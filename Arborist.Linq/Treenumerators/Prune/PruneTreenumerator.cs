@@ -2,51 +2,42 @@
 
 namespace Arborist.Linq.Treenumerators
 {
-  internal class PruneTreenumerator<TNode> : ITreenumerator<TNode>
+  internal class PruneTreenumerator<TNode> : TreenumeratorWrapper<TNode>
   {
     public PruneTreenumerator(
       ITreenumerator<TNode> innerTreenumerator,
-      Func<NodeVisit<TNode>, bool> predicate,
-      PruneOptions pruneOptions)
+      Func<NodeVisit<TNode>, bool> predicate)
+      : base(innerTreenumerator)
     {
-      _InnerTreenumerator = innerTreenumerator;
       _Predicate = predicate;
-      _PruneOptions = pruneOptions;
     }
-
-    private readonly ITreenumerator<TNode> _InnerTreenumerator;
 
     private readonly Func<NodeVisit<TNode>, bool> _Predicate;
-    private readonly PruneOptions _PruneOptions;
+    private bool _StartedEnumeration = false;
 
-    private bool _PruneCurrentBranch;
-
-    public NodeVisit<TNode> Current => _InnerTreenumerator.Current;
-
-    private bool _StartedEnumeration;
-
-    public bool MoveNext(bool skipChildren)
+    protected override bool OnMoveNext(bool skipChildren)
     {
-      //skipChildren = _PruneCurrentBranch || skipChildren;
+      if (!_StartedEnumeration)
+      {
+        _StartedEnumeration = true;
 
-      //_PruneCurrentBranch = false;
+        if (!InnerTreenumerator.MoveNext(skipChildren))
+          return false;
 
-      if (_StartedEnumeration && _Predicate(_InnerTreenumerator.Current))
-        skipChildren = true;
+        Current = InnerTreenumerator.Current;
 
-      _StartedEnumeration = true;
+        return true;
+      }
 
-      if (!_InnerTreenumerator.MoveNext(skipChildren))
-        return false;
+      skipChildren = skipChildren || _Predicate(InnerTreenumerator.Current);
 
-      //_PruneCurrentBranch = true;
+      if (InnerTreenumerator.MoveNext(skipChildren))
+      {
+        Current = InnerTreenumerator.Current;
+        return true;
+      }
 
-      return true;
-    }
-
-    public void Dispose()
-    {
-      _InnerTreenumerator?.Dispose();
+      return false;
     }
   }
 }

@@ -10,7 +10,7 @@
         source
         .Prune(
           step => step.SiblingIndex < count,
-          PruneOptions.PruneBeforeNode);
+          PruneOption.PruneBeforeNode);
     }
   }
 }

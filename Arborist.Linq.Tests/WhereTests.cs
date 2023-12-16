@@ -11,46 +11,605 @@ namespace Arborist.Linq.Tests
   public class WhereTests
   {
     [TestMethod]
-    public void Where()
+    public void Where_BreadthFirstTraversal_ThreeLevelChain_SkipFirst()
     {
       // Arrange
-      var root =
-        TreeNode.Create('a',
-          TreeNode.Create('b', 'c', 'd'),
-          TreeNode.Create('e', 'f', 'g'));
+      var root = TreeNode.Create('a', TreeNode.Create('b', 'c'));
 
       var treenumerable =
         TestTreenumerableFactory
         .Create<TreeNode<char>, char>(root)
-        .Where(x => x.Node != 'b' && x.Node != 'e');
+        .Where(x => x.Depth != 0);
 
       // Act
       var actual =
         treenumerable
-        .GetDepthFirstTraversal()
-        .Do(x => Debug.WriteLine($"{x.Node} : {x.SiblingIndex} : {x.Depth}"))
-        .Select(x => (x.Node, x.SiblingIndex, x.Depth))
+        .ToBreadthFirstMoveNext()
+        .Do(x => Debug.WriteLine(x))
         .ToArray();
 
       // Assert
-      var expected = new[]
+      var expected = new MoveNextResult<char>[]
       {
-        ('a', 1, 0),
-        ('c', 1, 1),
-        ('c', 2, 1),
-        ('a', 2, 0),
-        ('d', 1, 1),
-        ('d', 2, 1),
-        ('a', 3, 0),
-        ('f', 1, 1),
-        ('f', 2, 1),
-        ('a', 4, 0),
-        ('g', 1, 1),
-        ('g', 2, 1),
-        ('a', 5, 0)
+        ('b', 1, 0, 0),
+        ('b', 2, 0, 0),
+        ('c', 1, 0, 1),
+        ('c', 2, 0, 1),
       };
 
-      Assert.IsTrue(Enumerable.SequenceEqual(actual, expected));
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void Where_BreadthFirstTraversal_ThreeLevelChain_SkipSecond()
+    {
+      // Arrange
+      var root = TreeNode.Create('a', TreeNode.Create('b', 'c'));
+
+      var treenumerable =
+        TestTreenumerableFactory
+        .Create<TreeNode<char>, char>(root)
+        .Where(x => x.Depth != 1);
+
+      // Act
+      var actual =
+        treenumerable
+        .ToBreadthFirstMoveNext()
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        ('a', 1, 0, 0),
+        ('a', 2, 0, 0),
+        ('c', 1, 0, 1),
+        ('c', 2, 0, 1),
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void Where_BreadthFirstTraversal_ThreeLevelChain_SkipThird()
+    {
+      // Arrange
+      var root = TreeNode.Create('a', TreeNode.Create('b', 'c'));
+
+      var treenumerable =
+        TestTreenumerableFactory
+        .Create<TreeNode<char>, char>(root)
+        .Where(x => x.Depth != 2);
+
+      // Act
+      var actual =
+        treenumerable
+        .ToBreadthFirstMoveNext()
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        ('a', 1, 0, 0),
+        ('a', 2, 0, 0),
+        ('b', 1, 0, 1),
+        ('b', 2, 0, 1),
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void Where_BreadthFirstTraversal_TwoLevels_DepthIsZero()
+    {
+      // Arrange
+      var root = TreeNode.Create('a', 'b', 'c');
+
+      var treenumerable =
+        TestTreenumerableFactory
+        .Create<TreeNode<char>, char>(root)
+        .Where(x => x.Depth == 0);
+
+      // Act
+      var actual =
+        treenumerable
+        .ToBreadthFirstMoveNext()
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        ('a', 1, 0, 0),
+        ('a', 2, 0, 0)
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void Where_BreadthFirstTraversal_TwoLevels_DepthIsNotZero()
+    {
+      // Arrange
+      var root = TreeNode.Create('a', 'b', 'c');
+
+      var treenumerable =
+        TestTreenumerableFactory
+        .Create<TreeNode<char>, char>(root)
+        .Where(x => x.Depth != 0);
+
+      // Act
+      var actual =
+        treenumerable
+        .ToBreadthFirstMoveNext()
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        ('b', 1, 0, 0),
+        ('b', 2, 0, 0),
+        ('c', 1, 1, 0),
+        ('c', 2, 1, 0)
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void Where_BreadthFirstTraversal_TwoLevels_SkipsFirstChild()
+    {
+      // Arrange
+      var root = TreeNode.Create('a', 'b', 'c', 'd');
+
+      var treenumerable =
+        TestTreenumerableFactory
+        .Create<TreeNode<char>, char>(root)
+        .Where(x => !(x.Depth == 1 && x.SiblingIndex == 0));
+
+      // Act
+      var actual =
+        treenumerable
+        .ToBreadthFirstMoveNext()
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        ('a', 1, 0, 0),
+        ('a', 2, 0, 0),
+        ('a', 3, 0, 0),
+        ('c', 1, 0, 1),
+        ('c', 2, 0, 1),
+        ('d', 1, 1, 1),
+        ('d', 2, 1, 1),
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void Where_BreadthFirstTraversal_TwoLevels_SkipsSecondChild()
+    {
+      // Arrange
+      var root = TreeNode.Create('a', 'b', 'c', 'd');
+
+      var treenumerable =
+        TestTreenumerableFactory
+        .Create<TreeNode<char>, char>(root)
+        .Where(x => !(x.Depth == 1 && x.SiblingIndex == 1));
+
+      // Act
+      var actual =
+        treenumerable
+        .ToBreadthFirstMoveNext()
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        ('a', 1, 0, 0),
+        ('a', 2, 0, 0),
+        ('a', 3, 0, 0),
+        ('b', 1, 0, 1),
+        ('b', 2, 0, 1),
+        ('d', 1, 1, 1),
+        ('d', 2, 1, 1),
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void Where_BreadthFirstTraversal_TwoLevels_SkipsThirdChild()
+    {
+      // Arrange
+      var root = TreeNode.Create('a', 'b', 'c', 'd');
+
+      var treenumerable =
+        TestTreenumerableFactory
+        .Create<TreeNode<char>, char>(root)
+        .Where(x => !(x.Depth == 1 && x.SiblingIndex == 2));
+
+      // Act
+      var actual =
+        treenumerable
+        .ToBreadthFirstMoveNext()
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        ('a', 1, 0, 0),
+        ('a', 2, 0, 0),
+        ('a', 3, 0, 0),
+        ('b', 1, 1, 1),
+        ('b', 2, 1, 1),
+        ('c', 1, 0, 1),
+        ('c', 2, 0, 1),
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void Where_BreadthFirstTraversal_TwoLevels_PredicateAlwaysReturnsFalse()
+    {
+      // Arrange
+      var root = TreeNode.Create('a', 'b', 'c');
+
+      var treenumerable =
+        TestTreenumerableFactory
+        .Create<TreeNode<char>, char>(root)
+        .Where(_ => false);
+
+      // Act
+      var actual =
+        treenumerable
+        .ToBreadthFirstMoveNext()
+        .Count();
+
+      // Assert
+      Assert.AreEqual(0, actual);
+    }
+
+    [TestMethod]
+    public void Where_BreadthFirstTraversal_TwoLevels_PredicateAlwaysReturnsTrue()
+    {
+      // Arrange
+      var root = TreeNode.Create('a', 'b', 'c');
+
+      var treenumerable =
+        TestTreenumerableFactory
+        .Create<TreeNode<char>, char>(root)
+        .Where(_ => true);
+
+      // Act
+      var actual =
+        treenumerable
+        .ToBreadthFirstMoveNext()
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        ('a', 1, 0, 0),
+        ('a', 2, 0, 0),
+        ('a', 3, 0, 0),
+        ('b', 1, 0, 1),
+        ('b', 2, 0, 1),
+        ('c', 1, 1, 1),
+        ('c', 2, 1, 1),
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    // -------------------------------------------------------------------------------
+
+    [TestMethod]
+    public void Where_DepthFirstTraversal_ThreeLevelChain_SkipFirst()
+    {
+      // Arrange
+      var root = TreeNode.Create('a', TreeNode.Create('b', 'c'));
+
+      var treenumerable =
+        TestTreenumerableFactory
+        .Create<TreeNode<char>, char>(root)
+        .Where(x => x.Depth != 0);
+
+      // Act
+      var actual =
+        treenumerable
+        .ToDepthFirstMoveNext()
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        ('b', 1, 0, 0),
+        ('c', 1, 0, 1),
+        ('c', 2, 0, 1),
+        ('b', 2, 0, 0)
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void Where_DepthFirstTraversal_ThreeLevelChain_SkipSecond()
+    {
+      // Arrange
+      var root = TreeNode.Create('a', TreeNode.Create('b', 'c'));
+
+      var treenumerable =
+        TestTreenumerableFactory
+        .Create<TreeNode<char>, char>(root)
+        .Where(x => x.Depth != 1);
+
+      // Act
+      var actual =
+        treenumerable
+        .ToDepthFirstMoveNext()
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        ('a', 1, 0, 0),
+        ('c', 1, 0, 1),
+        ('c', 2, 0, 1),
+        ('a', 2, 0, 0)
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void Where_DepthFirstTraversal_ThreeLevelChain_SkipThird()
+    {
+      // Arrange
+      var root = TreeNode.Create('a', TreeNode.Create('b', 'c'));
+
+      var treenumerable =
+        TestTreenumerableFactory
+        .Create<TreeNode<char>, char>(root)
+        .Where(x => x.Depth != 2);
+
+      // Act
+      var actual =
+        treenumerable
+        .ToDepthFirstMoveNext()
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        ('a', 1, 0, 0),
+        ('b', 1, 0, 1),
+        ('b', 2, 0, 1),
+        ('a', 2, 0, 0)
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void Where_DepthFirstTraversal_TwoLevels_DepthIsZero()
+    {
+      // Arrange
+      var root = TreeNode.Create('a', 'b', 'c');
+
+      var treenumerable =
+        TestTreenumerableFactory
+        .Create<TreeNode<char>, char>(root)
+        .Where(x => x.Depth == 0);
+
+      // Act
+      var actual =
+        treenumerable
+        .ToDepthFirstMoveNext()
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        ('a', 1, 0, 0),
+        ('a', 2, 0, 0)
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void Where_DepthFirstTraversal_TwoLevels_DepthIsNotZero()
+    {
+      // Arrange
+      var root = TreeNode.Create('a', 'b', 'c');
+
+      var treenumerable =
+        TestTreenumerableFactory
+        .Create<TreeNode<char>, char>(root)
+        .Where(x => x.Depth != 0);
+
+      // Act
+      var actual =
+        treenumerable
+        .ToDepthFirstMoveNext()
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        ('b', 1, 0, 0),
+        ('b', 2, 0, 0),
+        ('c', 1, 1, 0),
+        ('c', 2, 1, 0)
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void Where_DepthFirstTraversal_TwoLevels_SkipsFirstChild()
+    {
+      // Arrange
+      var root = TreeNode.Create('a', 'b', 'c', 'd');
+
+      var treenumerable =
+        TestTreenumerableFactory
+        .Create<TreeNode<char>, char>(root)
+        .Where(x => !(x.Depth == 1 && x.SiblingIndex == 0));
+
+      // Act
+      var actual =
+        treenumerable
+        .ToDepthFirstMoveNext()
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        ('a', 1, 0, 0),
+        ('c', 1, 0, 1),
+        ('c', 2, 0, 1),
+        ('a', 2, 0, 0),
+        ('d', 1, 1, 1),
+        ('d', 2, 1, 1),
+        ('a', 3, 0, 0)
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void Where_DepthFirstTraversal_TwoLevels_SkipsSecondChild()
+    {
+      // Arrange
+      var root = TreeNode.Create('a', 'b', 'c', 'd');
+
+      var treenumerable =
+        TestTreenumerableFactory
+        .Create<TreeNode<char>, char>(root)
+        .Where(x => !(x.Depth == 1 && x.SiblingIndex == 1));
+
+      // Act
+      var actual =
+        treenumerable
+        .ToDepthFirstMoveNext()
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        ('a', 1, 0, 0),
+        ('b', 1, 0, 1),
+        ('b', 2, 0, 1),
+        ('a', 2, 0, 0),
+        ('d', 1, 1, 1),
+        ('d', 2, 1, 1),
+        ('a', 3, 0, 0)
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void Where_DepthFirstTraversal_TwoLevels_SkipsThirdChild()
+    {
+      // Arrange
+      var root = TreeNode.Create('a', 'b', 'c', 'd');
+
+      var treenumerable =
+        TestTreenumerableFactory
+        .Create<TreeNode<char>, char>(root)
+        .Where(x => !(x.Depth == 1 && x.SiblingIndex == 2));
+
+      // Act
+      var actual =
+        treenumerable
+        .ToDepthFirstMoveNext()
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        ('a', 1, 0, 0),
+        ('b', 1, 0, 1),
+        ('b', 2, 0, 1),
+        ('a', 2, 0, 0),
+        ('c', 1, 1, 1),
+        ('c', 2, 1, 1),
+        ('a', 3, 0, 0)
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void Where_DepthFirstTraversal_TwoLevels_PredicateAlwaysReturnsFalse()
+    {
+      // Arrange
+      var root = TreeNode.Create('a', 'b', 'c');
+
+      var treenumerable =
+        TestTreenumerableFactory
+        .Create<TreeNode<char>, char>(root)
+        .Where(_ => false);
+
+      // Act
+      var actual =
+        treenumerable
+        .ToDepthFirstMoveNext()
+        .Count();
+
+      // Assert
+      Assert.AreEqual(0, actual);
+    }
+
+    [TestMethod]
+    public void Where_DepthFirstTraversal_TwoLevels_PredicateAlwaysReturnsTrue()
+    {
+      // Arrange
+      var root = TreeNode.Create('a', 'b', 'c');
+
+      var treenumerable =
+        TestTreenumerableFactory
+        .Create<TreeNode<char>, char>(root)
+        .Where(_ => true);
+
+      // Act
+      var actual =
+        treenumerable
+        .ToDepthFirstMoveNext()
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        ('a', 1, 0, 0),
+        ('b', 1, 0, 1),
+        ('b', 2, 0, 1),
+        ('a', 2, 0, 0),
+        ('c', 1, 1, 1),
+        ('c', 2, 1, 1),
+        ('a', 3, 0, 0)
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
     }
   }
 }

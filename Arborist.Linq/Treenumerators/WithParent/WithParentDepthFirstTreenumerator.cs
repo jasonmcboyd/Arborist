@@ -47,7 +47,7 @@ namespace Arborist.Linq.Treenumerators
         var parentNode = Branch.Last().Node.Node;
 
         var node = new WithParentNode<TNode>(InnerTreenumerator.Current.Node, parentNode);
-        
+
         var step =
           NodeVisit
           .Create(
@@ -55,7 +55,7 @@ namespace Arborist.Linq.Treenumerators
             InnerTreenumerator.Current.VisitCount,
             InnerTreenumerator.Current.SiblingIndex,
             InnerTreenumerator.Current.Depth);
-        
+
         Branch.Add(step);
       }
     }

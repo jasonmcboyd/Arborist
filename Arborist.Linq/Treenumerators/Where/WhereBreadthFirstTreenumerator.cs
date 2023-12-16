@@ -15,14 +15,20 @@ namespace Arborist.Linq.Treenumerators
 
     private readonly Func<NodeVisit<TNode>, bool> _Predicate;
 
-    private readonly Stack<NodeVisit<TNode>> _CurrentBranch = new Stack<NodeVisit<TNode>>();
+    private readonly Queue<NodeVisit<TNode>> _Queue = new Queue<NodeVisit<TNode>>();
 
     protected override bool OnMoveNext(bool skipChildren)
     {
       if (!InnerTreenumerator.MoveNext(skipChildren))
         return false;
-      
-      throw new NotImplementedException();
+
+      while (!_Predicate(InnerTreenumerator.Current))
+        if (!InnerTreenumerator.MoveNext(false))
+          return false;
+
+      Current = InnerTreenumerator.Current;
+
+      return true;
     }
   }
 }

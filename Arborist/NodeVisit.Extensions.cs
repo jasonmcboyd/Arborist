@@ -2,6 +2,15 @@
 {
   public static partial class NodeVisit
   {
+    public static NodeVisit<TNode> WithDepth<TNode>(
+      this NodeVisit<TNode> source,
+      int depth)
+      => NodeVisit.Create(
+        source.Node,
+        source.VisitCount,
+        source.SiblingIndex,
+        depth);
+
     public static NodeVisit<TResult> WithNode<TSource, TResult>(
       this NodeVisit<TSource> source,
       TResult node)

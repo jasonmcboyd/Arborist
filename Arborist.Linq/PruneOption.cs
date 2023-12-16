@@ -1,6 +1,6 @@
 ﻿namespace Arborist.Linq
 {
-  public enum PruneOptions
+  public enum PruneOption
   {
     PruneBeforeNode,
     PruneAfterNode
