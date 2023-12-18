@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace Arborist.Linq
 {
@@ -7,11 +6,17 @@ namespace Arborist.Linq
   {
     public static IEnumerable<T> GetRoots<T>(this ITreenumerable<T> source)
     {
-      return
-        source
-        .GetBreadthFirstTraversal()
-        .TakeWhile(step => step.Depth == 0)
-        .Select(step => step.Node);
+      using (var treenumerator = source.GetBreadthFirstTreenumerator())
+      {
+        while(treenumerator.MoveNext(false))
+        {
+          if (treenumerator.Current.Depth > 0)
+            yield break;
+
+          if (treenumerator.Current.VisitCount == 1)
+            yield return treenumerator.Current.Node;
+        }
+      }
     }
   }
 }
