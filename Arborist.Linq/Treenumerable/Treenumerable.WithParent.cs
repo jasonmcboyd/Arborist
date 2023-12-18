@@ -7,7 +7,7 @@ namespace Arborist.Linq
     public static ITreenumerable<WithParentNode<TNode>> WithParent<TNode>(this ITreenumerable<TNode> source)
       => TreenumerableFactory.Create(
           source,
-          breadthFirstEnumerator => new WithParentDepthFirstTreenumerator<TNode>(breadthFirstEnumerator),
+          breadthFirstEnumerator => new WithParentBreadthFirstTreenumerator<TNode>(breadthFirstEnumerator),
           depthFirstEnumerator => new WithParentDepthFirstTreenumerator<TNode>(depthFirstEnumerator));
   }
 }

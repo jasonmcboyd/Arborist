@@ -2,6 +2,7 @@ using Arborist.Linq;
 using Arborist.Tests.Utils;
 using Arborist.Treenumerables;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Arborist.Linq.Tests
@@ -26,13 +27,14 @@ namespace Arborist.Linq.Tests
         .WithParent()
         .Select(step => (step.Node.Node, step.Node.ParentNode))
         .PreOrderTraversal()
+        .Do(x => Debug.WriteLine(x))
         .ToArray();
 
       // Assert
       var expected =
         new[]
         {
-          (1, default(int?)),
+          (1, 0),
           (2, 1),
           (3, 2),
           (4, 2),
@@ -59,15 +61,16 @@ namespace Arborist.Linq.Tests
       var actual =
         treenumerable
         .WithParent()
-        .Select(step => (step.Node.Node, step.Node.ParentNode))
+        .Select(step => (step.Node.Node, step.Node.HasParentNode ? step.Node.ParentNode : default))
         .LevelOrderTraversal()
+        .Do(x => Debug.WriteLine(x))
         .ToArray();
 
       // Assert
       var expected =
         new[]
         {
-          (1, default(int?)),
+          (1, 0),
           (2, 1),
           (6, 1),
           (3, 2),
