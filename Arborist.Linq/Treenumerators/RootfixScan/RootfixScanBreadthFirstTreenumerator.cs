@@ -33,9 +33,9 @@ namespace Arborist.Linq.Treenumerators
 
     private readonly Stack<NodeVisit<TNode>> _CurrentBranch = new Stack<NodeVisit<TNode>>();
 
-    protected override bool OnMoveNext(bool skipChildren)
+    protected override bool OnMoveNext(ChildStrategy childStrategy)
     {
-      if (!InnerTreenumerator.MoveNext(skipChildren))
+      if (!InnerTreenumerator.MoveNext(childStrategy))
         return false;
       
       var innerStep = InnerTreenumerator.Current;

@@ -25,20 +25,20 @@ namespace Arborist
 
     public abstract void Dispose();
 
-    public bool MoveNext(bool skipChildren)
+    public bool MoveNext(ChildStrategy childStrategy)
     {
       if (_CompletedEnumeration)
         return false;
 
       _StartedEnumeration = true;
 
-      if (OnMoveNext(skipChildren))
+      if (OnMoveNext(childStrategy))
         return true;
 
       _CompletedEnumeration = true;
       return false;
     }
 
-    protected abstract bool OnMoveNext(bool skipChildren);
+    protected abstract bool OnMoveNext(ChildStrategy childStrategy);
   }
 }

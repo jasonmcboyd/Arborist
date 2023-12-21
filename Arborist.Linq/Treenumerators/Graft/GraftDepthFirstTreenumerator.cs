@@ -48,9 +48,9 @@ namespace Arborist.Linq.Treenumerators
       Func<NodeVisit<T>, NodeVisit<TNode>> selector,
       Func<int> siblingIndexCalculator,
       Func<int> depthCalculator,
-      bool skipChildren)
+      ChildStrategy childStrategy)
     {
-      if (!treenumerator.MoveNext(skipChildren))
+      if (!treenumerator.MoveNext(childStrategy))
       {
         if (branch.Count > 0)
           branch.RemoveLast();
@@ -101,7 +101,7 @@ namespace Arborist.Linq.Treenumerators
       return true;
     }
 
-    private bool OnScionMoveNext(bool skipChildren)
+    private bool OnScionMoveNext(ChildStrategy childStrategy)
     {
       return OnTreenumeratorMoveNext(
         _Scion,
@@ -112,7 +112,7 @@ namespace Arborist.Linq.Treenumerators
         skipChildren);
     }
 
-    private bool OnInnerMoveNext(bool skipChildren)
+    private bool OnInnerMoveNext(ChildStrategy childStrategy)
     {
       return OnTreenumeratorMoveNext(
         InnerTreenumerator,
@@ -123,7 +123,7 @@ namespace Arborist.Linq.Treenumerators
         skipChildren);
     }
 
-    protected override bool OnMoveNext(bool skipChildren)
+    protected override bool OnMoveNext(ChildStrategy childStrategy)
     {
       if (_Scion == null
         && !skipChildren
@@ -133,7 +133,7 @@ namespace Arborist.Linq.Treenumerators
 
       if (_Scion != null)
       {
-        if (OnScionMoveNext(skipChildren))
+        if (OnScionMoveNext(childStrategy))
           return true;
         
         _Scion = null;
@@ -150,20 +150,20 @@ namespace Arborist.Linq.Treenumerators
       }
 
       if (!_ReturnedFromScion)
-        return OnInnerMoveNext(skipChildren);
+        return OnInnerMoveNext(childStrategy);
 
       _ReturnedFromScion = false;
 
       var priorVisit = _InnerBranch.Last();
 
-      var onMoveNext = OnInnerMoveNext(skipChildren);
+      var onMoveNext = OnInnerMoveNext(childStrategy);
 
       if (priorVisit.Depth != Current.Depth)
         return onMoveNext;
 
       _InnerBranch.RemoveLast();
 
-      return OnInnerMoveNext(skipChildren);
+      return OnInnerMoveNext(childStrategy);
     }
   }
 }

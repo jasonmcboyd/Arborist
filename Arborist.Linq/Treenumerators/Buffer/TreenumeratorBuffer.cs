@@ -18,7 +18,7 @@ namespace Arborist.Linq.Treenumerators
     
   //  private bool _Disposed;
 
-  //  protected override bool OnMoveNext(bool skipChildren)
+  //  protected override bool OnMoveNext(ChildStrategy childStrategy)
   //  {
   //    throw new NotImplementedException();
   //  }

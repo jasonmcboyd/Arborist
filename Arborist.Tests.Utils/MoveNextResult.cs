@@ -4,7 +4,6 @@ using System.Collections.Generic;
 namespace Arborist.Tests.Utils
 {
   public readonly struct MoveNextResult<TNode>
-    where TNode : struct
   {
     public MoveNextResult(
       TNode node,
@@ -49,51 +48,54 @@ namespace Arborist.Tests.Utils
   public static class MoveNextResult
   {
     public static MoveNextResult<TNode> Create<TNode>(NodeVisit<TNode> visit)
-      where TNode : struct
       => new MoveNextResult<TNode>(visit.Node, visit.VisitCount, visit.SiblingIndex, visit.Depth);
 
     public static IEnumerable<MoveNextResult<TNode>> ToDepthFirstMoveNext<TNode>(
       this ITreenumerable<TNode> source)
-      where TNode : struct
-      => source.ToDepthFirstMoveNext(_ => false);
+      => source.ToDepthFirstMoveNext(_ => ChildStrategy.ScheduleForTraversal);
 
     public static IEnumerable<MoveNextResult<TNode>> ToDepthFirstMoveNext<TNode>(
       this ITreenumerable<TNode> source,
-      Func<NodeVisit<TNode>, bool> skipChildrenPredicate)
-      where TNode : struct
+      Func<NodeVisit<TNode>, ChildStrategy> childStrategySelector)
     {
       using (var enumerator = source.GetDepthFirstTreenumerator())
       {
         NodeVisit<TNode>? previous = null;
 
-        while (enumerator.MoveNext(previous == null ? false : skipChildrenPredicate(previous.Value)))
+        var childStrategy = ChildStrategy.ScheduleForTraversal;
+
+        while (enumerator.MoveNext(childStrategy))
         {
           yield return Create(enumerator.Current);
 
           previous = enumerator.Current;
+
+          childStrategy = childStrategySelector(previous.Value);
         }
       }
     }
 
     public static IEnumerable<MoveNextResult<TNode>> ToBreadthFirstMoveNext<TNode>(
       this ITreenumerable<TNode> source)
-      where TNode : struct
-      => source.ToBreadthFirstMoveNext(_ => false);
+      => source.ToBreadthFirstMoveNext(_ => ChildStrategy.ScheduleForTraversal);
 
     public static IEnumerable<MoveNextResult<TNode>> ToBreadthFirstMoveNext<TNode>(
       this ITreenumerable<TNode> source,
-      Func<NodeVisit<TNode>, bool> skipChildrenPredicate)
-      where TNode : struct
+      Func<NodeVisit<TNode>, ChildStrategy> childStrategySelector)
     {
       using (var enumerator = source.GetBreadthFirstTreenumerator())
       {
         NodeVisit<TNode>? previous = null;
 
-        while (enumerator.MoveNext(previous == null ? false : skipChildrenPredicate(previous.Value)))
+        var childStrategy = ChildStrategy.ScheduleForTraversal;
+
+        while (enumerator.MoveNext(childStrategy))
         {
           yield return Create(enumerator.Current);
 
           previous = enumerator.Current;
+
+          childStrategy = childStrategySelector(previous.Value);
         }
       }
     }

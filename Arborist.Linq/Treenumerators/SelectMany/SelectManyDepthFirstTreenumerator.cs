@@ -18,9 +18,9 @@ namespace Arborist.Linq.Treenumerators
 
     private readonly Stack<NodeVisit<TNode>> _Stack = new Stack<NodeVisit<TNode>>();
 
-    protected override bool OnMoveNext(bool skipChildren)
+    protected override bool OnMoveNext(ChildStrategy childStrategy)
     {
-      while (InnerTreenumerator.MoveNext(skipChildren))
+      while (InnerTreenumerator.MoveNext(childStrategy))
       {
         using (var currentEnumerator = InnerTreenumerator.Current.Node.GetDepthFirstTreenumerator())
         {

@@ -15,13 +15,13 @@ namespace Arborist.Linq.Treenumerators
     private readonly Func<NodeVisit<TNode>, bool> _Predicate;
     private bool _StartedEnumeration = false;
 
-    protected override bool OnMoveNext(bool skipChildren)
+    protected override bool OnMoveNext(ChildStrategy childStrategy)
     {
       if (!_StartedEnumeration)
       {
         _StartedEnumeration = true;
 
-        if (!InnerTreenumerator.MoveNext(skipChildren))
+        if (!InnerTreenumerator.MoveNext(childStrategy))
           return false;
 
         Current = InnerTreenumerator.Current;
@@ -31,7 +31,7 @@ namespace Arborist.Linq.Treenumerators
 
       skipChildren = skipChildren || _Predicate(InnerTreenumerator.Current);
 
-      if (InnerTreenumerator.MoveNext(skipChildren))
+      if (InnerTreenumerator.MoveNext(childStrategy))
       {
         Current = InnerTreenumerator.Current;
         return true;

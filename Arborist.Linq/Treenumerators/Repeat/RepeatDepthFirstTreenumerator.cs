@@ -34,7 +34,7 @@
       }
     }
 
-    protected override bool OnMoveNext(bool skipChildren)
+    protected override bool OnMoveNext(ChildStrategy childStrategy)
     {
       if (Treenumerator == null)
       {
@@ -49,7 +49,7 @@
           return false;
       }
 
-      while (!Treenumerator.MoveNext(skipChildren))
+      while (!Treenumerator.MoveNext(childStrategy))
       {
         Treenumerator = _Treenumerable.GetDepthFirstTreenumerator();
 

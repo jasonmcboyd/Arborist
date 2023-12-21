@@ -13,7 +13,7 @@ namespace Arborist.Linq.Treenumerators
 
     public NodeVisit<TNode> Current => throw new InvalidOperationException();
 
-    public bool MoveNext(bool skipChildren)
+    public bool MoveNext(ChildStrategy childStrategy)
     {
       return false;
     }

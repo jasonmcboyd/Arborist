@@ -4,14 +4,14 @@ using System.Linq;
 
 namespace Arborist
 {
-  public abstract class StackTreenumeratorBase<TBranch, TNode> : ITreenumerator<TNode>
+  public abstract class StackTreenumeratorBase<TStack, TNode> : ITreenumerator<TNode>
   {
-    public StackTreenumeratorBase(Func<TBranch, TNode> selector)
+    public StackTreenumeratorBase(Func<TStack, TNode> selector)
     {
       _Selector = selector;
     }
 
-    private readonly Func<TBranch, TNode> _Selector;
+    private readonly Func<TStack, TNode> _Selector;
 
     private NodeVisit<TNode> _Current;
     public NodeVisit<TNode> Current
@@ -24,7 +24,7 @@ namespace Arborist
         if (_CompletedEnumeration)
           throw new InvalidOperationException("Enumeration has completed.");
 
-        _Current = Branch.Last().WithNode(_Selector(Branch.Last().Node));
+        _Current = Stack.Last().WithNode(_Selector(Stack.Last().Node));
 
         return _Current;
       }
@@ -33,24 +33,24 @@ namespace Arborist
     private bool _StartedEnumeration = false;
     private bool _CompletedEnumeration = false;
 
-    protected List<NodeVisit<TBranch>> Branch { get; } = new List<NodeVisit<TBranch>>();
+    protected List<NodeVisit<TStack>> Stack { get; } = new List<NodeVisit<TStack>>();
 
-    public bool MoveNext(bool skipChildren)
+    public bool MoveNext(ChildStrategy childStrategy)
     {
       if (_CompletedEnumeration)
         return false;
       
       _StartedEnumeration = true;
 
-      OnMoveNext(skipChildren);
+      OnMoveNext(childStrategy);
 
-      if (Branch.Count == 0)
+      if (Stack.Count == 0)
         _CompletedEnumeration = true;
 
-      return Branch.Count > 0;
+      return Stack.Count > 0;
     }
 
-    protected abstract void OnMoveNext(bool skipChildren);
+    protected abstract void OnMoveNext(ChildStrategy childStrategy);
 
     public abstract void Dispose();
   }

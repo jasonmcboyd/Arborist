@@ -11,15 +11,15 @@ namespace Arborist.Linq.Treenumerators
     {
     }
 
-    protected override void OnMoveNext(bool skipChildren)
+    protected override void OnMoveNext(ChildStrategy childStrategy)
     {
-      if (!InnerTreenumerator.MoveNext(skipChildren))
+      if (!InnerTreenumerator.MoveNext(childStrategy))
       {
-        Branch.RemoveAt(Branch.Count - 1);
+        Stack.RemoveAt(Stack.Count - 1);
         return;
       }
 
-      if (Branch.Count == 0)
+      if (Stack.Count == 0)
       {
         var node = new WithParentNode<TNode>(InnerTreenumerator.Current.Node, default);
 
@@ -31,20 +31,20 @@ namespace Arborist.Linq.Treenumerators
             InnerTreenumerator.Current.SiblingIndex,
             InnerTreenumerator.Current.Depth);
 
-        Branch.Add(visit);
+        Stack.Add(visit);
 
         return;
       }
 
-      var depthComparison = InnerTreenumerator.Current.Depth.CompareTo(Branch.Last().Depth);
+      var depthComparison = InnerTreenumerator.Current.Depth.CompareTo(Stack.Last().Depth);
 
       if (depthComparison < 0)
-        Branch.RemoveAt(Branch.Count - 1);
+        Stack.RemoveAt(Stack.Count - 1);
       else if (depthComparison == 0)
         return;
       else
       {
-        var parentNode = Branch.Last().Node.Node;
+        var parentNode = Stack.Last().Node.Node;
 
         var node = new WithParentNode<TNode>(InnerTreenumerator.Current.Node, parentNode);
 
@@ -56,7 +56,7 @@ namespace Arborist.Linq.Treenumerators
             InnerTreenumerator.Current.SiblingIndex,
             InnerTreenumerator.Current.Depth);
 
-        Branch.Add(step);
+        Stack.Add(step);
       }
     }
   }

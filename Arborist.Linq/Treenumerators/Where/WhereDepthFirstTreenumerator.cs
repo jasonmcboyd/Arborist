@@ -25,26 +25,26 @@ namespace Arborist.Linq.Treenumerators
 
     private bool _DoNotEnumerateInner = false;
 
-    private bool OnInnerEnumerationMoveNext(bool skipChildren)
+    private bool OnInnerEnumerationMoveNext(ChildStrategy childStrategy)
     {
-      if (InnerTreenumerator.MoveNext(skipChildren))
+      if (InnerTreenumerator.MoveNext(childStrategy))
         return true;
 
       if (_CachedVisit != null && _CachedVisit.Value.VisitCount == 2)
       {
-        Branch.ReplaceLast(_CachedVisit.Value);
+        Stack.ReplaceLast(_CachedVisit.Value);
 
         _CachedVisit = null;
       }
       else
-        Branch.Clear();
+        Stack.Clear();
 
       return false;
     }
 
     private void YieldCachedVisit()
     {
-      Branch.ReplaceLast(_CachedVisit.Value);
+      Stack.ReplaceLast(_CachedVisit.Value);
 
       _CachedVisit = null;
 
@@ -52,13 +52,13 @@ namespace Arborist.Linq.Treenumerators
 
     }
 
-    protected override void OnMoveNext(bool skipChildren)
+    protected override void OnMoveNext(ChildStrategy childStrategy)
     {
       do
       {
         if (!_DoNotEnumerateInner)
         {
-          if (!OnInnerEnumerationMoveNext(skipChildren))
+          if (!OnInnerEnumerationMoveNext(childStrategy))
             return;
 
           while (!_Predicate(InnerTreenumerator.Current))
@@ -79,12 +79,12 @@ namespace Arborist.Linq.Treenumerators
               0,
               0);
 
-          Branch.Add(visit);
+          Stack.Add(visit);
 
           return;
         }
 
-        if (InnerTreenumerator.Current.Depth < Branch.Last().Node.Depth)
+        if (InnerTreenumerator.Current.Depth < Stack.Last().Node.Depth)
         {
           if (_CachedVisit != null)
           {
@@ -93,18 +93,18 @@ namespace Arborist.Linq.Treenumerators
             return;
           }
 
-          Branch.RemoveLast();
+          Stack.RemoveLast();
 
           var visit =
             NodeVisit.Create(
               InnerTreenumerator.Current,
-              Branch.Last().VisitCount + 1,
-              Branch.Last().SiblingIndex,
-              Branch.Last().Depth);
+              Stack.Last().VisitCount + 1,
+              Stack.Last().SiblingIndex,
+              Stack.Last().Depth);
 
-          Branch.ReplaceLast(visit);
+          Stack.ReplaceLast(visit);
         }
-        else if (InnerTreenumerator.Current.Depth == Branch.Last().Node.Depth)
+        else if (InnerTreenumerator.Current.Depth == Stack.Last().Node.Depth)
         {
           if (_CachedVisit != null)
           {
@@ -121,11 +121,11 @@ namespace Arborist.Linq.Treenumerators
           var visit =
               NodeVisit.Create(
                 InnerTreenumerator.Current,
-                Branch.Last().VisitCount + 1,
-                Branch.Last().SiblingIndex,
-                Branch.Last().Depth);
+                Stack.Last().VisitCount + 1,
+                Stack.Last().SiblingIndex,
+                Stack.Last().Depth);
 
-          if (InnerTreenumerator.Current.SiblingIndex == Branch.Last().Node.SiblingIndex)
+          if (InnerTreenumerator.Current.SiblingIndex == Stack.Last().Node.SiblingIndex)
           {
             _CachedVisit = visit;
 
@@ -134,7 +134,7 @@ namespace Arborist.Linq.Treenumerators
 
           visit = NodeVisit.Create(visit.Node, 1, visit.SiblingIndex + 1, visit.Depth);
 
-          Branch.ReplaceLast(visit);
+          Stack.ReplaceLast(visit);
         }
         else
         {
@@ -142,10 +142,10 @@ namespace Arborist.Linq.Treenumerators
             NodeVisit.Create(
               InnerTreenumerator.Current,
               1,
-              Branch.Last().VisitCount - 1,
-              Branch.Last().Depth + 1);
+              Stack.Last().VisitCount - 1,
+              Stack.Last().Depth + 1);
 
-          Branch.Add(visit);
+          Stack.Add(visit);
 
           _CachedVisit = null;
         }

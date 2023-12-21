@@ -11,9 +11,9 @@ namespace Arborist.Linq.Treenumerators
 
     private readonly Queue<NodeVisit<TNode>> _Queue = new Queue<NodeVisit<TNode>>();
 
-    protected override bool OnMoveNext(bool skipChildren)
+    protected override bool OnMoveNext(ChildStrategy childStrategy)
     {
-      while (_Queue.Count < 2 && InnerTreenumerator.MoveNext(skipChildren))
+      while (_Queue.Count < 2 && InnerTreenumerator.MoveNext(childStrategy))
         _Queue.Enqueue(InnerTreenumerator.Current);
 
       if (_Queue.Count == 2)
