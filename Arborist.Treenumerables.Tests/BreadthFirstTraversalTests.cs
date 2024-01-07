@@ -1,222 +1,689 @@
-//using Arborist.Tests.Utils;
-//using Microsoft.VisualStudio.TestTools.UnitTesting;
-//using System.Diagnostics;
-//using System.Linq;
+using Arborist.Tests.Utils;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Diagnostics;
+using System.Linq;
 
-//namespace Arborist.Treenumerables.Tests
-//{
-//  [TestClass]
-//  public class BreadthFirstTraversalTests
-//  {
-//    [TestMethod]
-//    public void BreadthFirstTraversal()
-//    {
-//      // Arrange
-//      var root = TreeNode.Create('a', 'b', 'c');
+namespace Arborist.Treenumerables.Tests
+{
+  [TestClass]
+  public class BreadthFirstTraversalTests
+  {
+    [TestMethod]
+    public void BreadthFirstTraversal_ThreeLevels_ThreeBranches_SkipLastBranchNodes()
+    {
+      // Arrange
+      var root =
+        TreeNode.Create("a",
+          TreeNode.Create("b", "bb"),
+          TreeNode.Create("c", "cc"),
+          TreeNode.Create("d", "dd"));
 
-//      var treenumerable = TestTreenumerableFactory.Create<TreeNode<char>, char>(root);
+      var treenumerable = TestTreenumerableFactory.Create<TreeNode<string>, string>(root);
 
-//      // Act
-//      var actual =
-//        treenumerable
-//        .ToBreadthFirstMoveNext()
-//        .ToArray();
+      // Act
+      var actual =
+        treenumerable
+        .ToBreadthFirstMoveNext(visit =>
+          visit.Node == "d"
+          ? ChildStrategy.SkipNode
+          : ChildStrategy.ScheduleForTraversal)
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
 
-//      // Assert
-//      var expected = new MoveNextResult<char>[]
-//      {
-//        ('a', 1, 0, 0),
-//        ('a', 2, 0, 0),
-//        ('a', 3, 0, 0),
-//        ('b', 1, 0, 1),
-//        ('b', 2, 0, 1),
-//        ('c', 1, 1, 1),
-//        ('c', 2, 1, 1),
-//      };
+      // Assert
+      var expected = new MoveNextResult<string>[]
+      {
+        (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
+        (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
+          (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
+        (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
+          (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
+        (TreenumeratorState.VisitingNode,   "a", 3, 0, 0),
+          (TreenumeratorState.SchedulingNode, "d", 0, 2, 1),
+          (TreenumeratorState.VisitingNode,   "b", 1, 0, 1),
+            (TreenumeratorState.SchedulingNode, "bb", 0, 0, 2),
+          (TreenumeratorState.VisitingNode,   "b", 2, 0, 1),
+          (TreenumeratorState.VisitingNode,   "c", 1, 1, 1),
+            (TreenumeratorState.SchedulingNode, "cc", 0, 0, 2),
+          (TreenumeratorState.VisitingNode,   "c", 2, 1, 1),
+            (TreenumeratorState.SchedulingNode, "dd", 0, 0, 2),
+            (TreenumeratorState.VisitingNode,   "dd", 1, 2, 1),
+            (TreenumeratorState.VisitingNode,   "dd", 2, 2, 1),
+            (TreenumeratorState.VisitingNode,   "bb", 1, 0, 2),
+            (TreenumeratorState.VisitingNode,   "bb", 2, 0, 2),
+            (TreenumeratorState.VisitingNode,   "cc", 1, 1, 2),
+            (TreenumeratorState.VisitingNode,   "cc", 2, 1, 2),
+      };
 
-//      CollectionAssert.AreEqual(expected, actual);
-//    }
+      CollectionAssert.AreEqual(expected, actual);
+    }
 
-//    [TestMethod]
-//    public void BreadthFirstTraversal_SkipChildrenOnFirstMoveNext()
-//    {
-//      // Arrange
-//      var root = TreeNode.Create('a', 'b', 'c');
+    [TestMethod]
+    public void BreadthFirstTraversal_FiveLevels_ThreeBranches_SkipMiddleBranchNodes()
+    {
+      // Arrange
+      var root =
+        TreeNode.Create("a",
+          TreeNode.Create("b",
+            TreeNode.Create("bb")),
+          TreeNode.Create("c",
+            TreeNode.Create("cc",
+              TreeNode.Create("ccc",
+                TreeNode.Create("cccc")))),
+          TreeNode.Create("d",
+            TreeNode.Create("dd")));
 
-//      var treenumerable = TestTreenumerableFactory.Create<TreeNode<char>, char>(root);
+      var treenumerable = TestTreenumerableFactory.Create<TreeNode<string>, string>(root);
 
-//      var enumerator = treenumerable.GetBreadthFirstTreenumerator();
+      // Act
+      var actual =
+        treenumerable
+        .ToBreadthFirstMoveNext(visit =>
+          visit.Node == "c" || visit.Node == "cc" || visit.Node == "ccc"
+          ? ChildStrategy.SkipNode
+          : ChildStrategy.ScheduleForTraversal)
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
 
-//      // Act
-//      var result = enumerator.MoveNext(true);
-//      enumerator.Dispose();
+      // Assert
+      var expected = new MoveNextResult<string>[]
+      {
+        (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
+        (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
+          (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
+        (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
+          (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
+          (TreenumeratorState.SchedulingNode, "d", 0, 2, 1),
+        (TreenumeratorState.VisitingNode,   "a", 3, 0, 0),
+          (TreenumeratorState.VisitingNode,   "b", 1, 0, 1),
+            (TreenumeratorState.SchedulingNode, "bb", 0, 0, 2),
+          (TreenumeratorState.VisitingNode,   "b", 2, 0, 1),
+          (TreenumeratorState.SchedulingNode, "cc", 0, 0, 2),
+            (TreenumeratorState.SchedulingNode, "ccc", 0, 0, 3),
+              (TreenumeratorState.SchedulingNode, "cccc", 0, 0, 4),
+              (TreenumeratorState.VisitingNode,   "cccc", 1, 1, 1),
+              (TreenumeratorState.VisitingNode,   "cccc", 2, 1, 1),
+          (TreenumeratorState.VisitingNode,   "d", 1, 2, 1),
+            (TreenumeratorState.SchedulingNode, "dd", 0, 0, 2),
+          (TreenumeratorState.VisitingNode,   "d", 2, 2, 1),
+            (TreenumeratorState.VisitingNode,   "bb", 1, 0, 2),
+            (TreenumeratorState.VisitingNode,   "bb", 2, 0, 2),
+            (TreenumeratorState.VisitingNode,   "dd", 1, 0, 2),
+            (TreenumeratorState.VisitingNode,   "dd", 2, 0, 2),
+      };
 
-//      // Assert
-//      Assert.IsFalse(result);
-//    }
+      CollectionAssert.AreEqual(expected, actual);
+    }
 
-//    [TestMethod]
-//    public void BreadthFirstTraversal_SingleRootNode_SkipChildrenAfterRootNode()
-//    {
-//      // Arrange
-//      var root = TreeNode.Create('a', 'b', 'c');
+    [TestMethod]
+    public void BreadthFirstTraversal_OneLevel_MultipleRoots_NoSkipping()
+    {
+      // Arrange
+      var roots = new[]
+      {
+        TreeNode.Create('a'),
+        TreeNode.Create('b')
+      };
 
-//      var treenumerable = TestTreenumerableFactory.Create<TreeNode<char>, char>(root);
+      var treenumerable = TestTreenumerableFactory.Create<TreeNode<char>, char>(roots);
 
-//      // Act
-//      var actual =
-//        treenumerable
-//        .ToBreadthFirstMoveNext(visit => visit.Node == 'a')
-//        .ToArray();
+      // Act
+      var actual =
+        treenumerable
+        .ToBreadthFirstMoveNext()
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
 
-//      // Assert
-//      var expected = new MoveNextResult<char>[]
-//      {
-//        ('a', 1, 0, 0),
-//        ('a', 2, 0, 0),
-//      };
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
+        (TreenumeratorState.SchedulingNode, 'b', 0, 1, 0),
+        (TreenumeratorState.VisitingNode,   'a', 1, 0, 0),
+        (TreenumeratorState.VisitingNode,   'a', 2, 0, 0),
+        (TreenumeratorState.VisitingNode,   'b', 1, 1, 0),
+        (TreenumeratorState.VisitingNode,   'b', 2, 1, 0),
+      };
 
-//      CollectionAssert.AreEqual(expected, actual);
-//    }
+      CollectionAssert.AreEqual(expected, actual);
+    }
 
-//    [TestMethod]
-//    public void BreadthFirstTraversal_ThreeLevels_SkipChildrenAfterRootsFirstChild()
-//    {
-//      // Arrange
-//      var root =
-//        TreeNode.Create('a',
-//          TreeNode.Create('b', 'd', 'e'),
-//          TreeNode.Create('c', 'f', 'g'));
+    [TestMethod]
+    public void BreadthFirstTraversal_OneLevel_MultipleRoots_SkipSubtreeOfFirstRoot()
+    {
+      // Arrange
+      var roots = new[]
+      {
+        TreeNode.Create('a'),
+        TreeNode.Create('b'),
+        TreeNode.Create('c')
+      };
 
-//      var treenumerable = TestTreenumerableFactory.Create<TreeNode<char>, char>(root);
+      var treenumerable = TestTreenumerableFactory.Create<TreeNode<char>, char>(roots);
 
-//      // Act
-//      var actual =
-//        treenumerable
-//        .ToBreadthFirstMoveNext(visit => visit.Node == 'a' && visit.VisitCount == 2)
-//        .ToArray();
+      // Act
+      var actual =
+        treenumerable
+        .ToBreadthFirstMoveNext(visit =>
+          visit.Node == 'a'
+          ? ChildStrategy.SkipSubtree
+          : ChildStrategy.ScheduleForTraversal)
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
 
-//      // Assert
-//      var expected = new MoveNextResult<char>[]
-//      {
-//        ('a', 1, 0, 0),
-//        ('a', 2, 0, 0),
-//        ('a', 3, 0, 0),
-//        ('b', 1, 0, 1),
-//        ('b', 2, 0, 1),
-//        ('b', 3, 0, 1),
-//        ('d', 1, 0, 2),
-//        ('d', 2, 0, 2),
-//        ('e', 1, 1, 2),
-//        ('e', 2, 1, 2),
-//      };
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
+        (TreenumeratorState.SchedulingNode, 'b', 0, 1, 0),
+        (TreenumeratorState.SchedulingNode, 'c', 0, 2, 0),
+        (TreenumeratorState.VisitingNode,   'b', 1, 0, 0),
+        (TreenumeratorState.VisitingNode,   'b', 2, 0, 0),
+        (TreenumeratorState.VisitingNode,   'c', 1, 1, 0),
+        (TreenumeratorState.VisitingNode,   'c', 2, 1, 0),
+      };
 
-//      CollectionAssert.AreEqual(expected, actual);
-//    }
+      CollectionAssert.AreEqual(expected, actual);
+    }
 
-//    [TestMethod]
-//    public void BreadthFirstTraversal_ThreeLevels_SkipChildrenAfterLevelOne()
-//    {
-//      // Arrange
-//      var root =
-//        TreeNode.Create('a',
-//          TreeNode.Create('b', 'd', 'e'),
-//          TreeNode.Create('c', 'f', 'g'));
+    [TestMethod]
+    public void BreadthFirstTraversal_OneLevel_MultipleRoots_SkipSubtreeOfSecondRoot()
+    {
+      // Arrange
+      var roots = new[]
+      {
+        TreeNode.Create('a'),
+        TreeNode.Create('b'),
+        TreeNode.Create('c')
+      };
 
-//      var treenumerable = TestTreenumerableFactory.Create<TreeNode<char>, char>(root);
+      var treenumerable = TestTreenumerableFactory.Create<TreeNode<char>, char>(roots);
 
-//      // Act
-//      var actual =
-//        treenumerable
-//        .ToBreadthFirstMoveNext(visit => visit.Depth == 1 && visit.VisitCount == 1)
-//        .Do(visit => Debug.WriteLine(visit))
-//        .ToArray();
+      // Act
+      var actual =
+        treenumerable
+        .ToBreadthFirstMoveNext(visit =>
+          visit.Node == 'b'
+          ? ChildStrategy.SkipSubtree
+          : ChildStrategy.ScheduleForTraversal)
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
 
-//      // Assert
-//      var expected = new MoveNextResult<char>[]
-//      {
-//        ('a', 1, 0, 0),
-//        ('a', 2, 0, 0),
-//        ('a', 3, 0, 0),
-//        ('b', 1, 0, 1),
-//        ('b', 2, 0, 1),
-//        ('c', 1, 1, 1),
-//        ('c', 2, 1, 1),
-//      };
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
+        (TreenumeratorState.SchedulingNode, 'b', 0, 1, 0),
+        (TreenumeratorState.SchedulingNode, 'c', 0, 2, 0),
+        (TreenumeratorState.VisitingNode,   'a', 1, 0, 0),
+        (TreenumeratorState.VisitingNode,   'a', 2, 0, 0),
+        (TreenumeratorState.VisitingNode,   'c', 1, 1, 0),
+        (TreenumeratorState.VisitingNode,   'c', 2, 1, 0),
+      };
 
-//      CollectionAssert.AreEqual(expected, actual);
-//    }
+      CollectionAssert.AreEqual(expected, actual);
+    }
 
-//    [TestMethod]
-//    public void BreadthFirstTraversal_MultipleRoots()
-//    {
-//      // Arrange
-//      var roots = new[]
-//      {
-//        TreeNode.Create('a', 'b', 'c'),
-//        TreeNode.Create('d', 'e', 'f')
-//      };
+    [TestMethod]
+    public void BreadthFirstTraversal_ThreeLevels_OneNodePerLevel_SkipNodeAtLevelOne()
+    {
+      // Arrange
+      var root =
+        TreeNode.Create('a',
+          TreeNode.Create('b', 'c'));
 
-//      var treenumerable = TestTreenumerableFactory.Create<TreeNode<char>, char>(roots);
+      var treenumerable = TestTreenumerableFactory.Create<TreeNode<char>, char>(root);
 
-//      // Act
-//      var actual =
-//        treenumerable
-//        .ToBreadthFirstMoveNext()
-//        .ToArray();
+      // Act
+      var actual =
+        treenumerable
+        .ToBreadthFirstMoveNext(visit =>
+          visit.Depth == 1
+          ? ChildStrategy.SkipNode
+          : ChildStrategy.ScheduleForTraversal)
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
 
-//      // Assert
-//      var expected = new MoveNextResult<char>[]
-//      {
-//        ('a', 1, 0, 0),
-//        ('a', 2, 0, 0),
-//        ('a', 3, 0, 0),
-//        ('d', 1, 1, 0),
-//        ('d', 2, 1, 0),
-//        ('d', 3, 1, 0),
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
+        (TreenumeratorState.VisitingNode  , 'a', 1, 0, 0),
+        (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
+        (TreenumeratorState.VisitingNode  , 'a', 2, 0, 0),
+        (TreenumeratorState.SchedulingNode, 'c', 0, 0, 2),
+        (TreenumeratorState.VisitingNode,   'c', 1, 0, 1),
+        (TreenumeratorState.VisitingNode,   'c', 2, 0, 1),
+      };
 
-//        ('b', 1, 0, 1),
-//        ('b', 2, 0, 1),
-//        ('c', 1, 1, 1),
-//        ('c', 2, 1, 1),
+      CollectionAssert.AreEqual(expected, actual);
+    }
 
-//        ('e', 1, 0, 1),
-//        ('e', 2, 0, 1),
-//        ('f', 1, 1, 1),
-//        ('f', 2, 1, 1),
-//      };
+    [TestMethod]
+    public void BreadthFirstTraversal_ThreeLevels_OneNodePerLevel_SkipNodeAtLevelTwo()
+    {
+      // Arrange
+      var root =
+        TreeNode.Create('a',
+          TreeNode.Create('b', 'c'));
 
-//      CollectionAssert.AreEqual(expected, actual);
-//    }
+      var treenumerable = TestTreenumerableFactory.Create<TreeNode<char>, char>(root);
 
-//    [TestMethod]
-//    public void BreadthFirstTraversal_MultipleRoots_SingleLevel()
-//    {
-//      // Arrange
-//      var roots = new[]
-//      {
-//        TreeNode.Create('a'),
-//        TreeNode.Create('b')
-//      };
+      // Act
+      var actual =
+        treenumerable
+        .ToBreadthFirstMoveNext(visit =>
+          visit.Depth == 2
+          ? ChildStrategy.SkipNode
+          : ChildStrategy.ScheduleForTraversal)
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
 
-//      var treenumerable = TestTreenumerableFactory.Create<TreeNode<char>, char>(roots);
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
+        (TreenumeratorState.VisitingNode  , 'a', 1, 0, 0),
+        (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
+        (TreenumeratorState.VisitingNode,   'a', 2, 0, 0),
+        (TreenumeratorState.VisitingNode,   'b', 1, 0, 1),
+        (TreenumeratorState.SchedulingNode, 'c', 0, 0, 2),
+        (TreenumeratorState.VisitingNode,   'b', 2, 0, 1),
+      };
 
-//      // Act
-//      var actual =
-//        treenumerable
-//        .ToBreadthFirstMoveNext()
-//        .ToArray();
+      CollectionAssert.AreEqual(expected, actual);
+    }
 
-//      // Assert
-//      var expected = new MoveNextResult<char>[]
-//      {
-//        ('a', 1, 0, 0),
-//        ('a', 2, 0, 0),
-//        ('b', 1, 1, 0),
-//        ('b', 2, 1, 0),
-//      };
+    [TestMethod]
+    public void BreadthFirstTraversal_ThreeLevels_OneNodePerLevel_SkipNodeAtLevelZero()
+    {
+      // Arrange
+      var root =
+        TreeNode.Create('a',
+          TreeNode.Create('b', 'c'));
 
-//      CollectionAssert.AreEqual(expected, actual);
-//    }
-//  }
-//}
+      var treenumerable = TestTreenumerableFactory.Create<TreeNode<char>, char>(root);
+
+      // Act
+      var actual =
+        treenumerable
+        .ToBreadthFirstMoveNext(visit =>
+          visit.Depth == 0
+          ? ChildStrategy.SkipNode
+          : ChildStrategy.ScheduleForTraversal)
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
+        (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
+        (TreenumeratorState.VisitingNode,   'b', 1, 0, 0),
+        (TreenumeratorState.SchedulingNode, 'c', 0, 0, 2),
+        (TreenumeratorState.VisitingNode,   'b', 2, 0, 0),
+        (TreenumeratorState.VisitingNode,   'c', 1, 0, 1),
+        (TreenumeratorState.VisitingNode,   'c', 2, 0, 1),
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void BreadthFirstTraversal_ThreeLevels_SkipSubtreesAtLevelOne()
+    {
+      // Arrange
+      var root =
+        TreeNode.Create('a',
+          TreeNode.Create('b', 'd', 'e'),
+          TreeNode.Create('c', 'f', 'g'));
+
+      var treenumerable = TestTreenumerableFactory.Create<TreeNode<char>, char>(root);
+
+      // Act
+      var actual =
+        treenumerable
+        .ToBreadthFirstMoveNext(visit =>
+          visit.Depth == 1
+          ? ChildStrategy.SkipSubtree
+          : ChildStrategy.ScheduleForTraversal)
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
+        (TreenumeratorState.VisitingNode  , 'a', 1, 0, 0),
+        (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
+        (TreenumeratorState.SchedulingNode, 'c', 0, 1, 1),
+        (TreenumeratorState.VisitingNode,   'a', 2, 0, 0),
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void BreadthFirstTraversal_TwoLevels_MultipleRoots_NoSkipping()
+    {
+      // Arrange
+      var roots = new[]
+      {
+        TreeNode.Create('a', 'b', 'c'),
+        TreeNode.Create('d', 'e', 'f')
+      };
+
+      var treenumerable = TestTreenumerableFactory.Create<TreeNode<char>, char>(roots);
+
+      // Act
+      var actual =
+        treenumerable
+        .ToBreadthFirstMoveNext()
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
+        (TreenumeratorState.SchedulingNode, 'd', 0, 1, 0),
+
+        (TreenumeratorState.VisitingNode,   'a', 1, 0, 0),
+          (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
+        (TreenumeratorState.VisitingNode,   'a', 2, 0, 0),
+          (TreenumeratorState.SchedulingNode, 'c', 0, 1, 1),
+        (TreenumeratorState.VisitingNode,   'a', 3, 0, 0),
+
+        (TreenumeratorState.VisitingNode,   'd', 1, 1, 0),
+          (TreenumeratorState.SchedulingNode, 'e', 0, 0, 1),
+        (TreenumeratorState.VisitingNode,   'd', 2, 1, 0),
+          (TreenumeratorState.SchedulingNode, 'f', 0, 1, 1),
+        (TreenumeratorState.VisitingNode,   'd', 3, 1, 0),
+
+          (TreenumeratorState.VisitingNode,   'b', 1, 0, 1),
+          (TreenumeratorState.VisitingNode,   'b', 2, 0, 1),
+          (TreenumeratorState.VisitingNode,   'c', 1, 1, 1),
+          (TreenumeratorState.VisitingNode,   'c', 2, 1, 1),
+
+          (TreenumeratorState.VisitingNode,   'e', 1, 0, 1),
+          (TreenumeratorState.VisitingNode,   'e', 2, 0, 1),
+          (TreenumeratorState.VisitingNode,   'f', 1, 1, 1),
+          (TreenumeratorState.VisitingNode,   'f', 2, 1, 1),
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void BreadthFirstTraversal_TwoLevels_NoSkipping()
+    {
+      // Arrange
+      var root = TreeNode.Create('a', 'b', 'c');
+
+      var treenumerable = TestTreenumerableFactory.Create<TreeNode<char>, char>(root);
+
+      // Act
+      var actual =
+        treenumerable
+        .ToBreadthFirstMoveNext()
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
+        (TreenumeratorState.VisitingNode,   'a', 1, 0, 0),
+          (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
+        (TreenumeratorState.VisitingNode,   'a', 2, 0, 0),
+          (TreenumeratorState.SchedulingNode, 'c', 0, 1, 1),
+        (TreenumeratorState.VisitingNode,   'a', 3, 0, 0),
+
+          (TreenumeratorState.VisitingNode,   'b', 1, 0, 1),
+          (TreenumeratorState.VisitingNode,   'b', 2, 0, 1),
+
+          (TreenumeratorState.VisitingNode,   'c', 1, 1, 1),
+          (TreenumeratorState.VisitingNode,   'c', 2, 1, 1),
+        
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void BreadthFirstTraversal_TwoLevels_SkipNodeOnBreadthOfZero()
+    {
+      // Arrange
+      var root = TreeNode.Create('a', 'b', 'c');
+
+      var treenumerable = TestTreenumerableFactory.Create<TreeNode<char>, char>(root);
+
+      // Act
+      var actual =
+        treenumerable
+        .ToBreadthFirstMoveNext(visit =>
+          visit.Depth == 0
+          ? ChildStrategy.SkipNode
+          : ChildStrategy.ScheduleForTraversal)
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
+          (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
+          (TreenumeratorState.VisitingNode,   'b', 1, 0, 0),
+          (TreenumeratorState.VisitingNode,   'b', 2, 0, 0),
+          (TreenumeratorState.SchedulingNode, 'c', 0, 1, 1),
+          (TreenumeratorState.VisitingNode,   'c', 1, 1, 0),
+          (TreenumeratorState.VisitingNode,   'c', 2, 1, 0),
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void BreadthFirstTraversal_TwoLevels_SkipNodeOnNonzeroBreadth()
+    {
+      // Arrange
+      var root = TreeNode.Create('a', 'b', 'c');
+
+      var treenumerable = TestTreenumerableFactory.Create<TreeNode<char>, char>(root);
+
+      // Act
+      var actual =
+        treenumerable
+        .ToBreadthFirstMoveNext(visit =>
+          visit.Depth != 0
+          ? ChildStrategy.SkipNode
+          : ChildStrategy.ScheduleForTraversal)
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
+        (TreenumeratorState.VisitingNode,   'a', 1, 0, 0),
+        (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
+        (TreenumeratorState.SchedulingNode, 'c', 0, 1, 1),
+        (TreenumeratorState.VisitingNode,   'a', 2, 0, 0),
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void BreadthFirstTraversal_TwoLevels_SkipSubtreeOfFirstChild()
+    {
+      // Arrange
+      var root = TreeNode.Create('a', 'b', 'c', 'd');
+
+      var treenumerable = TestTreenumerableFactory.Create<TreeNode<char>, char>(root);
+
+      // Act
+      var actual =
+        treenumerable
+        .ToBreadthFirstMoveNext(visit =>
+          visit.Node == 'b'
+          ? ChildStrategy.SkipSubtree
+          : ChildStrategy.ScheduleForTraversal)
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
+        (TreenumeratorState.VisitingNode,   'a', 1, 0, 0),
+          (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
+          (TreenumeratorState.SchedulingNode, 'c', 0, 1, 1),
+        (TreenumeratorState.VisitingNode,   'a', 2, 0, 0),
+          (TreenumeratorState.SchedulingNode, 'd', 0, 2, 1),
+        (TreenumeratorState.VisitingNode,   'a', 3, 0, 0),
+
+          (TreenumeratorState.VisitingNode,   'c', 1, 0, 1),
+          (TreenumeratorState.VisitingNode,   'c', 2, 0, 1),
+          (TreenumeratorState.VisitingNode,   'd', 1, 1, 1),
+          (TreenumeratorState.VisitingNode,   'd', 2, 1, 1),
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void BreadthFirstTraversal_TwoLevels_SkipSubtreeOfLastChild()
+    {
+      // Arrange
+      var root = TreeNode.Create('a', 'b', 'c', 'd');
+
+      var treenumerable = TestTreenumerableFactory.Create<TreeNode<char>, char>(root);
+
+      // Act
+      var actual =
+        treenumerable
+        .ToBreadthFirstMoveNext(visit =>
+          visit.Node == 'd'
+          ? ChildStrategy.SkipSubtree
+          : ChildStrategy.ScheduleForTraversal)
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
+        (TreenumeratorState.VisitingNode,   'a', 1, 0, 0),
+          (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
+        (TreenumeratorState.VisitingNode,   'a', 2, 0, 0),
+          (TreenumeratorState.SchedulingNode, 'c', 0, 1, 1),
+        (TreenumeratorState.VisitingNode,   'a', 3, 0, 0),
+          (TreenumeratorState.SchedulingNode, 'd', 0, 2, 1),
+
+          (TreenumeratorState.VisitingNode,   'b', 1, 0, 1),
+          (TreenumeratorState.VisitingNode,   'b', 2, 0, 1),
+          (TreenumeratorState.VisitingNode,   'c', 1, 1, 1),
+          (TreenumeratorState.VisitingNode,   'c', 2, 1, 1),
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void BreadthFirstTraversal_TwoLevels_SkipSubtreeOfMiddleChild()
+    {
+      // Arrange
+      var root = TreeNode.Create('a', 'b', 'c', 'd');
+
+      var treenumerable = TestTreenumerableFactory.Create<TreeNode<char>, char>(root);
+
+      // Act
+      var actual =
+        treenumerable
+        .ToBreadthFirstMoveNext(visit =>
+          visit.Node == 'c'
+          ? ChildStrategy.SkipSubtree
+          : ChildStrategy.ScheduleForTraversal)
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
+        (TreenumeratorState.VisitingNode,   'a', 1, 0, 0),
+          (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
+        (TreenumeratorState.VisitingNode,   'a', 2, 0, 0),
+          (TreenumeratorState.SchedulingNode, 'c', 0, 1, 1),
+          (TreenumeratorState.SchedulingNode, 'd', 0, 2, 1),
+        (TreenumeratorState.VisitingNode,   'a', 3, 0, 0),
+
+          (TreenumeratorState.VisitingNode,   'b', 1, 0, 1),
+          (TreenumeratorState.VisitingNode,   'b', 2, 0, 1),
+          (TreenumeratorState.VisitingNode,   'd', 1, 1, 1),
+          (TreenumeratorState.VisitingNode,   'd', 2, 1, 1),
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void BreadthFirstTraversal_TwoLevels_SkipSubtreeOnLevelZero()
+    {
+      // Arrange
+      var root = TreeNode.Create('a', 'b', 'c');
+
+      var treenumerable = TestTreenumerableFactory.Create<TreeNode<char>, char>(root);
+
+      // Act
+      var actual =
+        treenumerable
+        .ToBreadthFirstMoveNext(visit =>
+          visit.Depth == 0
+          ? ChildStrategy.SkipSubtree
+          : ChildStrategy.ScheduleForTraversal)
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void BreadthFirstTraversal_TwoLevels_SkipSubtreeOnNonzeroDepth()
+    {
+      // Arrange
+      var root = TreeNode.Create('a', 'b', 'c');
+
+      var treenumerable = TestTreenumerableFactory.Create<TreeNode<char>, char>(root);
+
+      // Act
+      var actual =
+        treenumerable
+        .ToBreadthFirstMoveNext(visit =>
+          visit.Depth != 0
+          ? ChildStrategy.SkipSubtree
+          : ChildStrategy.ScheduleForTraversal)
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
+        (TreenumeratorState.VisitingNode,   'a', 1, 0, 0),
+        (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
+        (TreenumeratorState.SchedulingNode, 'c', 0, 1, 1),
+        (TreenumeratorState.VisitingNode,   'a', 2, 0, 0),
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
+    }
+  }
+}

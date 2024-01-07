@@ -6,5 +6,6 @@ namespace Arborist
   {
     bool MoveNext(ChildStrategy childStrategy);
     NodeVisit<TNode> Current { get; }
+    TreenumeratorState State { get; }
   }
 }

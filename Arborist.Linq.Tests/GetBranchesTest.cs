@@ -38,6 +38,7 @@ namespace Arborist.Linq.Tests
         };
 
       Assert.AreEqual(expected.Length, actual.Length);
+
       foreach (var (expectedBranch, actualBranch) in expected.Zip(actual, (e, a) => (e, a)))
         CollectionAssert.AreEqual(expectedBranch, actualBranch);
     }

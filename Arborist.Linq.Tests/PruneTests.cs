@@ -11,7 +11,7 @@ namespace Arborist.Linq.Tests
   public class PruneTests
   {
     [TestMethod]
-    public void Prune_BreadthFirstTraversal_PruneAfter_LevelOne()
+    public void Prune_BreadthFirstTraversal_AfterLevelOne()
     {
       // Arrange
       var root =
@@ -22,9 +22,7 @@ namespace Arborist.Linq.Tests
       var treenumerable =
         TestTreenumerableFactory
         .Create<TreeNode<char>, char>(root)
-        .Prune(
-          visit => visit.Depth == 1 && visit.VisitCount == 1,
-          PruneOption.PruneAfterNode);
+        .Prune(visit => visit.Depth > 1);
 
       // Act
       var actual =
@@ -36,20 +34,29 @@ namespace Arborist.Linq.Tests
       // Assert
       var expected = new MoveNextResult<char>[]
       {
-        ('a', 1, 0, 0),
-        ('a', 2, 0, 0),
-        ('a', 3, 0, 0),
-        ('b', 1, 0, 1),
-        ('b', 2, 0, 1),
-        ('e', 1, 1, 1),
-        ('e', 2, 1, 1),
+        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
+        (TreenumeratorState.VisitingNode,   'a', 1, 0, 0),
+        (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
+        (TreenumeratorState.VisitingNode,   'a', 2, 0, 0),
+        (TreenumeratorState.SchedulingNode, 'e', 0, 1, 1),
+        (TreenumeratorState.VisitingNode,   'a', 3, 0, 0),
+
+        (TreenumeratorState.VisitingNode,   'b', 1, 0, 1),
+        (TreenumeratorState.SchedulingNode, 'c', 0, 0, 2),
+        (TreenumeratorState.SchedulingNode, 'd', 0, 1, 2),
+        (TreenumeratorState.VisitingNode,   'b', 2, 0, 1),
+
+        (TreenumeratorState.VisitingNode,   'e', 1, 1, 1),
+        (TreenumeratorState.SchedulingNode, 'f', 0, 0, 2),
+        (TreenumeratorState.SchedulingNode, 'g', 0, 1, 2),
+        (TreenumeratorState.VisitingNode,   'e', 2, 1, 1),
       };
 
       CollectionAssert.AreEqual(expected, actual);
     }
 
     [TestMethod]
-    public void Prune_BreadthFirstTraversal_PruneBefore_LevelOne()
+    public void Prune_BreadthFirstTraversal_AtLevelOne()
     {
       // Arrange
       var root =
@@ -60,10 +67,7 @@ namespace Arborist.Linq.Tests
       var treenumerable =
         TestTreenumerableFactory
         .Create<TreeNode<char>, char>(root)
-        .Do(x => Debug.WriteLine(x))
-        .Prune(
-          x => x.Depth == 1,
-          PruneOption.PruneBeforeNode);
+        .Prune(x => x.Depth == 1);
 
       // Act
       var actual =
@@ -75,8 +79,11 @@ namespace Arborist.Linq.Tests
       // Assert
       var expected = new MoveNextResult<char>[]
       {
-        ('a', 1, 0, 0),
-        ('a', 2, 0, 0),
+        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
+        (TreenumeratorState.VisitingNode,   'a', 1, 0, 0),
+        (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
+        (TreenumeratorState.SchedulingNode, 'e', 0, 1, 1),
+        (TreenumeratorState.VisitingNode,   'a', 2, 0, 0),
       };
 
       CollectionAssert.AreEqual(expected, actual);
@@ -94,35 +101,33 @@ namespace Arborist.Linq.Tests
       var treenumerable =
         TestTreenumerableFactory
         .Create<TreeNode<char>, char>(root)
-        .Prune(
-          visit => visit.Depth == 0,
-          PruneOption.PruneBeforeNode);
+        .Prune(x => x.Depth == 0);
 
       // Act
       var actual =
         treenumerable
-        .GetBreadthFirstTraversal()
-        .Count();
+        .ToBreadthFirstMoveNext()
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
 
       // Assert
-      Assert.AreEqual(0, actual);
+      var expected = new MoveNextResult<char>[]
+      {
+        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
+      };
     }
 
     [TestMethod]
-    public void Prune_DepthFirstTraversal_PruneBefore_LevelOne()
+    public void Prune_DepthFirstTraversal_PruneBefore_MiddleChild()
     {
       // Arrange
       var root =
-        TreeNode.Create('a',
-          TreeNode.Create('b', 'c', 'd'),
-          TreeNode.Create('e', 'f', 'g'));
+        TreeNode.Create('a', 'b', 'c', 'd');
 
       var treenumerable =
         TestTreenumerableFactory
         .Create<TreeNode<char>, char>(root)
-        .Prune(
-          x => x.Depth == 1,
-          PruneOption.PruneBeforeNode);
+        .Prune(x => x.Node == 'c');
 
       // Act
       var actual =
@@ -134,28 +139,33 @@ namespace Arborist.Linq.Tests
       // Assert
       var expected = new MoveNextResult<char>[]
       {
-        ('a', 1, 0, 0),
-        ('a', 2, 0, 0),
+        (TreenumeratorState.SchedulingNode, 'a', 1, 0, 0),
+        (TreenumeratorState.VisitingNode,   'a', 2, 0, 0),
+          (TreenumeratorState.SchedulingNode, 'b', 1, 0, 1),
+          (TreenumeratorState.VisitingNode,   'b', 2, 0, 1),
+          (TreenumeratorState.VisitingNode,   'b', 3, 0, 1),
+        (TreenumeratorState.VisitingNode,   'a', 3, 0, 0),
+          (TreenumeratorState.SchedulingNode, 'c', 1, 1, 1),
+          (TreenumeratorState.SchedulingNode, 'd', 1, 1, 1),
+          (TreenumeratorState.VisitingNode,   'd', 2, 1, 1),
+          (TreenumeratorState.VisitingNode,   'd', 3, 1, 1),
+        (TreenumeratorState.VisitingNode,   'a', 4, 0, 0),
       };
 
       CollectionAssert.AreEqual(expected, actual);
     }
 
     [TestMethod]
-    public void Prune_DepthFirstTraversal_PruneAfter_LevelOne()
+    public void Prune_DepthFirstTraversal_PruneBefore_RootNode()
     {
       // Arrange
       var root =
-        TreeNode.Create('a',
-          TreeNode.Create('b', 'c', 'd'),
-          TreeNode.Create('e', 'f', 'g'));
+        TreeNode.Create('a', 'b', 'c', 'd');
 
       var treenumerable =
         TestTreenumerableFactory
         .Create<TreeNode<char>, char>(root)
-        .Prune(
-          x => x.Depth == 1,
-          PruneOption.PruneAfterNode);
+        .Prune(x => x.Node == 'a');
 
       // Act
       var actual =
@@ -167,13 +177,41 @@ namespace Arborist.Linq.Tests
       // Assert
       var expected = new MoveNextResult<char>[]
       {
-        ('a', 1, 0, 0),
-        ('b', 1, 0, 1),
-        ('b', 2, 0, 1),
-        ('a', 2, 0, 0),
-        ('e', 1, 1, 1),
-        ('e', 2, 1, 1),
-        ('a', 3, 0, 0),
+        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void Prune_DepthFirstTraversal_PruneBefore_FirstRootNode()
+    {
+      // Arrange
+      var roots = new[]
+      {
+        TreeNode.Create('a'),
+        TreeNode.Create('b'),
+      };
+
+      var treenumerable =
+        TestTreenumerableFactory
+        .Create<TreeNode<char>, char>(roots)
+        .Prune(x => x.Node == 'a');
+
+      // Act
+      var actual =
+        treenumerable
+        .ToDepthFirstMoveNext()
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
+        (TreenumeratorState.SchedulingNode, 'b', 0, 1, 0),
+        (TreenumeratorState.VisitingNode,   'b', 0, 2, 0),
+        (TreenumeratorState.VisitingNode,   'b', 0, 3, 0),
       };
 
       CollectionAssert.AreEqual(expected, actual);

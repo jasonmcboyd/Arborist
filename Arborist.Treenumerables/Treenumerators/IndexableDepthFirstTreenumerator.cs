@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Arborist.Treenumerables.Treenumerators
 {
   internal sealed class IndexableDepthFirstTreenumerator<TNode, TValue>
-    : TreenumeratorBase<TValue>
+    : StackTreenumeratorBase<TValue>
     where TNode : INodeWithIndexableChildren<TNode, TValue>
   {
     public IndexableDepthFirstTreenumerator(IEnumerable<TNode> roots)
@@ -14,157 +14,210 @@ namespace Arborist.Treenumerables.Treenumerators
 
     private readonly IEnumerator<TNode> _RootsEnumerator;
 
-    private int _RootsEnumerationIndex = -1;
+    private int _RootsEnumeratorIndex = -1;
+    private int _RootsSiblingIndex = -1;
 
-    private readonly Stack<IndexableTreenumeratorNodeVisit<TNode, TValue>> _Stack = new Stack<IndexableTreenumeratorNodeVisit<TNode, TValue>>();
+    private readonly Stack<IndexableTreenumeratorNodeVisit<TNode, TValue>> _ShadowStack = new Stack<IndexableTreenumeratorNodeVisit<TNode, TValue>>();
 
-    protected override bool OnMoveNext(ChildStrategy childStrategy)
+    protected override void OnMoveNext(ChildStrategy childStrategy)
     {
-      if (_Stack.Count == 0)
-        return OnEmptyStack();
+      if (_ShadowStack.Count == 0)
+      {
+        OnEmptyStack();
+        return;
+      }
 
-      var scheduleForTraversal =
-        _Stack.Peek().VisitCount != 1
-        || childStrategy == ChildStrategy.ScheduleForTraversal;
+      if (State == TreenumeratorState.SchedulingNode)
+      {
+        OnSchedulingNode(childStrategy);
+        return;
+      }
 
-      if (scheduleForTraversal)
-        return OnScheduleForTraversal();
-
-      if (childStrategy == ChildStrategy.SkipSubtree)
-        return OnSkipSubtree();
-
-      return OnSkipNode();
+      OnVisitingNode();
     }
 
-    private bool OnEmptyStack()
+    private void OnEmptyStack()
     {
       if (!_RootsEnumerator.MoveNext())
-        return false;
+        return;
 
-      _RootsEnumerationIndex++;
+      _RootsEnumeratorIndex++;
+
+      if (State != TreenumeratorState.SchedulingNode)
+        _RootsSiblingIndex++;
 
       var nextVisit =
-        DepthFirstNodeVisit
+        IndexableTreenumeratorNodeVisit
         .Create<TNode, TValue>(
           _RootsEnumerator.Current,
-          1,
-          _RootsEnumerationIndex,
+          0,
+          _RootsEnumeratorIndex,
           0,
           0,
           false);
 
-      _Stack.Push(nextVisit);
+      State = TreenumeratorState.SchedulingNode;
 
-      Current = nextVisit.ToNodeVisit();
-
-      return true;
+      _ShadowStack.Push(nextVisit);
+      Stack.Add(nextVisit.ToNodeVisit());
     }
 
-    private bool IncrementTopOfStackVisitCount()
+    private void OnSchedulingNode(ChildStrategy childStrategy)
     {
-      var nextVisit = _Stack.Pop().IncrementVisitCount();
+      if (childStrategy == ChildStrategy.ScheduleForTraversal)
+      {
+        OnVisitingNode();
+        return;
+      }
 
-      _Stack.Push(nextVisit);
+      if (childStrategy == ChildStrategy.SkipSubtree)
+      {
+        OnSkipSubtree();
+        return;
+      }
 
-      Current = nextVisit.ToNodeVisit();
-
-      return true;
+      OnSkipNode();
     }
 
-    private bool OnHasNextChild()
+    private void OnVisitingNode()
     {
-      var previousVisit = _Stack.Pop();
+      if (_ShadowStack.Count == 0)
+        return;
+
+      var previousVisit = _ShadowStack.Peek();
+
+      if (previousVisit.VisitCount == 0
+        || (!previousVisit.HasNextChild() && previousVisit.VisitCount == 1))
+      {
+        IncrementTopOfStackVisitCount();
+        return;
+      }
+
+      if (previousVisit.HasNextChild())
+      {
+        OnHasNextChild();
+        return;
+      }
+
+      _ShadowStack.Pop();
+      Stack.RemoveAt(Stack.Count - 1);
+
+      if (_ShadowStack.Count == 0)
+      {
+        OnEmptyStack();
+        return;
+      }
+
+      previousVisit = _ShadowStack.Peek();
+
+      if (previousVisit.Skipped)
+      {
+        OnSkipNode();
+        return;
+      }
+
+      var nextShadowVisit = _ShadowStack.Pop().IncrementVisitCount();
+      _ShadowStack.Push(nextShadowVisit);
+
+      var nextVisit = Stack[Stack.Count - 1].IncrementVisitCount();
+      Stack[Stack.Count - 1] = nextVisit;
+    }
+
+    private void OnSkipSubtree()
+    {
+      _ShadowStack.Pop();
+      Stack.RemoveAt(Stack.Count - 1);
+
+      if (_ShadowStack.Count == 0)
+      {
+        OnEmptyStack();
+        return;
+      }
+
+      OnVisitingNode();
+    }
+
+    private void OnSkipNode()
+    {
+      var previousVisit = _ShadowStack.Pop().Skip();
+      _ShadowStack.Push(previousVisit);
+
+      //if (!previousVisit.HasNextChild()
+      //  && )
+      //{
+      //  OnSkipSubtree();
+      //  return;
+      //}
+
+      if (State == TreenumeratorState.SchedulingNode)
+        Stack.RemoveAt(Stack.Count - 1);
+
+      if (previousVisit.HasNextChild())
+      {
+        OnHasNextChild();
+        return;
+      }
+
+      _ShadowStack.Pop();
+      if (Stack.Count > 0)
+        Stack.RemoveAt(Stack.Count - 1);
+
+      if (_ShadowStack.Count == 0)
+      {
+        OnEmptyStack();
+        return;
+      }
+
+      previousVisit = _ShadowStack.Peek();
+
+      if (previousVisit.Skipped)
+      {
+        OnSkipNode();
+        return;
+      }
+
+      var nextVisit = _ShadowStack.Pop().IncrementVisitCount();
+
+      _ShadowStack.Push(nextVisit);
+      Stack.Add(nextVisit.ToNodeVisit());
+
+      State = TreenumeratorState.VisitingNode;
+
+    }
+
+    private void OnHasNextChild()
+    {
+      var previousVisit = _ShadowStack.Pop();
 
       var nextVisit = previousVisit.GetNextChildVisit();
 
       previousVisit = previousVisit.IncrementVisitedChildrenCount();
 
-      _Stack.Push(previousVisit);
-      _Stack.Push(nextVisit);
+      _ShadowStack.Push(previousVisit);
+      _ShadowStack.Push(nextVisit);
 
-      Current = nextVisit.ToNodeVisit();
+      Stack.Add(nextVisit.ToNodeVisit());
 
-      return true;
+      State = TreenumeratorState.SchedulingNode;
     }
 
-    private bool OnScheduleForTraversal()
+    private void IncrementTopOfStackVisitCount()
     {
-      if (_Stack.Count == 0)
-        return false;
+      var nextShadowVisit = _ShadowStack.Pop().IncrementVisitCount();
+      var nextVisit = Stack.Last().IncrementVisitCount();
 
-      var previousVisit = _Stack.Peek();
+      if (nextVisit.Depth == 0 && nextVisit.VisitCount == 1)
+        nextVisit = nextVisit.WithSiblingIndex(_RootsSiblingIndex);
+      else if (Stack.Count > 1)
+        nextVisit = nextVisit.WithSiblingIndex(Stack[Stack.Count - 2].VisitCount - 1);
 
-      if (previousVisit.VisitCount == 1
-        || (!previousVisit.HasNextChild() && previousVisit.VisitCount == 2))
-        return IncrementTopOfStackVisitCount();
+      if (nextVisit.Depth != Stack.Count - 1)
+        nextVisit = nextVisit.WithDepth(Stack.Count - 1);
 
-      if (previousVisit.HasNextChild())
-        return OnHasNextChild();
+      _ShadowStack.Push(nextShadowVisit);
+      Stack[Stack.Count - 1] = nextVisit;
 
-      _Stack.Pop();
-
-      if (_Stack.Count == 0)
-        return OnEmptyStack();
-
-      previousVisit = _Stack.Peek();
-
-      if (previousVisit.Skipped)
-        return OnSkipNode();
-
-      IndexableTreenumeratorNodeVisit<TNode, TValue> nextVisit;
-
-      nextVisit = _Stack.Pop().IncrementVisitCount();
-
-      _Stack.Push(nextVisit);
-
-      Current = nextVisit.ToNodeVisit();
-
-      return true;
-    }
-
-    private bool OnSkipSubtree()
-    {
-      _Stack.Pop();
-
-      if (_Stack.Count == 0)
-        return OnEmptyStack();
-
-      var previousNode = _Stack.Pop().IncrementVisitCount();
-
-      _Stack.Push(previousNode);
-
-      Current = previousNode.ToNodeVisit();
-
-      return true;
-    }
-
-    private bool OnSkipNode()
-    {
-      var previousVisit = _Stack.Pop().Skip();
-      _Stack.Push(previousVisit);
-
-      if (previousVisit.HasNextChild())
-        return OnHasNextChild();
-
-      _Stack.Pop();
-
-      if (_Stack.Count == 0)
-        return OnEmptyStack();
-
-      previousVisit = _Stack.Peek();
-
-      if (previousVisit.Skipped)
-        return OnSkipNode();
-
-      IndexableTreenumeratorNodeVisit<TNode, TValue> nextVisit;
-
-      nextVisit = _Stack.Pop().IncrementVisitCount();
-
-      _Stack.Push(nextVisit);
-
-      Current = nextVisit.ToNodeVisit();
-
-      return true;
+      State = TreenumeratorState.VisitingNode;
     }
 
     public override void Dispose()

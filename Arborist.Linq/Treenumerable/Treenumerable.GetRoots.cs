@@ -8,7 +8,7 @@ namespace Arborist.Linq
     {
       using (var treenumerator = source.GetBreadthFirstTreenumerator())
       {
-        while(treenumerator.MoveNext(false))
+        while(treenumerator.MoveNext(ChildStrategy.ScheduleForTraversal))
         {
           if (treenumerator.Current.Depth > 0)
             yield break;

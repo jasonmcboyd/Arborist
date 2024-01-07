@@ -9,20 +9,10 @@ namespace Arborist.Linq
       if (source == null)
         yield break;
 
-      NodeVisit<T>? previousStep = null;
-
-      foreach (var step in source.GetDepthFirstTraversal())
-      {
-        var canYield =
-          previousStep == null
-          || previousStep.Value.Depth < step.Depth
-          || (step.Depth == 0 && previousStep.Value.Depth == 0);
-
-        if (canYield)
-          yield return step.Node;
-
-        previousStep = step;
-      }
+      using (var treenumerator = source.GetDepthFirstTreenumerator())
+        while (treenumerator.MoveNext(ChildStrategy.ScheduleForTraversal))
+          if (treenumerator.Current.VisitCount == 1)
+            yield return treenumerator.Current.Node;
     }
   }
 }

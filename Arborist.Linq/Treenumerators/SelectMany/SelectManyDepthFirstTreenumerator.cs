@@ -26,7 +26,7 @@ namespace Arborist.Linq.Treenumerators
         {
           NodeVisit<TNode>? previousVisit = null;
 
-          while (currentEnumerator.MoveNext(false))
+          while (currentEnumerator.MoveNext(ChildStrategy.ScheduleForTraversal))
           {
             if (previousVisit != null)
             {

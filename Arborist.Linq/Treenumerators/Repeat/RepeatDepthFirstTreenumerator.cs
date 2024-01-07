@@ -38,7 +38,7 @@
     {
       if (Treenumerator == null)
       {
-        if (skipChildren)
+        if (childStrategy == ChildStrategy.SkipSubtree)
           return false;
 
         Treenumerator = _Treenumerable.GetDepthFirstTreenumerator();
@@ -58,7 +58,7 @@
         if (_Count != null && (_TreenumeratorCount - 1) > _Count)
           return false;
 
-        skipChildren = false;
+        childStrategy = ChildStrategy.ScheduleForTraversal;
       }
 
       Current = Treenumerator.Current;

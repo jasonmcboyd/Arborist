@@ -51,7 +51,7 @@ namespace Arborist.Linq.Treenumerables
         {
           if (index > _BreadthFirstMemo.Count && !_BreadthFirstTreenumeratorExhausted)
           {
-            if (_BreadthFirstTreenumerator.MoveNext(false))
+            if (_BreadthFirstTreenumerator.MoveNext(ChildStrategy.ScheduleForTraversal))
               _BreadthFirstMemo.Add(_BreadthFirstTreenumerator.Current);
             else
               _BreadthFirstTreenumeratorExhausted = true;
@@ -73,7 +73,7 @@ namespace Arborist.Linq.Treenumerables
         {
           if (index > _BreadthFirstMemo.Count && !_BreadthFirstTreenumeratorExhausted)
           {
-            if (_BreadthFirstTreenumerator.MoveNext(false))
+            if (_BreadthFirstTreenumerator.MoveNext(ChildStrategy.ScheduleForTraversal))
               _BreadthFirstMemo.Add(_BreadthFirstTreenumerator.Current);
             else
               _BreadthFirstTreenumeratorExhausted = true;
@@ -95,7 +95,7 @@ namespace Arborist.Linq.Treenumerables
         {
           if (index > _DepthFirstMemo.Count && !_DepthFirstTreenumeratorExhausted)
           {
-            if (_DepthFirstTreenumerator.MoveNext(false))
+            if (_DepthFirstTreenumerator.MoveNext(ChildStrategy.ScheduleForTraversal))
               _DepthFirstMemo.Add(_DepthFirstTreenumerator.Current);
             else
               _DepthFirstTreenumeratorExhausted = true;

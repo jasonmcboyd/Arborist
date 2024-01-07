@@ -18,11 +18,11 @@ namespace Arborist
     {
       get
       {
-        if (!_StartedEnumeration)
-          throw new InvalidOperationException("Enumeration has not begun.");
+        if (State == TreenumeratorState.EnumerationNotStarted)
+          throw new InvalidOperationException("Enumeration has not started.");
 
-        if (_CompletedEnumeration)
-          throw new InvalidOperationException("Enumeration has completed.");
+        if (State == TreenumeratorState.EnumerationFinished)
+          throw new InvalidOperationException("Enumeration has finished.");
 
         _Current = Stack.Last().WithNode(_Selector(Stack.Last().Node));
 
@@ -30,22 +30,16 @@ namespace Arborist
       }
     }
 
-    private bool _StartedEnumeration = false;
-    private bool _CompletedEnumeration = false;
+    public TreenumeratorState State { get; protected set; } = TreenumeratorState.EnumerationNotStarted;
 
     protected List<NodeVisit<TStack>> Stack { get; } = new List<NodeVisit<TStack>>();
 
     public bool MoveNext(ChildStrategy childStrategy)
     {
-      if (_CompletedEnumeration)
+      if (State == TreenumeratorState.EnumerationFinished)
         return false;
-      
-      _StartedEnumeration = true;
 
       OnMoveNext(childStrategy);
-
-      if (Stack.Count == 0)
-        _CompletedEnumeration = true;
 
       return Stack.Count > 0;
     }
@@ -53,5 +47,12 @@ namespace Arborist
     protected abstract void OnMoveNext(ChildStrategy childStrategy);
 
     public abstract void Dispose();
+  }
+
+  public abstract class StackTreenumeratorBase<TNode> : StackTreenumeratorBase<TNode, TNode>
+  {
+    public StackTreenumeratorBase() : base(x => x)
+    {
+    }
   }
 }

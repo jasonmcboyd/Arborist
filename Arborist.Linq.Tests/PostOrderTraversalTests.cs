@@ -1,6 +1,7 @@
 using Arborist.Tests.Utils;
 using Arborist.Treenumerables;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Arborist.Linq.Tests
@@ -20,6 +21,7 @@ namespace Arborist.Linq.Tests
       var actual =
         treenumerable
         .PostOrderTraversal()
+        .Do(x => Debug.WriteLine(x))
         .ToArray();
 
       // Assert
@@ -43,6 +45,7 @@ namespace Arborist.Linq.Tests
       var actual =
         treenumerable
         .PostOrderTraversal()
+        .Do(x => Debug.WriteLine(x))
         .ToArray();
 
       // Assert

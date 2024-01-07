@@ -109,7 +109,7 @@ namespace Arborist.Linq.Treenumerators
         visit => visit,
         () => _InnerBranch.Last().VisitCount + _Scion.Current.SiblingIndex - 1,
         () => _InnerBranch.Last().Depth + _Scion.Current.Depth + 1,
-        skipChildren);
+        childStrategy);
     }
 
     private bool OnInnerMoveNext(ChildStrategy childStrategy)
@@ -120,13 +120,13 @@ namespace Arborist.Linq.Treenumerators
         visit => visit.WithNode(_Selector(visit)),
         () => CalculateInnerSiblingIndexAfterMoveNext(),
         () => InnerTreenumerator.Current.Depth,
-        skipChildren);
+        childStrategy);
     }
 
     protected override bool OnMoveNext(ChildStrategy childStrategy)
     {
       if (_Scion == null
-        && !skipChildren
+        && childStrategy == ChildStrategy.ScheduleForTraversal
         && _InnerBranch.Count > 0
         && _Predicate(_InnerBranch.Last()))
         _Scion = _ScionGenerator(InnerTreenumerator.Current).GetDepthFirstTreenumerator();

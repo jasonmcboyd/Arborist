@@ -13,10 +13,9 @@ namespace Arborist.Linq.Treenumerators
 
     public NodeVisit<TNode> Current => throw new InvalidOperationException();
 
-    public bool MoveNext(ChildStrategy childStrategy)
-    {
-      return false;
-    }
+    public TreenumeratorState State => TreenumeratorState.EnumerationFinished;
+
+    public bool MoveNext(ChildStrategy childStrategy) => false;
 
     public void Dispose()
     {

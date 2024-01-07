@@ -21,6 +21,8 @@ namespace Arborist.Linq.Treenumerators
       {
         var node = _Selector(InnerTreenumerator.Current);
 
+        State = InnerTreenumerator.State;
+
         Current =
           NodeVisit
           .Create(

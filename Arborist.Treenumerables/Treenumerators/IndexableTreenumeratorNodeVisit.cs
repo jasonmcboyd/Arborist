@@ -27,7 +27,7 @@
     public bool Skipped { get; }
   }
 
-  internal static class DepthFirstNodeVisit
+  internal static class IndexableTreenumeratorNodeVisit
   {
     public static IndexableTreenumeratorNodeVisit<TNode, TValue> Create<TNode, TValue>(
       TNode node,
@@ -47,7 +47,6 @@
 
     public static IndexableTreenumeratorNodeVisit<TNode, TValue> With<TNode, TValue>(
       this IndexableTreenumeratorNodeVisit<TNode, TValue> depthFirstNodeVisit,
-      TNode node,
       int? visitCount = null,
       int? siblingIndex = null,
       int? depth = null,
@@ -55,7 +54,7 @@
       bool? skipped = null)
       where TNode : INodeWithIndexableChildren<TNode, TValue>
       => new IndexableTreenumeratorNodeVisit<TNode, TValue>(
-        node == null ? depthFirstNodeVisit.Node : node,
+        depthFirstNodeVisit.Node,
         visitCount == null ? depthFirstNodeVisit.VisitCount : visitCount.Value,
         siblingIndex == null ? depthFirstNodeVisit.SiblingIndex : siblingIndex.Value,
         depth == null ? depthFirstNodeVisit.Depth : depth.Value,
@@ -121,9 +120,9 @@
     public static IndexableTreenumeratorNodeVisit<TNode, TValue> GetNextChildVisit<TNode, TValue>(
       this IndexableTreenumeratorNodeVisit<TNode, TValue> depthFirstNode)
       where TNode : INodeWithIndexableChildren<TNode, TValue>
-      => DepthFirstNodeVisit.Create<TNode, TValue>(
+      => IndexableTreenumeratorNodeVisit.Create<TNode, TValue>(
         depthFirstNode.GetNextChildNode(),
-        1,
+        0,
         depthFirstNode.VisitedChildrenCount,
         depthFirstNode.Depth + 1,
         0,

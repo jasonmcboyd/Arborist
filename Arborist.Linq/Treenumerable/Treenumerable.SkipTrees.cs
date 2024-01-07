@@ -5,12 +5,6 @@
     public static ITreenumerable<T> SkipTrees<T>(
       this ITreenumerable<T> source,
       int count)
-    {
-      return
-        source
-        .Prune(
-          step => step.SiblingIndex < count,
-          PruneOption.PruneBeforeNode);
-    }
+      => source.Prune(step => step.SiblingIndex < count);
   }
 }

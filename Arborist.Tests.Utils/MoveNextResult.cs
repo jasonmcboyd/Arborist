@@ -6,17 +6,20 @@ namespace Arborist.Tests.Utils
   public readonly struct MoveNextResult<TNode>
   {
     public MoveNextResult(
+      TreenumeratorState state,
       TNode node,
       int visitCount,
       int siblingIndex,
       int depth)
     {
+      State = state;
       Node = node;
       VisitCount = visitCount;
       SiblingIndex = siblingIndex;
       Depth = depth;
     }
 
+    public TreenumeratorState State { get; }
     public TNode Node { get; }
     public int VisitCount { get; }
     public int SiblingIndex { get; }
@@ -28,27 +31,28 @@ namespace Arborist.Tests.Utils
         return false;
 
       return
-        Equals(other.Node, Node)
+        State == other.State
+        && Equals(other.Node, Node)
         && other.VisitCount == VisitCount
         && other.SiblingIndex == SiblingIndex
         && other.Depth == Depth;
     }
 
-    public override int GetHashCode() => (Node, VisitCount, SiblingIndex, Depth).GetHashCode();
+    public override int GetHashCode() => (State, Node, VisitCount, SiblingIndex, Depth).GetHashCode();
 
-    public static implicit operator MoveNextResult<TNode>((TNode, int, int, int) tuple)
-      => new MoveNextResult<TNode>(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4);
+    public static implicit operator MoveNextResult<TNode>((TreenumeratorState, TNode, int, int, int) tuple)
+      => new MoveNextResult<TNode>(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5);
 
     public override string ToString()
     {
-      return $"{Node}, {VisitCount}, {SiblingIndex}, {Depth}";
+      return $"{State}, {Node}, {VisitCount}, {SiblingIndex}, {Depth}";
     }
   }
 
   public static class MoveNextResult
   {
-    public static MoveNextResult<TNode> Create<TNode>(NodeVisit<TNode> visit)
-      => new MoveNextResult<TNode>(visit.Node, visit.VisitCount, visit.SiblingIndex, visit.Depth);
+    public static MoveNextResult<TNode> Create<TNode>(TreenumeratorState state, NodeVisit<TNode> visit)
+      => new MoveNextResult<TNode>(state, visit.Node, visit.VisitCount, visit.SiblingIndex, visit.Depth);
 
     public static IEnumerable<MoveNextResult<TNode>> ToDepthFirstMoveNext<TNode>(
       this ITreenumerable<TNode> source)
@@ -66,7 +70,13 @@ namespace Arborist.Tests.Utils
 
         while (enumerator.MoveNext(childStrategy))
         {
-          yield return Create(enumerator.Current);
+          var visit =
+            enumerator.State == TreenumeratorState.EnumerationFinished
+            || enumerator.State == TreenumeratorState.EnumerationNotStarted
+            ? default
+            : enumerator.Current;
+
+          yield return Create(enumerator.State, visit);
 
           previous = enumerator.Current;
 
@@ -91,7 +101,13 @@ namespace Arborist.Tests.Utils
 
         while (enumerator.MoveNext(childStrategy))
         {
-          yield return Create(enumerator.Current);
+          var visit =
+            enumerator.State == TreenumeratorState.EnumerationFinished
+            || enumerator.State == TreenumeratorState.EnumerationNotStarted
+            ? default
+            : enumerator.Current;
+
+          yield return Create(enumerator.State, visit);
 
           previous = enumerator.Current;
 
