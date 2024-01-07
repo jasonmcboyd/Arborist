@@ -19,7 +19,7 @@ namespace Arborist.Treenumerables.Treenumerators
 
     private readonly Stack<IndexableTreenumeratorNodeVisit<TNode, TValue>> _ShadowStack = new Stack<IndexableTreenumeratorNodeVisit<TNode, TValue>>();
 
-    protected override void OnMoveNext(ChildStrategy childStrategy)
+    protected override void OnMoveNext(SchedulingStrategy schedulingStrategy)
     {
       if (_ShadowStack.Count == 0)
       {
@@ -29,7 +29,7 @@ namespace Arborist.Treenumerables.Treenumerators
 
       if (State == TreenumeratorState.SchedulingNode)
       {
-        OnSchedulingNode(childStrategy);
+        OnSchedulingNode(schedulingStrategy);
         return;
       }
 
@@ -62,15 +62,15 @@ namespace Arborist.Treenumerables.Treenumerators
       Stack.Add(nextVisit.ToNodeVisit());
     }
 
-    private void OnSchedulingNode(ChildStrategy childStrategy)
+    private void OnSchedulingNode(SchedulingStrategy schedulingStrategy)
     {
-      if (childStrategy == ChildStrategy.ScheduleForTraversal)
+      if (schedulingStrategy == SchedulingStrategy.ScheduleForTraversal)
       {
         OnVisitingNode();
         return;
       }
 
-      if (childStrategy == ChildStrategy.SkipSubtree)
+      if (schedulingStrategy == SchedulingStrategy.SkipSubtree)
       {
         OnSkipSubtree();
         return;

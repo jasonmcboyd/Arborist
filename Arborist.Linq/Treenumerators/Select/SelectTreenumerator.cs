@@ -13,9 +13,9 @@ namespace Arborist.Linq.Treenumerators
 
     private readonly Func<NodeVisit<TInner>, TNode> _Selector;
 
-    protected override bool OnMoveNext(ChildStrategy childStrategy)
+    protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
     {
-      var hasNext = InnerTreenumerator.MoveNext(childStrategy);
+      var hasNext = InnerTreenumerator.MoveNext(schedulingStrategy);
 
       if (hasNext)
       {

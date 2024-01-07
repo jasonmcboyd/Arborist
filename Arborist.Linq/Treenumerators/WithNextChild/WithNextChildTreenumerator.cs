@@ -12,7 +12,7 @@ namespace Arborist.Linq.Treenumerators
 
     private readonly Queue<NodeVisit<TNode>> _Queue = new Queue<NodeVisit<TNode>>();
 
-    protected override bool OnMoveNext(ChildStrategy childStrategy)
+    protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
     {
       throw new NotImplementedException();
     }

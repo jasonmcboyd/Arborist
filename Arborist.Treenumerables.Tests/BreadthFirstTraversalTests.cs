@@ -25,8 +25,8 @@ namespace Arborist.Treenumerables.Tests
         treenumerable
         .ToBreadthFirstMoveNext(visit =>
           visit.Node == "d"
-          ? ChildStrategy.SkipNode
-          : ChildStrategy.ScheduleForTraversal)
+          ? SchedulingStrategy.SkipNode
+          : SchedulingStrategy.ScheduleForTraversal)
         .Do(x => Debug.WriteLine(x))
         .ToArray();
 
@@ -80,8 +80,8 @@ namespace Arborist.Treenumerables.Tests
         treenumerable
         .ToBreadthFirstMoveNext(visit =>
           visit.Node == "c" || visit.Node == "cc" || visit.Node == "ccc"
-          ? ChildStrategy.SkipNode
-          : ChildStrategy.ScheduleForTraversal)
+          ? SchedulingStrategy.SkipNode
+          : SchedulingStrategy.ScheduleForTraversal)
         .Do(x => Debug.WriteLine(x))
         .ToArray();
 
@@ -166,8 +166,8 @@ namespace Arborist.Treenumerables.Tests
         treenumerable
         .ToBreadthFirstMoveNext(visit =>
           visit.Node == 'a'
-          ? ChildStrategy.SkipSubtree
-          : ChildStrategy.ScheduleForTraversal)
+          ? SchedulingStrategy.SkipSubtree
+          : SchedulingStrategy.ScheduleForTraversal)
         .Do(x => Debug.WriteLine(x))
         .ToArray();
 
@@ -204,8 +204,8 @@ namespace Arborist.Treenumerables.Tests
         treenumerable
         .ToBreadthFirstMoveNext(visit =>
           visit.Node == 'b'
-          ? ChildStrategy.SkipSubtree
-          : ChildStrategy.ScheduleForTraversal)
+          ? SchedulingStrategy.SkipSubtree
+          : SchedulingStrategy.ScheduleForTraversal)
         .Do(x => Debug.WriteLine(x))
         .ToArray();
 
@@ -239,8 +239,8 @@ namespace Arborist.Treenumerables.Tests
         treenumerable
         .ToBreadthFirstMoveNext(visit =>
           visit.Depth == 1
-          ? ChildStrategy.SkipNode
-          : ChildStrategy.ScheduleForTraversal)
+          ? SchedulingStrategy.SkipNode
+          : SchedulingStrategy.ScheduleForTraversal)
         .Do(x => Debug.WriteLine(x))
         .ToArray();
 
@@ -274,8 +274,8 @@ namespace Arborist.Treenumerables.Tests
         treenumerable
         .ToBreadthFirstMoveNext(visit =>
           visit.Depth == 2
-          ? ChildStrategy.SkipNode
-          : ChildStrategy.ScheduleForTraversal)
+          ? SchedulingStrategy.SkipNode
+          : SchedulingStrategy.ScheduleForTraversal)
         .Do(x => Debug.WriteLine(x))
         .ToArray();
 
@@ -309,8 +309,8 @@ namespace Arborist.Treenumerables.Tests
         treenumerable
         .ToBreadthFirstMoveNext(visit =>
           visit.Depth == 0
-          ? ChildStrategy.SkipNode
-          : ChildStrategy.ScheduleForTraversal)
+          ? SchedulingStrategy.SkipNode
+          : SchedulingStrategy.ScheduleForTraversal)
         .Do(x => Debug.WriteLine(x))
         .ToArray();
 
@@ -345,8 +345,8 @@ namespace Arborist.Treenumerables.Tests
         treenumerable
         .ToBreadthFirstMoveNext(visit =>
           visit.Depth == 1
-          ? ChildStrategy.SkipSubtree
-          : ChildStrategy.ScheduleForTraversal)
+          ? SchedulingStrategy.SkipSubtree
+          : SchedulingStrategy.ScheduleForTraversal)
         .Do(x => Debug.WriteLine(x))
         .ToArray();
 
@@ -463,8 +463,8 @@ namespace Arborist.Treenumerables.Tests
         treenumerable
         .ToBreadthFirstMoveNext(visit =>
           visit.Depth == 0
-          ? ChildStrategy.SkipNode
-          : ChildStrategy.ScheduleForTraversal)
+          ? SchedulingStrategy.SkipNode
+          : SchedulingStrategy.ScheduleForTraversal)
         .Do(x => Debug.WriteLine(x))
         .ToArray();
 
@@ -496,8 +496,8 @@ namespace Arborist.Treenumerables.Tests
         treenumerable
         .ToBreadthFirstMoveNext(visit =>
           visit.Depth != 0
-          ? ChildStrategy.SkipNode
-          : ChildStrategy.ScheduleForTraversal)
+          ? SchedulingStrategy.SkipNode
+          : SchedulingStrategy.ScheduleForTraversal)
         .Do(x => Debug.WriteLine(x))
         .ToArray();
 
@@ -527,8 +527,8 @@ namespace Arborist.Treenumerables.Tests
         treenumerable
         .ToBreadthFirstMoveNext(visit =>
           visit.Node == 'b'
-          ? ChildStrategy.SkipSubtree
-          : ChildStrategy.ScheduleForTraversal)
+          ? SchedulingStrategy.SkipSubtree
+          : SchedulingStrategy.ScheduleForTraversal)
         .Do(x => Debug.WriteLine(x))
         .ToArray();
 
@@ -565,8 +565,8 @@ namespace Arborist.Treenumerables.Tests
         treenumerable
         .ToBreadthFirstMoveNext(visit =>
           visit.Node == 'd'
-          ? ChildStrategy.SkipSubtree
-          : ChildStrategy.ScheduleForTraversal)
+          ? SchedulingStrategy.SkipSubtree
+          : SchedulingStrategy.ScheduleForTraversal)
         .Do(x => Debug.WriteLine(x))
         .ToArray();
 
@@ -603,8 +603,8 @@ namespace Arborist.Treenumerables.Tests
         treenumerable
         .ToBreadthFirstMoveNext(visit =>
           visit.Node == 'c'
-          ? ChildStrategy.SkipSubtree
-          : ChildStrategy.ScheduleForTraversal)
+          ? SchedulingStrategy.SkipSubtree
+          : SchedulingStrategy.ScheduleForTraversal)
         .Do(x => Debug.WriteLine(x))
         .ToArray();
 
@@ -641,8 +641,8 @@ namespace Arborist.Treenumerables.Tests
         treenumerable
         .ToBreadthFirstMoveNext(visit =>
           visit.Depth == 0
-          ? ChildStrategy.SkipSubtree
-          : ChildStrategy.ScheduleForTraversal)
+          ? SchedulingStrategy.SkipSubtree
+          : SchedulingStrategy.ScheduleForTraversal)
         .Do(x => Debug.WriteLine(x))
         .ToArray();
 
@@ -668,8 +668,8 @@ namespace Arborist.Treenumerables.Tests
         treenumerable
         .ToBreadthFirstMoveNext(visit =>
           visit.Depth != 0
-          ? ChildStrategy.SkipSubtree
-          : ChildStrategy.ScheduleForTraversal)
+          ? SchedulingStrategy.SkipSubtree
+          : SchedulingStrategy.ScheduleForTraversal)
         .Do(x => Debug.WriteLine(x))
         .ToArray();
 

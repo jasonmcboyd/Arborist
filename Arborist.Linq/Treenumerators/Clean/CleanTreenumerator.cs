@@ -14,11 +14,11 @@ namespace Arborist.Linq.Treenumerators
 
     private readonly Stack<NodeVisit<TNode>> _Stack = new Stack<NodeVisit<TNode>>();
 
-    protected override bool OnMoveNext(ChildStrategy childStrategy)
+    protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
     {
       while (true)
       {
-        if (InnerTreenumerator.MoveNext(ChildStrategy.ScheduleForTraversal))
+        if (InnerTreenumerator.MoveNext(SchedulingStrategy.ScheduleForTraversal))
           return false;
 
 

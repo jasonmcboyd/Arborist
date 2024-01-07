@@ -10,7 +10,7 @@ namespace Arborist.Linq
       Func<NodeVisit<T>, bool> predicate)
       => TreenumerableFactory.Create(
         source,
-        breadthFirstTreenumerator => new FilterTreenumerator<T>(breadthFirstTreenumerator, predicate, ChildStrategy.SkipNode),
-        depthFirstTreenumerator => new FilterTreenumerator<T>(depthFirstTreenumerator, predicate, ChildStrategy.SkipNode));
+        breadthFirstTreenumerator => new FilterTreenumerator<T>(breadthFirstTreenumerator, predicate, SchedulingStrategy.SkipNode),
+        depthFirstTreenumerator => new FilterTreenumerator<T>(depthFirstTreenumerator, predicate, SchedulingStrategy.SkipNode));
   }
 }

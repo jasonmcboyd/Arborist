@@ -24,12 +24,12 @@ namespace Arborist
 
     public abstract void Dispose();
 
-    public bool MoveNext(ChildStrategy childStrategy)
+    public bool MoveNext(SchedulingStrategy schedulingStrategy)
     {
       if (State == TreenumeratorState.EnumerationFinished)
         return false;
 
-      if (OnMoveNext(childStrategy))
+      if (OnMoveNext(schedulingStrategy))
         return true;
 
       State = TreenumeratorState.EnumerationFinished;
@@ -37,6 +37,6 @@ namespace Arborist
       return false;
     }
 
-    protected abstract bool OnMoveNext(ChildStrategy childStrategy);
+    protected abstract bool OnMoveNext(SchedulingStrategy schedulingStrategy);
   }
 }

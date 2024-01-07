@@ -18,7 +18,7 @@ namespace Arborist.Collatz
     {
       private long _Previous = -1;
 
-      protected override bool OnMoveNext(ChildStrategy childStrategy)
+      protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
       {
         //if (_Previous == -1)
         //{
@@ -75,7 +75,7 @@ namespace Arborist.Collatz
 
       private readonly Queue<long> _Children = new Queue<long>();
 
-      protected override bool OnMoveNext(ChildStrategy childStrategy)
+      protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
       {
         throw new NotImplementedException();
         //if (_CurrentLevel.Count == 0
@@ -91,7 +91,7 @@ namespace Arborist.Collatz
 
         //if (_Children.Count > 0)
         //{
-        //  if (childStrategy)
+        //  if (schedulingStrategy)
         //    _Children.Clear();
         //  else
         //  {

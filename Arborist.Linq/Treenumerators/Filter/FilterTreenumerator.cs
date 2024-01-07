@@ -8,7 +8,7 @@ namespace Arborist.Linq.Treenumerators
     public FilterTreenumerator(
       ITreenumerator<TNode> innerTreenumerator,
       Func<NodeVisit<TNode>, bool> predicate,
-      ChildStrategy skipStrategy)
+      SchedulingStrategy skipStrategy)
       : base(innerTreenumerator)
     {
       _Predicate = predicate;
@@ -16,15 +16,15 @@ namespace Arborist.Linq.Treenumerators
     }
 
     private readonly Func<NodeVisit<TNode>, bool> _Predicate;
-    private ChildStrategy _SkipStrategy;
+    private SchedulingStrategy _SkipStrategy;
 
-    protected override bool OnMoveNext(ChildStrategy childStrategy)
+    protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
     {
       if (State == TreenumeratorState.SchedulingNode
         && !_Predicate(InnerTreenumerator.Current))
-        childStrategy = _SkipStrategy;
+        schedulingStrategy = _SkipStrategy;
 
-      var result = InnerTreenumerator.MoveNext(childStrategy);
+      var result = InnerTreenumerator.MoveNext(schedulingStrategy);
 
       if (!result)
         return false;

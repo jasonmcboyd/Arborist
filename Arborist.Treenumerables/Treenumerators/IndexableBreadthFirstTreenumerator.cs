@@ -25,13 +25,13 @@ namespace Arborist.Treenumerables.Treenumerators
 
     private bool _ScheduledNodeAddedToFront = false;
 
-    protected override bool OnMoveNext(ChildStrategy childStrategy)
+    protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
     {
       if (State == TreenumeratorState.SchedulingNode)
       {
-        if (childStrategy == ChildStrategy.SkipSubtree)
+        if (schedulingStrategy == SchedulingStrategy.SkipSubtree)
           _NextLevel.RemoveFromBack();
-        else if (childStrategy == ChildStrategy.SkipNode)
+        else if (schedulingStrategy == SchedulingStrategy.SkipNode)
         {
           if (_ScheduledNodeAddedToFront)
           {
@@ -97,7 +97,7 @@ namespace Arborist.Treenumerables.Treenumerators
         if ((visit.VisitCount == 0
             && !visit.Skipped)
           || (State == TreenumeratorState.SchedulingNode
-            && childStrategy == ChildStrategy.ScheduleForTraversal))
+            && schedulingStrategy == SchedulingStrategy.ScheduleForTraversal))
         {
           if (visit.SiblingIndex == 0
             && !_ScheduledNodeAddedToFront)

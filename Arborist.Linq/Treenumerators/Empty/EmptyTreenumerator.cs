@@ -15,7 +15,7 @@ namespace Arborist.Linq.Treenumerators
 
     public TreenumeratorState State => TreenumeratorState.EnumerationFinished;
 
-    public bool MoveNext(ChildStrategy childStrategy) => false;
+    public bool MoveNext(SchedulingStrategy schedulingStrategy) => false;
 
     public void Dispose()
     {

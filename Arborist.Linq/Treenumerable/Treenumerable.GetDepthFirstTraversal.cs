@@ -7,7 +7,7 @@ namespace Arborist.Linq
     public static IEnumerable<NodeVisit<T>> GetDepthFirstTraversal<T>(this ITreenumerable<T> source)
     {
       using (var enumerator = source.GetDepthFirstTreenumerator())
-        while (enumerator.MoveNext(ChildStrategy.ScheduleForTraversal))
+        while (enumerator.MoveNext(SchedulingStrategy.ScheduleForTraversal))
           yield return enumerator.Current;
     }
   }

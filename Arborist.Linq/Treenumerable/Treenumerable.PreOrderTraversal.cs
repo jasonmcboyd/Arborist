@@ -10,7 +10,7 @@ namespace Arborist.Linq
         yield break;
 
       using (var treenumerator = source.GetDepthFirstTreenumerator())
-        while (treenumerator.MoveNext(ChildStrategy.ScheduleForTraversal))
+        while (treenumerator.MoveNext(SchedulingStrategy.ScheduleForTraversal))
           if (treenumerator.Current.VisitCount == 1)
             yield return treenumerator.Current.Node;
     }

@@ -11,9 +11,9 @@ namespace Arborist.Linq.Treenumerators
     {
     }
 
-    protected override void OnMoveNext(ChildStrategy childStrategy)
+    protected override void OnMoveNext(SchedulingStrategy schedulingStrategy)
     {
-      if (!InnerTreenumerator.MoveNext(childStrategy))
+      if (!InnerTreenumerator.MoveNext(schedulingStrategy))
       {
         Stack.RemoveAt(Stack.Count - 1);
         return;

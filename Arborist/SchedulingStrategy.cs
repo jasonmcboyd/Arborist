@@ -1,6 +1,6 @@
 ﻿namespace Arborist
 {
-  public enum ChildStrategy
+  public enum SchedulingStrategy
   {
     ScheduleForTraversal,
     SkipNode,

@@ -8,7 +8,7 @@ namespace Arborist.Linq
       this ITreenumerable<T> source)
     {
       using (var enumerator = source.GetBreadthFirstTreenumerator())
-        while (enumerator.MoveNext(ChildStrategy.ScheduleForTraversal))
+        while (enumerator.MoveNext(SchedulingStrategy.ScheduleForTraversal))
           yield return enumerator.Current;
     }
   }

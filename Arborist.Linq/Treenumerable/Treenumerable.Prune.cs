@@ -12,8 +12,8 @@ namespace Arborist.Linq
       var result =
         TreenumerableFactory.Create(
           source,
-          breadthFirstEnumerator => new FilterTreenumerator<T>(breadthFirstEnumerator, visit => !predicate(visit), ChildStrategy.SkipSubtree),
-          depthFirstEnumerator => new FilterTreenumerator<T>(depthFirstEnumerator, predicate, ChildStrategy.SkipSubtree));
+          breadthFirstEnumerator => new FilterTreenumerator<T>(breadthFirstEnumerator, visit => !predicate(visit), SchedulingStrategy.SkipSubtree),
+          depthFirstEnumerator => new FilterTreenumerator<T>(depthFirstEnumerator, predicate, SchedulingStrategy.SkipSubtree));
 
       return result;
     }

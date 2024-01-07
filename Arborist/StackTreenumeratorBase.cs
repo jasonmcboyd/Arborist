@@ -34,17 +34,17 @@ namespace Arborist
 
     protected List<NodeVisit<TStack>> Stack { get; } = new List<NodeVisit<TStack>>();
 
-    public bool MoveNext(ChildStrategy childStrategy)
+    public bool MoveNext(SchedulingStrategy schedulingStrategy)
     {
       if (State == TreenumeratorState.EnumerationFinished)
         return false;
 
-      OnMoveNext(childStrategy);
+      OnMoveNext(schedulingStrategy);
 
       return Stack.Count > 0;
     }
 
-    protected abstract void OnMoveNext(ChildStrategy childStrategy);
+    protected abstract void OnMoveNext(SchedulingStrategy schedulingStrategy);
 
     public abstract void Dispose();
   }
