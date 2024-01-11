@@ -47,7 +47,12 @@ namespace Arborist.Treenumerables.Treenumerators
       else if (schedulingStrategy == SchedulingStrategy.ScheduleForTraversal)
       {
         if (_RootsEnumerationCompleted)
+        {
+          var visitIndex = _CurrentLevel.TakeWhile(x => x.Skipped).Count();
+          var unskippedVisit = _CurrentLevel[visitIndex];
+          lastScheduled = lastScheduled.With(null, unskippedVisit.VisitCount - 1, null, null, null);
           _NextLevel.AddToBack(lastScheduled);
+        }
         else
           _CurrentLevel.AddToBack(lastScheduled);
       }
@@ -115,6 +120,7 @@ namespace Arborist.Treenumerables.Treenumerators
       return AfterRootsEnumerated(schedulingStrategy);
     }
 
+    // Remove _SiblingIndex reference from AfterRootsEnumerated.
     private bool AfterRootsEnumerated(SchedulingStrategy schedulingStrategy)
     {
       while (true)
