@@ -106,6 +106,44 @@ namespace Arborist.Treenumerables.Tests
     }
 
     [TestMethod]
+    public void DepthFirstTraversal_OneLevel_MultipleRoots_SkipNodeOfFirstRoot()
+    {
+      // Arrange
+      var roots = new[]
+      {
+        TreeNode.Create('a'),
+        TreeNode.Create('b'),
+        TreeNode.Create('c')
+      };
+
+      var treenumerable = TestTreenumerableFactory.Create<TreeNode<char>, char>(roots);
+
+      // Act
+      var actual =
+        treenumerable
+        .ToDepthFirstMoveNext(visit =>
+          visit.Node == 'a'
+          ? SchedulingStrategy.SkipNode
+          : SchedulingStrategy.ScheduleForTraversal)
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
+        (TreenumeratorState.SchedulingNode, 'b', 0, 1, 0),
+        (TreenumeratorState.VisitingNode,   'b', 1, 0, 0),
+        (TreenumeratorState.VisitingNode,   'b', 2, 0, 0),
+        (TreenumeratorState.SchedulingNode, 'c', 0, 2, 0),
+        (TreenumeratorState.VisitingNode,   'c', 1, 1, 0),
+        (TreenumeratorState.VisitingNode,   'c', 2, 1, 0),
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
     public void DepthFirstTraversal_OneLevel_MultipleRoots_SkipSubtreeOfFirstRoot()
     {
       // Arrange
@@ -358,6 +396,77 @@ namespace Arborist.Treenumerables.Tests
         (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
         (TreenumeratorState.SchedulingNode, 'c', 0, 1, 1),
         (TreenumeratorState.VisitingNode,   'a', 2, 0, 0),
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void DepthFirstTraversal_ThreeLevels_SkipSubtreeAtLevelTwo()
+    {
+      // Arrange
+      var root =
+        TreeNode.Create('a',
+          TreeNode.Create('b', 'c', 'd'));
+
+      var treenumerable = TestTreenumerableFactory.Create<TreeNode<char>, char>(root);
+
+      // Act
+      var actual =
+        treenumerable
+        .ToDepthFirstMoveNext(visit =>
+          visit.Depth == 1
+          ? SchedulingStrategy.SkipSubtree
+          : SchedulingStrategy.ScheduleForTraversal)
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
+        (TreenumeratorState.VisitingNode  , 'a', 1, 0, 0),
+        (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
+        (TreenumeratorState.VisitingNode,   'a', 2, 0, 0),
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void DepthFirstTraversal_ThreeLevels_SkipNodeAtLevelTwo()
+    {
+      // Arrange
+      var root =
+        TreeNode.Create('a',
+          TreeNode.Create('b', 'c', 'd'));
+
+      var treenumerable = TestTreenumerableFactory.Create<TreeNode<char>, char>(root);
+
+      // Act
+      var actual =
+        treenumerable
+        .ToDepthFirstMoveNext(visit =>
+          visit.Depth == 1
+          ? SchedulingStrategy.SkipNode
+          : SchedulingStrategy.ScheduleForTraversal)
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<char>[]
+      {
+        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
+        (TreenumeratorState.VisitingNode  , 'a', 1, 0, 0),
+        (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
+        (TreenumeratorState.SchedulingNode, 'c', 0, 0, 2),
+        (TreenumeratorState.VisitingNode,   'c', 1, 0, 1),
+        (TreenumeratorState.VisitingNode,   'c', 2, 0, 1),
+        (TreenumeratorState.VisitingNode,   'a', 2, 0, 0),
+        (TreenumeratorState.SchedulingNode, 'd', 0, 1, 2),
+        (TreenumeratorState.VisitingNode,   'd', 1, 1, 1),
+        (TreenumeratorState.VisitingNode,   'd', 2, 1, 1),
+        (TreenumeratorState.VisitingNode,   'a', 3, 0, 0),
       };
 
       CollectionAssert.AreEqual(expected, actual);

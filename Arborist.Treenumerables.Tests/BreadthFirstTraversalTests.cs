@@ -9,7 +9,7 @@ namespace Arborist.Treenumerables.Tests
   public class BreadthFirstTraversalTests
   {
     [TestMethod]
-    public void BreadthFirstTraversal_ThreeLevels_ThreeBranches_SkipLastBranchNodes()
+    public void BreadthFirstTraversal_ThreeLevels_ThreeBranches_SkipLastBranchesMiddleNode()
     {
       // Arrange
       var root =
@@ -35,24 +35,25 @@ namespace Arborist.Treenumerables.Tests
       {
         (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
         (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
-          (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
+        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
         (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
-          (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
+        (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
         (TreenumeratorState.VisitingNode,   "a", 3, 0, 0),
-          (TreenumeratorState.SchedulingNode, "d", 0, 2, 1),
-          (TreenumeratorState.VisitingNode,   "b", 1, 0, 1),
-            (TreenumeratorState.SchedulingNode, "bb", 0, 0, 2),
-          (TreenumeratorState.VisitingNode,   "b", 2, 0, 1),
-          (TreenumeratorState.VisitingNode,   "c", 1, 1, 1),
-            (TreenumeratorState.SchedulingNode, "cc", 0, 0, 2),
-          (TreenumeratorState.VisitingNode,   "c", 2, 1, 1),
-            (TreenumeratorState.SchedulingNode, "dd", 0, 0, 2),
-            (TreenumeratorState.VisitingNode,   "dd", 1, 2, 1),
-            (TreenumeratorState.VisitingNode,   "dd", 2, 2, 1),
-            (TreenumeratorState.VisitingNode,   "bb", 1, 0, 2),
-            (TreenumeratorState.VisitingNode,   "bb", 2, 0, 2),
-            (TreenumeratorState.VisitingNode,   "cc", 1, 1, 2),
-            (TreenumeratorState.VisitingNode,   "cc", 2, 1, 2),
+        (TreenumeratorState.SchedulingNode, "d", 0, 2, 1),
+        (TreenumeratorState.SchedulingNode, "dd", 0, 0, 2),
+        (TreenumeratorState.VisitingNode,   "a", 4, 0, 0),
+        (TreenumeratorState.VisitingNode,   "b", 1, 0, 1),
+        (TreenumeratorState.SchedulingNode, "bb", 0, 0, 2),
+        (TreenumeratorState.VisitingNode,   "b", 2, 0, 1),
+        (TreenumeratorState.VisitingNode,   "c", 1, 1, 1),
+        (TreenumeratorState.SchedulingNode, "cc", 0, 0, 2),
+        (TreenumeratorState.VisitingNode,   "c", 2, 1, 1),
+        (TreenumeratorState.VisitingNode,   "dd", 1, 2, 1),
+        (TreenumeratorState.VisitingNode,   "dd", 2, 2, 1),
+        (TreenumeratorState.VisitingNode,   "bb", 1, 0, 2),
+        (TreenumeratorState.VisitingNode,   "bb", 2, 0, 2),
+        (TreenumeratorState.VisitingNode,   "cc", 1, 0, 2),
+        (TreenumeratorState.VisitingNode,   "cc", 2, 0, 2),
       };
 
       CollectionAssert.AreEqual(expected, actual);
@@ -90,26 +91,27 @@ namespace Arborist.Treenumerables.Tests
       {
         (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
         (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
-          (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
+        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
         (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
-          (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
-          (TreenumeratorState.SchedulingNode, "d", 0, 2, 1),
+        (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
+        (TreenumeratorState.SchedulingNode, "cc", 0, 0, 2),
+        (TreenumeratorState.SchedulingNode, "ccc", 0, 0, 3),
+        (TreenumeratorState.SchedulingNode, "cccc", 0, 0, 4),
         (TreenumeratorState.VisitingNode,   "a", 3, 0, 0),
-          (TreenumeratorState.VisitingNode,   "b", 1, 0, 1),
-            (TreenumeratorState.SchedulingNode, "bb", 0, 0, 2),
-          (TreenumeratorState.VisitingNode,   "b", 2, 0, 1),
-          (TreenumeratorState.SchedulingNode, "cc", 0, 0, 2),
-            (TreenumeratorState.SchedulingNode, "ccc", 0, 0, 3),
-              (TreenumeratorState.SchedulingNode, "cccc", 0, 0, 4),
-              (TreenumeratorState.VisitingNode,   "cccc", 1, 1, 1),
-              (TreenumeratorState.VisitingNode,   "cccc", 2, 1, 1),
-          (TreenumeratorState.VisitingNode,   "d", 1, 2, 1),
-            (TreenumeratorState.SchedulingNode, "dd", 0, 0, 2),
-          (TreenumeratorState.VisitingNode,   "d", 2, 2, 1),
-            (TreenumeratorState.VisitingNode,   "bb", 1, 0, 2),
-            (TreenumeratorState.VisitingNode,   "bb", 2, 0, 2),
-            (TreenumeratorState.VisitingNode,   "dd", 1, 0, 2),
-            (TreenumeratorState.VisitingNode,   "dd", 2, 0, 2),
+        (TreenumeratorState.SchedulingNode, "d", 0, 2, 1),
+        (TreenumeratorState.VisitingNode,   "a", 4, 0, 0),
+        (TreenumeratorState.VisitingNode,   "b", 1, 0, 1),
+        (TreenumeratorState.SchedulingNode, "bb", 0, 0, 2),
+        (TreenumeratorState.VisitingNode,   "b", 2, 0, 1),
+        (TreenumeratorState.VisitingNode,   "cccc", 1, 1, 1),
+        (TreenumeratorState.VisitingNode,   "cccc", 2, 1, 1),
+        (TreenumeratorState.VisitingNode,   "d", 1, 2, 1),
+        (TreenumeratorState.SchedulingNode, "dd", 0, 0, 2),
+        (TreenumeratorState.VisitingNode,   "d", 2, 2, 1),
+        (TreenumeratorState.VisitingNode,   "bb", 1, 0, 2),
+        (TreenumeratorState.VisitingNode,   "bb", 2, 0, 2),
+        (TreenumeratorState.VisitingNode,   "dd", 1, 0, 2),
+        (TreenumeratorState.VisitingNode,   "dd", 2, 0, 2),
       };
 
       CollectionAssert.AreEqual(expected, actual);
@@ -250,8 +252,8 @@ namespace Arborist.Treenumerables.Tests
         (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
         (TreenumeratorState.VisitingNode  , 'a', 1, 0, 0),
         (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
-        (TreenumeratorState.VisitingNode  , 'a', 2, 0, 0),
         (TreenumeratorState.SchedulingNode, 'c', 0, 0, 2),
+        (TreenumeratorState.VisitingNode  , 'a', 2, 0, 0),
         (TreenumeratorState.VisitingNode,   'c', 1, 0, 1),
         (TreenumeratorState.VisitingNode,   'c', 2, 0, 1),
       };
@@ -451,7 +453,7 @@ namespace Arborist.Treenumerables.Tests
     }
 
     [TestMethod]
-    public void BreadthFirstTraversal_TwoLevels_SkipNodeOnBreadthOfZero()
+    public void BreadthFirstTraversal_TwoLevels_SkipNodeOnDepthOfZero()
     {
       // Arrange
       var root = TreeNode.Create('a', 'b', 'c');
@@ -473,9 +475,9 @@ namespace Arborist.Treenumerables.Tests
       {
         (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
           (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
+          (TreenumeratorState.SchedulingNode, 'c', 0, 1, 1),
           (TreenumeratorState.VisitingNode,   'b', 1, 0, 0),
           (TreenumeratorState.VisitingNode,   'b', 2, 0, 0),
-          (TreenumeratorState.SchedulingNode, 'c', 0, 1, 1),
           (TreenumeratorState.VisitingNode,   'c', 1, 1, 0),
           (TreenumeratorState.VisitingNode,   'c', 2, 1, 0),
       };
@@ -484,7 +486,7 @@ namespace Arborist.Treenumerables.Tests
     }
 
     [TestMethod]
-    public void BreadthFirstTraversal_TwoLevels_SkipNodeOnNonzeroBreadth()
+    public void BreadthFirstTraversal_TwoLevels_SkipNodeOnLevelOne()
     {
       // Arrange
       var root = TreeNode.Create('a', 'b', 'c');
@@ -613,16 +615,15 @@ namespace Arborist.Treenumerables.Tests
       {
         (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
         (TreenumeratorState.VisitingNode,   'a', 1, 0, 0),
-          (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
+        (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
         (TreenumeratorState.VisitingNode,   'a', 2, 0, 0),
-          (TreenumeratorState.SchedulingNode, 'c', 0, 1, 1),
-          (TreenumeratorState.SchedulingNode, 'd', 0, 2, 1),
+        (TreenumeratorState.SchedulingNode, 'c', 0, 1, 1),
+        (TreenumeratorState.SchedulingNode, 'd', 0, 2, 1),
         (TreenumeratorState.VisitingNode,   'a', 3, 0, 0),
-
-          (TreenumeratorState.VisitingNode,   'b', 1, 0, 1),
-          (TreenumeratorState.VisitingNode,   'b', 2, 0, 1),
-          (TreenumeratorState.VisitingNode,   'd', 1, 1, 1),
-          (TreenumeratorState.VisitingNode,   'd', 2, 1, 1),
+        (TreenumeratorState.VisitingNode,   'b', 1, 0, 1),
+        (TreenumeratorState.VisitingNode,   'b', 2, 0, 1),
+        (TreenumeratorState.VisitingNode,   'd', 1, 1, 1),
+        (TreenumeratorState.VisitingNode,   'd', 2, 1, 1),
       };
 
       CollectionAssert.AreEqual(expected, actual);

@@ -1,5 +1,6 @@
 ﻿using Nito.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace Arborist.Treenumerables.Treenumerators
@@ -21,62 +22,101 @@ namespace Arborist.Treenumerables.Treenumerators
     private Deque<IndexableTreenumeratorNodeVisit<TNode, TValue>> _CurrentLevel = new Deque<IndexableTreenumeratorNodeVisit<TNode, TValue>>();
     private Deque<IndexableTreenumeratorNodeVisit<TNode, TValue>> _NextLevel = new Deque<IndexableTreenumeratorNodeVisit<TNode, TValue>>();
 
-    private int _Depth = -1;
-
-    private bool _ScheduledNodeAddedToFront = false;
+    private int _Depth = 0;
 
     protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
     {
       if (State == TreenumeratorState.SchedulingNode)
-      {
-        if (schedulingStrategy == SchedulingStrategy.SkipSubtree)
-          _NextLevel.RemoveFromBack();
-        else if (schedulingStrategy == SchedulingStrategy.SkipNode)
-        {
-          if (_ScheduledNodeAddedToFront)
-          {
-            var lastScheduled = _CurrentLevel.RemoveFromFront();
-            lastScheduled = lastScheduled.Skip();
-            _CurrentLevel.AddToFront(lastScheduled);
-          }
-          else
-          {
-            var lastScheduled = _NextLevel.RemoveFromBack();
-            lastScheduled = lastScheduled.Skip();
-            _NextLevel.AddToBack(lastScheduled);
-          }
-        }
-      }
+        OnSchedulingVisit(schedulingStrategy);
 
       if (!_RootsEnumerationCompleted)
+        return BeforeRootsEnumerated(schedulingStrategy);
+
+      return AfterRootsEnumerated(schedulingStrategy);
+    }
+
+    private void OnSchedulingVisit(SchedulingStrategy schedulingStrategy)
+    {
+      var lastScheduled = _CurrentLevel.RemoveFromFront();
+
+      if (schedulingStrategy == SchedulingStrategy.SkipNode)
       {
-        if (_RootsEnumerator.MoveNext())
+        lastScheduled = lastScheduled.Skip();
+        _CurrentLevel.AddToFront(lastScheduled);
+      }
+      else if (schedulingStrategy == SchedulingStrategy.ScheduleForTraversal)
+      {
+        if (_RootsEnumerationCompleted)
+          _NextLevel.AddToBack(lastScheduled);
+        else
+          _CurrentLevel.AddToBack(lastScheduled);
+      }
+    }
+
+    private bool BeforeRootsEnumerated(SchedulingStrategy schedulingStrategy)
+    {
+      if (_CurrentLevel.Count > 0 && _CurrentLevel[0].Skipped)
+      {
+        var skippedNode = _CurrentLevel.RemoveFromFront();
+
+        if (skippedNode.HasNextChild())
         {
-          _SiblingIndex++;
+          var childIndex = skippedNode.VisitedChildrenCount;
 
           var nextVisit =
             IndexableTreenumeratorNodeVisit
             .Create<TNode, TValue>(
-              _RootsEnumerator.Current,
+              skippedNode.Node[childIndex],
               0,
-              _SiblingIndex,
-              0,
+              childIndex,
+              skippedNode.Depth + 1,
               0,
               false);
-
-          _NextLevel.AddToBack(nextVisit);
-
+          
+          skippedNode = skippedNode.IncrementVisitedChildrenCount();
           Current = nextVisit.ToNodeVisit();
+
+          _CurrentLevel.AddToFront(skippedNode);
+
+          _CurrentLevel.AddToFront(nextVisit);
 
           State = TreenumeratorState.SchedulingNode;
 
           return true;
         }
-
-        _RootsEnumerationCompleted = true;
-        _SiblingIndex = 0;
       }
 
+      if (_RootsEnumerator.MoveNext())
+      {
+        _SiblingIndex++;
+
+        var nextVisit =
+          IndexableTreenumeratorNodeVisit
+          .Create<TNode, TValue>(
+            _RootsEnumerator.Current,
+            0,
+            _SiblingIndex,
+            0,
+            0,
+            false);
+
+        _CurrentLevel.AddToFront(nextVisit);
+
+        Current = nextVisit.ToNodeVisit();
+
+        State = TreenumeratorState.SchedulingNode;
+
+        return true;
+      }
+
+      _RootsEnumerationCompleted = true;
+      _SiblingIndex = 0;
+
+      return AfterRootsEnumerated(schedulingStrategy);
+    }
+
+    private bool AfterRootsEnumerated(SchedulingStrategy schedulingStrategy)
+    {
       while (true)
       {
         if (_CurrentLevel.Count == 0)
@@ -99,11 +139,31 @@ namespace Arborist.Treenumerables.Treenumerators
           || (State == TreenumeratorState.SchedulingNode
             && schedulingStrategy == SchedulingStrategy.ScheduleForTraversal))
         {
-          if (visit.SiblingIndex == 0
-            && !_ScheduledNodeAddedToFront)
+          if (visit.Skipped)
+          {
+            _CurrentLevel.AddToFront(visit);
+            var visitIndex = _CurrentLevel.TakeWhile(x => x.Skipped).Count();
+
+            visit = _CurrentLevel[visitIndex].IncrementVisitCount();
+
+            _CurrentLevel[visitIndex] = visit;
+
+            Current =
+              visit
+              .ToNodeVisit()
+              .WithDepth(_Depth)
+              .WithSiblingIndex(_SiblingIndex);
+
+            State = TreenumeratorState.VisitingNode;
+
+            return true;
+          }
+
+          if (visit.SiblingIndex == 0)
             _SiblingIndex = 0;
 
           visit = visit.IncrementVisitCount();
+
           _CurrentLevel.AddToFront(visit);
 
           Current =
@@ -136,10 +196,7 @@ namespace Arborist.Treenumerables.Treenumerators
 
           _CurrentLevel.AddToFront(visit);
 
-          if (visit.Skipped)
-            ScheduleVisitNext(nextVisit);
-          else
-            ScheduleVisitLast(nextVisit);
+          _CurrentLevel.AddToFront(nextVisit);
 
           State = TreenumeratorState.SchedulingNode;
 
@@ -165,18 +222,6 @@ namespace Arborist.Treenumerables.Treenumerators
         if (!visit.Skipped)
           _SiblingIndex++;
       }
-    }
-
-    private void ScheduleVisitNext(IndexableTreenumeratorNodeVisit<TNode, TValue> visitToSchedule)
-    {
-      _CurrentLevel.AddToFront(visitToSchedule);
-      _ScheduledNodeAddedToFront = true;
-    }
-
-    private void ScheduleVisitLast(IndexableTreenumeratorNodeVisit<TNode, TValue> visitToSchedule)
-    {
-      _NextLevel.AddToBack(visitToSchedule);
-      _ScheduledNodeAddedToFront = false;
     }
 
     public override void Dispose()

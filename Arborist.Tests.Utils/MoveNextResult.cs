@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Arborist.Tests.Utils
 {
-  public readonly struct MoveNextResult<TNode>
+  public class MoveNextResult<TNode>
   {
     public MoveNextResult(
       TreenumeratorState state,

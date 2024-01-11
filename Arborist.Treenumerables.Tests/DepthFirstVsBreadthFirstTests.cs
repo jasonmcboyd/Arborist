@@ -4,65 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Arborist.Treenumerables.Tests
 {
   [TestClass]
   public class DepthFirstVsBreadthFirstTests
   {
-    public class TestNode : INodeWithIndexableChildren<TestNode, char>
-    {
-      public TestNode this[int index] => Children[index];
-
-      public int ChildCount => Children.Count;
-
-      public readonly List<TestNode> Children = new List<TestNode>();
-
-      public char Value { get; set; }
-    }
-
-    public IEnumerable<TestNode> ParseTreeString(string tree)
-    {
-      var parensCount = 0;
-
-      var rootNode = new TestNode();
-
-      var stack = new Stack<TestNode>();
-
-      stack.Push(rootNode);
-
-      foreach (var c in tree)
-      {
-        if (char.IsLetter(c))
-        {
-          var node = new TestNode { Value = c };
-
-          stack.Peek().Children.Add(node);
-
-          stack.Push(node);
-        }
-        else if (c == '(')
-        {
-          parensCount++;
-        }
-        else if (c == ')')
-        {
-          parensCount--;
-
-          stack.Pop();
-        }
-        else if (c == ',')
-        {
-          stack.Pop();
-        }
-      }
-
-      return rootNode.Children;
-    }
-
     public static IEnumerable<object[]> GetData()
     {
       var treeStrings = new[]
@@ -94,9 +41,7 @@ namespace Arborist.Treenumerables.Tests
     [DynamicData(nameof(GetData), DynamicDataSourceType.Method)]
     public void Test(string treeString, SchedulingStrategy? filterStrategy, char? filterCharacter)
     {
-      var roots = ParseTreeString(treeString).ToArray();
-
-      var treenumerable = new IndexableTreenumerable<TestNode, char>(roots);
+      var treenumerable = TreeStringParser.ParseTreeString(treeString);
 
       MoveNextResult<char>[] Sort(IEnumerable<MoveNextResult<char>> nodes) =>
         nodes
