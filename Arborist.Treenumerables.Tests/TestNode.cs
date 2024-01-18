@@ -2,7 +2,7 @@
 
 namespace Arborist.Treenumerables.Tests
 {
-  public class TestNode : INodeWithIndexableChildren<TestNode, char>
+  public class TestNode : INodeWithIndexableChildren<TestNode, string>
   {
     public TestNode this[int index] => Children[index];
 
@@ -10,6 +10,6 @@ namespace Arborist.Treenumerables.Tests
 
     public readonly List<TestNode> Children = new List<TestNode>();
 
-    public char Value { get; set; }
+    public string Value { get; set; }
   }
 }

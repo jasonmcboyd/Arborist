@@ -1,16 +1,16 @@
 ﻿using System.Collections.Generic;
+using System.Text;
 
 namespace Arborist.Treenumerables.Tests
 {
   internal static class TreeStringParser
   {
-    public static IndexableTreenumerable<TestNode, char> ParseTreeString(string tree)
+    public static IndexableTreenumerable<TestNode, string> ParseTreeString(string tree)
     {
       var parensCount = 0;
-
       var rootNode = new TestNode();
-
       var stack = new Stack<TestNode>();
+      var builder = new StringBuilder();
 
       stack.Push(rootNode);
 
@@ -18,13 +18,13 @@ namespace Arborist.Treenumerables.Tests
       {
         if (char.IsLetter(c))
         {
-          var node = new TestNode { Value = c };
-
-          stack.Peek().Children.Add(node);
-
-          stack.Push(node);
+          builder.Append(c);
+          continue;
         }
-        else if (c == '(')
+
+        AddNodeToStack(builder, stack);
+
+        if (c == '(')
         {
           parensCount++;
         }
@@ -40,7 +40,23 @@ namespace Arborist.Treenumerables.Tests
         }
       }
 
-      return new IndexableTreenumerable<TestNode, char>(rootNode.Children);
+      AddNodeToStack(builder, stack);
+
+      return new IndexableTreenumerable<TestNode, string>(rootNode.Children);
+    }
+
+    private static void AddNodeToStack(StringBuilder stringBuilder, Stack<TestNode> stack)
+    {
+      if (stringBuilder.Length == 0)
+        return;
+
+      var node = new TestNode { Value = stringBuilder.ToString() };
+
+      stringBuilder.Clear();
+
+      stack.Peek().Children.Add(node);
+
+      stack.Push(node);
     }
   }
 }
