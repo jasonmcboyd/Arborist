@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using Arborist.Treenumerables;
+using System.Collections.Generic;
 using System.Text;
 
-namespace Arborist.Treenumerables.Tests
+namespace Arborist.Tests.Utils
 {
-  internal static class TreeStringParser
+  public static class TreeStringParser
   {
     public static IndexableTreenumerable<TestNode, string> ParseTreeString(string tree)
     {

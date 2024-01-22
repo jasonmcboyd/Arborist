@@ -13,7 +13,7 @@ namespace Arborist.Linq
         TreenumerableFactory.Create(
           source,
           breadthFirstEnumerator => new FilterTreenumerator<T>(breadthFirstEnumerator, visit => !predicate(visit), SchedulingStrategy.SkipSubtree),
-          depthFirstEnumerator => new FilterTreenumerator<T>(depthFirstEnumerator, predicate, SchedulingStrategy.SkipSubtree));
+          depthFirstEnumerator => new FilterTreenumerator<T>(depthFirstEnumerator, visit => !predicate(visit), SchedulingStrategy.SkipSubtree));
 
       return result;
     }

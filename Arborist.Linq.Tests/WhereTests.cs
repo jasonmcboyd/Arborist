@@ -14,30 +14,28 @@ namespace Arborist.Linq.Tests
     public void Where_BreadthFirstTraversal_ThreeLevelChain_SkipFirst()
     {
       // Arrange
-      var root = TreeNode.Create('a', TreeNode.Create('b', 'c'));
+      var tree = "a(b(c))";
 
-      var treenumerable =
-        TestTreenumerableFactory
-        .Create<TreeNode<char>, char>(root)
-        .Where(x => x.Depth != 0);
+      var treenumerable = TreeStringParser.ParseTreeString(tree);
 
       // Act
       var actual =
         treenumerable
+        .Where(visit => visit.Depth != 0)
         .ToBreadthFirstMoveNext()
-        .Do(x => Debug.WriteLine(x))
+        .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<char>[]
+      var expected = new MoveNextResult<string>[]
       {
-        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
-        (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
-        (TreenumeratorState.VisitingNode,   'b', 1, 0, 0),
-        (TreenumeratorState.SchedulingNode, 'c', 0, 0, 2),
-        (TreenumeratorState.VisitingNode,   'b', 2, 0, 0),
-        (TreenumeratorState.VisitingNode,   'c', 1, 0, 1),
-        (TreenumeratorState.VisitingNode,   'c', 2, 0, 1),
+        (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
+        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
+        (TreenumeratorState.VisitingNode,   "b", 1, 0, 0),
+        (TreenumeratorState.SchedulingNode, "c", 0, 0, 2),
+        (TreenumeratorState.VisitingNode,   "b", 2, 0, 0),
+        (TreenumeratorState.VisitingNode,   "c", 1, 0, 1),
+        (TreenumeratorState.VisitingNode,   "c", 2, 0, 1),
       };
 
       CollectionAssert.AreEqual(expected, actual);
@@ -47,30 +45,28 @@ namespace Arborist.Linq.Tests
     public void Where_BreadthFirstTraversal_ThreeLevelChain_SkipSecond()
     {
       // Arrange
-      var root = TreeNode.Create('a', TreeNode.Create('b', 'c'));
+      var tree = "a(b(c))";
 
-      var treenumerable =
-        TestTreenumerableFactory
-        .Create<TreeNode<char>, char>(root)
-        .Where(x => x.Depth != 1);
+      var treenumerable = TreeStringParser.ParseTreeString(tree);
 
       // Act
       var actual =
         treenumerable
+        .Where(visit => visit.Depth != 1)
         .ToBreadthFirstMoveNext()
-        .Do(x => Debug.WriteLine(x))
+        .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<char>[]
+      var expected = new MoveNextResult<string>[]
       {
-        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
-        (TreenumeratorState.VisitingNode,   'a', 1, 0, 0),
-        (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
-        (TreenumeratorState.VisitingNode,   'a', 2, 0, 0),
-        (TreenumeratorState.SchedulingNode, 'c', 0, 0, 2),
-        (TreenumeratorState.VisitingNode,   'c', 1, 0, 1),
-        (TreenumeratorState.VisitingNode,   'c', 2, 0, 1),
+        (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
+        (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
+        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
+        (TreenumeratorState.SchedulingNode, "c", 0, 0, 2),
+        (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
+        (TreenumeratorState.VisitingNode,   "c", 1, 0, 1),
+        (TreenumeratorState.VisitingNode,   "c", 2, 0, 1),
       };
 
       CollectionAssert.AreEqual(expected, actual);
@@ -80,30 +76,28 @@ namespace Arborist.Linq.Tests
     public void Where_BreadthFirstTraversal_ThreeLevelChain_SkipThird()
     {
       // Arrange
-      var root = TreeNode.Create('a', TreeNode.Create('b', 'c'));
+      var tree = "a(b(c))";
 
-      var treenumerable =
-        TestTreenumerableFactory
-        .Create<TreeNode<char>, char>(root)
-        .Where(x => x.Depth != 2);
+      var treenumerable = TreeStringParser.ParseTreeString(tree);
 
       // Act
       var actual =
         treenumerable
+        .Where(visit => visit.Depth != 2)
         .ToBreadthFirstMoveNext()
-        .Do(x => Debug.WriteLine(x))
+        .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<char>[]
+      var expected = new MoveNextResult<string>[]
       {
-        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
-        (TreenumeratorState.VisitingNode,   'a', 1, 0, 0),
-        (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
-        (TreenumeratorState.VisitingNode,   'a', 2, 0, 0),
-        (TreenumeratorState.VisitingNode,   'b', 1, 0, 1),
-        (TreenumeratorState.SchedulingNode, 'c', 0, 0, 2),
-        (TreenumeratorState.VisitingNode,   'b', 2, 0, 1),
+        (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
+        (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
+        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
+        (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
+        (TreenumeratorState.VisitingNode,   "b", 1, 0, 1),
+        (TreenumeratorState.SchedulingNode, "c", 0, 0, 2),
+        (TreenumeratorState.VisitingNode,   "b", 2, 0, 1),
       };
 
       CollectionAssert.AreEqual(expected, actual);
@@ -113,28 +107,26 @@ namespace Arborist.Linq.Tests
     public void Where_BreadthFirstTraversal_TwoLevels_DepthIsZero()
     {
       // Arrange
-      var root = TreeNode.Create('a', 'b', 'c');
+      var tree = "a(b,c)";
 
-      var treenumerable =
-        TestTreenumerableFactory
-        .Create<TreeNode<char>, char>(root)
-        .Where(x => x.Depth == 0);
+      var treenumerable = TreeStringParser.ParseTreeString(tree);
 
       // Act
       var actual =
         treenumerable
+        .Where(visit => visit.Depth == 0)
         .ToBreadthFirstMoveNext()
-        .Do(x => Debug.WriteLine(x))
+        .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<char>[]
+      var expected = new MoveNextResult<string>[]
       {
-        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
-        (TreenumeratorState.VisitingNode,   'a', 1, 0, 0),
-        (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
-        (TreenumeratorState.SchedulingNode, 'c', 0, 1, 1),
-        (TreenumeratorState.VisitingNode,   'a', 2, 0, 0),
+        (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
+        (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
+        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
+        (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
+        (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
       };
 
       CollectionAssert.AreEqual(expected, actual);
@@ -144,30 +136,28 @@ namespace Arborist.Linq.Tests
     public void Where_BreadthFirstTraversal_TwoLevels_DepthIsNotZero()
     {
       // Arrange
-      var root = TreeNode.Create('a', 'b', 'c');
+      var tree = "a(b,c)";
 
-      var treenumerable =
-        TestTreenumerableFactory
-        .Create<TreeNode<char>, char>(root)
-        .Where(x => x.Depth != 0);
+      var treenumerable = TreeStringParser.ParseTreeString(tree);
 
       // Act
       var actual =
         treenumerable
+        .Where(visit => visit.Depth != 0)
         .ToBreadthFirstMoveNext()
-        .Do(x => Debug.WriteLine(x))
+        .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<char>[]
+      var expected = new MoveNextResult<string>[]
       {
-        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
-        (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
-        (TreenumeratorState.VisitingNode,   'b', 1, 0, 0),
-        (TreenumeratorState.VisitingNode,   'b', 2, 0, 0),
-        (TreenumeratorState.SchedulingNode, 'c', 0, 1, 1),
-        (TreenumeratorState.VisitingNode,   'c', 1, 1, 0),
-        (TreenumeratorState.VisitingNode,   'c', 2, 1, 0)
+        (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
+        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
+        (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
+        (TreenumeratorState.VisitingNode,   "b", 1, 0, 0),
+        (TreenumeratorState.VisitingNode,   "b", 2, 0, 0),
+        (TreenumeratorState.VisitingNode,   "c", 1, 1, 0),
+        (TreenumeratorState.VisitingNode,   "c", 2, 1, 0)
       };
 
       CollectionAssert.AreEqual(expected, actual);
@@ -177,34 +167,32 @@ namespace Arborist.Linq.Tests
     public void Where_BreadthFirstTraversal_TwoLevels_SkipsFirstChild()
     {
       // Arrange
-      var root = TreeNode.Create('a', 'b', 'c', 'd');
+      var tree = "a(b,c,d,)";
 
-      var treenumerable =
-        TestTreenumerableFactory
-        .Create<TreeNode<char>, char>(root)
-        .Where(x => !(x.Depth == 1 && x.SiblingIndex == 0));
+      var treenumerable = TreeStringParser.ParseTreeString(tree);
 
       // Act
       var actual =
         treenumerable
+        .Where(visit => !(visit.Depth == 1 && visit.SiblingIndex == 0))
         .ToBreadthFirstMoveNext()
-        .Do(x => Debug.WriteLine(x))
+        .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<char>[]
+      var expected = new MoveNextResult<string>[]
       {
-        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
-        (TreenumeratorState.VisitingNode,   'a', 1, 0, 0),
-        (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
-        (TreenumeratorState.SchedulingNode, 'c', 0, 1, 1),
-        (TreenumeratorState.VisitingNode,   'a', 2, 0, 0),
-        (TreenumeratorState.SchedulingNode, 'd', 0, 2, 1),
-        (TreenumeratorState.VisitingNode,   'a', 3, 0, 0),
-        (TreenumeratorState.VisitingNode,   'c', 1, 0, 1),
-        (TreenumeratorState.VisitingNode,   'c', 2, 0, 1),
-        (TreenumeratorState.VisitingNode,   'd', 1, 1, 1),
-        (TreenumeratorState.VisitingNode,   'd', 2, 1, 1),
+        (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
+        (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
+        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
+        (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
+        (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
+        (TreenumeratorState.SchedulingNode, "d", 0, 2, 1),
+        (TreenumeratorState.VisitingNode,   "a", 3, 0, 0),
+        (TreenumeratorState.VisitingNode,   "c", 1, 0, 1),
+        (TreenumeratorState.VisitingNode,   "c", 2, 0, 1),
+        (TreenumeratorState.VisitingNode,   "d", 1, 1, 1),
+        (TreenumeratorState.VisitingNode,   "d", 2, 1, 1),
       };
 
       CollectionAssert.AreEqual(expected, actual);
@@ -214,34 +202,32 @@ namespace Arborist.Linq.Tests
     public void Where_BreadthFirstTraversal_TwoLevels_SkipsSecondChild()
     {
       // Arrange
-      var root = TreeNode.Create('a', 'b', 'c', 'd');
+      var tree = "a(b,c,d,)";
 
-      var treenumerable =
-        TestTreenumerableFactory
-        .Create<TreeNode<char>, char>(root)
-        .Where(x => !(x.Depth == 1 && x.SiblingIndex == 1));
+      var treenumerable = TreeStringParser.ParseTreeString(tree);
 
       // Act
       var actual =
         treenumerable
+        .Where(visit => !(visit.Depth == 1 && visit.SiblingIndex == 1))
         .ToBreadthFirstMoveNext()
-        .Do(x => Debug.WriteLine(x))
+        .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<char>[]
+      var expected = new MoveNextResult<string>[]
       {
-        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
-        (TreenumeratorState.VisitingNode,   'a', 1, 0, 0),
-        (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
-        (TreenumeratorState.VisitingNode,   'a', 2, 0, 0),
-        (TreenumeratorState.SchedulingNode, 'c', 0, 1, 1),
-        (TreenumeratorState.SchedulingNode, 'd', 0, 2, 1),
-        (TreenumeratorState.VisitingNode,   'a', 3, 0, 0),
-        (TreenumeratorState.VisitingNode,   'b', 1, 0, 1),
-        (TreenumeratorState.VisitingNode,   'b', 2, 0, 1),
-        (TreenumeratorState.VisitingNode,   'd', 1, 1, 1),
-        (TreenumeratorState.VisitingNode,   'd', 2, 1, 1),
+        (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
+        (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
+        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
+        (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
+        (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
+        (TreenumeratorState.SchedulingNode, "d", 0, 2, 1),
+        (TreenumeratorState.VisitingNode,   "a", 3, 0, 0),
+        (TreenumeratorState.VisitingNode,   "b", 1, 0, 1),
+        (TreenumeratorState.VisitingNode,   "b", 2, 0, 1),
+        (TreenumeratorState.VisitingNode,   "d", 1, 1, 1),
+        (TreenumeratorState.VisitingNode,   "d", 2, 1, 1),
       };
 
       CollectionAssert.AreEqual(expected, actual);
@@ -251,34 +237,32 @@ namespace Arborist.Linq.Tests
     public void Where_BreadthFirstTraversal_TwoLevels_SkipsThirdChild()
     {
       // Arrange
-      var root = TreeNode.Create('a', 'b', 'c', 'd');
+      var tree = "a(b,c,d,)";
 
-      var treenumerable =
-        TestTreenumerableFactory
-        .Create<TreeNode<char>, char>(root)
-        .Where(x => !(x.Depth == 1 && x.SiblingIndex == 2));
+      var treenumerable = TreeStringParser.ParseTreeString(tree);
 
       // Act
       var actual =
         treenumerable
+        .Where(visit => !(visit.Depth == 1 && visit.SiblingIndex == 2))
         .ToBreadthFirstMoveNext()
-        .Do(x => Debug.WriteLine(x))
+        .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<char>[]
+      var expected = new MoveNextResult<string>[]
       {
-        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
-        (TreenumeratorState.VisitingNode,   'a', 1, 0, 0),
-        (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
-        (TreenumeratorState.VisitingNode,   'a', 2, 0, 0),
-        (TreenumeratorState.SchedulingNode, 'c', 0, 1, 1),
-        (TreenumeratorState.VisitingNode,   'a', 3, 0, 0),
-        (TreenumeratorState.SchedulingNode, 'd', 0, 2, 1),
-        (TreenumeratorState.VisitingNode,   'b', 1, 0, 1),
-        (TreenumeratorState.VisitingNode,   'b', 2, 0, 1),
-        (TreenumeratorState.VisitingNode,   'c', 1, 1, 1),
-        (TreenumeratorState.VisitingNode,   'c', 2, 1, 1),
+        (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
+        (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
+        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
+        (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
+        (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
+        (TreenumeratorState.VisitingNode,   "a", 3, 0, 0),
+        (TreenumeratorState.SchedulingNode, "d", 0, 2, 1),
+        (TreenumeratorState.VisitingNode,   "b", 1, 0, 1),
+        (TreenumeratorState.VisitingNode,   "b", 2, 0, 1),
+        (TreenumeratorState.VisitingNode,   "c", 1, 1, 1),
+        (TreenumeratorState.VisitingNode,   "c", 2, 1, 1),
       };
 
       CollectionAssert.AreEqual(expected, actual);
@@ -288,26 +272,24 @@ namespace Arborist.Linq.Tests
     public void Where_BreadthFirstTraversal_TwoLevels_PredicateAlwaysReturnsFalse()
     {
       // Arrange
-      var root = TreeNode.Create('a', 'b', 'c');
+      var tree = "a(b,c)";
 
-      var treenumerable =
-        TestTreenumerableFactory
-        .Create<TreeNode<char>, char>(root)
-        .Where(_ => false);
+      var treenumerable = TreeStringParser.ParseTreeString(tree);
 
       // Act
       var actual =
         treenumerable
+        .Where(_ => false)
         .ToBreadthFirstMoveNext()
-        .Do(x => Debug.WriteLine(x))
+        .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<char>[]
+      var expected = new MoveNextResult<string>[]
       {
-        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
-        (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
-        (TreenumeratorState.SchedulingNode, 'c', 0, 1, 1),
+        (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
+        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
+        (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
       };
 
       CollectionAssert.AreEqual(expected, actual);
@@ -317,33 +299,31 @@ namespace Arborist.Linq.Tests
     public void Where_BreadthFirstTraversal_TwoLevels_PredicateAlwaysReturnsTrue()
     {
       // Arrange
-      var root = TreeNode.Create('a', 'b', 'c');
+      var tree = "a(b,c)";
 
-      var treenumerable =
-        TestTreenumerableFactory
-        .Create<TreeNode<char>, char>(root)
-        .Where(_ => true);
+      var treenumerable = TreeStringParser.ParseTreeString(tree);
 
       // Act
       var actual =
         treenumerable
+        .Where(_ => true)
         .ToBreadthFirstMoveNext()
-        .Do(x => Debug.WriteLine(x))
+        .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<char>[]
+      var expected = new MoveNextResult<string>[]
       {
-        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
-        (TreenumeratorState.VisitingNode,   'a', 1, 0, 0),
-        (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
-        (TreenumeratorState.VisitingNode,   'a', 2, 0, 0),
-        (TreenumeratorState.SchedulingNode, 'c', 0, 1, 1),
-        (TreenumeratorState.VisitingNode,   'a', 3, 0, 0),
-        (TreenumeratorState.VisitingNode,   'b', 1, 0, 1),
-        (TreenumeratorState.VisitingNode,   'b', 2, 0, 1),
-        (TreenumeratorState.VisitingNode,   'c', 1, 1, 1),
-        (TreenumeratorState.VisitingNode,   'c', 2, 1, 1),
+        (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
+        (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
+        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
+        (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
+        (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
+        (TreenumeratorState.VisitingNode,   "a", 3, 0, 0),
+        (TreenumeratorState.VisitingNode,   "b", 1, 0, 1),
+        (TreenumeratorState.VisitingNode,   "b", 2, 0, 1),
+        (TreenumeratorState.VisitingNode,   "c", 1, 1, 1),
+        (TreenumeratorState.VisitingNode,   "c", 2, 1, 1),
       };
 
       CollectionAssert.AreEqual(expected, actual);
@@ -355,30 +335,28 @@ namespace Arborist.Linq.Tests
     public void Where_DepthFirstTraversal_ThreeLevelChain_SkipFirst()
     {
       // Arrange
-      var root = TreeNode.Create('a', TreeNode.Create('b', 'c'));
+      var tree = "a(b(c))";
 
-      var treenumerable =
-        TestTreenumerableFactory
-        .Create<TreeNode<char>, char>(root)
-        .Where(x => x.Depth != 0);
+      var treenumerable = TreeStringParser.ParseTreeString(tree);
 
       // Act
       var actual =
         treenumerable
+        .Where(visit => visit.Depth != 0)
         .ToDepthFirstMoveNext()
-        .Do(x => Debug.WriteLine(x))
+        .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<char>[]
+      var expected = new MoveNextResult<string>[]
       {
-        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
-        (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
-        (TreenumeratorState.VisitingNode,   'b', 1, 0, 0),
-        (TreenumeratorState.SchedulingNode, 'c', 0, 0, 2),
-        (TreenumeratorState.VisitingNode,   'c', 1, 0, 1),
-        (TreenumeratorState.VisitingNode,   'c', 2, 0, 1),
-        (TreenumeratorState.VisitingNode,   'b', 2, 0, 0),
+        (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
+        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
+        (TreenumeratorState.VisitingNode,   "b", 1, 0, 0),
+        (TreenumeratorState.SchedulingNode, "c", 0, 0, 2),
+        (TreenumeratorState.VisitingNode,   "c", 1, 0, 1),
+        (TreenumeratorState.VisitingNode,   "c", 2, 0, 1),
+        (TreenumeratorState.VisitingNode,   "b", 2, 0, 0),
       };
 
       CollectionAssert.AreEqual(expected, actual);
@@ -388,30 +366,28 @@ namespace Arborist.Linq.Tests
     public void Where_DepthFirstTraversal_ThreeLevelChain_SkipSecond()
     {
       // Arrange
-      var root = TreeNode.Create('a', TreeNode.Create('b', 'c'));
+      var tree = "a(b(c))";
 
-      var treenumerable =
-        TestTreenumerableFactory
-        .Create<TreeNode<char>, char>(root)
-        .Where(x => x.Depth != 1);
+      var treenumerable = TreeStringParser.ParseTreeString(tree);
 
       // Act
       var actual =
         treenumerable
+        .Where(visit => visit.Depth != 1)
         .ToDepthFirstMoveNext()
-        .Do(x => Debug.WriteLine(x))
+        .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<char>[]
+      var expected = new MoveNextResult<string>[]
       {
-        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
-        (TreenumeratorState.VisitingNode,   'a', 1, 0, 0),
-        (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
-        (TreenumeratorState.SchedulingNode, 'c', 0, 0, 2),
-        (TreenumeratorState.VisitingNode,   'c', 1, 0, 1),
-        (TreenumeratorState.VisitingNode,   'c', 2, 0, 1),
-        (TreenumeratorState.VisitingNode,   'a', 2, 0, 0),
+        (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
+        (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
+        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
+        (TreenumeratorState.SchedulingNode, "c", 0, 0, 2),
+        (TreenumeratorState.VisitingNode,   "c", 1, 0, 1),
+        (TreenumeratorState.VisitingNode,   "c", 2, 0, 1),
+        (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
       };
 
       CollectionAssert.AreEqual(expected, actual);
@@ -421,30 +397,28 @@ namespace Arborist.Linq.Tests
     public void Where_DepthFirstTraversal_ThreeLevelChain_SkipThird()
     {
       // Arrange
-      var root = TreeNode.Create('a', TreeNode.Create('b', 'c'));
+      var tree = "a(b(c))";
 
-      var treenumerable =
-        TestTreenumerableFactory
-        .Create<TreeNode<char>, char>(root)
-        .Where(x => x.Depth != 2);
+      var treenumerable = TreeStringParser.ParseTreeString(tree);
 
       // Act
       var actual =
         treenumerable
+        .Where(visit => visit.Depth != 2)
         .ToDepthFirstMoveNext()
-        .Do(x => Debug.WriteLine(x))
+        .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<char>[]
+      var expected = new MoveNextResult<string>[]
       {
-        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
-        (TreenumeratorState.VisitingNode,   'a', 1, 0, 0),
-        (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
-        (TreenumeratorState.VisitingNode,   'b', 1, 0, 1),
-        (TreenumeratorState.SchedulingNode, 'c', 0, 0, 2),
-        (TreenumeratorState.VisitingNode,   'b', 2, 0, 1),
-        (TreenumeratorState.VisitingNode,   'a', 2, 0, 0),
+        (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
+        (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
+        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
+        (TreenumeratorState.VisitingNode,   "b", 1, 0, 1),
+        (TreenumeratorState.SchedulingNode, "c", 0, 0, 2),
+        (TreenumeratorState.VisitingNode,   "b", 2, 0, 1),
+        (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
       };
 
       CollectionAssert.AreEqual(expected, actual);
@@ -454,28 +428,26 @@ namespace Arborist.Linq.Tests
     public void Where_DepthFirstTraversal_TwoLevels_DepthIsZero()
     {
       // Arrange
-      var root = TreeNode.Create('a', 'b', 'c');
+      var tree = "a(b,c)";
 
-      var treenumerable =
-        TestTreenumerableFactory
-        .Create<TreeNode<char>, char>(root)
-        .Where(x => x.Depth == 0);
+      var treenumerable = TreeStringParser.ParseTreeString(tree);
 
       // Act
       var actual =
         treenumerable
+        .Where(visit => visit.Depth == 0)
         .ToDepthFirstMoveNext()
-        .Do(x => Debug.WriteLine(x))
+        .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<char>[]
+      var expected = new MoveNextResult<string>[]
       {
-        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
-        (TreenumeratorState.VisitingNode,   'a', 1, 0, 0),
-        (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
-        (TreenumeratorState.SchedulingNode, 'c', 0, 1, 1),
-        (TreenumeratorState.VisitingNode,   'a', 2, 0, 0),
+        (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
+        (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
+        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
+        (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
+        (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
       };
 
       CollectionAssert.AreEqual(expected, actual);
@@ -485,30 +457,28 @@ namespace Arborist.Linq.Tests
     public void Where_DepthFirstTraversal_TwoLevels_DepthIsNotZero()
     {
       // Arrange
-      var root = TreeNode.Create('a', 'b', 'c');
+      var tree = "a(b,c)";
 
-      var treenumerable =
-        TestTreenumerableFactory
-        .Create<TreeNode<char>, char>(root)
-        .Where(x => x.Depth != 0);
+      var treenumerable = TreeStringParser.ParseTreeString(tree);
 
       // Act
       var actual =
         treenumerable
+        .Where(visit => visit.Depth != 0)
         .ToDepthFirstMoveNext()
-        .Do(x => Debug.WriteLine(x))
+        .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<char>[]
+      var expected = new MoveNextResult<string>[]
       {
-        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
-        (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
-        (TreenumeratorState.VisitingNode,   'b', 1, 0, 0),
-        (TreenumeratorState.VisitingNode,   'b', 2, 0, 0),
-        (TreenumeratorState.SchedulingNode, 'c', 0, 1, 1),
-        (TreenumeratorState.VisitingNode,   'c', 1, 1, 0),
-        (TreenumeratorState.VisitingNode,   'c', 2, 1, 0)
+        (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
+        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
+        (TreenumeratorState.VisitingNode,   "b", 1, 0, 0),
+        (TreenumeratorState.VisitingNode,   "b", 2, 0, 0),
+        (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
+        (TreenumeratorState.VisitingNode,   "c", 1, 1, 0),
+        (TreenumeratorState.VisitingNode,   "c", 2, 1, 0)
       };
 
       CollectionAssert.AreEqual(expected, actual);
@@ -518,33 +488,32 @@ namespace Arborist.Linq.Tests
     public void Where_DepthFirstTraversal_TwoLevels_SkipsFirstChild()
     {
       // Arrange
-      var root = TreeNode.Create('a', 'b', 'c', 'd');
+      var tree = "a(b,c,d)";
 
-      var treenumerable =
-        TestTreenumerableFactory
-        .Create<TreeNode<char>, char>(root)
-        .Where(x => !(x.Depth == 1 && x.SiblingIndex == 0));
+      var treenumerable = TreeStringParser.ParseTreeString(tree);
 
       // Act
       var actual =
         treenumerable
+        .Where(visit => !(visit.Depth == 1 && visit.SiblingIndex == 0))
         .ToDepthFirstMoveNext()
-        .Do(x => Debug.WriteLine(x))
+        .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<char>[]
+      var expected = new MoveNextResult<string>[]
       {
-        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
-        (TreenumeratorState.VisitingNode,   'a', 1, 0, 0),
-        (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
-        (TreenumeratorState.SchedulingNode, 'c', 0, 1, 1),
-        (TreenumeratorState.VisitingNode,   'c', 1, 0, 1),
-        (TreenumeratorState.VisitingNode,   'c', 2, 0, 1),
-        (TreenumeratorState.SchedulingNode, 'd', 0, 2, 1),
-        (TreenumeratorState.VisitingNode,   'd', 1, 1, 1),
-        (TreenumeratorState.VisitingNode,   'd', 2, 1, 1),
-        (TreenumeratorState.VisitingNode,   'a', 2, 0, 0),
+        (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
+        (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
+        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
+        (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
+        (TreenumeratorState.VisitingNode,   "c", 1, 0, 1),
+        (TreenumeratorState.VisitingNode,   "c", 2, 0, 1),
+        (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
+        (TreenumeratorState.SchedulingNode, "d", 0, 2, 1),
+        (TreenumeratorState.VisitingNode,   "d", 1, 1, 1),
+        (TreenumeratorState.VisitingNode,   "d", 2, 1, 1),
+        (TreenumeratorState.VisitingNode,   "a", 3, 0, 0),
       };
 
       CollectionAssert.AreEqual(expected, actual);
@@ -554,33 +523,32 @@ namespace Arborist.Linq.Tests
     public void Where_DepthFirstTraversal_TwoLevels_SkipsSecondChild()
     {
       // Arrange
-      var root = TreeNode.Create('a', 'b', 'c', 'd');
+      var tree = "a(b,c,d)";
 
-      var treenumerable =
-        TestTreenumerableFactory
-        .Create<TreeNode<char>, char>(root)
-        .Where(x => !(x.Depth == 1 && x.SiblingIndex == 1));
+      var treenumerable = TreeStringParser.ParseTreeString(tree);
 
       // Act
       var actual =
         treenumerable
+        .Where(visit => !(visit.Depth == 1 && visit.SiblingIndex == 1))
         .ToDepthFirstMoveNext()
-        .Do(x => Debug.WriteLine(x))
+        .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<char>[]
+      var expected = new MoveNextResult<string>[]
       {
-        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
-        (TreenumeratorState.VisitingNode,   'a', 1, 0, 0),
-        (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
-        (TreenumeratorState.VisitingNode,   'b', 1, 0, 1),
-        (TreenumeratorState.VisitingNode,   'b', 2, 0, 1),
-        (TreenumeratorState.SchedulingNode, 'c', 0, 1, 1),
-        (TreenumeratorState.SchedulingNode, 'd', 0, 2, 1),
-        (TreenumeratorState.VisitingNode,   'd', 1, 1, 1),
-        (TreenumeratorState.VisitingNode,   'd', 2, 1, 1),
-        (TreenumeratorState.VisitingNode,   'a', 2, 0, 0),
+        (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
+        (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
+        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
+        (TreenumeratorState.VisitingNode,   "b", 1, 0, 1),
+        (TreenumeratorState.VisitingNode,   "b", 2, 0, 1),
+        (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
+        (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
+        (TreenumeratorState.SchedulingNode, "d", 0, 2, 1),
+        (TreenumeratorState.VisitingNode,   "d", 1, 1, 1),
+        (TreenumeratorState.VisitingNode,   "d", 2, 1, 1),
+        (TreenumeratorState.VisitingNode,   "a", 3, 0, 0),
       };
 
       CollectionAssert.AreEqual(expected, actual);
@@ -590,33 +558,32 @@ namespace Arborist.Linq.Tests
     public void Where_DepthFirstTraversal_TwoLevels_SkipsThirdChild()
     {
       // Arrange
-      var root = TreeNode.Create('a', 'b', 'c', 'd');
+      var tree = "a(b,c,d)";
 
-      var treenumerable =
-        TestTreenumerableFactory
-        .Create<TreeNode<char>, char>(root)
-        .Where(x => !(x.Depth == 1 && x.SiblingIndex == 2));
+      var treenumerable = TreeStringParser.ParseTreeString(tree);
 
       // Act
       var actual =
         treenumerable
+        .Where(visit => !(visit.Depth == 1 && visit.SiblingIndex == 2))
         .ToDepthFirstMoveNext()
-        .Do(x => Debug.WriteLine(x))
+        .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<char>[]
+      var expected = new MoveNextResult<string>[]
       {
-        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
-        (TreenumeratorState.VisitingNode,   'a', 1, 0, 0),
-        (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
-        (TreenumeratorState.VisitingNode,   'b', 1, 0, 1),
-        (TreenumeratorState.VisitingNode,   'b', 2, 0, 1),
-        (TreenumeratorState.SchedulingNode, 'c', 0, 1, 1),
-        (TreenumeratorState.VisitingNode,   'c', 1, 1, 1),
-        (TreenumeratorState.VisitingNode,   'c', 2, 1, 1),
-        (TreenumeratorState.SchedulingNode, 'd', 0, 2, 1),
-        (TreenumeratorState.VisitingNode,   'a', 2, 0, 0),
+        (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
+        (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
+        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
+        (TreenumeratorState.VisitingNode,   "b", 1, 0, 1),
+        (TreenumeratorState.VisitingNode,   "b", 2, 0, 1),
+        (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
+        (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
+        (TreenumeratorState.VisitingNode,   "c", 1, 1, 1),
+        (TreenumeratorState.VisitingNode,   "c", 2, 1, 1),
+        (TreenumeratorState.VisitingNode,   "a", 3, 0, 0),
+        (TreenumeratorState.SchedulingNode, "d", 0, 2, 1),
       };
 
       CollectionAssert.AreEqual(expected, actual);
@@ -626,53 +593,58 @@ namespace Arborist.Linq.Tests
     public void Where_DepthFirstTraversal_TwoLevels_PredicateAlwaysReturnsFalse()
     {
       // Arrange
-      var root = TreeNode.Create('a', 'b', 'c');
+      var tree = "a(b,c)";
 
-      var treenumerable =
-        TestTreenumerableFactory
-        .Create<TreeNode<char>, char>(root)
-        .Where(_ => false);
+      var treenumerable = TreeStringParser.ParseTreeString(tree);
 
       // Act
       var actual =
         treenumerable
+        .Where(_ => false)
         .ToDepthFirstMoveNext()
-        .Count();
+        .Do(visit => Debug.WriteLine(visit))
+        .ToArray();
 
       // Assert
-      Assert.AreEqual(0, actual);
+      var expected = new MoveNextResult<string>[]
+      {
+        (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
+        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
+        (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
     }
 
     [TestMethod]
     public void Where_DepthFirstTraversal_TwoLevels_PredicateAlwaysReturnsTrue()
     {
       // Arrange
-      var root = TreeNode.Create('a', 'b', 'c');
+      var tree = "a(b,c)";
 
-      var treenumerable =
-        TestTreenumerableFactory
-        .Create<TreeNode<char>, char>(root)
-        .Where(_ => true);
+      var treenumerable = TreeStringParser.ParseTreeString(tree);
 
       // Act
       var actual =
         treenumerable
+        .Where(_ => true)
         .ToDepthFirstMoveNext()
+        .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<char>[]
+      var expected = new MoveNextResult<string>[]
       {
-        (TreenumeratorState.SchedulingNode, 'a', 0, 0, 0),
-        (TreenumeratorState.VisitingNode,   'a', 1, 0, 0),
-        (TreenumeratorState.SchedulingNode, 'b', 0, 0, 1),
-        (TreenumeratorState.VisitingNode,   'b', 1, 0, 1),
-        (TreenumeratorState.VisitingNode,   'b', 2, 0, 1),
-        (TreenumeratorState.VisitingNode,   'a', 2, 0, 0),
-        (TreenumeratorState.SchedulingNode, 'c', 0, 1, 1),
-        (TreenumeratorState.VisitingNode,   'c', 1, 1, 1),
-        (TreenumeratorState.VisitingNode,   'c', 2, 1, 1),
-        (TreenumeratorState.VisitingNode,   'a', 3, 0, 0),
+        (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
+        (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
+        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
+        (TreenumeratorState.VisitingNode,   "b", 1, 0, 1),
+        (TreenumeratorState.VisitingNode,   "b", 2, 0, 1),
+        (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
+        (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
+        (TreenumeratorState.VisitingNode,   "c", 1, 1, 1),
+        (TreenumeratorState.VisitingNode,   "c", 2, 1, 1),
+        (TreenumeratorState.VisitingNode,   "a", 3, 0, 0),
       };
 
       CollectionAssert.AreEqual(expected, actual);
