@@ -48,9 +48,9 @@ namespace Arborist.Linq.Treenumerators
       Func<NodeVisit<T>, NodeVisit<TNode>> selector,
       Func<int> siblingIndexCalculator,
       Func<int> depthCalculator,
-      bool skipChildren)
+      SchedulingStrategy schedulingStrategy)
     {
-      if (!treenumerator.MoveNext(skipChildren))
+      if (!treenumerator.MoveNext(schedulingStrategy))
       {
         if (branch.Count > 0)
           branch.RemoveLast();
@@ -101,7 +101,7 @@ namespace Arborist.Linq.Treenumerators
       return true;
     }
 
-    private bool OnScionMoveNext(bool skipChildren)
+    private bool OnScionMoveNext(SchedulingStrategy schedulingStrategy)
     {
       return OnTreenumeratorMoveNext(
         _Scion,
@@ -109,10 +109,10 @@ namespace Arborist.Linq.Treenumerators
         visit => visit,
         () => _InnerBranch.Last().VisitCount + _Scion.Current.SiblingIndex - 1,
         () => _InnerBranch.Last().Depth + _Scion.Current.Depth + 1,
-        skipChildren);
+        schedulingStrategy);
     }
 
-    private bool OnInnerMoveNext(bool skipChildren)
+    private bool OnInnerMoveNext(SchedulingStrategy schedulingStrategy)
     {
       return OnTreenumeratorMoveNext(
         InnerTreenumerator,
@@ -120,20 +120,20 @@ namespace Arborist.Linq.Treenumerators
         visit => visit.WithNode(_Selector(visit)),
         () => CalculateInnerSiblingIndexAfterMoveNext(),
         () => InnerTreenumerator.Current.Depth,
-        skipChildren);
+        schedulingStrategy);
     }
 
-    protected override bool OnMoveNext(bool skipChildren)
+    protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
     {
       if (_Scion == null
-        && !skipChildren
+        && schedulingStrategy == SchedulingStrategy.ScheduleForTraversal
         && _InnerBranch.Count > 0
         && _Predicate(_InnerBranch.Last()))
         _Scion = _ScionGenerator(InnerTreenumerator.Current).GetDepthFirstTreenumerator();
 
       if (_Scion != null)
       {
-        if (OnScionMoveNext(skipChildren))
+        if (OnScionMoveNext(schedulingStrategy))
           return true;
         
         _Scion = null;
@@ -150,20 +150,20 @@ namespace Arborist.Linq.Treenumerators
       }
 
       if (!_ReturnedFromScion)
-        return OnInnerMoveNext(skipChildren);
+        return OnInnerMoveNext(schedulingStrategy);
 
       _ReturnedFromScion = false;
 
       var priorVisit = _InnerBranch.Last();
 
-      var onMoveNext = OnInnerMoveNext(skipChildren);
+      var onMoveNext = OnInnerMoveNext(schedulingStrategy);
 
       if (priorVisit.Depth != Current.Depth)
         return onMoveNext;
 
       _InnerBranch.RemoveLast();
 
-      return OnInnerMoveNext(skipChildren);
+      return OnInnerMoveNext(schedulingStrategy);
     }
   }
 }

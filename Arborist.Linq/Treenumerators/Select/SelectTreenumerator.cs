@@ -13,13 +13,15 @@ namespace Arborist.Linq.Treenumerators
 
     private readonly Func<NodeVisit<TInner>, TNode> _Selector;
 
-    protected override bool OnMoveNext(bool skipChildren)
+    protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
     {
-      var hasNext = InnerTreenumerator.MoveNext(skipChildren);
+      var hasNext = InnerTreenumerator.MoveNext(schedulingStrategy);
 
       if (hasNext)
       {
         var node = _Selector(InnerTreenumerator.Current);
+
+        State = InnerTreenumerator.State;
 
         Current =
           NodeVisit

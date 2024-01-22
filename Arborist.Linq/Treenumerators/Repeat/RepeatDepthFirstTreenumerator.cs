@@ -34,11 +34,11 @@
       }
     }
 
-    protected override bool OnMoveNext(bool skipChildren)
+    protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
     {
       if (Treenumerator == null)
       {
-        if (skipChildren)
+        if (schedulingStrategy == SchedulingStrategy.SkipSubtree)
           return false;
 
         Treenumerator = _Treenumerable.GetDepthFirstTreenumerator();
@@ -49,7 +49,7 @@
           return false;
       }
 
-      while (!Treenumerator.MoveNext(skipChildren))
+      while (!Treenumerator.MoveNext(schedulingStrategy))
       {
         Treenumerator = _Treenumerable.GetDepthFirstTreenumerator();
 
@@ -58,7 +58,7 @@
         if (_Count != null && (_TreenumeratorCount - 1) > _Count)
           return false;
 
-        skipChildren = false;
+        schedulingStrategy = SchedulingStrategy.ScheduleForTraversal;
       }
 
       Current = Treenumerator.Current;

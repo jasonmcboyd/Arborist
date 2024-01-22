@@ -18,7 +18,7 @@ namespace Arborist.Collatz
     {
       private long _Previous = -1;
 
-      protected override bool OnMoveNext(bool skipChildren)
+      protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
       {
         //if (_Previous == -1)
         //{
@@ -75,45 +75,46 @@ namespace Arborist.Collatz
 
       private readonly Queue<long> _Children = new Queue<long>();
 
-      protected override bool OnMoveNext(bool skipChildren)
+      protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
       {
-        if (_CurrentLevel.Count == 0
-          && _Children.Count == 0)
-        {
-          (_CurrentLevel, _NextLevel) = (_NextLevel, _CurrentLevel);
-          _Depth++;
-        }
+        throw new NotImplementedException();
+        //if (_CurrentLevel.Count == 0
+        //  && _Children.Count == 0)
+        //{
+        //  (_CurrentLevel, _NextLevel) = (_NextLevel, _CurrentLevel);
+        //  _Depth++;
+        //}
 
-        if (_CurrentLevel.Count == 0
-          && _Children.Count == 0)
-          return false;
+        //if (_CurrentLevel.Count == 0
+        //  && _Children.Count == 0)
+        //  return false;
 
-        if (_Children.Count > 0)
-        {
-          if (skipChildren)
-            _Children.Clear();
-          else
-          {
-            var node = _Children.Dequeue();
-            var siblingIndex = node % 2 == 0 ? 0 : 1;
+        //if (_Children.Count > 0)
+        //{
+        //  if (schedulingStrategy)
+        //    _Children.Clear();
+        //  else
+        //  {
+        //    var node = _Children.Dequeue();
+        //    var siblingIndex = node % 2 == 0 ? 0 : 1;
 
-            _NextLevel.Enqueue(NodeVisit.Create(node, 1, siblingIndex, _Depth + 1));
-          }
+        //    _NextLevel.Enqueue(NodeVisit.Create(node, 1, siblingIndex, _Depth + 1));
+        //  }
 
-          Current = Current.IncrementVisitCount();
+        //  Current = Current.IncrementVisitCount();
 
-          return true;
-        }
+        //  return true;
+        //}
 
-        Current = _CurrentLevel.Dequeue();
+        //Current = _CurrentLevel.Dequeue();
 
-        _Children.Enqueue(checked(Current.Node << 1));
+        //_Children.Enqueue(checked(Current.Node << 1));
 
-        if (Current.Node > 4
-          && (Current.Node - 1) % 3 == 0)
-          _Children.Enqueue((Current.Node - 1) / 3);
+        //if (Current.Node > 4
+        //  && (Current.Node - 1) % 3 == 0)
+        //  _Children.Enqueue((Current.Node - 1) / 3);
 
-        return true;
+        //return true;
       }
 
       public override void Dispose()

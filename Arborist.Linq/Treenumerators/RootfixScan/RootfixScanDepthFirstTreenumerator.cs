@@ -28,9 +28,9 @@ namespace Arborist.Linq.Treenumerators
 
     private readonly Stack<NodeVisit<TNode>> CurrentBranch = new Stack<NodeVisit<TNode>>();
 
-    protected override bool OnMoveNext(bool skipChildren)
+    protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
     {
-      if (!InnerTreenumerator.MoveNext(skipChildren))
+      if (!InnerTreenumerator.MoveNext(schedulingStrategy))
         return false;
 
       var innerVisit = InnerTreenumerator.Current;

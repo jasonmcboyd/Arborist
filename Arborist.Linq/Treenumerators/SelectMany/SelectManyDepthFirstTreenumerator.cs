@@ -18,15 +18,15 @@ namespace Arborist.Linq.Treenumerators
 
     private readonly Stack<NodeVisit<TNode>> _Stack = new Stack<NodeVisit<TNode>>();
 
-    protected override bool OnMoveNext(bool skipChildren)
+    protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
     {
-      while (InnerTreenumerator.MoveNext(skipChildren))
+      while (InnerTreenumerator.MoveNext(schedulingStrategy))
       {
         using (var currentEnumerator = InnerTreenumerator.Current.Node.GetDepthFirstTreenumerator())
         {
           NodeVisit<TNode>? previousVisit = null;
 
-          while (currentEnumerator.MoveNext(false))
+          while (currentEnumerator.MoveNext(SchedulingStrategy.ScheduleForTraversal))
           {
             if (previousVisit != null)
             {

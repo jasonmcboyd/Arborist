@@ -15,9 +15,9 @@ namespace Arborist.Linq.Treenumerators
 
     private readonly Queue<TNode> _Queue = new Queue<TNode>();
 
-    protected override bool OnMoveNext(bool skipChildren)
+    protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
     {
-      if (!InnerTreenumerator.MoveNext(skipChildren))
+      if (!InnerTreenumerator.MoveNext(schedulingStrategy))
         return false;
 
       if (InnerTreenumerator.Current.VisitCount == 1)

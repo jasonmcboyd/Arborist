@@ -9,10 +9,10 @@ namespace Arborist
     {
       get
       {
-        if (!_StartedEnumeration)
+        if (State == TreenumeratorState.EnumerationNotStarted)
           throw new InvalidOperationException("Enumeration has not begun.");
 
-        if (_CompletedEnumeration)
+        if (State == TreenumeratorState.EnumerationFinished)
           throw new InvalidOperationException("Enumeration has completed.");
 
         return _Current;
@@ -20,25 +20,23 @@ namespace Arborist
       protected set => _Current = value;
     }
 
-    private bool _StartedEnumeration;
-    private bool _CompletedEnumeration;
+    public TreenumeratorState State { get; protected set; } = TreenumeratorState.EnumerationNotStarted;
 
     public abstract void Dispose();
 
-    public bool MoveNext(bool skipChildren)
+    public bool MoveNext(SchedulingStrategy schedulingStrategy)
     {
-      if (_CompletedEnumeration)
+      if (State == TreenumeratorState.EnumerationFinished)
         return false;
 
-      _StartedEnumeration = true;
-
-      if (OnMoveNext(skipChildren))
+      if (OnMoveNext(schedulingStrategy))
         return true;
 
-      _CompletedEnumeration = true;
+      State = TreenumeratorState.EnumerationFinished;
+
       return false;
     }
 
-    protected abstract bool OnMoveNext(bool skipChildren);
+    protected abstract bool OnMoveNext(SchedulingStrategy schedulingStrategy);
   }
 }

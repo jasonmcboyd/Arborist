@@ -9,22 +9,25 @@ namespace Arborist.Linq
     {
       var branch = new List<NodeVisit<T>>();
 
-      foreach (var step in source.GetDepthFirstTraversal())
+      foreach (var visit in source.GetDepthFirstTraversal())
       {
+        if (visit.VisitCount == 1)
+          continue;
+
         if (branch.Count == 0)
         {
-          branch.Add(step);
+          branch.Add(visit);
           continue;
         }
 
-        var depthComparison = step.Depth.CompareTo(branch.Last().Depth);
+        var depthComparison = visit.Depth.CompareTo(branch.Last().Depth);
 
         if (depthComparison < 0)
           branch.RemoveAt(branch.Count - 1);
         else if (depthComparison == 0)
           yield return branch.Select(branchStep => branchStep.Node).ToArray();
         else
-          branch.Add(step);
+          branch.Add(visit);
       }
     }
   }

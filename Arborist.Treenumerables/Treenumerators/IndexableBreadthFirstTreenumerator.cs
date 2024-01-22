@@ -1,164 +1,238 @@
-﻿using System;
+﻿using Nito.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Arborist.Treenumerables.Treenumerators
 {
-  internal sealed class IndexableBreadthFirstTreenumerator<TIndexableNode, TIndexableNodeValue>
-    : TreenumeratorBase<TIndexableNodeValue>
-    where TIndexableNode : INodeWithIndexableChildren<TIndexableNode, TIndexableNodeValue>
+  internal sealed class IndexableBreadthFirstTreenumerator<TNode, TValue>
+    : TreenumeratorBase<TValue>
+    where TNode : INodeWithIndexableChildren<TNode, TValue>
   {
-    public IndexableBreadthFirstTreenumerator(IEnumerable<TIndexableNode> roots)
+    public IndexableBreadthFirstTreenumerator(IEnumerable<TNode> roots)
     {
-      var enumerator =
-        roots
-        .Select((node, index) => NodeVisit.Create(node, 1, index, 0))
-        .GetEnumerator();
-
-      _CurrentSemiQueue = new EnumeratorSemiQueue<NodeVisit<TIndexableNode>>(enumerator);
+      _RootsEnumerator = roots.GetEnumerator();
     }
 
-    private readonly IEnumerator<TIndexableNode> _RootsEnumerator;
+    private readonly IEnumerator<TNode> _RootsEnumerator;
+    private bool _RootsEnumerationCompleted = false;
 
-    private ISemiQueue<NodeVisit<TIndexableNode>> _CurrentSemiQueue { get; set; }
+    private int _SiblingIndex = -1;
 
-    private readonly QueueSemiQueue<NodeVisit<TIndexableNode>> _QueueSemiQueue = new QueueSemiQueue<NodeVisit<TIndexableNode>>();
-
-    private Queue<NodeVisit<TIndexableNode>> _CurrentLevel = new Queue<NodeVisit<TIndexableNode>>();
-    private Queue<NodeVisit<TIndexableNode>> _NextLevel = new Queue<NodeVisit<TIndexableNode>>();
+    private Deque<IndexableTreenumeratorNodeVisit<TNode, TValue>> _CurrentLevel = new Deque<IndexableTreenumeratorNodeVisit<TNode, TValue>>();
+    private Deque<IndexableTreenumeratorNodeVisit<TNode, TValue>> _NextLevel = new Deque<IndexableTreenumeratorNodeVisit<TNode, TValue>>();
 
     private int _Depth = 0;
 
-    private bool _StartedEnumeration = false;
-
-    protected override bool OnMoveNext(bool skipChildren)
+    protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
     {
-      if (!_StartedEnumeration)
+      if (State == TreenumeratorState.SchedulingNode)
+        OnSchedulingVisit(schedulingStrategy);
+
+      if (!_RootsEnumerationCompleted)
+        return BeforeRootsEnumerated(schedulingStrategy);
+
+      return AfterRootsEnumerated(schedulingStrategy);
+    }
+
+    private void OnSchedulingVisit(SchedulingStrategy schedulingStrategy)
+    {
+      var lastScheduled = _CurrentLevel.RemoveFromFront();
+
+      if (schedulingStrategy == SchedulingStrategy.SkipNode)
       {
-        _StartedEnumeration = true;
-
-        if (skipChildren || _CurrentSemiQueue.IsEmpty)
-          return false;
-
-        Current = _CurrentSemiQueue.Peek().WithNode(_CurrentSemiQueue.Peek().Node.Value);
-
-        return true;
+        lastScheduled = lastScheduled.Skip();
+        _CurrentLevel.AddToFront(lastScheduled);
       }
-
-      if (_CurrentSemiQueue.IsEmpty)
+      else if (schedulingStrategy == SchedulingStrategy.ScheduleForTraversal)
       {
-        (_CurrentLevel, _NextLevel) = (_NextLevel, _CurrentLevel);
-        _QueueSemiQueue.Queue = _CurrentLevel;
-        _CurrentSemiQueue = _QueueSemiQueue;
-        _Depth++;
-
-        if (_CurrentSemiQueue.IsEmpty)
-          return false;
-
-        Current = _CurrentSemiQueue.Peek().WithNode(_QueueSemiQueue.Peek().Node.Value);
-
-        return true;
-      }
-
-      var currentQueued = _CurrentSemiQueue.Peek();
-
-      var currentQueuedDequeued = false;
-
-      if (currentQueued.SiblingIndex != Current.SiblingIndex || currentQueued.Depth != Current.Depth)
-      {
-        Current = currentQueued.WithNode(currentQueued.Node.Value);
-
-        return true;
-      }
-
-      if (currentQueued.Node.ChildCount >= Current.VisitCount)
-      {
-        var childIndex = Current.VisitCount - 1;
-
-        if (skipChildren)
+        if (_RootsEnumerationCompleted)
         {
-          _CurrentSemiQueue.Dequeue();
-          currentQueuedDequeued = true;
+          var visitIndex = _CurrentLevel.TakeWhile(x => x.Skipped).Count();
+          var unskippedVisit = _CurrentLevel[visitIndex];
+          lastScheduled = lastScheduled.With(null, unskippedVisit.VisitCount - 1, null, null, null);
+          _NextLevel.AddToBack(lastScheduled);
         }
         else
-        {
-          var childNode = currentQueued.Node[childIndex];
+          _CurrentLevel.AddToBack(lastScheduled);
+      }
+    }
 
-          _NextLevel.Enqueue(NodeVisit.Create(childNode, 1, childIndex, _Depth + 1));
+    private bool BeforeRootsEnumerated(SchedulingStrategy schedulingStrategy)
+    {
+      if (_CurrentLevel.Count > 0 && _CurrentLevel[0].Skipped)
+      {
+        var skippedNode = _CurrentLevel.RemoveFromFront();
+
+        if (skippedNode.HasNextChild())
+        {
+          var childIndex = skippedNode.VisitedChildrenCount;
+
+          var nextVisit =
+            IndexableTreenumeratorNodeVisit
+            .Create<TNode, TValue>(
+              skippedNode.Node[childIndex],
+              0,
+              childIndex,
+              skippedNode.Depth + 1,
+              0,
+              false);
+          
+          skippedNode = skippedNode.IncrementVisitedChildrenCount();
+          Current = nextVisit.ToNodeVisit();
+
+          _CurrentLevel.AddToFront(skippedNode);
+
+          _CurrentLevel.AddToFront(nextVisit);
+
+          State = TreenumeratorState.SchedulingNode;
+
+          return true;
         }
       }
 
-      Current = Current.IncrementVisitCount();
+      if (_RootsEnumerator.MoveNext())
+      {
+        _SiblingIndex++;
 
-      if (!currentQueuedDequeued && Current.VisitCount > currentQueued.Node.ChildCount)
-        _CurrentSemiQueue.Dequeue();
+        var nextVisit =
+          IndexableTreenumeratorNodeVisit
+          .Create<TNode, TValue>(
+            _RootsEnumerator.Current,
+            0,
+            _SiblingIndex,
+            0,
+            0,
+            false);
 
-      return true;
+        _CurrentLevel.AddToFront(nextVisit);
+
+        Current = nextVisit.ToNodeVisit();
+
+        State = TreenumeratorState.SchedulingNode;
+
+        return true;
+      }
+
+      _RootsEnumerationCompleted = true;
+      _SiblingIndex = 0;
+
+      return AfterRootsEnumerated(schedulingStrategy);
+    }
+
+    // Remove _SiblingIndex reference from AfterRootsEnumerated.
+    private bool AfterRootsEnumerated(SchedulingStrategy schedulingStrategy)
+    {
+      while (true)
+      {
+        if (_CurrentLevel.Count == 0)
+        {
+          _Depth++;
+          _SiblingIndex = 0;
+          (_CurrentLevel, _NextLevel) = (_NextLevel, _CurrentLevel);
+        }
+
+        if (_CurrentLevel.Count == 0)
+        {
+          State = TreenumeratorState.EnumerationFinished;
+          return false;
+        }
+
+        var visit = _CurrentLevel.RemoveFromFront();
+
+        if ((visit.VisitCount == 0
+            && !visit.Skipped)
+          || (State == TreenumeratorState.SchedulingNode
+            && schedulingStrategy == SchedulingStrategy.ScheduleForTraversal))
+        {
+          if (visit.Skipped)
+          {
+            _CurrentLevel.AddToFront(visit);
+            var visitIndex = _CurrentLevel.TakeWhile(x => x.Skipped).Count();
+
+            visit = _CurrentLevel[visitIndex].IncrementVisitCount();
+
+            _CurrentLevel[visitIndex] = visit;
+
+            Current =
+              visit
+              .ToNodeVisit()
+              .WithDepth(_Depth)
+              .WithSiblingIndex(_SiblingIndex);
+
+            State = TreenumeratorState.VisitingNode;
+
+            return true;
+          }
+
+          if (visit.SiblingIndex == 0)
+            _SiblingIndex = 0;
+
+          visit = visit.IncrementVisitCount();
+
+          _CurrentLevel.AddToFront(visit);
+
+          Current =
+            visit
+            .ToNodeVisit()
+            .WithDepth(_Depth)
+            .WithSiblingIndex(_SiblingIndex);
+
+          State = TreenumeratorState.VisitingNode;
+
+          return true;
+        }
+
+        if (visit.VisitedChildrenCount < visit.Node.ChildCount)
+        {
+          var childIndex = visit.VisitedChildrenCount;
+
+          var nextVisit =
+            IndexableTreenumeratorNodeVisit
+            .Create<TNode, TValue>(
+              visit.Node[childIndex],
+              0,
+              childIndex,
+              visit.Depth + 1,
+              0,
+              false);
+
+          visit = visit.IncrementVisitedChildrenCount();
+          Current = nextVisit.ToNodeVisit();
+
+          _CurrentLevel.AddToFront(visit);
+
+          _CurrentLevel.AddToFront(nextVisit);
+
+          State = TreenumeratorState.SchedulingNode;
+
+          return true;
+        }
+
+        if (visit.VisitCount == 1)
+        {
+          visit = visit.IncrementVisitCount();
+          _CurrentLevel.AddToFront(visit);
+
+          Current =
+            visit
+            .ToNodeVisit()
+            .WithDepth(_Depth)
+            .WithSiblingIndex(_SiblingIndex);
+
+          State = TreenumeratorState.VisitingNode;
+
+          return true;
+        }
+
+        if (!visit.Skipped)
+          _SiblingIndex++;
+      }
     }
 
     public override void Dispose()
     {
       _RootsEnumerator?.Dispose();
-    }
-
-    private interface ISemiQueue<T> : IDisposable
-    {
-      T Dequeue();
-      T Peek();
-      bool IsEmpty { get; }
-    }
-
-    private class EnumeratorSemiQueue<T> : ISemiQueue<T>
-    {
-      public EnumeratorSemiQueue(IEnumerator<T> enumerator)
-      {
-        _Enumerator = enumerator;
-
-        IsEmpty = !_Enumerator.MoveNext();
-      }
-
-      private readonly IEnumerator<T> _Enumerator;
-
-      public T Dequeue()
-      {
-        if (IsEmpty)
-          throw new InvalidOperationException("The queue is empty.");
-
-        var current = _Enumerator.Current;
-
-        IsEmpty = !_Enumerator.MoveNext();
-
-        return current;
-      }
-
-      public T Peek()
-      {
-        if (IsEmpty)
-          throw new InvalidOperationException("The queue is empty.");
-
-        return _Enumerator.Current;
-      }
-
-      public bool IsEmpty { get; private set; }
-
-      public void Dispose() => _Enumerator?.Dispose();
-    }
-  
-    private class QueueSemiQueue<T> : ISemiQueue<T>
-    {
-      public QueueSemiQueue()
-      {
-      }
-
-      public Queue<T> Queue { get; set; }
-
-      public T Dequeue() => Queue.Dequeue();
-
-      public T Peek() => Queue.Peek();
-
-      public bool IsEmpty => Queue.Count == 0;
-
-      public void Dispose() { }
     }
   }
 }

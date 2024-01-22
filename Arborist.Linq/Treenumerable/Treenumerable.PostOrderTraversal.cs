@@ -9,24 +9,27 @@ namespace Arborist.Linq
       if (source == null)
         yield break;
 
-      NodeVisit<T>? previousStep = null;
+      NodeVisit<T>? previousVisit = null;
 
-      foreach (var step in source.GetDepthFirstTraversal())
+      foreach (var visit in source.GetDepthFirstTraversal())
       {
+        if (visit.VisitCount == 1)
+          continue;
+
         var canYield =
-          previousStep != null
-          && (step.Depth < previousStep.Value.Depth
-            || (previousStep.Value.Depth == 0
-              && step.Depth == 0));
+          previousVisit != null
+          && (visit.Depth < previousVisit.Value.Depth
+            || (previousVisit.Value.Depth == 0
+              && visit.Depth == 0));
 
         if (canYield)
-          yield return previousStep.Value.Node;
+          yield return previousVisit.Value.Node;
 
-        previousStep = step;
+        previousVisit = visit;
       }
 
-      if (previousStep != null)
-        yield return previousStep.Value.Node;
+      if (previousVisit != null)
+        yield return previousVisit.Value.Node;
     }
   }
 }

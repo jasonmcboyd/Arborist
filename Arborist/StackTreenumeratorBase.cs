@@ -4,54 +4,55 @@ using System.Linq;
 
 namespace Arborist
 {
-  public abstract class StackTreenumeratorBase<TBranch, TNode> : ITreenumerator<TNode>
+  public abstract class StackTreenumeratorBase<TStack, TNode> : ITreenumerator<TNode>
   {
-    public StackTreenumeratorBase(Func<TBranch, TNode> selector)
+    public StackTreenumeratorBase(Func<TStack, TNode> selector)
     {
       _Selector = selector;
     }
 
-    private readonly Func<TBranch, TNode> _Selector;
+    private readonly Func<TStack, TNode> _Selector;
 
     private NodeVisit<TNode> _Current;
     public NodeVisit<TNode> Current
     {
       get
       {
-        if (!_StartedEnumeration)
-          throw new InvalidOperationException("Enumeration has not begun.");
+        if (State == TreenumeratorState.EnumerationNotStarted)
+          throw new InvalidOperationException("Enumeration has not started.");
 
-        if (_CompletedEnumeration)
-          throw new InvalidOperationException("Enumeration has completed.");
+        if (State == TreenumeratorState.EnumerationFinished)
+          throw new InvalidOperationException("Enumeration has finished.");
 
-        _Current = Branch.Last().WithNode(_Selector(Branch.Last().Node));
+        _Current = Stack.Last().WithNode(_Selector(Stack.Last().Node));
 
         return _Current;
       }
     }
 
-    private bool _StartedEnumeration = false;
-    private bool _CompletedEnumeration = false;
+    public TreenumeratorState State { get; protected set; } = TreenumeratorState.EnumerationNotStarted;
 
-    protected List<NodeVisit<TBranch>> Branch { get; } = new List<NodeVisit<TBranch>>();
+    protected List<NodeVisit<TStack>> Stack { get; } = new List<NodeVisit<TStack>>();
 
-    public bool MoveNext(bool skipChildren)
+    public bool MoveNext(SchedulingStrategy schedulingStrategy)
     {
-      if (_CompletedEnumeration)
+      if (State == TreenumeratorState.EnumerationFinished)
         return false;
-      
-      _StartedEnumeration = true;
 
-      OnMoveNext(skipChildren);
+      OnMoveNext(schedulingStrategy);
 
-      if (Branch.Count == 0)
-        _CompletedEnumeration = true;
-
-      return Branch.Count > 0;
+      return Stack.Count > 0;
     }
 
-    protected abstract void OnMoveNext(bool skipChildren);
+    protected abstract void OnMoveNext(SchedulingStrategy schedulingStrategy);
 
     public abstract void Dispose();
+  }
+
+  public abstract class StackTreenumeratorBase<TNode> : StackTreenumeratorBase<TNode, TNode>
+  {
+    public StackTreenumeratorBase() : base(x => x)
+    {
+    }
   }
 }
