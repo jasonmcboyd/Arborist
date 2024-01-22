@@ -23,7 +23,7 @@ namespace Arborist.Linq
             continue;
           }
 
-          if (step.SiblingIndex != previousStep.SiblingIndex)
+          if (step.VisitCount != 2)
           {
             previousStep = step;
             continue;

@@ -7,16 +7,16 @@ namespace Arborist.Linq
   {
     public static ITreenumerable<TNode> RepeatTrees<TNode>(this ITreenumerable<TNode> source)
       => TreenumerableFactory.Create(
-          source,
-          breadthFirstEnumerator => throw new NotImplementedException(),
-          depthFirstEnumerator => new RepeatDepthFirstTreenumerator<TNode>(source));
+        source,
+        breadthFirstEnumerator => throw new NotImplementedException(),
+        depthFirstEnumerator => new RepeatDepthFirstTreenumerator<TNode>(source));
 
     public static ITreenumerable<TNode> RepeatTrees<TNode>(
       this ITreenumerable<TNode> source,
       int count)
       => TreenumerableFactory.Create(
-          source,
-          breadthFirstEnumerator => throw new NotImplementedException(),
-          depthFirstEnumerator => new RepeatDepthFirstTreenumerator<TNode>(source, count));
+        source,
+        breadthFirstEnumerator => throw new NotImplementedException(),
+        depthFirstEnumerator => new RepeatDepthFirstTreenumerator<TNode>(source, count));
   }
 }
