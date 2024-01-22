@@ -39,7 +39,7 @@ namespace Arborist.Treenumerables.Treenumerators
         if (onTraversingNode.HasValue)
           return onTraversingNode.Value;
 
-        var onAscendingTree = OnAscendingTree(schedulingStrategy);
+        var onAscendingTree = OnAscendingTree();
 
         if (onAscendingTree.HasValue)
           return onAscendingTree.Value;
@@ -118,18 +118,28 @@ namespace Arborist.Treenumerables.Treenumerators
         return true;
       }
 
-      if (schedulingStrategy == SchedulingStrategy.SkipSubtree)
-      {
-        _ShadowStack.Pop();
+      ////if (schedulingstrategy == schedulingstrategy.skipsubtree)
+      ////{
+      ////  _shadowstack.pop();
 
-        if (_ShadowStack.Count == 0)
-          return null;
+      ////todo: testing this commented out.
+      ////  if (_shadowstack.count == 0)
+      ////    return null;
 
-        return IncrementVisitCount();
-      }
+      ////  return incrementvisitcount();
+
+
+      ////todo: second attempt.
+      ////  return null;
+
+      ////  return onascendingtree();
+      ////}
 
       // Set the previously visited shadow visit to skippped.
       previousShadowVisit = _ShadowStack.Pop().Skip();
+
+      if (schedulingStrategy == SchedulingStrategy.SkipSubtree)
+        previousShadowVisit = previousShadowVisit.With(null, null, null, previousShadowVisit.Node.ChildCount, null);
 
       _ShadowStack.Push(previousShadowVisit);
 
@@ -146,7 +156,7 @@ namespace Arborist.Treenumerables.Treenumerators
       if (!previousShadowVisit.Skipped
         && _Stack.Count > 0
         && Current.VisitCount == 0)
-        IncrementVisitCount();
+        return IncrementVisitCountOnTopOfStack();
 
       if (previousShadowVisit.HasNextChild())
         return ScheduleNextShadowVisitChild();
@@ -155,19 +165,18 @@ namespace Arborist.Treenumerables.Treenumerators
         return null;
 
       if (Current.VisitCount == 1)
-        return IncrementVisitCount();
+        return IncrementVisitCountOnTopOfStack();
 
       return null;
     }
 
-    private bool? OnAscendingTree(SchedulingStrategy schedulingStrategy)
+    private bool? OnAscendingTree()
     {
       if (_ShadowStack.Count == 0)
         return null;
 
       IndexableTreenumeratorNodeVisit<TNode, TValue> previousShadowVisit = _ShadowStack.Peek();
       NodeVisit<TValue> previousVisit;
-      NodeVisit<TValue> nextVisit;
 
       bool ascendingFromSkippedNode = false;
 
@@ -189,13 +198,13 @@ namespace Arborist.Treenumerables.Treenumerators
         if (ascendingFromSkippedNode)
           return ScheduleNextShadowVisitChild();
 
-        return IncrementVisitCount();
+        return IncrementVisitCountOnTopOfStack();
       }
 
       previousVisit = _Stack.Peek();
 
       if (previousVisit.VisitCount == 1)
-        return IncrementVisitCount();
+        return IncrementVisitCountOnTopOfStack();
 
       _Stack.Pop();
       _ShadowStack.Pop();
@@ -234,7 +243,7 @@ namespace Arborist.Treenumerables.Treenumerators
       return true;
     }
 
-    private bool IncrementVisitCount()
+    private bool IncrementVisitCountOnTopOfStack()
     {
       var nextVisit = _Stack.Pop().IncrementVisitCount();
       _Stack.Push(nextVisit);
