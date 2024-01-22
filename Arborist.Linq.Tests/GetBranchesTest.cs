@@ -2,45 +2,116 @@ using Arborist.Linq;
 using Arborist.Tests.Utils;
 using Arborist.Treenumerables;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 
 namespace Arborist.Linq.Tests
 {
   [TestClass]
   public class GetBranchesTest
-
   {
+    public static IEnumerable<object[]> GetTestData()
+    {
+      yield return new object[]
+      {
+        "a",
+        new[]
+        {
+          new[] { "a" }
+        }
+      };
+      yield return new object[]
+      {
+        "a,b,c",
+        new[]
+        {
+          new[] { "a" },
+          new[] { "b" },
+          new[] { "c" }
+        }
+      };
+      yield return new object[]
+      {
+        "a(b,c)",
+        new[]
+        {
+          new[] { "a", "b" },
+          new[] { "a", "c" }
+        }
+      };
+      yield return new object[]
+      {
+        "a(b(e,f,g),c(h,i,j))",
+        new[]
+        {
+          new[] { "a", "b", "e" },
+          new[] { "a", "b", "f" },
+          new[] { "a", "b", "g" },
+          new[] { "a", "c", "h" },
+          new[] { "a", "c", "i" },
+          new[] { "a", "c", "j" },
+        }
+      };
+      yield return new object[]
+      {
+        "a(b(c))",
+        new[]
+        {
+          new[] { "a", "b", "c" }
+        }
+      };
+      yield return new object[]
+      {
+        "a(b,c),d(e,f)",
+        new[]
+        {
+          new[] { "a", "b" },
+          new[] { "a", "c" },
+          new[] { "d", "e" },
+          new[] { "d", "f" }
+        }
+      };
+      yield return new object[]
+      {
+        "a,b(c),d(e(f))",
+        new[]
+        { 
+          new[] { "a" },
+          new[] { "b", "c" },
+          new[] { "d", "e", "f" }
+        }
+      };
+    }
+
+    public static string GetTestDisplayName(MethodInfo methodInfo, object[] data)
+    {
+      return data[0].ToString();
+    }
+
     [TestMethod]
-    public void GetBranches()
+    [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
+    public void GetBranches(
+      string treeString,
+      string[][] expected)
     {
       // Arrange
-      var root =
-        TreeNode.Create(1,
-          TreeNode.Create(2),
-          TreeNode.Create(3, 4, 5));
-
-      var treenumerable = TestTreenumerableFactory.Create<TreeNode<int>, int>(root);
+      var treenumerable = TreeStringParser.ParseTreeString(treeString);
 
       // Act
       var actual =
         treenumerable
         .GetBranches()
-        .Select(nums => nums.ToArray())
         .ToArray();
 
+      foreach (var a in actual)
+        Debug.WriteLine(string.Join(", ", a));
+
       // Assert
-      var expected =
-        new []
-        {
-          new [] { 1, 2 },
-          new [] { 1, 3, 4 },
-          new [] { 1, 3, 5 }
-        };
-
       Assert.AreEqual(expected.Length, actual.Length);
-
-      foreach (var (expectedBranch, actualBranch) in expected.Zip(actual, (e, a) => (e, a)))
-        CollectionAssert.AreEqual(expectedBranch, actualBranch);
+      for (int i = 0; i < expected.Length; i++)
+        CollectionAssert.AreEqual(expected[i], actual[i]);
     }
   }
 }
