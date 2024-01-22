@@ -212,7 +212,7 @@ namespace Arborist.Treenumerables.Tests
           }
         },
 
-        // Two-evel complete ternary tree.
+        // Two-level complete ternary tree.
         new TestTree
         {
           TreeString = "a(b,c,d)",
@@ -367,6 +367,8 @@ namespace Arborist.Treenumerables.Tests
                 (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
                 (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
                 (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
+                (TreenumeratorState.VisitingNode,   "b", 1, 0, 1),
+                (TreenumeratorState.VisitingNode,   "b", 2, 0, 1),
                 (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
                 (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
                 (TreenumeratorState.SchedulingNode, "d", 0, 2, 1),
@@ -404,7 +406,7 @@ namespace Arborist.Treenumerables.Tests
                 (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
                 (TreenumeratorState.VisitingNode,   "c", 1, 1, 1),
                 (TreenumeratorState.VisitingNode,   "c", 2, 1, 1),
-                (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
+                (TreenumeratorState.VisitingNode,   "a", 3, 0, 0),
                 (TreenumeratorState.SchedulingNode, "d", 0, 2, 1),
               }
             },
@@ -622,12 +624,12 @@ namespace Arborist.Treenumerables.Tests
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
                 (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
+                (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
                 (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
                 (TreenumeratorState.SchedulingNode, "c", 0, 0, 2),
-                (TreenumeratorState.VisitingNode,   "c", 1, 0, 0),
                 (TreenumeratorState.VisitingNode,   "c", 1, 0, 1),
                 (TreenumeratorState.VisitingNode,   "c", 2, 0, 1),
-                (TreenumeratorState.VisitingNode,   "b", 2, 0, 0),
+                (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
               }
             },
             new TestScenario
@@ -651,7 +653,7 @@ namespace Arborist.Treenumerables.Tests
                 (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
                 (TreenumeratorState.VisitingNode,   "b", 1, 0, 1),
                 (TreenumeratorState.SchedulingNode, "c", 0, 0, 2),
-                (TreenumeratorState.VisitingNode,   "b", 2, 0, 0),
+                (TreenumeratorState.VisitingNode,   "b", 2, 0, 1),
                 (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
               }
             },
@@ -729,7 +731,7 @@ namespace Arborist.Treenumerables.Tests
                 (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
                 (TreenumeratorState.VisitingNode,   "b", 1, 0, 1),
                 (TreenumeratorState.SchedulingNode, "c", 0, 0, 2),
-                (TreenumeratorState.VisitingNode,   "b", 2, 0, 0),
+                (TreenumeratorState.VisitingNode,   "b", 2, 0, 1),
                 (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
               }
             },
@@ -737,7 +739,6 @@ namespace Arborist.Treenumerables.Tests
         },
 
         // Five-level chain of single children.
-
         new TestTree
         {
           TreeString = "a(b(c(d(e))))",
@@ -768,6 +769,20 @@ namespace Arborist.Treenumerables.Tests
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
                 (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
+                (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
+                (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
+                (TreenumeratorState.VisitingNode,   "b", 1, 0, 1),
+                (TreenumeratorState.SchedulingNode, "c", 0, 0, 2),
+                (TreenumeratorState.VisitingNode,   "c", 1, 0, 2),
+                (TreenumeratorState.SchedulingNode, "d", 0, 0, 3),
+                (TreenumeratorState.VisitingNode,   "d", 1, 0, 3),
+                (TreenumeratorState.SchedulingNode, "e", 0, 0, 4),
+                (TreenumeratorState.VisitingNode,   "e", 1, 0, 4),
+                (TreenumeratorState.VisitingNode,   "e", 2, 0, 4),
+                (TreenumeratorState.VisitingNode,   "d", 2, 0, 3),
+                (TreenumeratorState.VisitingNode,   "c", 2, 0, 2),
+                (TreenumeratorState.VisitingNode,   "b", 2, 0, 1),
+                (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
               }
             },
             new TestScenario
@@ -789,6 +804,14 @@ namespace Arborist.Treenumerables.Tests
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
                 (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
+                (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
+                (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
+                (TreenumeratorState.SchedulingNode, "c", 0, 0, 2),
+                (TreenumeratorState.SchedulingNode, "d", 0, 0, 3),
+                (TreenumeratorState.SchedulingNode, "e", 0, 0, 4),
+                (TreenumeratorState.VisitingNode,   "e", 1, 0, 1),
+                (TreenumeratorState.VisitingNode,   "e", 2, 0, 1),
+                (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
               }
             },
           }
@@ -896,6 +919,30 @@ namespace Arborist.Treenumerables.Tests
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
                 (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
+                (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
+                (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
+                (TreenumeratorState.VisitingNode,   "b", 1, 0, 1),
+                (TreenumeratorState.VisitingNode,   "b", 2, 0, 1),
+                (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
+                (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
+                (TreenumeratorState.VisitingNode,   "c", 1, 1, 1),
+                (TreenumeratorState.SchedulingNode, "e", 0, 0, 2),
+                (TreenumeratorState.VisitingNode,   "e", 1, 0, 2),
+                (TreenumeratorState.VisitingNode,   "e", 2, 0, 2),
+                (TreenumeratorState.VisitingNode,   "c", 2, 1, 1),
+                (TreenumeratorState.SchedulingNode, "f", 0, 1, 2),
+                (TreenumeratorState.VisitingNode,   "f", 1, 1, 2),
+                (TreenumeratorState.VisitingNode,   "f", 2, 1, 2),
+                (TreenumeratorState.VisitingNode,   "c", 3, 1, 1),
+                (TreenumeratorState.SchedulingNode, "g", 0, 2, 2),
+                (TreenumeratorState.VisitingNode,   "g", 1, 2, 2),
+                (TreenumeratorState.VisitingNode,   "g", 2, 2, 2),
+                (TreenumeratorState.VisitingNode,   "c", 4, 1, 1),
+                (TreenumeratorState.VisitingNode,   "a", 3, 0, 0),
+                (TreenumeratorState.SchedulingNode, "d", 0, 2, 1),
+                (TreenumeratorState.VisitingNode,   "d", 1, 2, 1),
+                (TreenumeratorState.VisitingNode,   "d", 2, 2, 1),
+                (TreenumeratorState.VisitingNode,   "a", 4, 0, 0),
               }
             },
             new TestScenario
