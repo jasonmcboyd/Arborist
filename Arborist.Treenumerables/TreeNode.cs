@@ -6,7 +6,6 @@ namespace Arborist.Treenumerables
   public class TreeNode<TValue>
     : INodeWithIndexableChildren<TreeNode<TValue>, TValue>
   {
-
     public TreeNode(TValue value)
       : this(value, Array.Empty<TreeNode<TValue>>())
     {

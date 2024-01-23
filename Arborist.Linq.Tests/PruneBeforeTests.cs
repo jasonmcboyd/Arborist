@@ -8,10 +8,10 @@ using System.Linq;
 namespace Arborist.Linq.Tests
 {
   [TestClass]
-  public class PruneTests
+  public class PruneBeforeTests
   {
     [TestMethod]
-    public void Prune_BreadthFirstTraversal_AfterLevelOne()
+    public void PruneBefore_BreadthFirstTraversal_AfterLevelOne()
     {
       // Arrange
       var tree = "a(b(c,d),e(f,g))";
@@ -21,7 +21,7 @@ namespace Arborist.Linq.Tests
       // Act
       var actual =
         treenumerable
-        .Prune(visit => visit.Depth > 1)
+        .PruneBefore(visit => visit.Depth > 1)
         .ToBreadthFirstMoveNext()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
@@ -49,7 +49,7 @@ namespace Arborist.Linq.Tests
     }
 
     [TestMethod]
-    public void Prune_BreadthFirstTraversal_AtLevelOne()
+    public void PruneBefore_BreadthFirstTraversal_AtLevelOne()
     {
       // Arrange
       var tree = "a(b(c,d),e(f,g))";
@@ -59,7 +59,7 @@ namespace Arborist.Linq.Tests
       // Act
       var actual =
         treenumerable
-        .Prune(visit => visit.Depth == 1)
+        .PruneBefore(visit => visit.Depth == 1)
         .ToBreadthFirstMoveNext()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
@@ -78,7 +78,7 @@ namespace Arborist.Linq.Tests
     }
 
     [TestMethod]
-    public void Prune_BreadthFirstTraversal_PruneBefore_RootNode()
+    public void PruneBefore_BreadthFirstTraversal_RootNode()
     {
       // Arrange
       var tree = "a(b(c,d),e(f,g))";
@@ -88,7 +88,7 @@ namespace Arborist.Linq.Tests
       // Act
       var actual =
         treenumerable
-        .Prune(visit => visit.Depth == 0)
+        .PruneBefore(visit => visit.Depth == 0)
         .ToBreadthFirstMoveNext()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
@@ -101,7 +101,7 @@ namespace Arborist.Linq.Tests
     }
 
     [TestMethod]
-    public void Prune_DepthFirstTraversal_PruneBefore_MiddleChild()
+    public void PruneBefore_DepthFirstTraversal_MiddleChild()
     {
       // Arrange
       var tree = "a(b,c,d)";
@@ -111,7 +111,7 @@ namespace Arborist.Linq.Tests
       // Act
       var actual =
         treenumerable
-        .Prune(visit => visit.Node == "c")
+        .PruneBefore(visit => visit.Node == "c")
         .ToDepthFirstMoveNext()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
@@ -136,7 +136,7 @@ namespace Arborist.Linq.Tests
     }
 
     [TestMethod]
-    public void Prune_DepthFirstTraversal_PruneBefore_RootNode()
+    public void PruneBefore_DepthFirstTraversal_RootNode()
     {
       // Arrange
       var tree = "a(b,c,d)";
@@ -146,7 +146,7 @@ namespace Arborist.Linq.Tests
       // Act
       var actual =
         treenumerable
-        .Prune(visit => visit.Node == "a")
+        .PruneBefore(visit => visit.Node == "a")
         .ToDepthFirstMoveNext()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
@@ -161,7 +161,7 @@ namespace Arborist.Linq.Tests
     }
 
     [TestMethod]
-    public void Prune_DepthFirstTraversal_PruneBefore_FirstRootNode()
+    public void PruneBefore_DepthFirstTraversal_FirstRootNode()
     {
       // Arrange
       var tree = "a,b";
@@ -171,7 +171,7 @@ namespace Arborist.Linq.Tests
       // Act
       var actual =
         treenumerable
-        .Prune(visit => visit.Node == "a")
+        .PruneBefore(visit => visit.Node == "a")
         .ToDepthFirstMoveNext()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();

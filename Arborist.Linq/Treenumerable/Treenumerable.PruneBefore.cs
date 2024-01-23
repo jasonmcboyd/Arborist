@@ -5,7 +5,7 @@ namespace Arborist.Linq
 {
   public static partial class Treenumerable
   {
-    public static ITreenumerable<T> Prune<T>(
+    public static ITreenumerable<T> PruneBefore<T>(
       this ITreenumerable<T> source,
       Func<NodeVisit<T>, bool> predicate)
     {

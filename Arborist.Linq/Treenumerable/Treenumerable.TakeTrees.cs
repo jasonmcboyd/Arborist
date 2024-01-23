@@ -5,6 +5,6 @@
     public static ITreenumerable<T> TakeTrees<T>(
       this ITreenumerable<T> source,
       int count)
-      => source.Prune(visit => visit.SiblingIndex >= count);
+      => source.PruneBefore(visit => visit.SiblingIndex >= count);
   }
 }

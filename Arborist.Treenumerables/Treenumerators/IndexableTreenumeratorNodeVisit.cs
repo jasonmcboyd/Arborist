@@ -1,5 +1,6 @@
 ﻿namespace Arborist.Treenumerables.Treenumerators
 {
+  // TODO: This belongs in a test project.
   internal struct IndexableTreenumeratorNodeVisit<TNode, TValue>
     where TNode : INodeWithIndexableChildren<TNode, TValue>
   {
