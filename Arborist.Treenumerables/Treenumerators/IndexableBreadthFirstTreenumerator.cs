@@ -55,13 +55,20 @@ namespace Arborist.Treenumerables.Treenumerators
           _NextLevel.AddToBack(lastScheduled);
         }
         else
+        {
+          if (_CurrentLevel.Count > 1
+            && _CurrentLevel[0].Skipped)
+          {
+            lastScheduled = lastScheduled.With(null, _CurrentLevel.Last().SiblingIndex + 1, null, null, null);
+          }
           _CurrentLevel.AddToBack(lastScheduled);
+        }
       }
     }
 
     private bool BeforeRootsEnumerated(SchedulingStrategy schedulingStrategy)
     {
-      if (_CurrentLevel.Count > 0 && _CurrentLevel[0].Skipped)
+      while (_CurrentLevel.Count > 0 && _CurrentLevel[0].Skipped)
       {
         var skippedNode = _CurrentLevel.RemoveFromFront();
 
