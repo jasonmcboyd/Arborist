@@ -1,7 +1,6 @@
 ﻿using Nito.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 namespace Arborist.Treenumerables.Treenumerators
 {
@@ -48,6 +47,8 @@ namespace Arborist.Treenumerables.Treenumerators
       {
         if (_RootsEnumerationCompleted)
         {
+          // TODO: This is not ideal. I would prefer to cache the index of the nodes that were no skipped
+          // to avoid this enumeration.
           var visitIndex = _CurrentLevel.TakeWhile(x => x.Skipped).Count();
           var unskippedVisit = _CurrentLevel[visitIndex];
           lastScheduled = lastScheduled.With(null, unskippedVisit.VisitCount - 1, null, null, null);
@@ -120,7 +121,7 @@ namespace Arborist.Treenumerables.Treenumerators
       return AfterRootsEnumerated(schedulingStrategy);
     }
 
-    // Remove _SiblingIndex reference from AfterRootsEnumerated.
+    // TODO: Remove _SiblingIndex reference from AfterRootsEnumerated. (I don't remember why I added this note).
     private bool AfterRootsEnumerated(SchedulingStrategy schedulingStrategy)
     {
       while (true)
