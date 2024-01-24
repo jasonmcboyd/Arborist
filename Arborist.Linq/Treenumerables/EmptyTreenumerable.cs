@@ -12,9 +12,9 @@ namespace Arborist.Linq.Treenumerables
     public static EmptyTreenumerable<TNode> Instance => _Instance;
 
     public ITreenumerator<TNode> GetBreadthFirstTreenumerator()
-      => EmptyTreenumerator<TNode>.Instance;
+      => new EmptyTreenumerator<TNode>();
 
     public ITreenumerator<TNode> GetDepthFirstTreenumerator()
-      => EmptyTreenumerator<TNode>.Instance;
+      => new EmptyTreenumerator<TNode>();
   }
 }

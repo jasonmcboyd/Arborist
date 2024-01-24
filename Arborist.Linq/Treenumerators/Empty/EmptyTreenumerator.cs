@@ -4,18 +4,20 @@ namespace Arborist.Linq.Treenumerators
 {
   internal class EmptyTreenumerator<TNode> : ITreenumerator<TNode>
   {
-    private EmptyTreenumerator()
+    public EmptyTreenumerator()
     {
     }
 
-    private static readonly EmptyTreenumerator<TNode> _Instance = new EmptyTreenumerator<TNode>();
-    public static EmptyTreenumerator<TNode> Instance => _Instance;
-
     public NodeVisit<TNode> Current => throw new InvalidOperationException();
 
-    public TreenumeratorState State => TreenumeratorState.EnumerationFinished;
+    public TreenumeratorState State { get; private set; } = TreenumeratorState.EnumerationNotStarted;
 
-    public bool MoveNext(SchedulingStrategy schedulingStrategy) => false;
+    public bool MoveNext(SchedulingStrategy schedulingStrategy)
+    {
+      State = TreenumeratorState.EnumerationFinished;
+
+      return false;
+    }
 
     public void Dispose()
     {
