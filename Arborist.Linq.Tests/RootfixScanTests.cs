@@ -1,33 +1,79 @@
-//using Arborist.Linq;
-//using Arborist.Tests.Utilities;
-//using Microsoft.VisualStudio.TestTools.UnitTesting;
-//using System.Linq;
+using Arborist.Tests.Utils;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
 
-//namespace Arborist.Linq.Tests
-//{
-//  [TestClass]
-//  public class RootfixScanTests
-//  {
-//    [TestMethod]
-//    public void PreOrderTraversal_TwoLevels()
-//    {
-//      // Arrange
-//      var root = TreeNode.Create(1, 2, 3);
+namespace Arborist.Linq.Tests
+{
+  [TestClass]
+  public class RootfixScanTests
+  {
+    public static IEnumerable<object[]> GetTestData()
+    {
+      yield return new object[]
+      {
+        "a",
+        new[] { "a" }
+      };
+      yield return new object[]
+      {
+        "a,b,c",
+        new[] { "a", "b", "c" }
+      };
+      yield return new object[]
+      {
+        "a(b,c)",
+        new[] { "a", "ab", "ac" }
+      };
+      yield return new object[]
+      {
+        "a(b(e,f,g),c(h,i,j))",
+        new[] { "a", "ab", "abe", "abf", "abg", "c", "ch", "ci", "cj" }
+      };
+      yield return new object[]
+      {
+        "a(b(c))",
+        new[] { "a", "ab", "abc" }
+      };
+      yield return new object[]
+      {
+        "a(b,c),d(e,f)",
+        new[] { "a", "ab", "ac", "d", "de", "df" }
+      };
+      yield return new object[]
+      {
+        "a,b(c),d(e(f))",
+        new[] { "a", "b", "bc", "d", "de", "def" }
+      };
+    }
 
-//      var treenumerable = TestTreenumerableFactory.Create(root);
+    public static string GetTestDisplayName(MethodInfo methodInfo, object[] data)
+    {
+      return data[0].ToString();
+    }
 
-//      // Act
-//      var actual =
-//        treenumerable
-//        .RootfixScan()
-//        .PreOrderTraversal()
-//        .Select(x => x.Value)
-//        .ToArray();
+    [TestMethod]
+    [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
+    public void RootfixScan(
+      string treeString,
+      string[] expected)
+    {
+      // Arrange
+      var treenumerable = TreeStringParser.ParseTreeString(treeString);
 
-//      // Assert
-//      var expected = new[] { 1, 3, 4 };
+      // Act
+      var actual =
+        treenumerable
+        .Do(visit => Debug.WriteLine((visit.Node, visit.VisitCount, visit.SiblingIndex, visit.Depth)))
+        .RootfixScan((visit, accumulate) => visit.Node + accumulate.Node)
+        .Do(visit => Debug.WriteLine((visit.Node, visit.VisitCount, visit.SiblingIndex, visit.Depth)))
+        .PreOrderTraversal()
+        .ToArray();
 
-//      Assert.That.SequencesAreEqual(expected, actual);
-//    }
-//  }
-//}
+      // Assert
+      CollectionAssert.AreEqual(expected, actual);
+    }
+  }
+}

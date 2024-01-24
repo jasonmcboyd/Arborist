@@ -34,6 +34,7 @@ namespace Arborist.Linq.Treenumerators
         return false;
 
       var innerVisit = InnerTreenumerator.Current;
+      State = InnerTreenumerator.State;
 
       if (innerVisit.Depth == 0)
       {
