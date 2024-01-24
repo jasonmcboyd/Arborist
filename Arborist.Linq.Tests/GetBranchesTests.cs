@@ -8,7 +8,7 @@ using System.Reflection;
 namespace Arborist.Linq.Tests
 {
   [TestClass]
-  public class GetBranchesTest
+  public class GetBranchesTests
   {
     public static IEnumerable<object[]> GetTestData()
     {
