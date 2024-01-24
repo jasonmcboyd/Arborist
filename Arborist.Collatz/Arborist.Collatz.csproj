@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Arborist.Linq\Arborist.Linq.csproj" />
+    <ProjectReference Include="..\Arborist.Treenumerables\Arborist.Treenumerables.csproj" />
     <ProjectReference Include="..\Arborist\Arborist.csproj" />
   </ItemGroup>
 
