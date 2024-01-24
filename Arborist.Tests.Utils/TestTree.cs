@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Arborist.Treenumerables.Tests
+namespace Arborist.Tests.Utils
 {
   public class TestTree
   {

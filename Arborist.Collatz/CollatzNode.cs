@@ -8,11 +8,11 @@ namespace Arborist.Collatz
     public CollatzNode(ulong value)
     {
       if (value < 2)
-        throw new ArgumentOutOfRangeException();
+        throw new ArgumentOutOfRangeException($"The 'value' must be greater than 1.");
 
       Value = value;
 
-      _FirstChild = checked(value << 1);
+      _FirstChild = checked(value * 2);
 
       if (value != 4 && (value - 1) % 3 == 0)
       {

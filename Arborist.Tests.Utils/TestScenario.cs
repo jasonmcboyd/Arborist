@@ -1,7 +1,6 @@
-﻿using Arborist.Tests.Utils;
-using System;
+﻿using System;
 
-namespace Arborist.Treenumerables.Tests
+namespace Arborist.Tests.Utils
 {
   public class TestScenario
   {
