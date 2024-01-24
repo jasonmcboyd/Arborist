@@ -2,82 +2,78 @@ using Arborist.Linq;
 using Arborist.Tests.Utils;
 using Arborist.Treenumerables;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 
 namespace Arborist.Linq.Tests
 {
   [TestClass]
   public class PreOrderTraversalTests
   {
-    [TestMethod]
-    public void PreOrderTraversal_TwoLevels()
+    public static IEnumerable<object[]> GetTestData()
     {
-      // Arrange
-      var root = TreeNode.Create('a', 'b', 'c');
-
-      var treenumerable = TestTreenumerableFactory.Create<TreeNode<char>, char>(root);
-
-      // Act
-      var actual =
-        treenumerable
-        .PreOrderTraversal()
-        .Do(x => Debug.WriteLine(x))
-        .ToArray();
-
-      // Assert
-      var expected = new[] { 'a', 'b', 'c' };
-
-      Assert.IsTrue(Enumerable.SequenceEqual(actual, expected));
-    }
-
-    [TestMethod]
-    public void PreOrderTraversal_MultipleLevels()
-    {
-      // Arrange
-      var root =
-        TreeNode.Create('a',
-          TreeNode.Create('b', 'c', 'd'),
-          TreeNode.Create('e', 'f', 'g', 'h'));
-
-      var treenumerable = TestTreenumerableFactory.Create<TreeNode<char>, char>(root);
-
-      // Act
-      var actual =
-        treenumerable
-        .PreOrderTraversal()
-        .ToArray();
-
-      // Assert
-      var expected = new[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' };
-
-      Assert.IsTrue(Enumerable.SequenceEqual(actual, expected));
-    }
-
-    [TestMethod]
-    public void PreOrderTraversal_MultipleRoots_MultipleLevels()
-    {
-      // Arrange
-      var roots = new[]
+      yield return new object[]
       {
-        TreeNode.Create('a',
-          TreeNode.Create('b', 'c', 'd'),
-          TreeNode.Create('e', 'f', 'g', 'h')),
-        TreeNode.Create('i', 'j', 'k')
+        "a",
+        new[] { "a" }
       };
+      yield return new object[]
+      {
+        "a,b,c",
+        new[] { "a", "b", "c" }
+      };
+      yield return new object[]
+      {
+        "a(b,c)",
+        new[] { "a", "b", "c" }
+      };
+      yield return new object[]
+      {
+        "a(b(e,f,g),c(h,i,j))",
+        new[] { "a", "b", "e", "f", "g", "c", "h", "i", "j" }
+      };
+      yield return new object[]
+      {
+        "a(b(c))",
+        new[] { "a", "b", "c" }
+      };
+      yield return new object[]
+      {
+        "a(b,c),d(e,f)",
+        new[] { "a", "b", "c", "d", "e", "f" }
+      };
+      yield return new object[]
+      {
+        "a,b(c),d(e(f))",
+        new[] { "a", "b", "c", "d", "e", "f" }
+      };
+    }
 
-      var treenumerable = TestTreenumerableFactory.Create<TreeNode<char>, char>(roots);
+    public static string GetTestDisplayName(MethodInfo methodInfo, object[] data)
+    {
+      return data[0].ToString();
+    }
+
+    [TestMethod]
+    [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
+    public void PreOrderTraversal(
+      string treeString,
+      string[] expected)
+    {
+      // Arrange
+      var treenumerable = TreeStringParser.ParseTreeString(treeString);
 
       // Act
       var actual =
         treenumerable
         .PreOrderTraversal()
+        .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k' };
-
-      Assert.IsTrue(Enumerable.SequenceEqual(actual, expected));
+      CollectionAssert.AreEqual(expected, actual);
     }
   }
 }
