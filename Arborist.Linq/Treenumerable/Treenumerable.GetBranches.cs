@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Arborist.Linq.Extensions;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Arborist.Linq
@@ -11,8 +12,11 @@ namespace Arborist.Linq
 
       foreach (var visit in source.GetDepthFirstTraversal())
       {
-        if (visit.VisitCount == 1)
+        if (visit.VisitCount == 0)
           continue;
+
+        if (visit.Depth == 0 && visit.VisitCount == 1)
+          branch.Clear();
 
         if (branch.Count == 0)
         {
@@ -23,9 +27,16 @@ namespace Arborist.Linq
         var depthComparison = visit.Depth.CompareTo(branch.Last().Depth);
 
         if (depthComparison < 0)
-          branch.RemoveAt(branch.Count - 1);
+          branch.RemoveLast();
         else if (depthComparison == 0)
-          yield return branch.Select(branchStep => branchStep.Node).ToArray();
+        {
+          var result = branch.Select(branchStep => branchStep.Node).ToArray();
+
+          if (branch.Count == 1)
+            branch.RemoveLast();
+
+          yield return result;
+        }
         else
           branch.Add(visit);
       }

@@ -101,10 +101,8 @@ namespace Arborist.Linq.Tests
       var actual =
         treenumerable
         .GetBranches()
+        .Do(branch => Debug.WriteLine(string.Join(", ", branch)))
         .ToArray();
-
-      foreach (var a in actual)
-        Debug.WriteLine(string.Join(", ", a));
 
       // Assert
       Assert.AreEqual(expected.Length, actual.Length);
