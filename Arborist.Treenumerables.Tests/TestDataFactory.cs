@@ -52,7 +52,7 @@ namespace Arborist.Treenumerables.Tests
             new TestScenario
             {
               SchedulingPredicate = visit => SchedulingStrategy.ScheduleForTraversal,
-              Description = "Traversal all",
+              Description = "Traverse all",
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
                 (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),

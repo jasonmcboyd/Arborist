@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Arborist.Treenumerables
@@ -8,6 +10,13 @@ namespace Arborist.Treenumerables
   {
     public TreeNode(TValue value)
       : this(value, Array.Empty<TreeNode<TValue>>())
+    {
+    }
+
+    public TreeNode(
+      TValue value,
+      IEnumerable<TreeNode<TValue>> children)
+      : this(value, children?.ToArray())
     {
     }
 
