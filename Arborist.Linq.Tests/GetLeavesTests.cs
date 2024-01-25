@@ -1,5 +1,6 @@
 using Arborist.Linq;
 using Arborist.Tests.Utils;
+using Arborist.Treenumerables.Serialization;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -33,7 +34,7 @@ namespace Arborist.Linq.Tests
       string[] expected)
     {
       // Arrange
-      var treenumerable = TreeStringParser.ParseTreeString(treeString);
+      var treenumerable = TreeSerializer.Deserialize(treeString);
 
       // Act
       var actual =

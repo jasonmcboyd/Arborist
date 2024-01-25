@@ -1,4 +1,5 @@
 using Arborist.Tests.Utils;
+using Arborist.Treenumerables.Serialization;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Diagnostics;
 using System.Linq;
@@ -14,8 +15,8 @@ namespace Arborist.Linq.Tests
       // Arrange
       var tree = "a(b,c)";
 
-      var treenumerable = TreeStringParser.ParseTreeString(tree);
-      var scion = TreeStringParser.ParseTreeString("d");
+      var treenumerable = TreeSerializer.Deserialize(tree);
+      var scion = TreeSerializer.Deserialize("d");
 
       // Act
       var actual =
@@ -50,8 +51,8 @@ namespace Arborist.Linq.Tests
       // Arrange
       var tree = "a(b,c)";
 
-      var treenumerable = TreeStringParser.ParseTreeString(tree);
-      var scion = TreeStringParser.ParseTreeString("d");
+      var treenumerable = TreeSerializer.Deserialize(tree);
+      var scion = TreeSerializer.Deserialize("d");
 
       // Act
       var actual =
@@ -87,8 +88,8 @@ namespace Arborist.Linq.Tests
       // Arrange
       var tree = "a(b,c)";
 
-      var treenumerable = TreeStringParser.ParseTreeString(tree);
-      var scion = TreeStringParser.ParseTreeString("d");
+      var treenumerable = TreeSerializer.Deserialize(tree);
+      var scion = TreeSerializer.Deserialize("d");
 
       // Act
       var actual =
@@ -118,8 +119,8 @@ namespace Arborist.Linq.Tests
       // Arrange
       var tree = "a";
 
-      var treenumerable = TreeStringParser.ParseTreeString(tree);
-      var scion = TreeStringParser.ParseTreeString("b");
+      var treenumerable = TreeSerializer.Deserialize(tree);
+      var scion = TreeSerializer.Deserialize("b");
 
       // Act
       var actual =
@@ -149,8 +150,8 @@ namespace Arborist.Linq.Tests
       // Arrange
       var tree = "a";
 
-      var treenumerable = TreeStringParser.ParseTreeString(tree);
-      var scion = TreeStringParser.ParseTreeString("b");
+      var treenumerable = TreeSerializer.Deserialize(tree);
+      var scion = TreeSerializer.Deserialize("b");
 
       // Act
       var actual =
@@ -183,7 +184,7 @@ namespace Arborist.Linq.Tests
       // Arrange
       var tree = "a";
 
-      var treenumerable = TreeStringParser.ParseTreeString(tree);
+      var treenumerable = TreeSerializer.Deserialize(tree);
 
       // Act
       var actual =

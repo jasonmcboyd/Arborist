@@ -1,4 +1,5 @@
 using Arborist.Tests.Utils;
+using Arborist.Treenumerables.Serialization;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -36,7 +37,7 @@ namespace Arborist.Treenumerables.Tests
       int testScenarioIndex)
     {
       // Arrange
-      var treenumerable = TreeStringParser.ParseTreeString(treeString);
+      var treenumerable = TreeSerializer.Deserialize(treeString);
       var testScenario = TestDataFactory.TestTrees[testTreeIndex].TestScenarios[testScenarioIndex];
 
       var expected = testScenario.ExpectedDepthFirstResults;
@@ -66,7 +67,7 @@ namespace Arborist.Treenumerables.Tests
       int testScenarioIndex)
     {
       // Arrange
-      var treenumerable = TreeStringParser.ParseTreeString(treeString);
+      var treenumerable = TreeSerializer.Deserialize(treeString);
       var testScenario = TestDataFactory.TestTrees[testTreeIndex].TestScenarios[testScenarioIndex];
 
       var expected = testScenario.ExpectedBreadthFirstResults;
@@ -96,7 +97,7 @@ namespace Arborist.Treenumerables.Tests
       int testScenarioIndex)
     {
       // Arrange
-      var treenumerable = TreeStringParser.ParseTreeString(treeString);
+      var treenumerable = TreeSerializer.Deserialize(treeString);
       var testScenario = TestDataFactory.TestTrees[testTreeIndex].TestScenarios[testScenarioIndex];
 
       MoveNextResult<string>[] Sort(IEnumerable<MoveNextResult<string>> nodes) =>
