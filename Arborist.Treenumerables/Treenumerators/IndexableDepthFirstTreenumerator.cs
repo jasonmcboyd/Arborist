@@ -77,6 +77,17 @@ namespace Arborist.Treenumerables.Treenumerators
       IndexableTreenumeratorNodeVisit<TNode, TValue> previousShadowVisit;
       NodeVisit<TValue> nextVisit;
 
+      if (schedulingStrategy == SchedulingStrategy.SkipDescendantSubtrees)
+      {
+        previousShadowVisit = _ShadowStack.Pop();
+
+        schedulingStrategy = SchedulingStrategy.ScheduleForTraversal;
+
+        previousShadowVisit = previousShadowVisit.With(null, null, null, previousShadowVisit.Node.ChildCount, null);
+
+        _ShadowStack.Push(previousShadowVisit);
+      }
+
       if (schedulingStrategy == SchedulingStrategy.ScheduleForTraversal)
       {
         // TODO: I don't think tracking visit counts for the shadow stack matters.
@@ -118,24 +129,6 @@ namespace Arborist.Treenumerables.Treenumerators
         return true;
       }
 
-      ////if (schedulingstrategy == schedulingstrategy.skipsubtree)
-      ////{
-      ////  _shadowstack.pop();
-
-      ////todo: testing this commented out.
-      ////  if (_shadowstack.count == 0)
-      ////    return null;
-
-      ////  return incrementvisitcount();
-
-
-      ////todo: second attempt.
-      ////  return null;
-
-      ////  return onascendingtree();
-      ////}
-
-      // Set the previously visited shadow visit to skippped.
       previousShadowVisit = _ShadowStack.Pop().Skip();
 
       if (schedulingStrategy == SchedulingStrategy.SkipSubtree)

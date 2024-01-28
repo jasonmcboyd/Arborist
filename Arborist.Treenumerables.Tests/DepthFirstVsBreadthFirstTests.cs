@@ -26,7 +26,8 @@ namespace Arborist.Treenumerables.Tests
       var filterStrategies = new[]
       {
         SchedulingStrategy.SkipNode,
-        SchedulingStrategy.SkipSubtree
+        SchedulingStrategy.SkipSubtree,
+        SchedulingStrategy.SkipDescendantSubtrees,
       };
 
       foreach (var treeString in treeStrings)
