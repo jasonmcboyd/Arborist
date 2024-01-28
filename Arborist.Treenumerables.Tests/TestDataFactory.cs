@@ -291,7 +291,7 @@ namespace Arborist.Treenumerables.Tests
                 (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
                 (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
                 (TreenumeratorState.VisitingNode,   "b", 1, 1, 0),
-                (TreenumeratorState.VisitingNode,   "b", 1, 1, 0),
+                (TreenumeratorState.VisitingNode,   "b", 2, 1, 0),
                 (TreenumeratorState.VisitingNode,   "c", 1, 2, 0),
                 (TreenumeratorState.VisitingNode,   "c", 2, 2, 0),
               },

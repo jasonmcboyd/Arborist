@@ -38,6 +38,12 @@ namespace Arborist.Treenumerables.Treenumerators
     {
       var lastScheduled = _CurrentLevel.RemoveFromFront();
 
+      if (schedulingStrategy == SchedulingStrategy.SkipDescendantSubtrees)
+      {
+        lastScheduled = lastScheduled.With(null, null, null, lastScheduled.Node.ChildCount);
+        schedulingStrategy = SchedulingStrategy.ScheduleForTraversal;
+      }
+
       if (schedulingStrategy == SchedulingStrategy.SkipNode)
       {
         lastScheduled = lastScheduled.Skip();
@@ -128,7 +134,6 @@ namespace Arborist.Treenumerables.Treenumerators
       return AfterRootsEnumerated(schedulingStrategy);
     }
 
-    // TODO: Remove _SiblingIndex reference from AfterRootsEnumerated. (I don't remember why I added this note).
     private bool AfterRootsEnumerated(SchedulingStrategy schedulingStrategy)
     {
       while (true)
@@ -151,7 +156,8 @@ namespace Arborist.Treenumerables.Treenumerators
         if ((visit.VisitCount == 0
             && !visit.Skipped)
           || (State == TreenumeratorState.SchedulingNode
-            && schedulingStrategy == SchedulingStrategy.ScheduleForTraversal))
+            && (schedulingStrategy == SchedulingStrategy.ScheduleForTraversal
+            || schedulingStrategy == SchedulingStrategy.SkipDescendantSubtrees)))
         {
           if (visit.Skipped)
           {
