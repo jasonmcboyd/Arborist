@@ -31,6 +31,7 @@ namespace Arborist.Linq.Treenumerators
 
       Current = InnerTreenumerator.Current;
       State = InnerTreenumerator.State;
+
       return true;
     }
   }
