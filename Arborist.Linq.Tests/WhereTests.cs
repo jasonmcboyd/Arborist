@@ -29,10 +29,9 @@ namespace Arborist.Linq.Tests
       // Assert
       var expected = new MoveNextResult<string>[]
       {
-        (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
-        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
+        (TreenumeratorState.SchedulingNode, "b", 0, 0, 0),
         (TreenumeratorState.VisitingNode,   "b", 1, 0, 0),
-        (TreenumeratorState.SchedulingNode, "c", 0, 0, 2),
+        (TreenumeratorState.SchedulingNode, "c", 0, 0, 1),
         (TreenumeratorState.VisitingNode,   "b", 2, 0, 0),
         (TreenumeratorState.VisitingNode,   "c", 1, 0, 1),
         (TreenumeratorState.VisitingNode,   "c", 2, 0, 1),
@@ -62,8 +61,7 @@ namespace Arborist.Linq.Tests
       {
         (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
         (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
-        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
-        (TreenumeratorState.SchedulingNode, "c", 0, 0, 2),
+        (TreenumeratorState.SchedulingNode, "c", 0, 0, 1),
         (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
         (TreenumeratorState.VisitingNode,   "c", 1, 0, 1),
         (TreenumeratorState.VisitingNode,   "c", 2, 0, 1),
@@ -96,7 +94,6 @@ namespace Arborist.Linq.Tests
         (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
         (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
         (TreenumeratorState.VisitingNode,   "b", 1, 0, 1),
-        (TreenumeratorState.SchedulingNode, "c", 0, 0, 2),
         (TreenumeratorState.VisitingNode,   "b", 2, 0, 1),
       };
 
@@ -124,8 +121,6 @@ namespace Arborist.Linq.Tests
       {
         (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
         (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
-        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
-        (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
         (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
       };
 
@@ -151,9 +146,8 @@ namespace Arborist.Linq.Tests
       // Assert
       var expected = new MoveNextResult<string>[]
       {
-        (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
-        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
-        (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
+        (TreenumeratorState.SchedulingNode, "b", 0, 0, 0),
+        (TreenumeratorState.SchedulingNode, "c", 0, 1, 0),
         (TreenumeratorState.VisitingNode,   "b", 1, 0, 0),
         (TreenumeratorState.VisitingNode,   "b", 2, 0, 0),
         (TreenumeratorState.VisitingNode,   "c", 1, 1, 0),
@@ -184,10 +178,9 @@ namespace Arborist.Linq.Tests
       {
         (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
         (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
-        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
-        (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
+        (TreenumeratorState.SchedulingNode, "c", 0, 0, 1),
         (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
-        (TreenumeratorState.SchedulingNode, "d", 0, 2, 1),
+        (TreenumeratorState.SchedulingNode, "d", 0, 1, 1),
         (TreenumeratorState.VisitingNode,   "a", 3, 0, 0),
         (TreenumeratorState.VisitingNode,   "c", 1, 0, 1),
         (TreenumeratorState.VisitingNode,   "c", 2, 0, 1),
@@ -221,8 +214,7 @@ namespace Arborist.Linq.Tests
         (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
         (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
         (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
-        (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
-        (TreenumeratorState.SchedulingNode, "d", 0, 2, 1),
+        (TreenumeratorState.SchedulingNode, "d", 0, 1, 1),
         (TreenumeratorState.VisitingNode,   "a", 3, 0, 0),
         (TreenumeratorState.VisitingNode,   "b", 1, 0, 1),
         (TreenumeratorState.VisitingNode,   "b", 2, 0, 1),
@@ -258,7 +250,6 @@ namespace Arborist.Linq.Tests
         (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
         (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
         (TreenumeratorState.VisitingNode,   "a", 3, 0, 0),
-        (TreenumeratorState.SchedulingNode, "d", 0, 2, 1),
         (TreenumeratorState.VisitingNode,   "b", 1, 0, 1),
         (TreenumeratorState.VisitingNode,   "b", 2, 0, 1),
         (TreenumeratorState.VisitingNode,   "c", 1, 1, 1),
@@ -287,9 +278,6 @@ namespace Arborist.Linq.Tests
       // Assert
       var expected = new MoveNextResult<string>[]
       {
-        (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
-        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
-        (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
       };
 
       CollectionAssert.AreEqual(expected, actual);
@@ -350,10 +338,9 @@ namespace Arborist.Linq.Tests
       // Assert
       var expected = new MoveNextResult<string>[]
       {
-        (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
-        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
+        (TreenumeratorState.SchedulingNode, "b", 0, 0, 0),
         (TreenumeratorState.VisitingNode,   "b", 1, 0, 0),
-        (TreenumeratorState.SchedulingNode, "c", 0, 0, 2),
+        (TreenumeratorState.SchedulingNode, "c", 0, 0, 1),
         (TreenumeratorState.VisitingNode,   "c", 1, 0, 1),
         (TreenumeratorState.VisitingNode,   "c", 2, 0, 1),
         (TreenumeratorState.VisitingNode,   "b", 2, 0, 0),
@@ -383,8 +370,7 @@ namespace Arborist.Linq.Tests
       {
         (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
         (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
-        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
-        (TreenumeratorState.SchedulingNode, "c", 0, 0, 2),
+        (TreenumeratorState.SchedulingNode, "c", 0, 0, 1),
         (TreenumeratorState.VisitingNode,   "c", 1, 0, 1),
         (TreenumeratorState.VisitingNode,   "c", 2, 0, 1),
         (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
@@ -416,7 +402,6 @@ namespace Arborist.Linq.Tests
         (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
         (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
         (TreenumeratorState.VisitingNode,   "b", 1, 0, 1),
-        (TreenumeratorState.SchedulingNode, "c", 0, 0, 2),
         (TreenumeratorState.VisitingNode,   "b", 2, 0, 1),
         (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
       };
@@ -445,8 +430,6 @@ namespace Arborist.Linq.Tests
       {
         (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
         (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
-        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
-        (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
         (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
       };
 
@@ -472,11 +455,10 @@ namespace Arborist.Linq.Tests
       // Assert
       var expected = new MoveNextResult<string>[]
       {
-        (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
-        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
+        (TreenumeratorState.SchedulingNode, "b", 0, 0, 0),
         (TreenumeratorState.VisitingNode,   "b", 1, 0, 0),
         (TreenumeratorState.VisitingNode,   "b", 2, 0, 0),
-        (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
+        (TreenumeratorState.SchedulingNode, "c", 0, 1, 0),
         (TreenumeratorState.VisitingNode,   "c", 1, 1, 0),
         (TreenumeratorState.VisitingNode,   "c", 2, 1, 0)
       };
@@ -505,12 +487,11 @@ namespace Arborist.Linq.Tests
       {
         (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
         (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
-        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
-        (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
+        (TreenumeratorState.SchedulingNode, "c", 0, 0, 1),
         (TreenumeratorState.VisitingNode,   "c", 1, 0, 1),
         (TreenumeratorState.VisitingNode,   "c", 2, 0, 1),
         (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
-        (TreenumeratorState.SchedulingNode, "d", 0, 2, 1),
+        (TreenumeratorState.SchedulingNode, "d", 0, 1, 1),
         (TreenumeratorState.VisitingNode,   "d", 1, 1, 1),
         (TreenumeratorState.VisitingNode,   "d", 2, 1, 1),
         (TreenumeratorState.VisitingNode,   "a", 3, 0, 0),
@@ -544,8 +525,7 @@ namespace Arborist.Linq.Tests
         (TreenumeratorState.VisitingNode,   "b", 1, 0, 1),
         (TreenumeratorState.VisitingNode,   "b", 2, 0, 1),
         (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
-        (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
-        (TreenumeratorState.SchedulingNode, "d", 0, 2, 1),
+        (TreenumeratorState.SchedulingNode, "d", 0, 1, 1),
         (TreenumeratorState.VisitingNode,   "d", 1, 1, 1),
         (TreenumeratorState.VisitingNode,   "d", 2, 1, 1),
         (TreenumeratorState.VisitingNode,   "a", 3, 0, 0),
@@ -555,7 +535,7 @@ namespace Arborist.Linq.Tests
     }
 
     [TestMethod]
-    public void Where_DepthFirstTraversal_TwoLevels_SkipsThirdChild()
+    public void Where_DepthFirstTraversal_TwoLevels_LevelOne_SiblingTwo()
     {
       // Arrange
       var tree = "a(b,c,d)";
@@ -583,7 +563,6 @@ namespace Arborist.Linq.Tests
         (TreenumeratorState.VisitingNode,   "c", 1, 1, 1),
         (TreenumeratorState.VisitingNode,   "c", 2, 1, 1),
         (TreenumeratorState.VisitingNode,   "a", 3, 0, 0),
-        (TreenumeratorState.SchedulingNode, "d", 0, 2, 1),
       };
 
       CollectionAssert.AreEqual(expected, actual);
@@ -608,9 +587,6 @@ namespace Arborist.Linq.Tests
       // Assert
       var expected = new MoveNextResult<string>[]
       {
-        (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
-        (TreenumeratorState.SchedulingNode, "b", 0, 0, 1),
-        (TreenumeratorState.SchedulingNode, "c", 0, 1, 1),
       };
 
       CollectionAssert.AreEqual(expected, actual);
@@ -645,6 +621,60 @@ namespace Arborist.Linq.Tests
         (TreenumeratorState.VisitingNode,   "c", 1, 1, 1),
         (TreenumeratorState.VisitingNode,   "c", 2, 1, 1),
         (TreenumeratorState.VisitingNode,   "a", 3, 0, 0),
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void Where_DepthFirstTraversal_OneLevel_LevelZero_SiblingZero()
+    {
+      // Arrange
+      var tree = "a,b";
+
+      var treenumerable = TreeSerializer.Deserialize(tree);
+
+      // Act
+      var actual =
+        treenumerable
+        .Where(visit => visit.Node == "a")
+        .ToDepthFirstMoveNext()
+        .Do(visit => Debug.WriteLine(visit))
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<string>[]
+      {
+        (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
+        (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
+        (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
+      };
+
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void Where_DepthFirstTraversal_OneLevel_LevelZero_SiblingOne()
+    {
+      // Arrange
+      var tree = "a,b";
+
+      var treenumerable = TreeSerializer.Deserialize(tree);
+
+      // Act
+      var actual =
+        treenumerable
+        .Where(visit => visit.Node == "b")
+        .ToDepthFirstMoveNext()
+        .Do(visit => Debug.WriteLine(visit))
+        .ToArray();
+
+      // Assert
+      var expected = new MoveNextResult<string>[]
+      {
+        (TreenumeratorState.SchedulingNode, "b", 0, 0, 0),
+        (TreenumeratorState.VisitingNode,   "b", 1, 0, 0),
+        (TreenumeratorState.VisitingNode,   "b", 2, 0, 0),
       };
 
       CollectionAssert.AreEqual(expected, actual);

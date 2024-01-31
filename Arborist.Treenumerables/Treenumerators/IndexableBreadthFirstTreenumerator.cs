@@ -4,6 +4,10 @@ using System.Linq;
 
 namespace Arborist.Treenumerables.Treenumerators
 {
+  // TODO: I think a lot of the complexity of this class is because it has
+  // too many responsibilities. I think if this was split into two classes,
+  // one to walk the original tree and stores its state and second to produce
+  // the new tree and store its state that might simplify the logic.
   internal sealed class IndexableBreadthFirstTreenumerator<TNode, TValue>
     : TreenumeratorBase<TValue>
     where TNode : INodeWithIndexableChildren<TNode, TValue>
