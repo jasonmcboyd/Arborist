@@ -19,7 +19,7 @@ namespace Arborist.Linq.Treenumerators
       TNode seed) : base(InnerTreenumerator)
     {
       _Accumulator = accumulator;
-      _SeedVisit = new NodeVisit<TNode>(seed, 1, 0, -1);
+      _SeedVisit = new NodeVisit<TNode>(seed, 1, 0, -1, false);
     }
 
     private readonly Func<NodeVisit<TNode>, NodeVisit<TInner>, TNode> _Accumulator;
@@ -30,37 +30,39 @@ namespace Arborist.Linq.Treenumerators
 
     protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
     {
-      if (!InnerTreenumerator.MoveNext(schedulingStrategy))
-        return false;
+      // TODO:
+      throw new NotImplementedException();
+      //if (!InnerTreenumerator.MoveNext(schedulingStrategy))
+      //  return false;
 
-      var innerVisit = InnerTreenumerator.Current;
-      State = InnerTreenumerator.State;
+      //var innerVisit = InnerTreenumerator.Current;
+      //State = InnerTreenumerator.State;
 
-      if (innerVisit.Depth == 0)
-      {
-        var currentNode = _Accumulator(_SeedVisit, innerVisit);
-        Current = NodeVisit.Create(currentNode, innerVisit.VisitCount, innerVisit.SiblingIndex, innerVisit.Depth);
-        CurrentBranch.Push(Current);
-      }
-      else if (innerVisit.Depth == Current.Depth)
-      {
-        Current = NodeVisit.Create(Current.Node, innerVisit.VisitCount, Current.SiblingIndex, Current.Depth);
-        CurrentBranch.Pop();
-        CurrentBranch.Push(Current);
-      }
-      else if (innerVisit.Depth > Current.Depth)
-      {
-        var currentNode = _Accumulator(Current, innerVisit);
-        Current = NodeVisit.Create(currentNode, innerVisit.VisitCount, innerVisit.SiblingIndex, innerVisit.Depth);
-        CurrentBranch.Push(Current);
-      }
-      else
-      {
-        CurrentBranch.Pop();
-        Current = CurrentBranch.Peek();
-      }
+      //if (innerVisit.Depth == 0)
+      //{
+      //  var currentNode = _Accumulator(_SeedVisit, innerVisit);
+      //  Current = NodeVisit.Create(currentNode, innerVisit.VisitCount, innerVisit.SiblingIndex, innerVisit.Depth);
+      //  CurrentBranch.Push(Current);
+      //}
+      //else if (innerVisit.Depth == Current.Depth)
+      //{
+      //  Current = NodeVisit.Create(Current.Node, innerVisit.VisitCount, Current.SiblingIndex, Current.Depth);
+      //  CurrentBranch.Pop();
+      //  CurrentBranch.Push(Current);
+      //}
+      //else if (innerVisit.Depth > Current.Depth)
+      //{
+      //  var currentNode = _Accumulator(Current, innerVisit);
+      //  Current = NodeVisit.Create(currentNode, innerVisit.VisitCount, innerVisit.SiblingIndex, innerVisit.Depth);
+      //  CurrentBranch.Push(Current);
+      //}
+      //else
+      //{
+      //  CurrentBranch.Pop();
+      //  Current = CurrentBranch.Peek();
+      //}
 
-      return true;
+      //return true;
     }
   }
 }

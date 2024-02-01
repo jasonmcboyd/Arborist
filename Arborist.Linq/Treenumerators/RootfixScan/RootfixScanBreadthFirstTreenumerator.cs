@@ -21,7 +21,7 @@ namespace Arborist.Linq.Treenumerators
       TNode seed) : base(innerTreenumerator)
     {
       _Accumulator = accumulator;
-      _SeedStep = NodeVisit.Create(seed, 1, 0, -1);
+      _SeedStep = NodeVisit.Create(seed, 1, 0, -1, false);
       _HasSeed = true;
     }
 
@@ -35,36 +35,38 @@ namespace Arborist.Linq.Treenumerators
 
     protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
     {
-      if (!InnerTreenumerator.MoveNext(schedulingStrategy))
-        return false;
+      // TODO:
+      throw new NotImplementedException();
+      //if (!InnerTreenumerator.MoveNext(schedulingStrategy))
+      //  return false;
       
-      var innerStep = InnerTreenumerator.Current;
+      //var innerStep = InnerTreenumerator.Current;
 
-      if (innerStep.Depth == 0)
-      {
-        var currentNode = _Accumulator(_SeedStep, innerStep);
-        Current = NodeVisit.Create(currentNode, 1, innerStep.SiblingIndex, innerStep.Depth);
-        _CurrentBranch.Push(Current);
-      }
-      else if (innerStep.Depth == Current.Depth)
-      {
-        Current = NodeVisit.Create(Current.Node, 1, Current.SiblingIndex, Current.Depth);
-        _CurrentBranch.Pop();
-        _CurrentBranch.Push(Current);
-      }
-      else if (innerStep.Depth > Current.Depth)
-      {
-        var currentNode = _Accumulator(Current, innerStep);
-        Current = NodeVisit.Create(currentNode, 1, innerStep.SiblingIndex, innerStep.Depth);
-        _CurrentBranch.Push(Current);
-      }
-      else
-      {
-        _CurrentBranch.Pop();
-        Current = _CurrentBranch.Peek();
-      }
+      //if (innerStep.Depth == 0)
+      //{
+      //  var currentNode = _Accumulator(_SeedStep, innerStep);
+      //  Current = NodeVisit.Create(currentNode, 1, innerStep.SiblingIndex, innerStep.Depth);
+      //  _CurrentBranch.Push(Current);
+      //}
+      //else if (innerStep.Depth == Current.Depth)
+      //{
+      //  Current = NodeVisit.Create(Current.Node, 1, Current.SiblingIndex, Current.Depth);
+      //  _CurrentBranch.Pop();
+      //  _CurrentBranch.Push(Current);
+      //}
+      //else if (innerStep.Depth > Current.Depth)
+      //{
+      //  var currentNode = _Accumulator(Current, innerStep);
+      //  Current = NodeVisit.Create(currentNode, 1, innerStep.SiblingIndex, innerStep.Depth);
+      //  _CurrentBranch.Push(Current);
+      //}
+      //else
+      //{
+      //  _CurrentBranch.Pop();
+      //  Current = _CurrentBranch.Peek();
+      //}
 
-      return true;
+      //return true;
     }
   }
 }

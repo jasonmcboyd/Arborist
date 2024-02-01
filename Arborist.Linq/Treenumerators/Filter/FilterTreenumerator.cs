@@ -122,7 +122,8 @@ namespace Arborist.Linq.Treenumerators
               InnerTreenumerator.Current.Node,
               0,
               0,
-              0);
+              0,
+              InnerTreenumerator.Current.Skipped);
         }
         else
         {
@@ -132,7 +133,8 @@ namespace Arborist.Linq.Treenumerators
               InnerTreenumerator.Current.Node,
               0,
               Current.VisitCount - 1,
-              Current.Depth + 1);
+              Current.Depth + 1,
+              InnerTreenumerator.Current.Skipped);
         }
       }
       else

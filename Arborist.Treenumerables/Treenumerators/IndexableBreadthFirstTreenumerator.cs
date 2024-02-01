@@ -1,13 +1,8 @@
 ﻿using Nito.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Arborist.Treenumerables.Treenumerators
 {
-  // TODO: I think a lot of the complexity of this class is because it has
-  // too many responsibilities. I think if this was split into two classes,
-  // one to walk the original tree and stores its state and second to produce
-  // the new tree and store its state that might simplify the logic.
   internal sealed class IndexableBreadthFirstTreenumerator<TNode, TValue>
     : TreenumeratorBase<TValue>
     where TNode : INodeWithIndexableChildren<TNode, TValue>
@@ -29,86 +24,49 @@ namespace Arborist.Treenumerables.Treenumerators
 
     protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
     {
+      if (State == TreenumeratorState.EnumerationFinished)
+        return false;
+
       if (State == TreenumeratorState.SchedulingNode)
         OnSchedulingVisit(schedulingStrategy);
 
       if (!_RootsEnumerationCompleted)
-        return BeforeRootsEnumerated(schedulingStrategy);
+      {
+        var beforeRootsEnumerated = BeforeRootsEnumerated(schedulingStrategy);
+
+        if (beforeRootsEnumerated.HasValue)
+          return beforeRootsEnumerated.Value;
+      }
+
+      if (_CurrentLevel.Count == 0)
+        (_CurrentLevel, _NextLevel) = (_NextLevel, _CurrentLevel);
+
+      if (_CurrentLevel.Count == 0)
+      {
+        State = TreenumeratorState.EnumerationFinished;
+        return false;
+      }
 
       return AfterRootsEnumerated(schedulingStrategy);
     }
 
     private void OnSchedulingVisit(SchedulingStrategy schedulingStrategy)
     {
-      var lastScheduled = _CurrentLevel.RemoveFromFront();
+      var lastScheduled = _NextLevel.RemoveFromBack();
+
+      if (schedulingStrategy == SchedulingStrategy.SkipSubtree)
+        return;
 
       if (schedulingStrategy == SchedulingStrategy.SkipDescendantSubtrees)
-      {
         lastScheduled = lastScheduled.With(null, null, null, lastScheduled.Node.ChildCount);
-        schedulingStrategy = SchedulingStrategy.ScheduleForTraversal;
-      }
-
-      if (schedulingStrategy == SchedulingStrategy.SkipNode)
-      {
+      else if (schedulingStrategy == SchedulingStrategy.SkipNode)
         lastScheduled = lastScheduled.Skip();
-        _CurrentLevel.AddToFront(lastScheduled);
-      }
-      else if (schedulingStrategy == SchedulingStrategy.ScheduleForTraversal)
-      {
-        if (_RootsEnumerationCompleted)
-        {
-          // TODO: This is not ideal. I would prefer to cache the index of the nodes that were no skipped
-          // to avoid this enumeration.
-          var visitIndex = _CurrentLevel.TakeWhile(x => x.Skipped).Count();
-          var unskippedVisit = _CurrentLevel[visitIndex];
-          lastScheduled = lastScheduled.With(null, unskippedVisit.VisitCount - 1, null, null, null);
-          _NextLevel.AddToBack(lastScheduled);
-        }
-        else
-        {
-          if (_CurrentLevel.Count > 1
-            && _CurrentLevel[0].Skipped)
-          {
-            lastScheduled = lastScheduled.With(null, _CurrentLevel.Last().SiblingIndex + 1, null, null, null);
-          }
-          _CurrentLevel.AddToBack(lastScheduled);
-        }
-      }
+
+      _NextLevel.AddToBack(lastScheduled);
     }
 
-    private bool BeforeRootsEnumerated(SchedulingStrategy schedulingStrategy)
+    private bool? BeforeRootsEnumerated(SchedulingStrategy schedulingStrategy)
     {
-      while (_CurrentLevel.Count > 0 && _CurrentLevel[0].Skipped)
-      {
-        var skippedNode = _CurrentLevel.RemoveFromFront();
-
-        if (skippedNode.HasNextChild())
-        {
-          var childIndex = skippedNode.VisitedChildrenCount;
-
-          var nextVisit =
-            IndexableTreenumeratorNodeVisit
-            .Create<TNode, TValue>(
-              skippedNode.Node[childIndex],
-              0,
-              childIndex,
-              skippedNode.Depth + 1,
-              0,
-              false);
-          
-          skippedNode = skippedNode.IncrementVisitedChildrenCount();
-          Current = nextVisit.ToNodeVisit();
-
-          _CurrentLevel.AddToFront(skippedNode);
-
-          _CurrentLevel.AddToFront(nextVisit);
-
-          State = TreenumeratorState.SchedulingNode;
-
-          return true;
-        }
-      }
-
       if (_RootsEnumerator.MoveNext())
       {
         _SiblingIndex++;
@@ -123,7 +81,7 @@ namespace Arborist.Treenumerables.Treenumerators
             0,
             false);
 
-        _CurrentLevel.AddToFront(nextVisit);
+        _NextLevel.AddToBack(nextVisit);
 
         Current = nextVisit.ToNodeVisit();
 
@@ -135,7 +93,7 @@ namespace Arborist.Treenumerables.Treenumerators
       _RootsEnumerationCompleted = true;
       _SiblingIndex = 0;
 
-      return AfterRootsEnumerated(schedulingStrategy);
+      return null;
     }
 
     private bool AfterRootsEnumerated(SchedulingStrategy schedulingStrategy)
@@ -143,65 +101,30 @@ namespace Arborist.Treenumerables.Treenumerators
       while (true)
       {
         if (_CurrentLevel.Count == 0)
-        {
-          _Depth++;
-          _SiblingIndex = 0;
           (_CurrentLevel, _NextLevel) = (_NextLevel, _CurrentLevel);
-        }
 
         if (_CurrentLevel.Count == 0)
-        {
-          State = TreenumeratorState.EnumerationFinished;
           return false;
-        }
 
         var visit = _CurrentLevel.RemoveFromFront();
 
-        if ((visit.VisitCount == 0
-            && !visit.Skipped)
-          || (State == TreenumeratorState.SchedulingNode
-            && (schedulingStrategy == SchedulingStrategy.ScheduleForTraversal
-            || schedulingStrategy == SchedulingStrategy.SkipDescendantSubtrees)))
+        // TODO: State == Scheduling and VisitCount == 0 should always happen together.
+        if (visit.VisitCount == 0
+          || (visit.VisitCount == 1 && !visit.HasNextChild())
+          || State == TreenumeratorState.SchedulingNode)
         {
-          if (visit.Skipped)
-          {
-            _CurrentLevel.AddToFront(visit);
-            var visitIndex = _CurrentLevel.TakeWhile(x => x.Skipped).Count();
-
-            visit = _CurrentLevel[visitIndex].IncrementVisitCount();
-
-            _CurrentLevel[visitIndex] = visit;
-
-            Current =
-              visit
-              .ToNodeVisit()
-              .WithDepth(_Depth)
-              .WithSiblingIndex(_SiblingIndex);
-
-            State = TreenumeratorState.VisitingNode;
-
-            return true;
-          }
-
-          if (visit.SiblingIndex == 0)
-            _SiblingIndex = 0;
-
           visit = visit.IncrementVisitCount();
 
-          _CurrentLevel.AddToFront(visit);
+          Current = visit.ToNodeVisit();
 
-          Current =
-            visit
-            .ToNodeVisit()
-            .WithDepth(_Depth)
-            .WithSiblingIndex(_SiblingIndex);
+          _CurrentLevel.AddToFront(visit);
 
           State = TreenumeratorState.VisitingNode;
 
           return true;
         }
 
-        if (visit.VisitedChildrenCount < visit.Node.ChildCount)
+        if (visit.HasNextChild())
         {
           var childIndex = visit.VisitedChildrenCount;
 
@@ -220,31 +143,12 @@ namespace Arborist.Treenumerables.Treenumerators
 
           _CurrentLevel.AddToFront(visit);
 
-          _CurrentLevel.AddToFront(nextVisit);
+          _NextLevel.AddToBack(nextVisit);
 
           State = TreenumeratorState.SchedulingNode;
 
           return true;
         }
-
-        if (visit.VisitCount == 1)
-        {
-          visit = visit.IncrementVisitCount();
-          _CurrentLevel.AddToFront(visit);
-
-          Current =
-            visit
-            .ToNodeVisit()
-            .WithDepth(_Depth)
-            .WithSiblingIndex(_SiblingIndex);
-
-          State = TreenumeratorState.VisitingNode;
-
-          return true;
-        }
-
-        if (!visit.Skipped)
-          _SiblingIndex++;
       }
     }
 

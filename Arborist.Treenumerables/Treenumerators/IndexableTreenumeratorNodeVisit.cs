@@ -105,7 +105,8 @@
         depthFirstNodeVisit.Node.Value,
         depthFirstNodeVisit.VisitCount,
         depthFirstNodeVisit.SiblingIndex,
-        depthFirstNodeVisit.Depth);
+        depthFirstNodeVisit.Depth,
+        depthFirstNodeVisit.Skipped);
 
     public static bool HasNextChild<TNode, TValue>(
       this IndexableTreenumeratorNodeVisit<TNode, TValue> depthFirstNode)

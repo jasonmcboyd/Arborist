@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Arborist.Linq.Treenumerators
 {
@@ -13,38 +14,40 @@ namespace Arborist.Linq.Treenumerators
 
     protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
     {
-      while (_Queue.Count < 2 && InnerTreenumerator.MoveNext(schedulingStrategy))
-        _Queue.Enqueue(InnerTreenumerator.Current);
+      // TODO:
+      throw new NotImplementedException();
+      //while (_Queue.Count < 2 && InnerTreenumerator.MoveNext(schedulingStrategy))
+      //  _Queue.Enqueue(InnerTreenumerator.Current);
 
-      if (_Queue.Count == 2)
-      {
-        var next = _Queue.Dequeue();
+      //if (_Queue.Count == 2)
+      //{
+      //  var next = _Queue.Dequeue();
        
-        Current =
-          new NodeVisit<WithPeekNextVisit<TNode>>(
-            new WithPeekNextVisit<TNode>(next.Node, _Queue.Peek()),
-            next.VisitCount,
-            next.SiblingIndex,
-            next.Depth);
+      //  Current =
+      //    new NodeVisit<WithPeekNextVisit<TNode>>(
+      //      new WithPeekNextVisit<TNode>(next.Node, _Queue.Peek()),
+      //      next.VisitCount,
+      //      next.SiblingIndex,
+      //      next.Depth);
 
-        return true;
-      }
+      //  return true;
+      //}
 
-      if (_Queue.Count == 1)
-      {
-        var next = _Queue.Dequeue();
+      //if (_Queue.Count == 1)
+      //{
+      //  var next = _Queue.Dequeue();
 
-        Current =
-          new NodeVisit<WithPeekNextVisit<TNode>>(
-            new WithPeekNextVisit<TNode>(next.Node),
-            next.VisitCount,
-            next.SiblingIndex,
-            next.Depth);
+      //  Current =
+      //    new NodeVisit<WithPeekNextVisit<TNode>>(
+      //      new WithPeekNextVisit<TNode>(next.Node),
+      //      next.VisitCount,
+      //      next.SiblingIndex,
+      //      next.Depth);
 
-        return true;
-      }
+      //  return true;
+      //}
 
-      return false;
+      //return false;
     }
   }
 }

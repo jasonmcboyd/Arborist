@@ -6,7 +6,8 @@
       TNode node,
       int visitCount,
       int siblingIndex,
-      int depth)
-      => new NodeVisit<TNode>(node, visitCount, siblingIndex, depth);
+      int depth,
+      bool skipped)
+      => new NodeVisit<TNode>(node, visitCount, siblingIndex, depth, skipped);
   }
 }

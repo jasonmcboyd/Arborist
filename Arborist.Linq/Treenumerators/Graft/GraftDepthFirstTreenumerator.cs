@@ -50,55 +50,57 @@ namespace Arborist.Linq.Treenumerators
       Func<int> depthCalculator,
       SchedulingStrategy schedulingStrategy)
     {
-      if (!treenumerator.MoveNext(schedulingStrategy))
-      {
-        if (branch.Count > 0)
-          branch.RemoveLast();
+      // TODO:
+      throw new NotImplementedException();
+      //if (!treenumerator.MoveNext(schedulingStrategy))
+      //{
+      //  if (branch.Count > 0)
+      //    branch.RemoveLast();
 
-        return false;
-      }
+      //  return false;
+      //}
 
-      var siblingIndex = siblingIndexCalculator();
-      var depth = depthCalculator();
+      //var siblingIndex = siblingIndexCalculator();
+      //var depth = depthCalculator();
 
-      var nextVisit =
-        NodeVisit
-        .Create(
-          treenumerator.Current.Node,
-          treenumerator.Current.VisitCount,
-          siblingIndex,
-          depth);
+      //var nextVisit =
+      //  NodeVisit
+      //  .Create(
+      //    treenumerator.Current.Node,
+      //    treenumerator.Current.VisitCount,
+      //    siblingIndex,
+      //    depth);
 
-      if (branch.Count == 0)
-      {
-        branch.Add(nextVisit);
-        Current = selector(nextVisit);
-        return true;
-      }
+      //if (branch.Count == 0)
+      //{
+      //  branch.Add(nextVisit);
+      //  Current = selector(nextVisit);
+      //  return true;
+      //}
 
-      var previousVisit = branch.Last();
+      //var previousVisit = branch.Last();
 
-      if (previousVisit.Depth < nextVisit.Depth)
-        branch.Add(nextVisit);
-      else if (previousVisit.Depth == nextVisit.Depth)
-      {
-        if (nextVisit.Depth == previousVisit.Depth && nextVisit.VisitCount == previousVisit.VisitCount)
-          nextVisit = nextVisit.WithVisitCount(previousVisit.VisitCount + 1);
+      //if (previousVisit.Depth < nextVisit.Depth)
+      //  branch.Add(nextVisit);
+      //else if (previousVisit.Depth == nextVisit.Depth)
+      //{
+      //  if (nextVisit.Depth == previousVisit.Depth && nextVisit.VisitCount == previousVisit.VisitCount)
+      //    nextVisit = nextVisit.WithVisitCount(previousVisit.VisitCount + 1);
 
-        branch.ReplaceLast(nextVisit);
-      }
-      else
-      {
-        branch.RemoveLast();
-        
-        if (nextVisit.Depth == branch.Last().Depth && nextVisit.VisitCount == branch.Last().VisitCount)
-          nextVisit = nextVisit.WithVisitCount(branch.Last().VisitCount + 1);
+      //  branch.ReplaceLast(nextVisit);
+      //}
+      //else
+      //{
+      //  branch.RemoveLast();
 
-        branch.ReplaceLast(nextVisit);
-      }
+      //  if (nextVisit.Depth == branch.Last().Depth && nextVisit.VisitCount == branch.Last().VisitCount)
+      //    nextVisit = nextVisit.WithVisitCount(branch.Last().VisitCount + 1);
 
-      Current = selector(nextVisit);
-      return true;
+      //  branch.ReplaceLast(nextVisit);
+      //}
+
+      //Current = selector(nextVisit);
+      //return true;
     }
 
     private bool OnScionMoveNext(SchedulingStrategy schedulingStrategy)
@@ -125,45 +127,47 @@ namespace Arborist.Linq.Treenumerators
 
     protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
     {
-      if (_Scion == null
-        && schedulingStrategy == SchedulingStrategy.ScheduleForTraversal
-        && _InnerBranch.Count > 0
-        && _Predicate(_InnerBranch.Last()))
-        _Scion = _ScionGenerator(InnerTreenumerator.Current).GetDepthFirstTreenumerator();
+      // TODO:
+      throw new NotImplementedException();
+      //if (_Scion == null
+      //  && schedulingStrategy == SchedulingStrategy.ScheduleForTraversal
+      //  && _InnerBranch.Count > 0
+      //  && _Predicate(_InnerBranch.Last()))
+      //  _Scion = _ScionGenerator(InnerTreenumerator.Current).GetDepthFirstTreenumerator();
 
-      if (_Scion != null)
-      {
-        if (OnScionMoveNext(schedulingStrategy))
-          return true;
-        
-        _Scion = null;
+      //if (_Scion != null)
+      //{
+      //  if (OnScionMoveNext(schedulingStrategy))
+      //    return true;
 
-        var nextVisit = _InnerBranch.Last().IncrementVisitCount();
+      //  _Scion = null;
 
-        _InnerBranch.ReplaceLast(nextVisit);
+      //  var nextVisit = _InnerBranch.Last().IncrementVisitCount();
 
-        Current = nextVisit.WithNode(_Selector(nextVisit));
+      //  _InnerBranch.ReplaceLast(nextVisit);
 
-        _ReturnedFromScion = true;
+      //  Current = nextVisit.WithNode(_Selector(nextVisit));
 
-        return true;
-      }
+      //  _ReturnedFromScion = true;
 
-      if (!_ReturnedFromScion)
-        return OnInnerMoveNext(schedulingStrategy);
+      //  return true;
+      //}
 
-      _ReturnedFromScion = false;
+      //if (!_ReturnedFromScion)
+      //  return OnInnerMoveNext(schedulingStrategy);
 
-      var priorVisit = _InnerBranch.Last();
+      //_ReturnedFromScion = false;
 
-      var onMoveNext = OnInnerMoveNext(schedulingStrategy);
+      //var priorVisit = _InnerBranch.Last();
 
-      if (priorVisit.Depth != Current.Depth)
-        return onMoveNext;
+      //var onMoveNext = OnInnerMoveNext(schedulingStrategy);
 
-      _InnerBranch.RemoveLast();
+      //if (priorVisit.Depth != Current.Depth)
+      //  return onMoveNext;
 
-      return OnInnerMoveNext(schedulingStrategy);
+      //_InnerBranch.RemoveLast();
+
+      //return OnInnerMoveNext(schedulingStrategy);
     }
   }
 }
