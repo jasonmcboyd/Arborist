@@ -88,12 +88,12 @@ namespace Arborist.Treenumerables.Tests
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
                 (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
-                (TreenumeratorState.SchedulingNode, "b", 0, 1, 0),
-                (TreenumeratorState.SchedulingNode, "c", 0, 2, 0),
                 (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
                 (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
+                (TreenumeratorState.SchedulingNode, "b", 0, 1, 0),
                 (TreenumeratorState.VisitingNode,   "b", 1, 1, 0),
                 (TreenumeratorState.VisitingNode,   "b", 2, 1, 0),
+                (TreenumeratorState.SchedulingNode, "c", 0, 2, 0),
                 (TreenumeratorState.VisitingNode,   "c", 1, 2, 0),
                 (TreenumeratorState.VisitingNode,   "c", 2, 2, 0),
               },
@@ -117,10 +117,10 @@ namespace Arborist.Treenumerables.Tests
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
                 (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
-                (TreenumeratorState.SchedulingNode, "b", 0, 1, 0),
-                (TreenumeratorState.SchedulingNode, "c", 0, 2, 0),
                 (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
                 (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
+                (TreenumeratorState.SchedulingNode, "b", 0, 1, 0),
+                (TreenumeratorState.SchedulingNode, "c", 0, 2, 0),
                 (TreenumeratorState.VisitingNode,   "b", 1, 1, 0),
                 (TreenumeratorState.VisitingNode,   "b", 2, 1, 0),
                 (TreenumeratorState.VisitingNode,   "c", 1, 2, 0),
@@ -147,11 +147,11 @@ namespace Arborist.Treenumerables.Tests
               {
                 (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
                 (TreenumeratorState.SchedulingNode, "b", 0, 1, 0),
+                (TreenumeratorState.VisitingNode,   "b", 1, 1, 0),
+                (TreenumeratorState.VisitingNode,   "b", 2, 1, 0),
                 (TreenumeratorState.SchedulingNode, "c", 0, 2, 0),
                 (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
                 (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
-                (TreenumeratorState.VisitingNode,   "b", 1, 1, 0),
-                (TreenumeratorState.VisitingNode,   "b", 2, 1, 0),
                 (TreenumeratorState.VisitingNode,   "c", 1, 2, 0),
                 (TreenumeratorState.VisitingNode,   "c", 2, 2, 0),
               },
@@ -177,12 +177,12 @@ namespace Arborist.Treenumerables.Tests
                 (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
                 (TreenumeratorState.SchedulingNode, "b", 0, 1, 0),
                 (TreenumeratorState.SchedulingNode, "c", 0, 2, 0),
+                (TreenumeratorState.VisitingNode,   "c", 1, 2, 0),
+                (TreenumeratorState.VisitingNode,   "c", 2, 2, 0),
                 (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
                 (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
                 (TreenumeratorState.VisitingNode,   "b", 1, 1, 0),
                 (TreenumeratorState.VisitingNode,   "b", 2, 1, 0),
-                (TreenumeratorState.VisitingNode,   "c", 1, 2, 0),
-                (TreenumeratorState.VisitingNode,   "c", 2, 2, 0),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
