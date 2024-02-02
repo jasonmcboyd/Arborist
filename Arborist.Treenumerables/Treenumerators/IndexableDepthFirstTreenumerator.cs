@@ -158,7 +158,6 @@ namespace Arborist.Treenumerables.Treenumerators
     {
       var previousVisit = _Stack.Pop();
 
-      // TODO: State == Scheduling and VisitCount == 0 should always happen together.
       if (previousVisit.VisitCount == 0
         || (previousVisit.VisitCount == 1 && !previousVisit.HasNextChild())
         || State == TreenumeratorState.SchedulingNode)

@@ -22,6 +22,8 @@ namespace Arborist.Treenumerables.Treenumerators
 
     private int _Depth = 0;
 
+    private bool _ScheduledToFront = false;
+
     protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
     {
       if (State == TreenumeratorState.EnumerationFinished)
@@ -52,7 +54,12 @@ namespace Arborist.Treenumerables.Treenumerators
 
     private void OnSchedulingVisit(SchedulingStrategy schedulingStrategy)
     {
-      var lastScheduled = _NextLevel.RemoveFromBack();
+      IndexableTreenumeratorNodeVisit<TNode, TValue> lastScheduled;
+
+      if (_ScheduledToFront)
+        lastScheduled = _CurrentLevel.RemoveFromFront();
+      else
+        lastScheduled = _NextLevel.RemoveFromBack();
 
       if (schedulingStrategy == SchedulingStrategy.SkipSubtree)
         return;
@@ -62,7 +69,12 @@ namespace Arborist.Treenumerables.Treenumerators
       else if (schedulingStrategy == SchedulingStrategy.SkipNode)
         lastScheduled = lastScheduled.Skip();
 
-      _NextLevel.AddToBack(lastScheduled);
+      if (_ScheduledToFront)
+        _CurrentLevel.AddToFront(lastScheduled);
+      else
+        _NextLevel.AddToBack(lastScheduled);
+
+      _ScheduledToFront = false;
     }
 
     private bool? BeforeRootsEnumerated(SchedulingStrategy schedulingStrategy)
@@ -98,6 +110,8 @@ namespace Arborist.Treenumerables.Treenumerators
 
     private bool AfterRootsEnumerated(SchedulingStrategy schedulingStrategy)
     {
+      var timesThroughLoop = 0;
+
       while (true)
       {
         if (_CurrentLevel.Count == 0)
@@ -108,8 +122,8 @@ namespace Arborist.Treenumerables.Treenumerators
 
         var visit = _CurrentLevel.RemoveFromFront();
 
-        // TODO: State == Scheduling and VisitCount == 0 should always happen together.
-        if (visit.VisitCount == 0
+        if (timesThroughLoop > 1
+          || visit.VisitCount == 0
           || (visit.VisitCount == 1 && !visit.HasNextChild())
           || State == TreenumeratorState.SchedulingNode)
         {
@@ -143,12 +157,20 @@ namespace Arborist.Treenumerables.Treenumerators
 
           _CurrentLevel.AddToFront(visit);
 
-          _NextLevel.AddToBack(nextVisit);
+          if (visit.Skipped)
+          {
+            _ScheduledToFront = true;
+            _CurrentLevel.AddToFront(nextVisit);
+          }
+          else
+            _NextLevel.AddToBack(nextVisit);
 
           State = TreenumeratorState.SchedulingNode;
 
           return true;
         }
+
+        timesThroughLoop++;
       }
     }
 
