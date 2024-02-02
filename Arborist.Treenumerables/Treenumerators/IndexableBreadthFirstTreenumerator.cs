@@ -54,12 +54,13 @@ namespace Arborist.Treenumerables.Treenumerators
 
     private void OnSchedulingVisit(SchedulingStrategy schedulingStrategy)
     {
-      IndexableTreenumeratorNodeVisit<TNode, TValue> lastScheduled;
+      //IndexableTreenumeratorNodeVisit<TNode, TValue> lastScheduled;
 
-      if (_ScheduledToFront)
-        lastScheduled = _CurrentLevel.RemoveFromFront();
-      else
-        lastScheduled = _NextLevel.RemoveFromBack();
+      //if (_ScheduledToFront)
+      //  lastScheduled = _CurrentLevel.RemoveFromFront();
+      //else
+      //  lastScheduled = _NextLevel.RemoveFromBack();
+      var lastScheduled = _CurrentLevel.RemoveFromFront();
 
       if (schedulingStrategy == SchedulingStrategy.SkipSubtree)
         return;
@@ -69,12 +70,17 @@ namespace Arborist.Treenumerables.Treenumerators
       else if (schedulingStrategy == SchedulingStrategy.SkipNode)
         lastScheduled = lastScheduled.Skip();
 
-      if (_ScheduledToFront)
+      //if (_ScheduledToFront)
+      //  _CurrentLevel.AddToFront(lastScheduled);
+      //else
+      //  _NextLevel.AddToBack(lastScheduled);
+
+      if (_CurrentLevel.Count > 0 && _CurrentLevel[0].Skipped)
         _CurrentLevel.AddToFront(lastScheduled);
       else
         _NextLevel.AddToBack(lastScheduled);
 
-      _ScheduledToFront = false;
+      //_ScheduledToFront = false;
     }
 
     private bool? BeforeRootsEnumerated(SchedulingStrategy schedulingStrategy)
@@ -93,7 +99,8 @@ namespace Arborist.Treenumerables.Treenumerators
             0,
             false);
 
-        _NextLevel.AddToBack(nextVisit);
+        //_NextLevel.AddToBack(nextVisit);
+        _CurrentLevel.AddToFront(nextVisit);
 
         Current = nextVisit.ToNodeVisit();
 
@@ -122,7 +129,7 @@ namespace Arborist.Treenumerables.Treenumerators
 
         var visit = _CurrentLevel.RemoveFromFront();
 
-        if (timesThroughLoop > 1
+        if (timesThroughLoop > 0
           || visit.VisitCount == 0
           || (visit.VisitCount == 1 && !visit.HasNextChild())
           || State == TreenumeratorState.SchedulingNode)
@@ -157,13 +164,14 @@ namespace Arborist.Treenumerables.Treenumerators
 
           _CurrentLevel.AddToFront(visit);
 
-          if (visit.Skipped)
-          {
-            _ScheduledToFront = true;
-            _CurrentLevel.AddToFront(nextVisit);
-          }
-          else
-            _NextLevel.AddToBack(nextVisit);
+          //if (visit.Skipped)
+          //{
+          //  _ScheduledToFront = true;
+          //  _CurrentLevel.AddToFront(nextVisit);
+          //}
+          //else
+          //  _NextLevel.AddToBack(nextVisit);
+          _CurrentLevel.AddToFront(nextVisit);
 
           State = TreenumeratorState.SchedulingNode;
 
