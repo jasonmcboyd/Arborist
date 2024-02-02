@@ -32,7 +32,8 @@ namespace Arborist.Treenumerables.Treenumerators
       if (State == TreenumeratorState.SchedulingNode)
         OnSchedulingVisit(schedulingStrategy);
 
-      if (!_RootsEnumerationCompleted)
+      //if (!_RootsEnumerationCompleted)
+      if (_CurrentLevel.Count == 0 && !_RootsEnumerationCompleted)
       {
         var beforeRootsEnumerated = BeforeRootsEnumerated(schedulingStrategy);
 
@@ -64,7 +65,9 @@ namespace Arborist.Treenumerables.Treenumerators
       else if (schedulingStrategy == SchedulingStrategy.SkipNode)
         lastScheduled = lastScheduled.Skip();
 
-      if (_CurrentLevel.Count > 0 && _CurrentLevel[0].Skipped)
+      // TODO: Testing
+      if ((_CurrentLevel.Count > 0 && _CurrentLevel[0].Skipped)
+        || (_CurrentLevel.Count == 0 && lastScheduled.Skipped))
         _CurrentLevel.AddToFront(lastScheduled);
       else
         _NextLevel.AddToBack(lastScheduled);
@@ -107,11 +110,25 @@ namespace Arborist.Treenumerables.Treenumerators
 
       while (true)
       {
-        if (_CurrentLevel.Count == 0)
+        if (_RootsEnumerationCompleted && _CurrentLevel.Count == 0)
           (_CurrentLevel, _NextLevel) = (_NextLevel, _CurrentLevel);
 
         if (_CurrentLevel.Count == 0)
-          return false;
+        {
+          var beforeRootsEnumerated = BeforeRootsEnumerated(schedulingStrategy);
+
+          if (beforeRootsEnumerated == true)
+            return true;
+
+          (_CurrentLevel, _NextLevel) = (_NextLevel, _CurrentLevel);
+
+          if (_CurrentLevel.Count == 0)
+          {
+            State = TreenumeratorState.EnumerationFinished;
+
+            return false;
+          }
+        }
 
         var visit = _CurrentLevel.RemoveFromFront();
 
