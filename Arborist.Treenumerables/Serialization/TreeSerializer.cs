@@ -9,7 +9,19 @@ namespace Arborist.Treenumerables.Serialization
     public static IndexableTreenumerable<TreeNode<string>, string> Deserialize(string tree)
       => Deserialize(tree, value => value);
 
+    public static List<TreeNode<string>> DeserializeRoots(string tree)
+      => DeserializeRoots(tree, value => value);
+
     public static IndexableTreenumerable<TreeNode<TResult>, TResult> Deserialize<TResult>(
+      string tree,
+      Func<string, TResult> map)
+    {
+      var rootNodes = DeserializeRoots<TResult>(tree, map);
+
+      return new IndexableTreenumerable<TreeNode<TResult>, TResult>(rootNodes);
+    }
+
+    public static List<TreeNode<TResult>> DeserializeRoots<TResult>(
       string tree,
       Func<string, TResult> map)
     {
@@ -62,7 +74,7 @@ namespace Arborist.Treenumerables.Serialization
 
       rootNodes.Reverse();
 
-      return new IndexableTreenumerable<TreeNode<TResult>, TResult>(rootNodes);
+      return rootNodes;
     }
 
     public static string Serialize(ITreenumerable<string> treenumerable)

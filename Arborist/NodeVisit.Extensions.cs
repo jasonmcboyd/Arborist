@@ -50,5 +50,14 @@
         siblingIndex,
         source.Depth,
         source.Skipped);
+
+    public static NodeVisit<TNode> Skip<TNode>(
+      this NodeVisit<TNode> source)
+      => NodeVisit.Create(
+        source.Node,
+        source.VisitCount,
+        source.SiblingIndex,
+        source.Depth,
+        true);
   }
 }
