@@ -2,7 +2,7 @@
 
 namespace Arborist.Linq.Treenumerables
 {
-    public interface ITreenumerableBuffer<TNode> : ITreenumerable<TNode>, IDisposable
-    {
-    }
+  public interface ITreenumerableBuffer<TNode> : ITreenumerable<TNode>, IDisposable
+  {
+  }
 }
