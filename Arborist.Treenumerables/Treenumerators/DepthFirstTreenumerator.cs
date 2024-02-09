@@ -15,7 +15,8 @@ namespace Arborist.Treenumerables.Treenumerators
 
     private int _RootsEnumeratorIndex = 0;
 
-    private readonly Stack<NodeVisit<IEnumerator<INodeWithEnumerableChildren<TNode>>>> _Stack = new Stack<NodeVisit<IEnumerator<INodeWithEnumerableChildren<TNode>>>>();
+    private readonly Stack<NodeVisit<IEnumerator<INodeWithEnumerableChildren<TNode>>>> _Stack =
+      new Stack<NodeVisit<IEnumerator<INodeWithEnumerableChildren<TNode>>>>();
 
     public int VisitCount
     {

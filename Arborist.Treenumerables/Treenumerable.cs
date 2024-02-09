@@ -15,7 +15,7 @@ namespace Arborist.Treenumerables
     private readonly IEnumerable<INodeWithEnumerableChildren<TNode>> _Roots;
 
     public ITreenumerator<TNode> GetBreadthFirstTreenumerator()
-      => throw new NotImplementedException();
+      => new BreadthFirstTreenumerator<TNode>(_Roots);
 
     public ITreenumerator<TNode> GetDepthFirstTreenumerator()
       => new DepthFirstTreenumerator<TNode>(_Roots);

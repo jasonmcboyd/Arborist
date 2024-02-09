@@ -121,6 +121,37 @@ namespace Arborist.Treenumerables.Tests
 
     [TestMethod]
     [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
+    public void Treenumerable_BreadthFirst(
+      string treeString,
+      string testDescription,
+      int testTreeIndex,
+      int testScenarioIndex)
+    {
+      // Arrange
+      var rootNodes = EnumerableTreeNode.Create(TreeSerializer.DeserializeRoots(treeString));
+      var treenumerable = new Treenumerable<string>(rootNodes);
+      var testScenario = TestDataFactory.TestTrees[testTreeIndex].TestScenarios[testScenarioIndex];
+
+      var expected = testScenario.ExpectedBreadthFirstResults;
+
+      Debug.WriteLine("-----Expected Values-----");
+      foreach (var value in expected)
+        Debug.WriteLine(value);
+
+      // Act
+      Debug.WriteLine("\r\n-----Actual Values-----");
+      var actual =
+        treenumerable
+        .ToBreadthFirstMoveNext(testScenario.SchedulingPredicate)
+        .Do(x => Debug.WriteLine(x))
+        .ToArray();
+
+      // Assert
+      CollectionAssert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
     public void DepthFirstVsBreadthFirstValues(
       string treeString,
       string testDescription,
