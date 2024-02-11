@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arborist.Tests.Utils", "Arb
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arborist.Linq.Tests", "Arborist.Linq.Tests\Arborist.Linq.Tests.csproj", "{F2E4474E-C912-4EE8-9BE3-B25592C00720}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arborist.Treenumerables.SimpleSerializer", "Arborist.Treenumerables.SimpleSerializer\Arborist.Treenumerables.SimpleSerializer.csproj", "{F3D7772D-40DF-47A8-8C68-01EBA738F6EB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{F2E4474E-C912-4EE8-9BE3-B25592C00720}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F2E4474E-C912-4EE8-9BE3-B25592C00720}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F2E4474E-C912-4EE8-9BE3-B25592C00720}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3D7772D-40DF-47A8-8C68-01EBA738F6EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3D7772D-40DF-47A8-8C68-01EBA738F6EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3D7772D-40DF-47A8-8C68-01EBA738F6EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3D7772D-40DF-47A8-8C68-01EBA738F6EB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

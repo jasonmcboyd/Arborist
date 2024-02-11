@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Arborist.Treenumerables.Serialization
+namespace Arborist.Treenumerables.SimpleSerializer
 {
   public static class TreeSerializer
   {

@@ -1,4 +1,4 @@
-﻿namespace Arborist.Treenumerables.Serialization
+﻿namespace Arborist.Treenumerables.SimpleSerializer
 {
   public enum TokenType
   {

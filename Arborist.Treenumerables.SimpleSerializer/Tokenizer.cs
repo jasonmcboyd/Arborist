@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 
-namespace Arborist.Treenumerables.Serialization
+namespace Arborist.Treenumerables.SimpleSerializer
 {
   public static class Tokenizer
   {
