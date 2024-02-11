@@ -3,28 +3,13 @@ using System.Collections.Generic;
 
 namespace Arborist.Treenumerables.Tests
 {
-  public static class TestDataFactory
+  public static class TreeTraversalTestData
   {
-    public static IEnumerable<(string, string, int, int)> GetTestInput()
-    {
-      for (int i = 0; i < TestTrees.Length; i++)
-      {
-        var testTree = TestTrees[i];
-
-        for (int j = 0; j < testTree.TestScenarios.Count; j++)
-        {
-          var testScenario = testTree.TestScenarios[j];
-
-          yield return (testTree.TreeString, testScenario.Description, i, j);
-        }
-      }
-    }
-
-    public static TestTree[] TestTrees =>
-      new TestTree[]
+    public static TreeTestDefinition[] TestTrees =>
+      new TreeTestDefinition[]
       {
         // Empty Tree
-        new TestTree
+        new TreeTestDefinition
         {
           TreeString = "",
           TestScenarios = new List<TestScenario>
@@ -45,7 +30,7 @@ namespace Arborist.Treenumerables.Tests
         },
 
         // Three root nodes, no children.
-        new TestTree
+        new TreeTestDefinition
         {
           TreeString = "a,b,c",
           TestScenarios = new List<TestScenario>
@@ -365,7 +350,7 @@ namespace Arborist.Treenumerables.Tests
         },
 
         // Two-level complete ternary tree.
-        new TestTree
+        new TreeTestDefinition
         {
           TreeString = "a(b,c,d)",
           TestScenarios = new List<TestScenario>
@@ -969,7 +954,7 @@ namespace Arborist.Treenumerables.Tests
         },
 
         // Three-level unary tree.
-        new TestTree
+        new TreeTestDefinition
         {
           TreeString = "a(b(c))",
           TestScenarios = new List<TestScenario>()
@@ -1282,7 +1267,7 @@ namespace Arborist.Treenumerables.Tests
         },
 
         // Two two-level unary tree.
-        new TestTree
+        new TreeTestDefinition
         {
           TreeString = "a(c),b(d)",
           TestScenarios = new List<TestScenario>()
@@ -1398,7 +1383,7 @@ namespace Arborist.Treenumerables.Tests
         },
 
         // Five-level unary tree.
-        new TestTree
+        new TreeTestDefinition
         {
           TreeString = "a(b(c(d(e))))",
           TestScenarios = new List<TestScenario>()
@@ -1532,7 +1517,7 @@ namespace Arborist.Treenumerables.Tests
         },
 
         // Two two-level complete binary trees.
-        new TestTree
+        new TreeTestDefinition
         {
           TreeString = "a(b,c),d(e,f)",
           TestScenarios = new List<TestScenario>
@@ -1769,7 +1754,7 @@ namespace Arborist.Treenumerables.Tests
         },
 
         // Three-level complete binary trees.
-        new TestTree
+        new TreeTestDefinition
         {
           TreeString = "a(b(d,e),c(f,g))",
           TestScenarios = new List<TestScenario>
@@ -1901,7 +1886,7 @@ namespace Arborist.Treenumerables.Tests
         },
 
         // Two trees, single node and two-level complete binary tree.
-        new TestTree
+        new TreeTestDefinition
         {
           TreeString = "a,b(c,d)",
           TestScenarios = new List<TestScenario>
@@ -2023,7 +2008,7 @@ namespace Arborist.Treenumerables.Tests
         },
 
         // Five-level right-heavy binary tree.
-        new TestTree
+        new TreeTestDefinition
         {
           TreeString = "a(b,c(d,e(f,g(h,i))))",
           TestScenarios = new List<TestScenario>
@@ -2334,7 +2319,7 @@ namespace Arborist.Treenumerables.Tests
         },
 
         // Three-level ternary arrow fletching.
-        new TestTree
+        new TreeTestDefinition
         {
           TreeString = "a(b,c(e,f,g),d)",
           TestScenarios = new List<TestScenario>

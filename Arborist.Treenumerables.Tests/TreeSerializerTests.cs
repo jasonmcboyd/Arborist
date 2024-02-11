@@ -13,9 +13,9 @@ namespace Arborist.Treenumerables.Tests
   {
     public static IEnumerable<object[]> GetTestData()
     {
-      for (int i = 0; i < TestDataFactory.TestTrees.Length; i++)
+      for (int i = 0; i < TreeTraversalTestData.TestTrees.Length; i++)
       {
-        var testTree = TestDataFactory.TestTrees[i];
+        var testTree = TreeTraversalTestData.TestTrees[i];
 
         var testScenarioFound = false;
 
@@ -50,7 +50,7 @@ namespace Arborist.Treenumerables.Tests
     {
       // Arrange
       var treenumerable = TreeSerializer.Deserialize(treeString);
-      var testScenario = TestDataFactory.TestTrees[testTreeIndex].TestScenarios[testScenarioIndex];
+      var testScenario = TreeTraversalTestData.TestTrees[testTreeIndex].TestScenarios[testScenarioIndex];
 
       var expected = testScenario.ExpectedDepthFirstResults;
 
