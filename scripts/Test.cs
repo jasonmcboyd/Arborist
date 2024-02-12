@@ -207,4 +207,3 @@ namespace Arborist.Linq.Tests
     }
   }
 }
-

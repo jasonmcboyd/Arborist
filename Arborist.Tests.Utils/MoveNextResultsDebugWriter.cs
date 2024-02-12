@@ -11,7 +11,7 @@ namespace Arborist.Tests.Utils
 
       var results = new List<string[]>()
       {
-        new string[] { " ", "S", "N", "VC", "SI", "D" }
+        new string[] { " ", "S", "N", "VC", "OP" }
       };
 
       foreach (var moveNextResult in moveNextResults)

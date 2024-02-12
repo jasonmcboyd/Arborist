@@ -51,5 +51,8 @@ namespace Arborist
 
     public override int GetHashCode()
       => GetHashCode(this);
+
+    public override string ToString()
+      => $"({SiblingIndex}, {Depth})";
   }
 }
