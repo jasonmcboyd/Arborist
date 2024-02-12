@@ -66,9 +66,9 @@ namespace Arborist.Linq.Tests
       // Act
       var actual =
         treenumerable
-        .Do(visit => Debug.WriteLine((visit.Node, visit.VisitCount, visit.SiblingIndex, visit.Depth)))
+        .Do(visit => Debug.WriteLine((visit.Node, visit.VisitCount, visit.OriginalPosition.SiblingIndex, visit.OriginalPosition.Depth)))
         .RootfixScan((visit, accumulate) => visit.Node + accumulate.Node)
-        .Do(visit => Debug.WriteLine((visit.Node, visit.VisitCount, visit.SiblingIndex, visit.Depth)))
+        .Do(visit => Debug.WriteLine((visit.Node, visit.VisitCount, visit.OriginalPosition.SiblingIndex, visit.OriginalPosition.Depth)))
         .PreOrderTraversal()
         .ToArray();
 

@@ -28,8 +28,8 @@ namespace Arborist.Linq.Treenumerators
           .Create(
             node,
             InnerTreenumerator.Current.VisitCount,
-            InnerTreenumerator.Current.SiblingIndex,
-            InnerTreenumerator.Current.Depth,
+            InnerTreenumerator.OriginalPosition,
+            InnerTreenumerator.Position,
             InnerTreenumerator.Current.Skipped);
 
         Stack.Add(visit);
@@ -37,7 +37,7 @@ namespace Arborist.Linq.Treenumerators
         return;
       }
 
-      var depthComparison = InnerTreenumerator.Current.Depth.CompareTo(Stack.Last().Depth);
+      var depthComparison = InnerTreenumerator.Current.OriginalPosition.Depth.CompareTo(Stack.Last().OriginalPosition.Depth);
 
       if (depthComparison < 0)
         Stack.RemoveAt(Stack.Count - 1);
@@ -54,8 +54,8 @@ namespace Arborist.Linq.Treenumerators
           .Create(
             node,
             InnerTreenumerator.Current.VisitCount,
-            InnerTreenumerator.Current.SiblingIndex,
-            InnerTreenumerator.Current.Depth,
+            InnerTreenumerator.Current.OriginalPosition,
+            InnerTreenumerator.Current.Position,
             InnerTreenumerator.Current.Skipped);
 
         Stack.Add(step);

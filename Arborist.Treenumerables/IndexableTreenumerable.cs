@@ -1,4 +1,4 @@
-﻿using Arborist.Treenumerables.Treenumerators;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Arborist.Treenumerables
@@ -15,9 +15,9 @@ namespace Arborist.Treenumerables
     private readonly IEnumerable<TIndexableNode> _Roots;
 
     public ITreenumerator<TIndexableNodeValue> GetBreadthFirstTreenumerator()
-      => new IndexableBreadthFirstTreenumerator<TIndexableNode, TIndexableNodeValue>(_Roots);
+      => throw new NotImplementedException();
 
     public ITreenumerator<TIndexableNodeValue> GetDepthFirstTreenumerator()
-      => new IndexableDepthFirstTreenumerator<TIndexableNode, TIndexableNodeValue>(_Roots);
+      => throw new NotImplementedException();
   }
 }

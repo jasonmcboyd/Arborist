@@ -39,16 +39,22 @@ namespace Arborist.Treenumerables.Tests
       var expected = testScenario.ExpectedDepthFirstResults;
 
       Debug.WriteLine("-----Expected Values-----");
-      foreach (var value in expected)
-        Debug.WriteLine(value);
+      MoveNextResultsDebugWriter.WriteMoveNextResults(expected);
 
       // Act
-      Debug.WriteLine("\r\n-----Actual Values-----");
       var actual =
         treenumerable
         .ToDepthFirstMoveNext(testScenario.SchedulingPredicate)
-        .Do(x => Debug.WriteLine(x))
         .ToArray();
+
+      Debug.WriteLine("\r\n-----Actual Values-----");
+      MoveNextResultsDebugWriter.WriteMoveNextResults(expected);
+
+      var diff = MoveNextResultDiffer.Diff(expected, actual);
+
+      Debug.WriteLine("\r\n-----Diffed Values-----");
+      foreach (var diffResult in diff)
+        Debug.WriteLine(diffResult);
 
       // Assert
       CollectionAssert.AreEqual(expected, actual);
@@ -70,8 +76,7 @@ namespace Arborist.Treenumerables.Tests
       var expected = testScenario.ExpectedDepthFirstResults;
 
       Debug.WriteLine("-----Expected Values-----");
-      foreach (var value in expected)
-        Debug.WriteLine(value);
+      MoveNextResultsDebugWriter.WriteMoveNextResults(expected);
 
       // Act
       Debug.WriteLine("\r\n-----Actual Values-----");
@@ -80,6 +85,12 @@ namespace Arborist.Treenumerables.Tests
         .ToDepthFirstMoveNext(testScenario.SchedulingPredicate)
         .Do(x => Debug.WriteLine(x))
         .ToArray();
+
+      var diff = MoveNextResultDiffer.Diff(expected, actual);
+
+      Debug.WriteLine("\r\n-----Diffed Values-----");
+      foreach (var diffResult in diff)
+        Debug.WriteLine(diffResult);
 
       // Assert
       CollectionAssert.AreEqual(expected, actual);
@@ -100,16 +111,22 @@ namespace Arborist.Treenumerables.Tests
       var expected = testScenario.ExpectedBreadthFirstResults;
 
       Debug.WriteLine("-----Expected Values-----");
-      foreach (var value in expected)
-        Debug.WriteLine(value);
+      MoveNextResultsDebugWriter.WriteMoveNextResults(expected);
 
       // Act
-      Debug.WriteLine("\r\n-----Actual Values-----");
       var actual =
         treenumerable
         .ToBreadthFirstMoveNext(testScenario.SchedulingPredicate)
-        .Do(x => Debug.WriteLine(x))
         .ToArray();
+
+      Debug.WriteLine("\r\n-----Actual Values-----");
+      MoveNextResultsDebugWriter.WriteMoveNextResults(expected);
+
+      var diff = MoveNextResultDiffer.Diff(expected, actual);
+
+      Debug.WriteLine("\r\n-----Diffed Values-----");
+      foreach (var diffResult in diff)
+        Debug.WriteLine(diffResult);
 
       // Assert
       CollectionAssert.AreEqual(expected, actual);
@@ -131,16 +148,22 @@ namespace Arborist.Treenumerables.Tests
       var expected = testScenario.ExpectedBreadthFirstResults;
 
       Debug.WriteLine("-----Expected Values-----");
-      foreach (var value in expected)
-        Debug.WriteLine(value);
+      MoveNextResultsDebugWriter.WriteMoveNextResults(expected);
 
       // Act
-      Debug.WriteLine("\r\n-----Actual Values-----");
       var actual =
         treenumerable
         .ToBreadthFirstMoveNext(testScenario.SchedulingPredicate)
-        .Do(x => Debug.WriteLine(x))
         .ToArray();
+
+      Debug.WriteLine("\r\n-----Actual Values-----");
+      MoveNextResultsDebugWriter.WriteMoveNextResults(expected);
+
+      var diff = MoveNextResultDiffer.Diff(expected, actual);
+
+      Debug.WriteLine("\r\n-----Diffed Values-----");
+      foreach (var diffResult in diff)
+        Debug.WriteLine(diffResult);
 
       // Assert
       CollectionAssert.AreEqual(expected, actual);

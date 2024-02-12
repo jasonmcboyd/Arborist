@@ -23,7 +23,7 @@ namespace Arborist.Linq.Tests
         treenumerable
         .Graft(
           scion,
-          visit => visit.VisitCount == 2 && visit.Depth == 0)
+          visit => visit.VisitCount == 2 && visit.OriginalPosition.Depth == 0)
         .ToDepthFirstMoveNext()
         .ToArray();
 

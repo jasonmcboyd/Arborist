@@ -15,7 +15,7 @@ namespace Arborist.Linq
         if (visit.VisitCount == 0)
           continue;
 
-        if (visit.Depth == 0 && visit.VisitCount == 1)
+        if (visit.OriginalPosition.Depth == 0 && visit.VisitCount == 1)
           branch.Clear();
 
         if (branch.Count == 0)
@@ -24,7 +24,7 @@ namespace Arborist.Linq
           continue;
         }
 
-        var depthComparison = visit.Depth.CompareTo(branch.Last().Depth);
+        var depthComparison = visit.OriginalPosition.Depth.CompareTo(branch.Last().OriginalPosition.Depth);
 
         if (depthComparison < 0)
           branch.RemoveLast();

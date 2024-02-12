@@ -9,21 +9,24 @@ namespace Arborist.Tests.Utils
       TreenumeratorState state,
       TNode node,
       int visitCount,
-      int siblingIndex,
-      int depth)
+      NodePosition originalPosition,
+      NodePosition position)
     {
       State = state;
       Node = node;
       VisitCount = visitCount;
-      SiblingIndex = siblingIndex;
-      Depth = depth;
+      //OriginalPosition = originalPosition;
+      Depth = originalPosition.Depth;
+      SiblingIndex = originalPosition.SiblingIndex;
+      Position = position;
     }
 
     public TreenumeratorState State { get; }
     public TNode Node { get; }
     public int VisitCount { get; }
-    public int SiblingIndex { get; }
     public int Depth { get; }
+    public int SiblingIndex { get; }
+    NodePosition Position { get; }
 
     public override bool Equals(object obj)
     {
@@ -41,18 +44,18 @@ namespace Arborist.Tests.Utils
     public override int GetHashCode() => (State, Node, VisitCount, SiblingIndex, Depth).GetHashCode();
 
     public static implicit operator MoveNextResult<TNode>((TreenumeratorState, TNode, int, int, int) tuple)
-      => new MoveNextResult<TNode>(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5);
+      => new MoveNextResult<TNode>(tuple.Item1, tuple.Item2, tuple.Item3, (tuple.Item4, tuple.Item5), default);
 
     public override string ToString()
     {
-      return $"{State}, {Node}, {VisitCount}, {SiblingIndex}, {Depth}";
+      return $"{TreenumeratorStateMap.ToChar(State)}, {Node}, {VisitCount}, {SiblingIndex}, {Depth}";
     }
   }
 
   public static class MoveNextResult
   {
     public static MoveNextResult<TNode> Create<TNode>(TreenumeratorState state, NodeVisit<TNode> visit)
-      => new MoveNextResult<TNode>(state, visit.Node, visit.VisitCount, visit.SiblingIndex, visit.Depth);
+      => new MoveNextResult<TNode>(state, visit.Node, visit.VisitCount, visit.OriginalPosition, default);
 
     public static IEnumerable<MoveNextResult<TNode>> ToDepthFirstMoveNext<TNode>(
       this ITreenumerable<TNode> source)

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Arborist.Treenumerables
+﻿namespace Arborist.Treenumerables
 {
   public interface INodeWithIndexableChildren<out TNode, out TValue>
     where TNode : INodeWithIndexableChildren<TNode, TValue>

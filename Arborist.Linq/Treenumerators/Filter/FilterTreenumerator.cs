@@ -121,8 +121,8 @@ namespace Arborist.Linq.Treenumerators
             .Create(
               InnerTreenumerator.Current.Node,
               0,
-              0,
-              0,
+              default,
+              default,
               InnerTreenumerator.Current.Skipped);
         }
         else
@@ -132,8 +132,8 @@ namespace Arborist.Linq.Treenumerators
             .Create(
               InnerTreenumerator.Current.Node,
               0,
-              Current.VisitCount - 1,
-              Current.Depth + 1,
+              Current.OriginalPosition + (1, -1),
+              default,
               InnerTreenumerator.Current.Skipped);
         }
       }

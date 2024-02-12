@@ -90,7 +90,7 @@ namespace Arborist.Linq.Tests
             new TestScenario
             {
               SchedulingPredicate = visit => SchedulingStrategy.ScheduleForTraversal,
-              TreenumerableMap = treenumerable => treenumerable.PruneAfter(visit => visit.SiblingIndex != 1),
+              TreenumerableMap = treenumerable => treenumerable.PruneAfter(visit => visit.OriginalPosition.SiblingIndex != 1),
               Description = "visit.SiblingIndex != 1",
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {

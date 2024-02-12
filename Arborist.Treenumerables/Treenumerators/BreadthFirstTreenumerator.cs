@@ -10,7 +10,7 @@ namespace Arborist.Treenumerables.Treenumerators
     public BreadthFirstTreenumerator(IEnumerable<INodeWithEnumerableChildren<TNode>> rootNodes)
     {
       INodeWithEnumerableChildren<TNode> sentinalNode = new SentinalNode(rootNodes);
-      var sentinalNodeVisit = NodeVisit.Create(sentinalNode, 1, 0, -1, false);
+      var sentinalNodeVisit = NodeVisit.Create(sentinalNode, 1, (0, -1), default, false);
       _CurrentLevel.AddToFront(sentinalNodeVisit);
       Current = sentinalNodeVisit.WithNode(sentinalNode.Value);
     }
@@ -102,7 +102,7 @@ namespace Arborist.Treenumerables.Treenumerators
         State = TreenumeratorState.VisitingNode;
 
         return
-          Current.Depth == -1
+          Current.OriginalPosition.Depth == -1
           ? (bool?)null
           : true;
       }
@@ -124,19 +124,19 @@ namespace Arborist.Treenumerables.Treenumerators
       }
 
       if (previousVisit.VisitCount == 1
-        && Current.Depth == previousVisit.Depth)
+        && Current.OriginalPosition.Depth == previousVisit.OriginalPosition.Depth)
         _ChildrenStack.Push(previousVisit.Node.Children.GetEnumerator());
 
-      if (Current.Depth > previousVisit.Depth)
+      if (Current.OriginalPosition.Depth > previousVisit.OriginalPosition.Depth)
       {
         IncrementVisit();
         return
-          Current.Depth == -1
+          Current.OriginalPosition.Depth == -1
           ? (bool?)null
           : true;
       }
 
-      if (Current.Depth < previousVisit.Depth)
+      if (Current.OriginalPosition.Depth < previousVisit.OriginalPosition.Depth)
       {
         IncrementVisit();
         return true;
@@ -150,7 +150,7 @@ namespace Arborist.Treenumerables.Treenumerators
         IncrementVisit();
         _CurrentLevel.RemoveFromFront();
         return
-          Current.Depth == -1
+          Current.OriginalPosition.Depth == -1
           ? (bool?)null
           : true;
       }
@@ -178,9 +178,9 @@ namespace Arborist.Treenumerables.Treenumerators
       if (children.MoveNext())
       {
         var siblingIndex = Current.VisitCount - 1; ;
-        var depth = Current.Depth + 1;
+        var depth = Current.OriginalPosition.Depth + 1;
 
-        var childNode = NodeVisit.Create(children.Current, 0, siblingIndex, depth, false);
+        var childNode = NodeVisit.Create(children.Current, 0, (siblingIndex, depth), default, false);
         _CurrentLevel.AddToFront(childNode);
         Current = childNode.WithNode(childNode.Node.Value);
         State = TreenumeratorState.SchedulingNode;

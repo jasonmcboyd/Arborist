@@ -25,8 +25,8 @@ namespace Arborist.Linq.Tests
         .Select(visit => (
           visit.Node.Node,
           visit.VisitCount,
-          visit.SiblingIndex,
-          visit.Depth,
+          visit.OriginalPosition.SiblingIndex,
+          visit.OriginalPosition.Depth,
           visit.Node.HasNextVisit ? visit.Node.NextVisit.Node : (char?)null))
         .ToArray();
 

@@ -28,8 +28,8 @@ namespace Arborist.Linq.Treenumerators
           .Create(
             node,
             InnerTreenumerator.Current.VisitCount,
-            InnerTreenumerator.Current.SiblingIndex,
-            InnerTreenumerator.Current.Depth,
+            InnerTreenumerator.OriginalPosition,
+            InnerTreenumerator.Position,
             InnerTreenumerator.Current.Skipped);
       }
 

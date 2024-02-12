@@ -21,7 +21,7 @@ namespace Arborist.Linq.Tests
       // Act
       var actual =
         treenumerable
-        .PruneBefore(visit => visit.Depth == 2)
+        .PruneBefore(visit => visit.OriginalPosition.Depth == 2)
         .ToBreadthFirstMoveNext()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
@@ -55,7 +55,7 @@ namespace Arborist.Linq.Tests
       // Act
       var actual =
         treenumerable
-        .PruneBefore(visit => visit.Depth == 1)
+        .PruneBefore(visit => visit.OriginalPosition.Depth == 1)
         .ToBreadthFirstMoveNext()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
@@ -82,7 +82,7 @@ namespace Arborist.Linq.Tests
       // Act
       var actual =
         treenumerable
-        .PruneBefore(visit => visit.Depth == 0)
+        .PruneBefore(visit => visit.OriginalPosition.Depth == 0)
         .ToBreadthFirstMoveNext()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();

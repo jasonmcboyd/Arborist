@@ -63,7 +63,7 @@
 
       Current = Treenumerator.Current;
 
-      if (Current.Depth == 0)
+      if (Current.OriginalPosition.Depth == 0)
       {
         if (Current.VisitCount == 1)
           _RootSiblingCount++;

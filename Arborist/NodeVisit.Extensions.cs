@@ -8,8 +8,8 @@
       => NodeVisit.Create(
         source.Node,
         source.VisitCount,
-        source.SiblingIndex,
-        depth,
+        (depth, source.OriginalPosition.SiblingIndex),
+        source.Position,
         source.Skipped);
 
     public static NodeVisit<TResult> WithNode<TSource, TResult>(
@@ -18,8 +18,8 @@
       => NodeVisit.Create(
         node,
         source.VisitCount,
-        source.SiblingIndex,
-        source.Depth,
+        source.OriginalPosition,
+        source.Position,
         source.Skipped);
 
     public static NodeVisit<TNode> WithVisitCount<TNode>(
@@ -28,8 +28,8 @@
       => NodeVisit.Create(
         source.Node,
         visitCount,
-        source.SiblingIndex,
-        source.Depth,
+        source.OriginalPosition,
+        source.Position,
         source.Skipped);
 
     public static NodeVisit<TNode> IncrementVisitCount<TNode>(
@@ -37,8 +37,8 @@
       => NodeVisit.Create(
         source.Node,
         source.VisitCount + 1,
-        source.SiblingIndex,
-        source.Depth,
+        source.OriginalPosition,
+        source.Position,
         source.Skipped);
 
     public static NodeVisit<TNode> WithSiblingIndex<TNode>(
@@ -47,8 +47,8 @@
       => NodeVisit.Create(
         source.Node,
         source.VisitCount,
-        siblingIndex,
-        source.Depth,
+        (source.OriginalPosition.Depth, siblingIndex),
+        source.Position,
         source.Skipped);
 
     public static NodeVisit<TNode> Skip<TNode>(
@@ -56,8 +56,8 @@
       => NodeVisit.Create(
         source.Node,
         source.VisitCount,
-        source.SiblingIndex,
-        source.Depth,
+        source.OriginalPosition,
+        source.Position,
         true);
   }
 }

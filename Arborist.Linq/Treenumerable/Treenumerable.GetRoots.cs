@@ -10,7 +10,7 @@ namespace Arborist.Linq
       {
         while(treenumerator.MoveNext(SchedulingStrategy.ScheduleForTraversal))
         {
-          if (treenumerator.Current.Depth > 0)
+          if (treenumerator.Current.OriginalPosition.Depth > 0)
             yield break;
 
           if (treenumerator.Current.VisitCount == 1)

@@ -18,9 +18,9 @@ namespace Arborist.Linq
 
         var canYield =
           previousVisit != null
-          && (visit.Depth < previousVisit.Value.Depth
-            || (previousVisit.Value.Depth == 0
-              && visit.Depth == 0));
+          && (visit.OriginalPosition.Depth < previousVisit.Value.OriginalPosition.Depth
+            || (previousVisit.Value.OriginalPosition.Depth == 0
+              && visit.OriginalPosition.Depth == 0));
 
         if (canYield)
           yield return previousVisit.Value.Node;

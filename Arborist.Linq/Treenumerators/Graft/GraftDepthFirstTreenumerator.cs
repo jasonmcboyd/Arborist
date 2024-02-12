@@ -33,11 +33,11 @@ namespace Arborist.Linq.Treenumerators
 
     private int CalculateInnerSiblingIndexAfterMoveNext()
     {
-      if (InnerTreenumerator.Current.Depth == 0)
-        return InnerTreenumerator.Current.SiblingIndex;
+      if (InnerTreenumerator.Current.OriginalPosition.Depth == 0)
+        return InnerTreenumerator.Current.OriginalPosition.SiblingIndex;
 
-      if (InnerTreenumerator.Current.Depth == _InnerBranch.Last().Depth)
-        return _InnerBranch.Last().SiblingIndex;
+      if (InnerTreenumerator.Current.OriginalPosition.Depth == _InnerBranch.Last().OriginalPosition.Depth)
+        return _InnerBranch.Last().OriginalPosition.SiblingIndex;
 
       return _InnerBranch.Last().VisitCount - 1;
     }
@@ -109,8 +109,8 @@ namespace Arborist.Linq.Treenumerators
         _Scion,
         _ScionBranch,
         visit => visit,
-        () => _InnerBranch.Last().VisitCount + _Scion.Current.SiblingIndex - 1,
-        () => _InnerBranch.Last().Depth + _Scion.Current.Depth + 1,
+        () => _InnerBranch.Last().VisitCount + _Scion.Current.OriginalPosition.SiblingIndex - 1,
+        () => _InnerBranch.Last().OriginalPosition.Depth + _Scion.Current.OriginalPosition.Depth + 1,
         schedulingStrategy);
     }
 
@@ -121,7 +121,7 @@ namespace Arborist.Linq.Treenumerators
         _InnerBranch,
         visit => visit.WithNode(_Selector(visit)),
         () => CalculateInnerSiblingIndexAfterMoveNext(),
-        () => InnerTreenumerator.Current.Depth,
+        () => InnerTreenumerator.Current.OriginalPosition.Depth,
         schedulingStrategy);
     }
 

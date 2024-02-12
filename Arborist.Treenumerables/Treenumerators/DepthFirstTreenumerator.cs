@@ -42,7 +42,7 @@ namespace Arborist.Treenumerables.Treenumerators
         if (State == TreenumeratorState.EnumerationFinished)
           throw new InvalidOperationException("Enumeration has completed.");
 
-        return _Stack.Peek().Depth;
+        return _Stack.Peek().OriginalPosition.Depth;
       }
     }
 
@@ -56,7 +56,7 @@ namespace Arborist.Treenumerables.Treenumerators
         if (State == TreenumeratorState.EnumerationFinished)
           throw new InvalidOperationException("Enumeration has completed.");
 
-        return _Stack.Peek().SiblingIndex;
+        return _Stack.Peek().OriginalPosition.SiblingIndex;
       }
     }
 
@@ -110,7 +110,7 @@ namespace Arborist.Treenumerables.Treenumerators
 
       State = TreenumeratorState.SchedulingNode;
 
-      var rootNode = NodeVisit.Create(_RootsEnumerator, 0, _RootsEnumeratorIndex++, 0, false);
+      var rootNode = NodeVisit.Create(_RootsEnumerator, 0, (_RootsEnumeratorIndex++, 0), default, false);
 
       _Stack.Push(rootNode);
 
@@ -134,7 +134,7 @@ namespace Arborist.Treenumerables.Treenumerators
             return false;
           }
 
-          previousVisit = NodeVisit.Create(_RootsEnumerator, 0, _RootsEnumeratorIndex++, 0, false);
+          previousVisit = NodeVisit.Create(_RootsEnumerator, 0, (_RootsEnumeratorIndex++, 0), default, false);
 
           _Stack.Push(previousVisit);
           Current = previousVisit.WithNode(previousVisit.Node.Current.Value);
@@ -148,7 +148,7 @@ namespace Arborist.Treenumerables.Treenumerators
 
         if (previousVisit.Node.MoveNext())
         {
-          previousVisit = NodeVisit.Create(previousVisit.Node, 0, previousVisit.SiblingIndex + 1, previousVisit.Depth, false);
+          previousVisit = NodeVisit.Create(previousVisit.Node, 0, previousVisit.OriginalPosition.AddToSiblingIndex(1), default, false);
           _Stack.Push(previousVisit);
           _HasCachedChild = true;
         }
@@ -199,7 +199,7 @@ namespace Arborist.Treenumerables.Treenumerators
           return true;
         }
 
-        var childrenNode = NodeVisit.Create(children, 0, 0, previousVisit.Depth + 1, false);
+        var childrenNode = NodeVisit.Create(children, 0, (0, previousVisit.OriginalPosition.Depth + 1), default, false);
         _Stack.Push(previousVisit);
         _Stack.Push(childrenNode);
         Current = childrenNode.WithNode(childrenNode.Node.Current.Value);
@@ -215,7 +215,7 @@ namespace Arborist.Treenumerables.Treenumerators
           return false;
         }
 
-        previousVisit = NodeVisit.Create(_RootsEnumerator, 0, _RootsEnumeratorIndex++, 0, false);
+        previousVisit = NodeVisit.Create(_RootsEnumerator, 0, (_RootsEnumeratorIndex++, 0), default, false);
 
         _Stack.Push(previousVisit);
         Current = previousVisit.WithNode(previousVisit.Node.Current.Value);
@@ -229,7 +229,7 @@ namespace Arborist.Treenumerables.Treenumerators
 
       if (previousVisit.Node.MoveNext())
       {
-        previousVisit = NodeVisit.Create(previousVisit.Node, 0, previousVisit.SiblingIndex + 1, previousVisit.Depth, false);
+        previousVisit = NodeVisit.Create(previousVisit.Node, 0, previousVisit.OriginalPosition.AddToSiblingIndex(1), default, false);
         _Stack.Push(previousVisit);
         _HasCachedChild = true;
       }

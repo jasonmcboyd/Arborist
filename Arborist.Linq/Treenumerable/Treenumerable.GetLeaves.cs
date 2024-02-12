@@ -17,7 +17,7 @@ namespace Arborist.Linq
         {
           var step = enumerator.Current;
 
-          if (step.Depth != previousStep.Depth)
+          if (step.OriginalPosition.Depth != previousStep.OriginalPosition.Depth)
           {
             previousStep = step;
             continue;

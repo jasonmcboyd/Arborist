@@ -8,7 +8,10 @@ namespace Arborist.Linq.Treenumerators
     {
     }
 
-    public NodeVisit<TNode> Current => throw new InvalidOperationException();
+    // TODO: I am just going to return defaults rather than throwing for now.
+    public NodeVisit<TNode> Current => default;
+    public NodePosition OriginalPosition => default;
+    public NodePosition Position => default;
 
     public TreenumeratorState State { get; private set; } = TreenumeratorState.EnumerationNotStarted;
 

@@ -5,9 +5,9 @@
     public static NodeVisit<TNode> Create<TNode>(
       TNode node,
       int visitCount,
-      int siblingIndex,
-      int depth,
+      NodePosition originalPosition,
+      NodePosition position,
       bool skipped)
-      => new NodeVisit<TNode>(node, visitCount, siblingIndex, depth, skipped);
+      => new NodeVisit<TNode>(node, visitCount, originalPosition, position, skipped);
   }
 }

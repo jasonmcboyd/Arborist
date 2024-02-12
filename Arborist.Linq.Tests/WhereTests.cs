@@ -21,7 +21,7 @@ namespace Arborist.Linq.Tests
       // Act
       var actual =
         treenumerable
-        .Where(visit => visit.Depth != 0)
+        .Where(visit => visit.OriginalPosition.Depth != 0)
         .ToBreadthFirstMoveNext()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
@@ -51,7 +51,7 @@ namespace Arborist.Linq.Tests
       // Act
       var actual =
         treenumerable
-        .Where(visit => visit.Depth != 1)
+        .Where(visit => visit.OriginalPosition.Depth != 1)
         .ToBreadthFirstMoveNext()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
@@ -81,7 +81,7 @@ namespace Arborist.Linq.Tests
       // Act
       var actual =
         treenumerable
-        .Where(visit => visit.Depth != 2)
+        .Where(visit => visit.OriginalPosition.Depth != 2)
         .ToBreadthFirstMoveNext()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
@@ -111,7 +111,7 @@ namespace Arborist.Linq.Tests
       // Act
       var actual =
         treenumerable
-        .Where(visit => visit.Depth == 0)
+        .Where(visit => visit.OriginalPosition.Depth == 0)
         .ToBreadthFirstMoveNext()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
@@ -138,7 +138,7 @@ namespace Arborist.Linq.Tests
       // Act
       var actual =
         treenumerable
-        .Where(visit => visit.Depth != 0)
+        .Where(visit => visit.OriginalPosition.Depth != 0)
         .ToBreadthFirstMoveNext()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
@@ -168,7 +168,7 @@ namespace Arborist.Linq.Tests
       // Act
       var actual =
         treenumerable
-        .Where(visit => !(visit.Depth == 1 && visit.SiblingIndex == 0))
+        .Where(visit => !(visit.OriginalPosition.Depth == 1 && visit.OriginalPosition.SiblingIndex == 0))
         .ToBreadthFirstMoveNext()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
@@ -202,7 +202,7 @@ namespace Arborist.Linq.Tests
       // Act
       var actual =
         treenumerable
-        .Where(visit => !(visit.Depth == 1 && visit.SiblingIndex == 1))
+        .Where(visit => !(visit.OriginalPosition.Depth == 1 && visit.OriginalPosition.SiblingIndex == 1))
         .ToBreadthFirstMoveNext()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
@@ -236,7 +236,7 @@ namespace Arborist.Linq.Tests
       // Act
       var actual =
         treenumerable
-        .Where(visit => !(visit.Depth == 1 && visit.SiblingIndex == 2))
+        .Where(visit => !(visit.OriginalPosition.Depth == 1 && visit.OriginalPosition.SiblingIndex == 2))
         .ToBreadthFirstMoveNext()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
@@ -330,7 +330,7 @@ namespace Arborist.Linq.Tests
       // Act
       var actual =
         treenumerable
-        .Where(visit => visit.Depth != 0)
+        .Where(visit => visit.OriginalPosition.Depth != 0)
         .ToDepthFirstMoveNext()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
@@ -360,7 +360,7 @@ namespace Arborist.Linq.Tests
       // Act
       var actual =
         treenumerable
-        .Where(visit => visit.Depth != 1)
+        .Where(visit => visit.OriginalPosition.Depth != 1)
         .ToDepthFirstMoveNext()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
@@ -390,7 +390,7 @@ namespace Arborist.Linq.Tests
       // Act
       var actual =
         treenumerable
-        .Where(visit => visit.Depth != 2)
+        .Where(visit => visit.OriginalPosition.Depth != 2)
         .ToDepthFirstMoveNext()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
@@ -420,7 +420,7 @@ namespace Arborist.Linq.Tests
       // Act
       var actual =
         treenumerable
-        .Where(visit => visit.Depth == 0)
+        .Where(visit => visit.OriginalPosition.Depth == 0)
         .ToDepthFirstMoveNext()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
@@ -447,7 +447,7 @@ namespace Arborist.Linq.Tests
       // Act
       var actual =
         treenumerable
-        .Where(visit => visit.Depth != 0)
+        .Where(visit => visit.OriginalPosition.Depth != 0)
         .ToDepthFirstMoveNext()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
@@ -477,7 +477,7 @@ namespace Arborist.Linq.Tests
       // Act
       var actual =
         treenumerable
-        .Where(visit => !(visit.Depth == 1 && visit.SiblingIndex == 0))
+        .Where(visit => !(visit.OriginalPosition.Depth == 1 && visit.OriginalPosition.SiblingIndex == 0))
         .ToDepthFirstMoveNext()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
@@ -511,7 +511,7 @@ namespace Arborist.Linq.Tests
       // Act
       var actual =
         treenumerable
-        .Where(visit => !(visit.Depth == 1 && visit.SiblingIndex == 1))
+        .Where(visit => !(visit.OriginalPosition.Depth == 1 && visit.OriginalPosition.SiblingIndex == 1))
         .ToDepthFirstMoveNext()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
@@ -545,7 +545,7 @@ namespace Arborist.Linq.Tests
       // Act
       var actual =
         treenumerable
-        .Where(visit => !(visit.Depth == 1 && visit.SiblingIndex == 2))
+        .Where(visit => !(visit.OriginalPosition.Depth == 1 && visit.OriginalPosition.SiblingIndex == 2))
         .ToDepthFirstMoveNext()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();

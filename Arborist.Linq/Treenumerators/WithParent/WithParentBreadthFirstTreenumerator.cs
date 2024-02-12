@@ -2,7 +2,6 @@
 
 namespace Arborist.Linq.Treenumerators
 {
-
   internal class WithParentBreadthFirstTreenumerator<TNode>
     : TreenumeratorWrapper<TNode, WithParentNode<TNode>>
   {
@@ -24,12 +23,12 @@ namespace Arborist.Linq.Treenumerators
       {
         _Queue.Enqueue(InnerTreenumerator.Current.Node);
 
-        if (InnerTreenumerator.Current.SiblingIndex == 0)
+        if (InnerTreenumerator.Current.OriginalPosition.SiblingIndex == 0)
           _Queue.Dequeue();
       }
 
       var node =
-        InnerTreenumerator.Current.Depth == 0
+        InnerTreenumerator.Current.OriginalPosition.Depth == 0
         ? new WithParentNode<TNode>(InnerTreenumerator.Current.Node)
         : new WithParentNode<TNode>(InnerTreenumerator.Current.Node, _Queue.Peek());
 
@@ -38,8 +37,8 @@ namespace Arborist.Linq.Treenumerators
         .Create(
           node,
           InnerTreenumerator.Current.VisitCount,
-          InnerTreenumerator.Current.SiblingIndex,
-          InnerTreenumerator.Current.Depth,
+          InnerTreenumerator.Current.OriginalPosition,
+          InnerTreenumerator.Current.Position,
           InnerTreenumerator.Current.Skipped);
 
       Current = visit;
