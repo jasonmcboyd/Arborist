@@ -645,9 +645,9 @@ namespace Arborist.Linq.Tests
       // Assert
       var expected = new MoveNextResult<string>[]
       {
-        (TreenumeratorState.SchedulingNode, "a", 0, 0, 0),
-        (TreenumeratorState.VisitingNode,   "a", 1, 0, 0),
-        (TreenumeratorState.VisitingNode,   "a", 2, 0, 0),
+        (TreenumeratorState.SchedulingNode, "a", 0, (0, 0)),
+        (TreenumeratorState.VisitingNode,   "a", 1, (0, 0)),
+        (TreenumeratorState.VisitingNode,   "a", 2, (0, 0)),
       };
 
       CollectionAssert.AreEqual(expected, actual);

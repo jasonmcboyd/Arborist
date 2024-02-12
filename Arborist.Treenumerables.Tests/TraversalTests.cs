@@ -183,7 +183,7 @@ namespace Arborist.Treenumerables.Tests
 
       MoveNextResult<string>[] Sort(IEnumerable<MoveNextResult<string>> nodes) =>
         nodes
-        .OrderBy(x => (x.State, x.Depth, x.SiblingIndex, x.Node))
+        .OrderBy(x => (x.State, x.OriginalPosition, x.Node))
         .ToArray();
 
       // Act

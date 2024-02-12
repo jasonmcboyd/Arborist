@@ -15,18 +15,15 @@ namespace Arborist.Tests.Utils
       State = state;
       Node = node;
       VisitCount = visitCount;
-      //OriginalPosition = originalPosition;
-      Depth = originalPosition.Depth;
-      SiblingIndex = originalPosition.SiblingIndex;
+      OriginalPosition = originalPosition;
       Position = position;
     }
 
     public TreenumeratorState State { get; }
     public TNode Node { get; }
     public int VisitCount { get; }
-    public int Depth { get; }
-    public int SiblingIndex { get; }
-    NodePosition Position { get; }
+    public NodePosition OriginalPosition { get; }
+    public NodePosition Position { get; }
 
     public override bool Equals(object obj)
     {
@@ -37,18 +34,18 @@ namespace Arborist.Tests.Utils
         State == other.State
         && Equals(other.Node, Node)
         && other.VisitCount == VisitCount
-        && other.SiblingIndex == SiblingIndex
-        && other.Depth == Depth;
+        && other.OriginalPosition == OriginalPosition
+        && other.Position == Position;
     }
 
-    public override int GetHashCode() => (State, Node, VisitCount, SiblingIndex, Depth).GetHashCode();
+    public override int GetHashCode() => (State, Node, VisitCount, OriginalPosition).GetHashCode();
 
-    public static implicit operator MoveNextResult<TNode>((TreenumeratorState, TNode, int, int, int) tuple)
-      => new MoveNextResult<TNode>(tuple.Item1, tuple.Item2, tuple.Item3, (tuple.Item4, tuple.Item5), default);
+    public static implicit operator MoveNextResult<TNode>((TreenumeratorState, TNode, int, NodePosition) tuple)
+      => new MoveNextResult<TNode>(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, default);
 
     public override string ToString()
     {
-      return $"{TreenumeratorStateMap.ToChar(State)}, {Node}, {VisitCount}, {SiblingIndex}, {Depth}";
+      return $"{TreenumeratorStateMap.ToChar(State)}, {Node}, {VisitCount}, ({OriginalPosition.SiblingIndex}, {OriginalPosition.Depth})";
     }
   }
 
