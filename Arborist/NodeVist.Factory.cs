@@ -7,7 +7,7 @@
       int visitCount,
       NodePosition originalPosition,
       NodePosition position,
-      bool skipped)
-      => new NodeVisit<TNode>(node, visitCount, originalPosition, position, skipped);
+      SchedulingStrategy schedulingStrategy)
+      => new NodeVisit<TNode>(node, visitCount, originalPosition, position, schedulingStrategy);
   }
 }

@@ -10,7 +10,7 @@
         source.VisitCount,
         (depth, source.OriginalPosition.SiblingIndex),
         source.Position,
-        source.Skipped);
+        source.SchedulingStrategy);
 
     public static NodeVisit<TResult> WithNode<TSource, TResult>(
       this NodeVisit<TSource> source,
@@ -20,7 +20,7 @@
         source.VisitCount,
         source.OriginalPosition,
         source.Position,
-        source.Skipped);
+        source.SchedulingStrategy);
 
     public static NodeVisit<TNode> WithVisitCount<TNode>(
       this NodeVisit<TNode> source,
@@ -30,7 +30,7 @@
         visitCount,
         source.OriginalPosition,
         source.Position,
-        source.Skipped);
+        source.SchedulingStrategy);
 
     public static NodeVisit<TNode> IncrementVisitCount<TNode>(
       this NodeVisit<TNode> source)
@@ -39,7 +39,7 @@
         source.VisitCount + 1,
         source.OriginalPosition,
         source.Position,
-        source.Skipped);
+        source.SchedulingStrategy);
 
     public static NodeVisit<TNode> WithSiblingIndex<TNode>(
       this NodeVisit<TNode> source,
@@ -49,15 +49,34 @@
         source.VisitCount,
         (source.OriginalPosition.Depth, siblingIndex),
         source.Position,
-        source.Skipped);
+        source.SchedulingStrategy);
 
-    public static NodeVisit<TNode> Skip<TNode>(
+    public static NodeVisit<TNode> WithSchedulingStrategy<TNode>(
+      this NodeVisit<TNode> source,
+      SchedulingStrategy schedulingStrategy)
+      => NodeVisit.Create(
+        source.Node,
+        source.VisitCount,
+        source.OriginalPosition,
+        source.Position,
+        schedulingStrategy);
+
+    public static NodeVisit<TNode> SkipNode<TNode>(
       this NodeVisit<TNode> source)
       => NodeVisit.Create(
         source.Node,
         source.VisitCount,
         source.OriginalPosition,
         source.Position,
-        true);
+        SchedulingStrategy.SkipNode);
+
+    public static NodeVisit<TNode> SkipDescendantSubtrees<TNode>(
+      this NodeVisit<TNode> source)
+      => NodeVisit.Create(
+        source.Node,
+        source.VisitCount,
+        source.OriginalPosition,
+        source.Position,
+        SchedulingStrategy.SkipDescendantSubtrees);
   }
 }

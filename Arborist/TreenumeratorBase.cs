@@ -29,6 +29,18 @@ namespace Arborist
       protected set => _Current = value;
     }
 
+    private int _VisitCount;
+    public int VisitCount
+    {
+      get
+      {
+        ValidateState();
+
+        return _VisitCount;
+      }
+      protected set => _VisitCount = value;
+    }
+
     private NodePosition _OriginalPosition;
     public NodePosition OriginalPosition
     {
@@ -51,6 +63,18 @@ namespace Arborist
         return _Position;
       }
       protected set => _Position = value;
+    }
+
+    private SchedulingStrategy _SchedulingStrategy;
+    public SchedulingStrategy SchedulingStrategy
+    {
+      get
+      {
+        ValidateState();
+
+        return _SchedulingStrategy;
+      }
+      protected set => _SchedulingStrategy = value;
     }
 
     public TreenumeratorState State { get; protected set; } = TreenumeratorState.EnumerationNotStarted;

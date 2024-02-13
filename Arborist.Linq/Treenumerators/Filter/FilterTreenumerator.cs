@@ -123,7 +123,7 @@ namespace Arborist.Linq.Treenumerators
               0,
               default,
               default,
-              InnerTreenumerator.Current.Skipped);
+              InnerTreenumerator.Current.SchedulingStrategy);
         }
         else
         {
@@ -134,7 +134,7 @@ namespace Arborist.Linq.Treenumerators
               0,
               Current.OriginalPosition + (1, -1),
               default,
-              InnerTreenumerator.Current.Skipped);
+              InnerTreenumerator.Current.SchedulingStrategy);
         }
       }
       else

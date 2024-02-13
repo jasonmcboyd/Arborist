@@ -39,7 +39,7 @@ namespace Arborist.Linq.Treenumerators
           InnerTreenumerator.Current.VisitCount,
           InnerTreenumerator.Current.OriginalPosition,
           InnerTreenumerator.Current.Position,
-          InnerTreenumerator.Current.Skipped);
+          InnerTreenumerator.Current.SchedulingStrategy);
 
       Current = visit;
 

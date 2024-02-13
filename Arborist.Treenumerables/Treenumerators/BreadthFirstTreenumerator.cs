@@ -1,4 +1,5 @@
 ﻿using Nito.Collections;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -7,22 +8,29 @@ namespace Arborist.Treenumerables.Treenumerators
   internal sealed class BreadthFirstTreenumerator<TNode>
     : TreenumeratorBase<TNode>
   {
-    public BreadthFirstTreenumerator(IEnumerable<INodeWithEnumerableChildren<TNode>> rootNodes)
+    public BreadthFirstTreenumerator(
+      IEnumerable<TNode> rootNodes,
+      Func<TNode, IEnumerator<TNode>> childrenGetter)
     {
-      INodeWithEnumerableChildren<TNode> sentinalNode = new SentinalNode(rootNodes);
-      var sentinalNodeVisit = NodeVisit.Create(sentinalNode, 1, (0, -1), default, false);
+      _RootsEnumerator = rootNodes.GetEnumerator();
+      _ChildrenGetter = childrenGetter;
+      var sentinalNodeVisit = NodeVisit.Create(default(TNode), 1, (0, -1), default, SchedulingStrategy.ScheduleForTraversal);
       _CurrentLevel.AddToFront(sentinalNodeVisit);
-      Current = sentinalNodeVisit.WithNode(sentinalNode.Value);
+      Current = sentinalNodeVisit;
     }
 
-    private Deque<NodeVisit<INodeWithEnumerableChildren<TNode>>> _CurrentLevel =
-      new Deque<NodeVisit<INodeWithEnumerableChildren<TNode>>>();
+    private readonly IEnumerator<TNode> _RootsEnumerator;
 
-    private Deque<NodeVisit<INodeWithEnumerableChildren<TNode>>> _NextLevel =
-      new Deque<NodeVisit<INodeWithEnumerableChildren<TNode>>>();
+    private Deque<NodeVisit<TNode>> _CurrentLevel =
+      new Deque<NodeVisit<TNode>>();
 
-    private Stack<IEnumerator<INodeWithEnumerableChildren<TNode>>> _ChildrenStack =
-      new Stack<IEnumerator<INodeWithEnumerableChildren<TNode>>>();
+    private Deque<NodeVisit<TNode>> _NextLevel =
+      new Deque<NodeVisit<TNode>>();
+
+    private Stack<IEnumerator<TNode>> _ChildrenStack =
+      new Stack<IEnumerator<TNode>>();
+
+    private readonly Func<TNode, IEnumerator<TNode>> _ChildrenGetter;
 
     protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
     {
@@ -69,23 +77,12 @@ namespace Arborist.Treenumerables.Treenumerators
     {
       var previousVisit = _CurrentLevel.RemoveFromFront();
 
-      if (schedulingStrategy == SchedulingStrategy.SkipDescendantSubtrees)
-      {
-        // TODO: This is a temporary hack.
-        INodeWithEnumerableChildren<TNode> node =
-          new SentinalNode(
-            previousVisit.Node.Value,
-            Enumerable.Empty<INodeWithEnumerableChildren<TNode>>());
-
-        previousVisit = previousVisit.WithNode(node);
-      }
-
-      if (schedulingStrategy == SchedulingStrategy.SkipNode)
-        previousVisit = previousVisit.Skip();
+      previousVisit = previousVisit.WithSchedulingStrategy(schedulingStrategy);
 
       if (schedulingStrategy != SchedulingStrategy.SkipSubtree)
       {
-        if (_CurrentLevel[0].Skipped)
+        // TODO: Not sure which predicate to use here.
+        if (_CurrentLevel[0].SchedulingStrategy == SchedulingStrategy.SkipNode)
           //&& (_CurrentLevel[0].Depth != -1 || previousVisit.Skipped))
           _CurrentLevel.AddToFront(previousVisit);
         else
@@ -97,7 +94,7 @@ namespace Arborist.Treenumerables.Treenumerators
         var nextVisit = _CurrentLevel.RemoveFromFront().IncrementVisitCount();
         _CurrentLevel.AddToFront(nextVisit);
 
-        Current = nextVisit.WithNode(nextVisit.Node.Value);
+        Current = nextVisit.WithNode(nextVisit.Node);
 
         State = TreenumeratorState.VisitingNode;
 
@@ -125,7 +122,7 @@ namespace Arborist.Treenumerables.Treenumerators
 
       if (previousVisit.VisitCount == 1
         && Current.OriginalPosition.Depth == previousVisit.OriginalPosition.Depth)
-        _ChildrenStack.Push(previousVisit.Node.Children.GetEnumerator());
+        _ChildrenStack.Push(GetChildren(previousVisit));
 
       if (Current.OriginalPosition.Depth > previousVisit.OriginalPosition.Depth)
       {
@@ -160,13 +157,24 @@ namespace Arborist.Treenumerables.Treenumerators
       return null;
     }
 
+    private IEnumerator<TNode> GetChildren(NodeVisit<TNode> visit)
+    {
+      if (visit.OriginalPosition.Depth == -1)
+        return _RootsEnumerator;
+
+      if (visit.SchedulingStrategy == SchedulingStrategy.SkipDescendantSubtrees)
+        return Enumerable.Empty<TNode>().GetEnumerator();
+
+      return _ChildrenGetter(visit.Node);
+    }
+
     private void IncrementVisit()
     {
       var previousVisit = _CurrentLevel[0].IncrementVisitCount();
 
       _CurrentLevel[0] = previousVisit;
 
-      Current = previousVisit.WithNode(previousVisit.Node.Value);
+      Current = previousVisit.WithNode(previousVisit.Node);
 
       State = TreenumeratorState.VisitingNode;
     }
@@ -180,9 +188,9 @@ namespace Arborist.Treenumerables.Treenumerators
         var siblingIndex = Current.VisitCount - 1; ;
         var depth = Current.OriginalPosition.Depth + 1;
 
-        var childNode = NodeVisit.Create(children.Current, 0, (siblingIndex, depth), default, false);
+        var childNode = NodeVisit.Create(children.Current, 0, (siblingIndex, depth), default, SchedulingStrategy.ScheduleForTraversal);
         _CurrentLevel.AddToFront(childNode);
-        Current = childNode.WithNode(childNode.Node.Value);
+        Current = childNode.WithNode(childNode.Node);
         State = TreenumeratorState.SchedulingNode;
         _ChildrenStack.Push(children);
         return true;
@@ -195,29 +203,10 @@ namespace Arborist.Treenumerables.Treenumerators
 
     public override void Dispose()
     {
+      _RootsEnumerator?.Dispose();
+
       while (_ChildrenStack.Count > 0)
         _ChildrenStack.Pop().Dispose();
-    }
-
-    private class SentinalNode : INodeWithEnumerableChildren<TNode>
-    {
-      public SentinalNode(
-        IEnumerable<INodeWithEnumerableChildren<TNode>> rootNodes)
-        : this(default, rootNodes)
-      {
-      }
-
-      public SentinalNode(
-        TNode value,
-        IEnumerable<INodeWithEnumerableChildren<TNode>> rootNodes)
-      {
-        Value = value;
-        Children = rootNodes;
-      }
-
-      public TNode Value { get; private set; }
-
-      public IEnumerable<INodeWithEnumerableChildren<TNode>> Children { get; private set; }
     }
   }
 }

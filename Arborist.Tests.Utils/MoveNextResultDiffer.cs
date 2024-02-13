@@ -37,8 +37,15 @@ namespace Arborist.Tests.Utils
         var expectedDiff = diff.OldText.Lines[i];
         var actualDiff = diff.NewText.Lines[i];
 
-        var expected = expectedResults[expectedPointer];
-        var actual = actualResults[actualPointer];
+        var expected =
+          expectedPointer < expectedResults.Length
+          ? expectedResults[expectedPointer]
+          : null;
+
+        var actual =
+          actualPointer < actualResults.Length
+          ? actualResults[actualPointer]
+          : null;
 
         if (expectedDiff.Type == ChangeType.Unchanged)
         {

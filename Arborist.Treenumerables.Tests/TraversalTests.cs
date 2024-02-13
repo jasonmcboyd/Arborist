@@ -1,3 +1,4 @@
+using Arborist.Linq;
 using Arborist.Tests.Utils;
 using Arborist.Treenumerables.SimpleSerializer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -70,7 +71,7 @@ namespace Arborist.Treenumerables.Tests
     {
       // Arrange
       var rootNodes = EnumerableTreeNode.Create(TreeSerializer.DeserializeRoots(treeString));
-      var treenumerable = new Treenumerable<string>(rootNodes);
+      var treenumerable = rootNodes.ToTreenumerable().Select(visit => visit.Node.Value);
       var testScenario = TreeTraversalTestData.TestTrees[testTreeIndex].TestScenarios[testScenarioIndex];
 
       var expected = testScenario.ExpectedDepthFirstResults;
@@ -142,7 +143,7 @@ namespace Arborist.Treenumerables.Tests
     {
       // Arrange
       var rootNodes = EnumerableTreeNode.Create(TreeSerializer.DeserializeRoots(treeString));
-      var treenumerable = new Treenumerable<string>(rootNodes);
+      var treenumerable = rootNodes.ToTreenumerable().Select(visit => visit.Node.Value);
       var testScenario = TreeTraversalTestData.TestTrees[testTreeIndex].TestScenarios[testScenarioIndex];
 
       var expected = testScenario.ExpectedBreadthFirstResults;

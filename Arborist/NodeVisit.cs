@@ -7,19 +7,21 @@
       int visitCount,
       NodePosition originalPosition,
       NodePosition position,
-      bool skipped)
+      SchedulingStrategy schedulingStrategy)
     {
       Node = node;
       VisitCount = visitCount;
       OriginalPosition = originalPosition;
       Position = position;
-      Skipped = skipped;
+      SchedulingStrategy = schedulingStrategy;
     }
 
     public TNode Node { get; }
     public int VisitCount { get; }
     public NodePosition OriginalPosition { get; }
     public NodePosition Position { get; }
-    public bool Skipped { get; }
+    public SchedulingStrategy SchedulingStrategy { get; }
+    public bool Skipped => SchedulingStrategy == SchedulingStrategy.SkipNode;
+    public bool SkippedDescendants => SchedulingStrategy == SchedulingStrategy.SkipDescendantSubtrees;
   }
 }

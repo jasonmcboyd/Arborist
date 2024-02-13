@@ -28,9 +28,9 @@ namespace Arborist.Linq.Treenumerators
           .Create(
             node,
             InnerTreenumerator.Current.VisitCount,
-            InnerTreenumerator.OriginalPosition,
-            InnerTreenumerator.Position,
-            InnerTreenumerator.Current.Skipped);
+            InnerTreenumerator.Current.OriginalPosition,
+            InnerTreenumerator.Current.Position,
+            InnerTreenumerator.Current.SchedulingStrategy);
       }
 
       return hasNext;
