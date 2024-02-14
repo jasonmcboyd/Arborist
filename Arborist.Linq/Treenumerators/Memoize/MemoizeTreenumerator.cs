@@ -17,24 +17,25 @@ namespace Arborist.Linq.Treenumerators
 
     protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
     {
-      if (_GeneratorExhausted)
-        return false;
+      throw new NotImplementedException();
+      //if (_GeneratorExhausted)
+      //  return false;
 
-      var result = _Generator(_Index);
+      //var result = _Generator(_Index);
 
-      _Index++;
+      //_Index++;
 
-      if (result.HadNext)
-      {
-        Current = result.Current;
-        return true;
-      }
+      //if (result.HadNext)
+      //{
+      //  Current = result.Current;
+      //  return true;
+      //}
 
-      _GeneratorExhausted = true;
+      //_GeneratorExhausted = true;
 
-      _Generator = null;
+      //_Generator = null;
       
-      return false;
+      //return false;
     }
 
     public override void Dispose()

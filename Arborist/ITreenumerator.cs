@@ -6,11 +6,11 @@ namespace Arborist
   {
     bool MoveNext(SchedulingStrategy schedulingStrategy);
 
-    NodeVisit<TNode> Current { get; }
+    SchedulingStrategy SchedulingStrategy { get; }
+    TNode Node { get; }
     int VisitCount { get; }
     TreenumeratorState State { get; }
     NodePosition OriginalPosition { get; }
     NodePosition Position { get; }
-    SchedulingStrategy SchedulingStrategy { get; }
   }
 }

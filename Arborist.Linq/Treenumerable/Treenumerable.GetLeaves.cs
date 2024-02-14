@@ -6,30 +6,30 @@ namespace Arborist.Linq
   {
     public static IEnumerable<T> GetLeaves<T>(this ITreenumerable<T> source)
     {
-      using (var enumerator = source.GetDepthFirstTreenumerator())
+      using (var treenumerator = source.GetDepthFirstTreenumerator())
       {
-        if (!enumerator.MoveNext(SchedulingStrategy.ScheduleForTraversal))
+        if (!treenumerator.MoveNext(SchedulingStrategy.ScheduleForTraversal))
           yield break;
 
-        var previousStep = enumerator.Current;
+        var previousVisit = treenumerator.ToNodeVisit();
 
-        while (enumerator.MoveNext(SchedulingStrategy.ScheduleForTraversal))
+        while (treenumerator.MoveNext(SchedulingStrategy.ScheduleForTraversal))
         {
-          var step = enumerator.Current;
+          var currentVisit = treenumerator.ToNodeVisit();
 
-          if (step.OriginalPosition.Depth != previousStep.OriginalPosition.Depth)
+          if (currentVisit.OriginalPosition.Depth != previousVisit.OriginalPosition.Depth)
           {
-            previousStep = step;
+            previousVisit = currentVisit;
             continue;
           }
 
-          if (step.VisitCount != 2)
+          if (currentVisit.VisitCount != 2)
           {
-            previousStep = step;
+            previousVisit = currentVisit;
             continue;
           }
 
-          yield return step.Node;
+          yield return currentVisit.Node;
         }
       }
     }

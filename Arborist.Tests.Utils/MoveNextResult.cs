@@ -51,8 +51,13 @@ namespace Arborist.Tests.Utils
 
   public static class MoveNextResult
   {
-    public static MoveNextResult<TNode> Create<TNode>(TreenumeratorState state, NodeVisit<TNode> visit)
-      => new MoveNextResult<TNode>(state, visit.Node, visit.VisitCount, visit.OriginalPosition, default);
+    public static MoveNextResult<TNode> Create<TNode>(ITreenumerator<TNode> treenumerator)
+      => new MoveNextResult<TNode>(
+        treenumerator.State,
+        treenumerator.Node,
+        treenumerator.VisitCount,
+        treenumerator.OriginalPosition,
+        treenumerator.Position);
 
     public static IEnumerable<MoveNextResult<TNode>> ToDepthFirstMoveNext<TNode>(
       this ITreenumerable<TNode> source)
@@ -60,28 +65,19 @@ namespace Arborist.Tests.Utils
 
     public static IEnumerable<MoveNextResult<TNode>> ToDepthFirstMoveNext<TNode>(
       this ITreenumerable<TNode> source,
-      Func<NodeVisit<TNode>, SchedulingStrategy> schedulingStrategySelector)
+      Func<ITreenumerator<TNode>, SchedulingStrategy> schedulingStrategySelector)
     {
-      using (var enumerator = source.GetDepthFirstTreenumerator())
+      using (var treenumerator = source.GetDepthFirstTreenumerator())
       {
-        NodeVisit<TNode>? previous = null;
-
-        var schedulingStrategy = SchedulingStrategy.ScheduleForTraversal;
-
-        while (enumerator.MoveNext(schedulingStrategy))
+        var schedulingStrategy = SchedulingStrategy.ScheduleForTraversal; 
+        while (treenumerator.MoveNext(schedulingStrategy))
         {
-          var visit =
-            enumerator.State == TreenumeratorState.EnumerationFinished
-            || enumerator.State == TreenumeratorState.EnumerationNotStarted
-            ? default
-            : enumerator.Current;
+          yield return Create(treenumerator);
 
-          yield return Create(enumerator.State, visit);
-
-          previous = enumerator.Current;
-
-          schedulingStrategy = schedulingStrategySelector(previous.Value);
+          schedulingStrategy = schedulingStrategySelector(treenumerator);
         }
+
+        yield break;
       }
     }
 
@@ -91,28 +87,20 @@ namespace Arborist.Tests.Utils
 
     public static IEnumerable<MoveNextResult<TNode>> ToBreadthFirstMoveNext<TNode>(
       this ITreenumerable<TNode> source,
-      Func<NodeVisit<TNode>, SchedulingStrategy> schedulingStrategySelector)
+      Func<ITreenumerator<TNode>, SchedulingStrategy> schedulingStrategySelector)
     {
-      using (var enumerator = source.GetBreadthFirstTreenumerator())
+      using (var treenumerator = source.GetBreadthFirstTreenumerator())
       {
-        NodeVisit<TNode>? previous = null;
+        var schedulingStrategy = SchedulingStrategy.ScheduleForTraversal; 
 
-        var schedulingStrategy = SchedulingStrategy.ScheduleForTraversal;
-
-        while (enumerator.MoveNext(schedulingStrategy))
+        while (treenumerator.MoveNext(schedulingStrategy))
         {
-          var visit =
-            enumerator.State == TreenumeratorState.EnumerationFinished
-            || enumerator.State == TreenumeratorState.EnumerationNotStarted
-            ? default
-            : enumerator.Current;
+          yield return Create(treenumerator);
 
-          yield return Create(enumerator.State, visit);
-
-          previous = enumerator.Current;
-
-          schedulingStrategy = schedulingStrategySelector(previous.Value);
+          schedulingStrategy = schedulingStrategySelector(treenumerator);
         }
+
+        yield break;
       }
     }
   }

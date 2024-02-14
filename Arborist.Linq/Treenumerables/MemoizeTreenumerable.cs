@@ -42,71 +42,74 @@ namespace Arborist.Linq.Treenumerables
       object treenumeratorLock,
       ref bool exhaustedFlag)
     {
-      if (_Disposed)
-        throw new ObjectDisposedException("");
+      throw new NotImplementedException();
+      //if (_Disposed)
+      //  throw new ObjectDisposedException("");
 
-      if (index > _BreadthFirstMemo.Count && !_BreadthFirstTreenumeratorExhausted)
-      {
-        lock (_BreadthFirstTreenumeratorLock)
-        {
-          if (index > _BreadthFirstMemo.Count && !_BreadthFirstTreenumeratorExhausted)
-          {
-            if (_BreadthFirstTreenumerator.MoveNext(SchedulingStrategy.ScheduleForTraversal))
-              _BreadthFirstMemo.Add(_BreadthFirstTreenumerator.Current);
-            else
-              _BreadthFirstTreenumeratorExhausted = true;
-          }
-        }
-      }
+      //if (index > _BreadthFirstMemo.Count && !_BreadthFirstTreenumeratorExhausted)
+      //{
+      //  lock (_BreadthFirstTreenumeratorLock)
+      //  {
+      //    if (index > _BreadthFirstMemo.Count && !_BreadthFirstTreenumeratorExhausted)
+      //    {
+      //      if (_BreadthFirstTreenumerator.MoveNext(SchedulingStrategy.ScheduleForTraversal))
+      //        _BreadthFirstMemo.Add(_BreadthFirstTreenumerator.Node);
+      //      else
+      //        _BreadthFirstTreenumeratorExhausted = true;
+      //    }
+      //  }
+      //}
 
-      if (index < _BreadthFirstMemo.Count)
-        return new MoveNextResult<TNode>(true, _BreadthFirstMemo[index]);
+      //if (index < _BreadthFirstMemo.Count)
+      //  return new MoveNextResult<TNode>(true, _BreadthFirstMemo[index]);
 
-      return new MoveNextResult<TNode>(false);
+      //return new MoveNextResult<TNode>(false);
     }
 
     internal MoveNextResult<TNode> GetNextBreadthFirst(int index)
     {
-      if (index > _BreadthFirstMemo.Count && !_BreadthFirstTreenumeratorExhausted)
-      {
-        lock (_BreadthFirstTreenumeratorLock)
-        {
-          if (index > _BreadthFirstMemo.Count && !_BreadthFirstTreenumeratorExhausted)
-          {
-            if (_BreadthFirstTreenumerator.MoveNext(SchedulingStrategy.ScheduleForTraversal))
-              _BreadthFirstMemo.Add(_BreadthFirstTreenumerator.Current);
-            else
-              _BreadthFirstTreenumeratorExhausted = true;
-          }
-        }
-      }
+      throw new NotImplementedException();
+      //if (index > _BreadthFirstMemo.Count && !_BreadthFirstTreenumeratorExhausted)
+      //{
+      //  lock (_BreadthFirstTreenumeratorLock)
+      //  {
+      //    if (index > _BreadthFirstMemo.Count && !_BreadthFirstTreenumeratorExhausted)
+      //    {
+      //      if (_BreadthFirstTreenumerator.MoveNext(SchedulingStrategy.ScheduleForTraversal))
+      //        _BreadthFirstMemo.Add(_BreadthFirstTreenumerator.Node);
+      //      else
+      //        _BreadthFirstTreenumeratorExhausted = true;
+      //    }
+      //  }
+      //}
 
-      if (index < _BreadthFirstMemo.Count)
-        return new MoveNextResult<TNode>(true, _BreadthFirstMemo[index]);
+      //if (index < _BreadthFirstMemo.Count)
+      //  return new MoveNextResult<TNode>(true, _BreadthFirstMemo[index]);
 
-      return new MoveNextResult<TNode>(false);
+      //return new MoveNextResult<TNode>(false);
     }
 
     internal MoveNextResult<TNode> GetNextDepthFirst(int index)
     {
-      if (index > _DepthFirstMemo.Count && !_DepthFirstTreenumeratorExhausted)
-      {
-        lock (_DepthFirstTreenumeratorLock)
-        {
-          if (index > _DepthFirstMemo.Count && !_DepthFirstTreenumeratorExhausted)
-          {
-            if (_DepthFirstTreenumerator.MoveNext(SchedulingStrategy.ScheduleForTraversal))
-              _DepthFirstMemo.Add(_DepthFirstTreenumerator.Current);
-            else
-              _DepthFirstTreenumeratorExhausted = true;
-          }
-        }
-      }
+      throw new NotImplementedException();
+      //if (index > _DepthFirstMemo.Count && !_DepthFirstTreenumeratorExhausted)
+      //{
+      //  lock (_DepthFirstTreenumeratorLock)
+      //  {
+      //    if (index > _DepthFirstMemo.Count && !_DepthFirstTreenumeratorExhausted)
+      //    {
+      //      if (_DepthFirstTreenumerator.MoveNext(SchedulingStrategy.ScheduleForTraversal))
+      //        _DepthFirstMemo.Add(_DepthFirstTreenumerator.Node);
+      //      else
+      //        _DepthFirstTreenumeratorExhausted = true;
+      //    }
+      //  }
+      //}
 
-      if (index < _DepthFirstMemo.Count)
-        return new MoveNextResult<TNode>(true, _DepthFirstMemo[index]);
+      //if (index < _DepthFirstMemo.Count)
+      //  return new MoveNextResult<TNode>(true, _DepthFirstMemo[index]);
 
-      return new MoveNextResult<TNode>(false);
+      //return new MoveNextResult<TNode>(false);
     }
 
     public void Dispose()

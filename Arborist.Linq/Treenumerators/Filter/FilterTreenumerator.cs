@@ -31,118 +31,121 @@ namespace Arborist.Linq.Treenumerators
 
     private bool OnSchedulingNode(SchedulingStrategy schedulingStrategy)
     {
-      if (!_Predicate(InnerTreenumerator.Current))
-      {
-        var skippingNode =
-          schedulingStrategy == SchedulingStrategy.SkipSubtree
-          || schedulingStrategy == SchedulingStrategy.SkipNode
-          || _SkipStrategy == SchedulingStrategy.SkipSubtree
-          || _SkipStrategy == SchedulingStrategy.SkipNode;
+      throw new NotImplementedException();
+      //if (!_Predicate(InnerTreenumerator.Node))
+      //{
+      //  var skippingNode =
+      //    schedulingStrategy == SchedulingStrategy.SkipSubtree
+      //    || schedulingStrategy == SchedulingStrategy.SkipNode
+      //    || _SkipStrategy == SchedulingStrategy.SkipSubtree
+      //    || _SkipStrategy == SchedulingStrategy.SkipNode;
 
-        var skippingDescendants =
-          schedulingStrategy == SchedulingStrategy.SkipSubtree
-          || schedulingStrategy == SchedulingStrategy.SkipDescendantSubtrees
-          || _SkipStrategy == SchedulingStrategy.SkipSubtree
-          || _SkipStrategy == SchedulingStrategy.SkipDescendantSubtrees;
+      //  var skippingDescendants =
+      //    schedulingStrategy == SchedulingStrategy.SkipSubtree
+      //    || schedulingStrategy == SchedulingStrategy.SkipDescendantSubtrees
+      //    || _SkipStrategy == SchedulingStrategy.SkipSubtree
+      //    || _SkipStrategy == SchedulingStrategy.SkipDescendantSubtrees;
 
-        if (skippingDescendants)
-        {
-          schedulingStrategy =
-            skippingNode
-            ? SchedulingStrategy.SkipSubtree
-            : SchedulingStrategy.SkipDescendantSubtrees;
-        }
-        else
-        {
-          schedulingStrategy =
-            skippingNode
-            ? SchedulingStrategy.SkipNode
-            : SchedulingStrategy.ScheduleForTraversal;
-        }
-      }
+      //  if (skippingDescendants)
+      //  {
+      //    schedulingStrategy =
+      //      skippingNode
+      //      ? SchedulingStrategy.SkipSubtree
+      //      : SchedulingStrategy.SkipDescendantSubtrees;
+      //  }
+      //  else
+      //  {
+      //    schedulingStrategy =
+      //      skippingNode
+      //      ? SchedulingStrategy.SkipNode
+      //      : SchedulingStrategy.ScheduleForTraversal;
+      //  }
+      //}
 
-      if (!InnerTreenumerator.MoveNext(schedulingStrategy))
-      {
-        State = TreenumeratorState.EnumerationFinished;
-        return false;
-      }
+      //if (!InnerTreenumerator.MoveNext(schedulingStrategy))
+      //{
+      //  State = TreenumeratorState.EnumerationFinished;
+      //  return false;
+      //}
 
-      if (InnerTreenumerator.State == TreenumeratorState.SchedulingNode)
-        return OnInnerTreenumeratorIsSchedulingNode();
+      //if (InnerTreenumerator.State == TreenumeratorState.SchedulingNode)
+      //  return OnInnerTreenumeratorIsSchedulingNode();
 
-      Current = InnerTreenumerator.Current;
-      State = InnerTreenumerator.State;
+      //Current = InnerTreenumerator.Node;
+      //State = InnerTreenumerator.State;
 
-      return true;
+      //return true;
     }
 
     private bool OnTraversing()
     {
-      // The state is not scheduling so it does not matter what we pass for
-      // the strategy.
-      if (!InnerTreenumerator.MoveNext(SchedulingStrategy.ScheduleForTraversal))
-      {
-        State = TreenumeratorState.EnumerationFinished;
-        return false;
-      }
+      throw new NotImplementedException();
+      //// The state is not scheduling so it does not matter what we pass for
+      //// the strategy.
+      //if (!InnerTreenumerator.MoveNext(SchedulingStrategy.ScheduleForTraversal))
+      //{
+      //  State = TreenumeratorState.EnumerationFinished;
+      //  return false;
+      //}
 
-      if (InnerTreenumerator.State == TreenumeratorState.SchedulingNode)
-        return OnInnerTreenumeratorIsSchedulingNode();
+      //if (InnerTreenumerator.State == TreenumeratorState.SchedulingNode)
+      //  return OnInnerTreenumeratorIsSchedulingNode();
 
-      Current = InnerTreenumerator.Current;
-      State = InnerTreenumerator.State;
+      //Current = InnerTreenumerator.Node;
+      //State = InnerTreenumerator.State;
 
-      return true;
+      //return true;
     }
 
     private bool OnInnerTreenumeratorIsSchedulingNode()
     {
-      if (_SkipStrategy == SchedulingStrategy.SkipSubtree
-        || _SkipStrategy == SchedulingStrategy.SkipNode)
-      {
-        while (!_Predicate(InnerTreenumerator.Current))
-        {
-          InnerTreenumerator.MoveNext(_SkipStrategy);
+      throw new NotImplementedException();
+      //if (_SkipStrategy == SchedulingStrategy.SkipSubtree
+      //  || _SkipStrategy == SchedulingStrategy.SkipNode)
+      //{
+      //  while (!_Predicate(InnerTreenumerator.Node))
+      //  {
+      //    InnerTreenumerator.MoveNext(_SkipStrategy);
 
-          if (InnerTreenumerator.State == TreenumeratorState.EnumerationFinished)
-          {
-            State = TreenumeratorState.EnumerationFinished;
-            return false;
-          }
-        }
-      }
+      //    if (InnerTreenumerator.State == TreenumeratorState.EnumerationFinished)
+      //    {
+      //      State = TreenumeratorState.EnumerationFinished;
+      //      return false;
+      //    }
+      //  }
+      //}
 
-      if (InnerTreenumerator.State == TreenumeratorState.SchedulingNode)
-      {
-        if (State == TreenumeratorState.EnumerationNotStarted)
-        {
-          Current =
-            NodeVisit
-            .Create(
-              InnerTreenumerator.Current.Node,
-              0,
-              default,
-              default,
-              InnerTreenumerator.Current.SchedulingStrategy);
-        }
-        else
-        {
-          Current =
-            NodeVisit
-            .Create(
-              InnerTreenumerator.Current.Node,
-              0,
-              Current.OriginalPosition + (1, -1),
-              default,
-              InnerTreenumerator.Current.SchedulingStrategy);
-        }
-      }
-      else
-        Current = InnerTreenumerator.Current;
+      //if (InnerTreenumerator.State == TreenumeratorState.SchedulingNode)
+      //{
+      //  if (State == TreenumeratorState.EnumerationNotStarted)
+      //  {
+      //    Current =
+      //      NodeVisit
+      //      .Create(
+      //        InnerTreenumerator.Node.Node,
+      //        0,
+      //        default,
+      //        default,
+      //        InnerTreenumerator.Node.SchedulingStrategy);
+      //  }
+      //  else
+      //  {
+      //    Current =
+      //      NodeVisit
+      //      .Create(
+      //        InnerTreenumerator.Node.Node,
+      //        0,
+      //        Current.OriginalPosition + (1, -1),
+      //        default,
+      //        InnerTreenumerator.Node.SchedulingStrategy);
+      //  }
+      //}
+      //else
+      //  Current = InnerTreenumerator.Node;
 
-      State = InnerTreenumerator.State;
+      //State = InnerTreenumerator.State;
 
-      return true;
+      //return true;
     }
   }
 }

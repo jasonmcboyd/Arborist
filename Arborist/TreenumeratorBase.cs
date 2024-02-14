@@ -17,16 +17,16 @@ namespace Arborist
         throw new InvalidOperationException("Enumeration has completed.");
     }
 
-    private NodeVisit<TNode> _Current;
-    public NodeVisit<TNode> Current
+    private TNode _Node;
+    public TNode Node
     {
       get
       {
         ValidateState();
 
-        return _Current;
+        return _Node;
       }
-      protected set => _Current = value;
+      protected set => _Node = value;
     }
 
     private int _VisitCount;

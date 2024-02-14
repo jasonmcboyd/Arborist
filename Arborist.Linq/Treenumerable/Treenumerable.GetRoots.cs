@@ -8,14 +8,9 @@ namespace Arborist.Linq
     {
       using (var treenumerator = source.GetBreadthFirstTreenumerator())
       {
-        while(treenumerator.MoveNext(SchedulingStrategy.ScheduleForTraversal))
-        {
-          if (treenumerator.Current.OriginalPosition.Depth > 0)
-            yield break;
-
-          if (treenumerator.Current.VisitCount == 1)
-            yield return treenumerator.Current.Node;
-        }
+        while(treenumerator.MoveNext(SchedulingStrategy.SkipDescendantSubtrees))
+          if (treenumerator.VisitCount == 1)
+            yield return treenumerator.Node;
       }
     }
   }

@@ -31,7 +31,7 @@ namespace Arborist.Treenumerables
       }
     }
 
-    public PooledNodeWithIndexableChildrenWrapper<TNode, TValue> Get(TNode node)
+    public PooledNodeWithIndexableChildrenWrapper<TNode, TValue> Lease(TNode node)
     {
       PooledNodeWithIndexableChildrenWrapper<TNode, TValue> result;
 

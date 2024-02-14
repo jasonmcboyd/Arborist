@@ -33,13 +33,14 @@ namespace Arborist.Linq.Treenumerators
 
     private int CalculateInnerSiblingIndexAfterMoveNext()
     {
-      if (InnerTreenumerator.Current.OriginalPosition.Depth == 0)
-        return InnerTreenumerator.Current.OriginalPosition.SiblingIndex;
+      throw new NotImplementedException();
+      //if (InnerTreenumerator.Node.OriginalPosition.Depth == 0)
+      //  return InnerTreenumerator.Node.OriginalPosition.SiblingIndex;
 
-      if (InnerTreenumerator.Current.OriginalPosition.Depth == _InnerBranch.Last().OriginalPosition.Depth)
-        return _InnerBranch.Last().OriginalPosition.SiblingIndex;
+      //if (InnerTreenumerator.Node.OriginalPosition.Depth == _InnerBranch.Last().OriginalPosition.Depth)
+      //  return _InnerBranch.Last().OriginalPosition.SiblingIndex;
 
-      return _InnerBranch.Last().VisitCount - 1;
+      //return _InnerBranch.Last().VisitCount - 1;
     }
 
     private bool OnTreenumeratorMoveNext<T>(
@@ -105,24 +106,26 @@ namespace Arborist.Linq.Treenumerators
 
     private bool OnScionMoveNext(SchedulingStrategy schedulingStrategy)
     {
-      return OnTreenumeratorMoveNext(
-        _Scion,
-        _ScionBranch,
-        visit => visit,
-        () => _InnerBranch.Last().VisitCount + _Scion.Current.OriginalPosition.SiblingIndex - 1,
-        () => _InnerBranch.Last().OriginalPosition.Depth + _Scion.Current.OriginalPosition.Depth + 1,
-        schedulingStrategy);
+      throw new NotImplementedException();
+      //return OnTreenumeratorMoveNext(
+      //  _Scion,
+      //  _ScionBranch,
+      //  visit => visit,
+      //  () => _InnerBranch.Last().VisitCount + _Scion.Node.OriginalPosition.SiblingIndex - 1,
+      //  () => _InnerBranch.Last().OriginalPosition.Depth + _Scion.Node.OriginalPosition.Depth + 1,
+      //  schedulingStrategy);
     }
 
     private bool OnInnerMoveNext(SchedulingStrategy schedulingStrategy)
     {
-      return OnTreenumeratorMoveNext(
-        InnerTreenumerator,
-        _InnerBranch,
-        visit => visit.WithNode(_Selector(visit)),
-        () => CalculateInnerSiblingIndexAfterMoveNext(),
-        () => InnerTreenumerator.Current.OriginalPosition.Depth,
-        schedulingStrategy);
+      throw new NotImplementedException();
+      //return OnTreenumeratorMoveNext(
+      //  InnerTreenumerator,
+      //  _InnerBranch,
+      //  visit => visit.WithNode(_Selector(visit)),
+      //  () => CalculateInnerSiblingIndexAfterMoveNext(),
+      //  () => InnerTreenumerator.Node.OriginalPosition.Depth,
+      //  schedulingStrategy);
     }
 
     protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)

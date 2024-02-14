@@ -20,34 +20,35 @@ namespace Arborist.Linq.Treenumerators
 
     protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
     {
-      while (InnerTreenumerator.MoveNext(schedulingStrategy))
-      {
-        using (var currentEnumerator = InnerTreenumerator.Current.Node.GetDepthFirstTreenumerator())
-        {
-          NodeVisit<TNode>? previousVisit = null;
+      throw new NotImplementedException();
+      //while (InnerTreenumerator.MoveNext(schedulingStrategy))
+      //{
+      //  using (var currentEnumerator = InnerTreenumerator.Node.Node.GetDepthFirstTreenumerator())
+      //  {
+      //    NodeVisit<TNode>? previousVisit = null;
 
-          while (currentEnumerator.MoveNext(SchedulingStrategy.ScheduleForTraversal))
-          {
-            if (previousVisit != null)
-            {
-              Current = previousVisit.Value;
-              previousVisit = currentEnumerator.Current.WithNode(_Selector(currentEnumerator.Current));
-              return true;
-            }
-          }
+      //    while (currentEnumerator.MoveNext(SchedulingStrategy.ScheduleForTraversal))
+      //    {
+      //      if (previousVisit != null)
+      //      {
+      //        Current = previousVisit.Value;
+      //        previousVisit = currentEnumerator.Current.WithNode(_Selector(currentEnumerator.Current));
+      //        return true;
+      //      }
+      //    }
 
-          if (previousVisit != null)
-            _Stack.Push(previousVisit.Value);
-        }
-      }
+      //    if (previousVisit != null)
+      //      _Stack.Push(previousVisit.Value);
+      //  }
+      //}
 
-      while (_Stack.Count > 0)
-      {
-        Current = _Stack.Pop();
-        return true;
-      }
+      //while (_Stack.Count > 0)
+      //{
+      //  Current = _Stack.Pop();
+      //  return true;
+      //}
 
-      return false;
+      //return false;
     }
   }
 }

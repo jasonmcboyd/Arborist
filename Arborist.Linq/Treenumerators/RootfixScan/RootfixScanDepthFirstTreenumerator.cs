@@ -19,7 +19,7 @@ namespace Arborist.Linq.Treenumerators
       TNode seed) : base(InnerTreenumerator)
     {
       _Accumulator = accumulator;
-      _SeedVisit = new NodeVisit<TNode>(seed, 1, (-1, 0), default, SchedulingStrategy.ScheduleForTraversal);
+      //_SeedVisit = new NodeVisit<TNode>(seed, 1, (-1, 0), default, SchedulingStrategy.ScheduleForTraversal);
     }
 
     private readonly Func<NodeVisit<TNode>, NodeVisit<TInner>, TNode> _Accumulator;

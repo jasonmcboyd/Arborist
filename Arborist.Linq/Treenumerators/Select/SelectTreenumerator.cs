@@ -2,38 +2,48 @@
 
 namespace Arborist.Linq.Treenumerators
 {
-  internal class SelectTreenumerator<TInner, TNode> : TreenumeratorWrapper<TInner, TNode>
+  internal class SelectTreenumerator<TInner, TNode> : ITreenumerator<TNode>
   {
     public SelectTreenumerator(
-      ITreenumerator<TInner> InnerTreenumerator,
-      Func<NodeVisit<TInner>, TNode> selector) : base(InnerTreenumerator)
+      ITreenumerator<TInner> innerTreenumerator,
+      Func<NodeVisit<TInner>, TNode> selector)
     {
+      _InnerTreenumerator = innerTreenumerator;
       _Selector = selector;
     }
 
+    private readonly ITreenumerator<TInner> _InnerTreenumerator;
     private readonly Func<NodeVisit<TInner>, TNode> _Selector;
 
-    protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
+    public SchedulingStrategy SchedulingStrategy => _InnerTreenumerator.SchedulingStrategy;
+
+    public TNode Node { get; private set; } = default;
+
+    public int VisitCount => _InnerTreenumerator.VisitCount;
+
+    public TreenumeratorState State => _InnerTreenumerator.State;
+
+    public NodePosition OriginalPosition => _InnerTreenumerator.OriginalPosition;
+
+    public NodePosition Position => _InnerTreenumerator.Position;
+
+    public bool MoveNext(SchedulingStrategy schedulingStrategy)
     {
-      var hasNext = InnerTreenumerator.MoveNext(schedulingStrategy);
+      var hasNext = _InnerTreenumerator.MoveNext(schedulingStrategy);
 
-      if (hasNext)
-      {
-        var node = _Selector(InnerTreenumerator.Current);
+      if (!hasNext)
+        return false;
 
-        State = InnerTreenumerator.State;
+      var visit = _InnerTreenumerator.ToNodeVisit();
 
-        Current =
-          NodeVisit
-          .Create(
-            node,
-            InnerTreenumerator.Current.VisitCount,
-            InnerTreenumerator.Current.OriginalPosition,
-            InnerTreenumerator.Current.Position,
-            InnerTreenumerator.Current.SchedulingStrategy);
-      }
+      Node = _Selector(visit);
 
-      return hasNext;
+      return true;
+    }
+
+    public void Dispose()
+    {
+      _InnerTreenumerator?.Dispose();
     }
   }
 }

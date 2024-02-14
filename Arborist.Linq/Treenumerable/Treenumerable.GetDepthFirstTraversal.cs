@@ -4,11 +4,12 @@ namespace Arborist.Linq
 {
   public static partial class Treenumerable
   {
-    public static IEnumerable<NodeVisit<T>> GetDepthFirstTraversal<T>(this ITreenumerable<T> source)
+    public static IEnumerable<NodeVisit<TNode>> GetDepthFirstTraversal<TNode>(
+      this ITreenumerable<TNode> source)
     {
-      using (var enumerator = source.GetDepthFirstTreenumerator())
-        while (enumerator.MoveNext(SchedulingStrategy.ScheduleForTraversal))
-          yield return enumerator.Current;
+      using (var treenumerator = source.GetDepthFirstTreenumerator())
+        while (treenumerator.MoveNext(SchedulingStrategy.ScheduleForTraversal))
+          yield return treenumerator.ToNodeVisit();
     }
   }
 }

@@ -58,7 +58,7 @@ namespace Arborist.Treenumerables
       var result = _ChildIndex < _InnerNode.ChildCount;
 
       if (result)
-        _Current = _Pool.Get(_InnerNode[_ChildIndex]);
+        _Current = _Pool.Lease(_InnerNode[_ChildIndex]);
 
       return result;
     }

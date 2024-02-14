@@ -1,4 +1,6 @@
-﻿namespace Arborist.Linq.Treenumerators
+﻿using System;
+
+namespace Arborist.Linq.Treenumerators
 {
   internal class RepeatDepthFirstTreenumerator<TNode> : TreenumeratorBase<TNode>
   {
@@ -36,42 +38,43 @@
 
     protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
     {
-      if (Treenumerator == null)
-      {
-        if (schedulingStrategy == SchedulingStrategy.SkipSubtree)
-          return false;
+      throw new NotImplementedException();
+      //if (Treenumerator == null)
+      //{
+      //  if (schedulingStrategy == SchedulingStrategy.SkipSubtree)
+      //    return false;
 
-        Treenumerator = _Treenumerable.GetDepthFirstTreenumerator();
+      //  Treenumerator = _Treenumerable.GetDepthFirstTreenumerator();
 
-        _TreenumeratorCount++;
+      //  _TreenumeratorCount++;
 
-        if (_Count != null && (_TreenumeratorCount - 1) > _Count)
-          return false;
-      }
+      //  if (_Count != null && (_TreenumeratorCount - 1) > _Count)
+      //    return false;
+      //}
 
-      while (!Treenumerator.MoveNext(schedulingStrategy))
-      {
-        Treenumerator = _Treenumerable.GetDepthFirstTreenumerator();
+      //while (!Treenumerator.MoveNext(schedulingStrategy))
+      //{
+      //  Treenumerator = _Treenumerable.GetDepthFirstTreenumerator();
 
-        _TreenumeratorCount++;
+      //  _TreenumeratorCount++;
 
-        if (_Count != null && (_TreenumeratorCount - 1) > _Count)
-          return false;
+      //  if (_Count != null && (_TreenumeratorCount - 1) > _Count)
+      //    return false;
 
-        schedulingStrategy = SchedulingStrategy.ScheduleForTraversal;
-      }
+      //  schedulingStrategy = SchedulingStrategy.ScheduleForTraversal;
+      //}
 
-      Current = Treenumerator.Current;
+      //Current = Treenumerator.Node;
 
-      if (Current.OriginalPosition.Depth == 0)
-      {
-        if (Current.VisitCount == 1)
-          _RootSiblingCount++;
+      //if (Current.OriginalPosition.Depth == 0)
+      //{
+      //  if (Current.VisitCount == 1)
+      //    _RootSiblingCount++;
 
-        Current = Current.WithSiblingIndex(_RootSiblingCount);
-      }
+      //  Current = Current.WithSiblingIndex(_RootSiblingCount);
+      //}
 
-      return true;
+      //return true;
     }
 
     public override void Dispose()

@@ -52,7 +52,7 @@ namespace Arborist.Treenumerables.Tests
         .ToArray();
 
       var visitStrategy =
-        new Func<NodeVisit<string>, SchedulingStrategy>(
+        new Func<ITreenumerator<string>, SchedulingStrategy>(
           visit =>
             filterCharacter == null || filterCharacter != visit.Node
             ? SchedulingStrategy.ScheduleForTraversal

@@ -21,7 +21,7 @@ namespace Arborist.Linq.Treenumerators
       TNode seed) : base(innerTreenumerator)
     {
       _Accumulator = accumulator;
-      _SeedStep = NodeVisit.Create(seed, 1, (-1, 0), default, SchedulingStrategy.ScheduleForTraversal);
+      //_SeedStep = NodeVisit.Create(seed, 1, (-1, 0), default, SchedulingStrategy.ScheduleForTraversal);
       _HasSeed = true;
     }
 
