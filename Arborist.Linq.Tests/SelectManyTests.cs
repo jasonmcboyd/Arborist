@@ -1,6 +1,4 @@
-using Arborist.Linq;
-using Arborist.Tests.Utils;
-using Arborist.Treenumerables;
+using Arborist.Treenumerables.Nodes;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 
@@ -13,11 +11,11 @@ namespace Arborist.Linq.Tests
     public void SelectMany()
     {
       // Arrange
-      var subtree = TestTreenumerableFactory.Create<TreeNode<int>, int>(TreeNode.Create(1, 2, 3));
+      var subtree = IndexableTreeNode.Create(1, 2, 3).ToTreenumerable();
 
-      var root = TreeNode.Create(subtree, subtree, subtree);
+      var root = IndexableTreeNode.Create(subtree, subtree, subtree);
 
-      var treenumerable = TestTreenumerableFactory.Create<TreeNode<ITreenumerable<int>>, ITreenumerable<int>>(root);
+      var treenumerable = root.ToTreenumerable();
 
       // Act
       var actual =

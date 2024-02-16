@@ -1,11 +1,9 @@
-﻿using Arborist.Treenumerables;
+﻿using Arborist.Treenumerables.Nodes;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 
 namespace Arborist.Collatz
 {
-  public struct CollatzNode : INodeWithIndexableChildren<CollatzNode, ulong>
+  public struct CollatzNode : INodeContainerWithIndexableChildren<ulong>
   {
     public CollatzNode(ulong value)
     {
@@ -28,7 +26,7 @@ namespace Arborist.Collatz
       }
     }
 
-    public CollatzNode this[int index]
+    public INodeContainerWithIndexableChildren<ulong> this[int index]
     {
       get
       {

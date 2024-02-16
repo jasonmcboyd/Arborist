@@ -1,5 +1,4 @@
-using Arborist.Tests.Utils;
-using Arborist.Treenumerables;
+using Arborist.Treenumerables.Nodes;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 
@@ -12,14 +11,14 @@ namespace Arborist.Linq.Tests
     public void PreOrderTraversal_TwoLevels()
     {
       // Arrange
-      var root = TreeNode.Create(1, 2, 3);
+      var root = IndexableTreeNode.Create(1, 2, 3);
 
-      var treenumerable = TestTreenumerableFactory.Create<TreeNode<int>, int>(root);
+      var treenumerable = root.ToTreenumerable();
 
       // Act
       var actual =
         treenumerable
-        .Select(x => (char)('a' + x.Node))
+        .Select(visit => (char)('a' + visit.Node))
         .PreOrderTraversal()
         .ToArray();
 
@@ -33,14 +32,14 @@ namespace Arborist.Linq.Tests
     public void LevelOrderTraversal_TwoLevels()
     {
       // Arrange
-      var root = TreeNode.Create(1, 2, 3);
+      var root = IndexableTreeNode.Create(1, 2, 3);
 
-      var treenumerable = TestTreenumerableFactory.Create<TreeNode<int>, int>(root);
+      var treenumerable = root.ToTreenumerable();
 
       // Act
       var actual =
         treenumerable
-        .Select(x => (char)('a' + x.Node))
+        .Select(visit => (char)('a' + visit.Node))
         .LevelOrderTraversal()
         .ToArray();
 

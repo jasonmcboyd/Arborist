@@ -1,30 +1,34 @@
-﻿using System;
+﻿using Arborist.Treenumerables.Virtualization;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Arborist.Treenumerables.Treenumerators
 {
-  internal sealed class DepthFirstTreenumerator<TNode>
+  internal sealed class DepthFirstTreenumerator<TRootNode, TNode>
     : ITreenumerator<TNode>
   {
     public DepthFirstTreenumerator(
-      IEnumerable<TNode> rootNodes,
-      Func<TNode, IEnumerator<TNode>> childrenGetter)
+      IEnumerable<TRootNode> rootNodes,
+      Func<TRootNode, TNode> map,
+      Func<TRootNode, IEnumerator<TRootNode>> childrenGetter)
     {
       _RootsEnumerator = rootNodes.GetEnumerator();
+      _Map = map;
       _ChildrenGetter = childrenGetter;
     }
 
-    private readonly VirtualNodeVisitPool<IEnumerator<TNode>> _NodeVisitPool =
-      new VirtualNodeVisitPool<IEnumerator<TNode>>();
-
-    private readonly IEnumerator<TNode> _RootsEnumerator;
-    private readonly Func<TNode, IEnumerator<TNode>> _ChildrenGetter;
-
     private int _RootsEnumeratorIndex = 0;
 
-    private readonly Stack<VirtualNodeVisit<IEnumerator<TNode>>> _Stack =
-      new Stack<VirtualNodeVisit<IEnumerator<TNode>>>();
+    private readonly IEnumerator<TRootNode> _RootsEnumerator;
+    private readonly Func<TRootNode, TNode> _Map;
+    private readonly Func<TRootNode, IEnumerator<TRootNode>> _ChildrenGetter;
+
+    private readonly VirtualNodeVisitPool<IEnumerator<TRootNode>> _NodeVisitPool =
+      new VirtualNodeVisitPool<IEnumerator<TRootNode>>();
+
+    private readonly Stack<VirtualNodeVisit<IEnumerator<TRootNode>>> _Stack =
+      new Stack<VirtualNodeVisit<IEnumerator<TRootNode>>>();
 
     private bool _SkippingDescendants = false;
     private bool _HasCachedChild = false;
@@ -174,7 +178,8 @@ namespace Arborist.Treenumerables.Treenumerators
       {
         previousVisit.VisitCount++;
         _Stack.Push(previousVisit);
-        Node = previousVisit.Node.Current;
+        // TODO:
+        UpdateStateFromVirtualNodeVisit(previousVisit);
         return true;
       }
 
@@ -268,25 +273,25 @@ namespace Arborist.Treenumerables.Treenumerators
       return true;
     }
 
-    private IEnumerator<TNode> GetNodeChildren(VirtualNodeVisit<IEnumerator<TNode>> visit)
+    private IEnumerator<TRootNode> GetNodeChildren(VirtualNodeVisit<IEnumerator<TRootNode>> visit)
     {
       if (visit.SchedulingStrategy == SchedulingStrategy.SkipDescendantSubtrees)
-        return Enumerable.Empty<TNode>().GetEnumerator();
+        return Enumerable.Empty<TRootNode>().GetEnumerator();
 
       return _ChildrenGetter(visit.Node.Current);
     }
 
-    private void UpdateStateFromVirtualNodeVisit(VirtualNodeVisit<IEnumerator<TNode>> visit)
+    private void UpdateStateFromVirtualNodeVisit(VirtualNodeVisit<IEnumerator<TRootNode>> visit)
     {
       State = visit.TreenumeratorState;
-      Node = visit.Node.Current;
+      Node = _Map(visit.Node.Current);
       VisitCount = visit.VisitCount;
       OriginalPosition = visit.OriginalPosition;
       Position = visit.Position;
       SchedulingStrategy = visit.SchedulingStrategy;
     }
 
-    private void ReturnVirtualNodeVisit(VirtualNodeVisit<IEnumerator<TNode>> virtualNodeVisit)
+    private void ReturnVirtualNodeVisit(VirtualNodeVisit<IEnumerator<TRootNode>> virtualNodeVisit)
     {
       virtualNodeVisit.Node.Dispose();
       _NodeVisitPool.Return(virtualNodeVisit);

@@ -1,15 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using Arborist.Treenumerables.Nodes;
+using Arborist.Treenumerables.Treenumerables;
+using System.Collections.Generic;
 
 namespace Arborist.Treenumerables
 {
   public static class EnumerableExtensions
   {
-    public static ITreenumerable<INodeWithEnumerableChildren<TNode>> ToTreenumerable<TNode>(
-      this IEnumerable<INodeWithEnumerableChildren<TNode>> rootNodes)
-      => new Treenumerable<INodeWithEnumerableChildren<TNode>>(rootNodes, node => node.Children.GetEnumerator());
+    public static ITreenumerable<TNode> ToTreenumerable<TNode>(
+      this IEnumerable<INodeContainerWithEnumerableChildren<TNode>> rootNodes)
+      => new EnumerableTreenumerable<TNode>(rootNodes);
 
-    //public static ITreenumerable<INodeWithIndexableChildren<TNode>> ToTreenumerable<TNode>(
-    //  this IEnumerable<INodeWithIndexableChildren<TNode>> rootNodes)
-    //  => new Treenumerable<INodeWithIndexableChildren<TNode>>(rootNodes, node => node.Children.GetEnumerator());
+    public static ITreenumerable<TNode> ToTreenumerable<TNode>(
+      this IEnumerable<INodeContainerWithIndexableChildren<TNode>> rootNodes)
+      => new IndexableTreenumerable<TNode>(rootNodes);
   }
 }

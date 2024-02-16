@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Arborist.Treenumerables
+namespace Arborist.Treenumerables.Virtualization
 {
   internal class VirtualNodeVisitPool<TNode>
   {
@@ -33,7 +33,7 @@ namespace Arborist.Treenumerables
     {
       get
       {
-        lock(_Lock)
+        lock (_Lock)
         {
           return _Stack.Count;
         }

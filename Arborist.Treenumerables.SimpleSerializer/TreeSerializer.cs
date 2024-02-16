@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Arborist.Treenumerables.Nodes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,39 +7,35 @@ namespace Arborist.Treenumerables.SimpleSerializer
 {
   public static class TreeSerializer
   {
-    public static IndexableTreenumerable<TreeNode<string>, string> Deserialize(string tree)
+    public static ITreenumerable<string> Deserialize(string tree)
       => Deserialize(tree, value => value);
 
-    public static List<TreeNode<string>> DeserializeRoots(string tree)
-      => DeserializeRoots(tree, value => value);
-
-    public static IndexableTreenumerable<TreeNode<TResult>, TResult> Deserialize<TResult>(
+    public static ITreenumerable<TResult> Deserialize<TResult>(
       string tree,
       Func<string, TResult> map)
-    {
-      var rootNodes = DeserializeRoots<TResult>(tree, map);
+      => DeserializeRoots(tree, map).ToTreenumerable();
 
-      return new IndexableTreenumerable<TreeNode<TResult>, TResult>(rootNodes);
-    }
+    public static IEnumerable<INodeContainerWithIndexableChildren<string>> DeserializeRoots(string tree)
+      => DeserializeRoots(tree, value => value);
 
-    public static List<TreeNode<TResult>> DeserializeRoots<TResult>(
+    public static IEnumerable<INodeContainerWithIndexableChildren<TResult>> DeserializeRoots<TResult>(
       string tree,
       Func<string, TResult> map)
     {
       var tokens = Tokenizer.Tokenize(tree).Reverse();
 
-      var stack = new Stack<List<TreeNode<TResult>>>();
+      var stack = new Stack<List<IndexableTreeNode<TResult>>>();
 
-      stack.Push(new List<TreeNode<TResult>>());
+      stack.Push(new List<IndexableTreeNode<TResult>>());
 
-      List<TreeNode<TResult>> children = null;
+      List<IndexableTreeNode<TResult>> children = null;
 
-      var rootNodes = new List<TreeNode<TResult>>();
+      var rootNodes = new List<IndexableTreeNode<TResult>>();
 
       foreach (var token in tokens)
       {
         TResult value;
-        TreeNode<TResult> node;
+        IndexableTreeNode<TResult> node;
 
         switch (token.TokenType)
         {
@@ -57,12 +54,12 @@ namespace Arborist.Treenumerables.SimpleSerializer
             break;
 
           case TokenType.RightParentheses:
-            stack.Push(new List<TreeNode<TResult>>());
+            stack.Push(new List<IndexableTreeNode<TResult>>());
             break;
 
           default:
             value = map(token.Symbol);
-            node = new TreeNode<TResult>(value, children);
+            node = new IndexableTreeNode<TResult>(value, children);
             stack.Peek().Add(node);
             children = null;
             break;

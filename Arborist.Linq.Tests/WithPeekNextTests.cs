@@ -1,6 +1,5 @@
 using Arborist.Linq;
-using Arborist.Tests.Utils;
-using Arborist.Treenumerables;
+using Arborist.Treenumerables.Nodes;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 
@@ -13,9 +12,9 @@ namespace Arborist.Linq.Tests
     public void WithPeekNext_GetDepthFirstTraversal()
     {
       // Arrange
-      var root = TreeNode.Create('a', 'b', 'c');
+      var root = IndexableTreeNode.Create('a', 'b', 'c');
 
-      var treenumerable = TestTreenumerableFactory.Create<TreeNode<char>, char>(root);
+      var treenumerable = root.ToTreenumerable();
 
       // Act
       var actual =

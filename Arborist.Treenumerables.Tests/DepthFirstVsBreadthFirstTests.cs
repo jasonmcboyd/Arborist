@@ -1,4 +1,5 @@
-﻿using Arborist.Tests.Utils;
+﻿using Arborist.Linq;
+using Arborist.Tests.Utils;
 using Arborist.Treenumerables.SimpleSerializer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -44,7 +45,11 @@ namespace Arborist.Treenumerables.Tests
     [DynamicData(nameof(GetData), DynamicDataSourceType.Method)]
     public void Test(string treeString, SchedulingStrategy? filterStrategy, string filterCharacter)
     {
-      var treenumerable = TreeSerializer.Deserialize(treeString);
+      var treenumerable =
+        TreeSerializer
+        .DeserializeRoots(treeString)
+        .ToTreenumerable()
+        .Select(visit => visit.Node);
 
       MoveNextResult<string>[] Sort(IEnumerable<MoveNextResult<string>> nodes) =>
         nodes

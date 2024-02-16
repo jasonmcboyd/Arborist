@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
+using Arborist.Treenumerables.Nodes;
 
-namespace Arborist.Treenumerables
+namespace Arborist.Treenumerables.Virtualization
 {
-  internal class PooledNodeWithIndexableChildrenWrapperPool<TNode, TValue>
-    where TNode : INodeWithIndexableChildren<TNode, TValue>
+  internal class VirtualEnumeratorPool<TNode>
   {
-    private readonly Stack<PooledNodeWithIndexableChildrenWrapper<TNode, TValue>> _Stack = new Stack<PooledNodeWithIndexableChildrenWrapper<TNode, TValue>>();
+    private readonly Stack<VirtualEnumerator<TNode>> _Stack =
+      new Stack<VirtualEnumerator<TNode>>();
 
     private readonly object _Lock = new object();
 
@@ -14,7 +15,7 @@ namespace Arborist.Treenumerables
     {
       get
       {
-        lock(_Lock)
+        lock (_Lock)
         {
           return _Stack.Count;
         }
@@ -31,16 +32,16 @@ namespace Arborist.Treenumerables
       }
     }
 
-    public PooledNodeWithIndexableChildrenWrapper<TNode, TValue> Lease(TNode node)
+    public IEnumerator<INodeContainerWithIndexableChildren<TNode>> Lease(INodeContainerWithIndexableChildren<TNode> node)
     {
-      PooledNodeWithIndexableChildrenWrapper<TNode, TValue> result;
+      VirtualEnumerator<TNode> result;
 
       lock (_Lock)
       {
         result =
           _Stack.Count > 0
           ? _Stack.Pop()
-          : new PooledNodeWithIndexableChildrenWrapper<TNode, TValue>(this);
+          : new VirtualEnumerator<TNode>(this);
 
         Leased++;
       }
@@ -50,7 +51,7 @@ namespace Arborist.Treenumerables
       return result;
     }
 
-    public void Return(PooledNodeWithIndexableChildrenWrapper<TNode, TValue> wrapper)
+    public void Return(VirtualEnumerator<TNode> wrapper)
     {
       lock (_Lock)
       {

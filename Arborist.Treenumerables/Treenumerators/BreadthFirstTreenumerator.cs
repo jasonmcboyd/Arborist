@@ -1,39 +1,42 @@
-﻿using Nito.Collections;
+﻿using Arborist.Treenumerables.Virtualization;
+using Nito.Collections;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Arborist.Treenumerables.Treenumerators
 {
-  internal sealed class BreadthFirstTreenumerator<TNode>
+  internal sealed class BreadthFirstTreenumerator<TRootNode, TNode>
     : TreenumeratorBase<TNode>
   {
     public BreadthFirstTreenumerator(
-      IEnumerable<TNode> rootNodes,
-      Func<TNode, IEnumerator<TNode>> childrenGetter)
+      IEnumerable<TRootNode> rootNodes,
+      Func<TRootNode, TNode> map,
+      Func<TRootNode, IEnumerator<TRootNode>> childrenGetter)
     {
       _RootsEnumerator = rootNodes.GetEnumerator();
+      _Map = map;
       _ChildrenGetter = childrenGetter;
 
-      //var sentinalNodeVisit = NodeVisit.Create(default(TNode), 1, (0, -1), default, SchedulingStrategy.ScheduleForTraversal);
+      //var sentinalNodeVisit = NodeVisit.Create(default(TRootNode), 1, (0, -1), default, SchedulingStrategy.ScheduleForTraversal);
       //_CurrentLevel.AddToFront(sentinalNodeVisit);
       //Current = sentinalNodeVisit;
     }
 
-    private readonly IEnumerator<TNode> _RootsEnumerator;
+    private readonly Func<TRootNode, TNode> _Map;
+    private readonly IEnumerator<TRootNode> _RootsEnumerator;
 
-    private readonly VirtualNodeVisitPool<TNode> _NodePool;
+    private readonly VirtualNodeVisitPool<TRootNode> _NodePool;
 
-    private Deque<VirtualNodeVisit<TNode>> _CurrentLevel =
-      new Deque<VirtualNodeVisit<TNode>>();
+    private Deque<VirtualNodeVisit<TRootNode>> _CurrentLevel =
+      new Deque<VirtualNodeVisit<TRootNode>>();
 
-    private Deque<VirtualNodeVisit<TNode>> _NextLevel =
-      new Deque<VirtualNodeVisit<TNode>>();
+    private Deque<VirtualNodeVisit<TRootNode>> _NextLevel =
+      new Deque<VirtualNodeVisit<TRootNode>>();
 
-    private Stack<IEnumerator<TNode>> _ChildrenStack =
-      new Stack<IEnumerator<TNode>>();
+    private Stack<IEnumerator<TRootNode>> _ChildrenStack =
+      new Stack<IEnumerator<TRootNode>>();
 
-    private readonly Func<TNode, IEnumerator<TNode>> _ChildrenGetter;
+    private readonly Func<TRootNode, IEnumerator<TRootNode>> _ChildrenGetter;
 
     protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
     {
@@ -162,14 +165,14 @@ namespace Arborist.Treenumerables.Treenumerators
       //return null;
     }
 
-    private IEnumerator<TNode> GetChildren(VirtualNodeVisit<TNode> visit)
+    private IEnumerator<TRootNode> GetChildren(VirtualNodeVisit<TRootNode> visit)
     {
       throw new NotImplementedException();
       //if (visit.OriginalPosition.Depth == -1)
       //  return _RootsEnumerator;
 
       //if (visit.SchedulingStrategy == SchedulingStrategy.SkipDescendantSubtrees)
-      //  return Enumerable.Empty<TNode>().GetEnumerator();
+      //  return Enumerable.Empty<TRootNode>().GetEnumerator();
 
       //return _ChildrenGetter(visit.Node);
     }

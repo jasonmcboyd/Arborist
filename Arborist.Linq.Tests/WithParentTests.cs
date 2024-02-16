@@ -1,6 +1,6 @@
 using Arborist.Linq;
 using Arborist.Tests.Utils;
-using Arborist.Treenumerables;
+using Arborist.Treenumerables.Nodes;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Diagnostics;
 using System.Linq;
@@ -15,11 +15,11 @@ namespace Arborist.Linq.Tests
     {
       // Arrange
       var root =
-        TreeNode.Create(1,
-          TreeNode.Create(2, 3, 4, 5),
-          TreeNode.Create(6, 7));
+        IndexableTreeNode.Create(1,
+          IndexableTreeNode.Create(2, 3, 4, 5),
+          IndexableTreeNode.Create(6, 7));
 
-      var treenumerable = TestTreenumerableFactory.Create<TreeNode<int>, int>(root);
+      var treenumerable = root.ToTreenumerable();
 
       // Act
       var actual =
@@ -51,11 +51,11 @@ namespace Arborist.Linq.Tests
     {
       // Arrange
       var root =
-        TreeNode.Create(1,
-          TreeNode.Create(2, 3, 4, 5),
-          TreeNode.Create(6, 7));
+        IndexableTreeNode.Create(1,
+          IndexableTreeNode.Create(2, 3, 4, 5),
+          IndexableTreeNode.Create(6, 7));
 
-      var treenumerable = TestTreenumerableFactory.Create<TreeNode<int>, int>(root);
+      var treenumerable = root.ToTreenumerable();
 
       // Act
       var actual =

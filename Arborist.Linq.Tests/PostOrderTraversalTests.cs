@@ -1,5 +1,6 @@
 using Arborist.Tests.Utils;
 using Arborist.Treenumerables;
+using Arborist.Treenumerables.Nodes;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Diagnostics;
 using System.Linq;
@@ -13,9 +14,9 @@ namespace Arborist.Linq.Tests
     public void PostOrderTraversal_TwoLevels()
     {
       // Arrange
-      var root = TreeNode.Create('a', 'b', 'c');
+      var root = IndexableTreeNode.Create('a', 'b', 'c');
 
-      var treenumerable = TestTreenumerableFactory.Create<TreeNode<char>, char>(root);
+      var treenumerable = root.ToTreenumerable();
 
       // Act
       var actual =
@@ -27,7 +28,7 @@ namespace Arborist.Linq.Tests
       // Assert
       var expected = new[] { 'b', 'c', 'a' };
 
-      Assert.IsTrue(Enumerable.SequenceEqual(actual, expected));
+      CollectionAssert.AreEqual(expected, actual);
     }
 
     [TestMethod]
@@ -35,11 +36,11 @@ namespace Arborist.Linq.Tests
     {
       // Arrange
       var root =
-        TreeNode.Create('a',
-          TreeNode.Create('b', 'c', 'd'),
-          TreeNode.Create('e', 'f', 'g', 'h'));
+        IndexableTreeNode.Create('a',
+          IndexableTreeNode.Create('b', 'c', 'd'),
+          IndexableTreeNode.Create('e', 'f', 'g', 'h'));
 
-      var treenumerable = TestTreenumerableFactory.Create<TreeNode<char>, char>(root);
+      var treenumerable = root.ToTreenumerable();
 
       // Act
       var actual =
@@ -51,7 +52,7 @@ namespace Arborist.Linq.Tests
       // Assert
       var expected = new[] { 'c', 'd', 'b', 'f', 'g', 'h', 'e', 'a' };
 
-      Assert.IsTrue(Enumerable.SequenceEqual(actual, expected));
+      CollectionAssert.AreEqual(expected, actual);
     }
 
     [TestMethod]
@@ -60,13 +61,13 @@ namespace Arborist.Linq.Tests
       // Arrange
       var roots = new[]
       {
-        TreeNode.Create('a',
-          TreeNode.Create('b', 'c', 'd'),
-          TreeNode.Create('e', 'f', 'g', 'h')),
-        TreeNode.Create('i', 'j', 'k')
+        IndexableTreeNode.Create('a',
+          IndexableTreeNode.Create('b', 'c', 'd'),
+          IndexableTreeNode.Create('e', 'f', 'g', 'h')),
+        IndexableTreeNode.Create('i', 'j', 'k')
       };
 
-      var treenumerable = TestTreenumerableFactory.Create<TreeNode<char>, char>(roots);
+      var treenumerable = roots.ToTreenumerable();
 
       // Act
       var actual =
@@ -77,7 +78,7 @@ namespace Arborist.Linq.Tests
       // Assert
       var expected = new[] { 'c', 'd', 'b', 'f', 'g', 'h', 'e', 'a', 'j', 'k', 'i' };
 
-      Assert.IsTrue(Enumerable.SequenceEqual(actual, expected));
+      CollectionAssert.AreEqual(expected, actual);
     }
   }
 }
