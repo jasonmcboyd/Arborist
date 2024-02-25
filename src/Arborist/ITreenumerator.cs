@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Arborist
+namespace Arborist.Core
 {
   public interface ITreenumerator<TNode> : IDisposable
   {

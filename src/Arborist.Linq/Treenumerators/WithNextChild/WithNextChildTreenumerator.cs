@@ -1,10 +1,12 @@
-﻿using System;
+﻿using Arborist.Core;
+using System;
 using System.Collections.Generic;
 
 namespace Arborist.Linq.Treenumerators
 {
 
-  internal class WithNextChildTreenumerator<TNode> : TreenumeratorWrapper<TNode, WithPeekNextVisit<TNode>>
+  internal class WithNextChildTreenumerator<TNode>
+    : TreenumeratorWrapper<TNode, WithPeekNextVisit<TNode>>
   {
     public WithNextChildTreenumerator(ITreenumerator<TNode> innerTreenumerator) : base(innerTreenumerator)
     {

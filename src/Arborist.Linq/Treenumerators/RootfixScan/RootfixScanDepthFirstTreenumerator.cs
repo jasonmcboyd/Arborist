@@ -1,9 +1,11 @@
-﻿using System;
+﻿using Arborist.Core;
+using System;
 using System.Collections.Generic;
 
 namespace Arborist.Linq.Treenumerators
 {
-  internal class RootfixScanDepthFirstTreenumerator<TInner, TNode> : TreenumeratorWrapper<TInner, TNode>
+  internal class RootfixScanDepthFirstTreenumerator<TInner, TNode>
+    : TreenumeratorWrapper<TInner, TNode>
   {
     public RootfixScanDepthFirstTreenumerator(
       ITreenumerator<TInner> innerTreenumerator,

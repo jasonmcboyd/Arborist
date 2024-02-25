@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Arborist.Treenumerables\Arborist.Treenumerables.csproj" />
-    <ProjectReference Include="..\Arborist\Arborist.csproj" />
+    <ProjectReference Include="..\Arborist\Arborist.Core.csproj" />
   </ItemGroup>
 
 </Project>

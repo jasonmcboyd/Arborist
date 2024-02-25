@@ -1,4 +1,6 @@
-﻿namespace Arborist.Treenumerables.Virtualization
+﻿using Arborist.Core;
+
+namespace Arborist.Treenumerables.Virtualization
 {
   internal class VirtualNodeVisit<TNode>
   {

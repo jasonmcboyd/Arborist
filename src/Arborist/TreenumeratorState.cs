@@ -1,4 +1,4 @@
-﻿namespace Arborist
+﻿namespace Arborist.Core
 {
   public enum TreenumeratorState
   {

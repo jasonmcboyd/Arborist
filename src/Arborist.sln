@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34221.43
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arborist", "Arborist\Arborist.csproj", "{430112C6-9381-4AC9-AAE1-B92E18C48044}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arborist.Core", "Arborist\Arborist.Core.csproj", "{430112C6-9381-4AC9-AAE1-B92E18C48044}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arborist.Treenumerables", "Arborist.Treenumerables\Arborist.Treenumerables.csproj", "{457264BD-ACEA-4769-8DFD-C542F1261B6F}"
 EndProject
@@ -17,7 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arborist.Tests.Utils", "Arb
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arborist.Linq.Tests", "Arborist.Linq.Tests\Arborist.Linq.Tests.csproj", "{F2E4474E-C912-4EE8-9BE3-B25592C00720}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arborist.Treenumerables.SimpleSerializer", "Arborist.Treenumerables.SimpleSerializer\Arborist.Treenumerables.SimpleSerializer.csproj", "{F3D7772D-40DF-47A8-8C68-01EBA738F6EB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arborist.Treenumerables.SimpleSerializer", "Arborist.Treenumerables.SimpleSerializer\Arborist.Treenumerables.SimpleSerializer.csproj", "{F3D7772D-40DF-47A8-8C68-01EBA738F6EB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

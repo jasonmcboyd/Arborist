@@ -1,4 +1,4 @@
-﻿namespace Arborist
+﻿namespace Arborist.Core
 {
   // TODO: I think TraversalStrategy is a better name.
   public enum SchedulingStrategy

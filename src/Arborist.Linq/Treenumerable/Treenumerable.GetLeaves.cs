@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Arborist.Core;
+using System.Collections.Generic;
 
 namespace Arborist.Linq
 {

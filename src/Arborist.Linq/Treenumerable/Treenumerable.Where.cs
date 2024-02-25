@@ -1,4 +1,5 @@
-﻿using Arborist.Linq.Treenumerators;
+﻿using Arborist.Core;
+using Arborist.Linq.Treenumerators;
 using System;
 
 namespace Arborist.Linq

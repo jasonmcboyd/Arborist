@@ -1,4 +1,5 @@
-﻿using Arborist.Treenumerables.Nodes;
+﻿using Arborist.Core;
+using Arborist.Treenumerables.Nodes;
 using Arborist.Treenumerables.Treenumerators;
 using Arborist.Treenumerables.Virtualization;
 using System.Collections.Generic;

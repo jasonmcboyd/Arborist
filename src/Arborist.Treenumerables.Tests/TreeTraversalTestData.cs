@@ -1,4 +1,5 @@
-﻿using Arborist.Tests.Utils;
+﻿using Arborist.Core;
+using Arborist.Tests.Utils;
 using System.Collections.Generic;
 
 namespace Arborist.Treenumerables.Tests

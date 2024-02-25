@@ -1,3 +1,4 @@
+using Arborist.Core;
 using Arborist.Tests.Utils;
 using Arborist.Treenumerables.SimpleSerializer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

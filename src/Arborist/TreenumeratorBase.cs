@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Arborist
+namespace Arborist.Core
 {
   public abstract class TreenumeratorBase<TNode> : ITreenumerator<TNode>
   {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Arborist.Core;
+using System;
 
 namespace Arborist.Linq
 {

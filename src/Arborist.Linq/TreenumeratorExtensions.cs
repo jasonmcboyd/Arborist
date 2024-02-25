@@ -1,4 +1,6 @@
-﻿namespace Arborist.Linq
+﻿using Arborist.Core;
+
+namespace Arborist.Linq
 {
   internal static class TreenumeratorExtensions
   {

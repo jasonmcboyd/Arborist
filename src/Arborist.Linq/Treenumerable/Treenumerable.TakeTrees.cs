@@ -1,4 +1,6 @@
-﻿namespace Arborist.Linq
+﻿using Arborist.Core;
+
+namespace Arborist.Linq
 {
   public static partial class Treenumerable
   {

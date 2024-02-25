@@ -1,4 +1,5 @@
-﻿using Arborist.Treenumerables.Treenumerables;
+﻿using Arborist.Core;
+using Arborist.Treenumerables.Treenumerables;
 using System;
 using System.Collections.Generic;
 using System.Linq;

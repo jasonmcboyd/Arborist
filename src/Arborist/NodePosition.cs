@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Arborist
+namespace Arborist.Core
 {
   public struct NodePosition : IEqualityComparer<NodePosition>
   {

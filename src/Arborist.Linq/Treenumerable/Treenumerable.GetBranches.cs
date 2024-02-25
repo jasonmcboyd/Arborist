@@ -1,4 +1,5 @@
-﻿using Arborist.Linq.Extensions;
+﻿using Arborist.Core;
+using Arborist.Linq.Extensions;
 using System.Collections.Generic;
 using System.Linq;
 
