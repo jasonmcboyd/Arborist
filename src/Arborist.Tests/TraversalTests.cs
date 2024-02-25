@@ -1,3 +1,4 @@
+using Arborist.Core;
 using Arborist.Linq;
 using Arborist.Nodes;
 using Arborist.SimpleSerializer;
@@ -34,40 +35,7 @@ namespace Arborist.Tests
       int testTreeIndex,
       int testScenarioIndex)
     {
-      // Arrange
-      IEnumerable<INodeContainerWithIndexableChildren<string>> roots = TreeSerializer.DeserializeRoots(treeString);
-
-      var treenumerable =
-        roots
-        .ToTreenumerable()
-        .Select(visit => visit.Node);
-
-      var testScenario = TreeTraversalTestData.TestTrees[testTreeIndex].TestScenarios[testScenarioIndex];
-
-      var expected = testScenario.ExpectedDepthFirstResults;
-
-      Debug.WriteLine("--------- Tree ---------");
-      Debug.WriteLine($"\r\n{treeString}");
-
-      Debug.WriteLine("\r\n-----Expected Values-----");
-      MoveNextResultsDebugWriter.WriteMoveNextResults(expected);
-
-      // Act
-      Debug.WriteLine("\r\n-----Actual Values-----");
-      var actual =
-        treenumerable
-        .ToDepthFirstMoveNext(testScenario.SchedulingPredicate)
-        .Do(x => Debug.WriteLine(x))
-        .ToArray();
-
-      var diff = MoveNextResultDiffer.Diff(expected, actual);
-
-      Debug.WriteLine("\r\n-----Diffed Values-----");
-      foreach (var diffResult in diff)
-        Debug.WriteLine(diffResult);
-
-      // Assert
-      CollectionAssert.AreEqual(expected, actual);
+      TraversalTest(treeString, testTreeIndex, testScenarioIndex, true, false);
     }
 
     [TestMethod]
@@ -78,35 +46,7 @@ namespace Arborist.Tests
       int testTreeIndex,
       int testScenarioIndex)
     {
-      // Arrange
-      var rootNodes = EnumerableTreeNode.Create(TreeSerializer.DeserializeRoots(treeString));
-      var treenumerable = rootNodes.ToTreenumerable().Select(visit => visit.Node);
-      var testScenario = TreeTraversalTestData.TestTrees[testTreeIndex].TestScenarios[testScenarioIndex];
-
-      var expected = testScenario.ExpectedDepthFirstResults;
-
-      Debug.WriteLine("--------- Tree ---------");
-      Debug.WriteLine(treeString);
-
-      Debug.WriteLine("\r\n-----Expected Values-----");
-      MoveNextResultsDebugWriter.WriteMoveNextResults(expected);
-
-      // Act
-      Debug.WriteLine("\r\n-----Actual Values-----");
-      var actual =
-        treenumerable
-        .ToDepthFirstMoveNext(testScenario.SchedulingPredicate)
-        .Do(x => Debug.WriteLine(x))
-        .ToArray();
-
-      var diff = MoveNextResultDiffer.Diff(expected, actual);
-
-      Debug.WriteLine("\r\n-----Diffed Values-----");
-      foreach (var diffResult in diff)
-        Debug.WriteLine(diffResult);
-
-      // Assert
-      CollectionAssert.AreEqual(expected, actual);
+      TraversalTest(treeString, testTreeIndex, testScenarioIndex, true, true);
     }
 
     [TestMethod]
@@ -117,38 +57,7 @@ namespace Arborist.Tests
       int testTreeIndex,
       int testScenarioIndex)
     {
-      // Arrange
-      IEnumerable<INodeContainerWithIndexableChildren<string>> roots = TreeSerializer.DeserializeRoots(treeString);
-
-      var treenumerable =
-        roots
-        .ToTreenumerable()
-        .Select(visit => visit.Node);
-
-      var testScenario = TreeTraversalTestData.TestTrees[testTreeIndex].TestScenarios[testScenarioIndex];
-
-      var expected = testScenario.ExpectedBreadthFirstResults;
-
-      Debug.WriteLine("-----Expected Values-----");
-      MoveNextResultsDebugWriter.WriteMoveNextResults(expected);
-
-      // Act
-      var actual =
-        treenumerable
-        .ToBreadthFirstMoveNext(testScenario.SchedulingPredicate)
-        .ToArray();
-
-      Debug.WriteLine("\r\n-----Actual Values-----");
-      MoveNextResultsDebugWriter.WriteMoveNextResults(expected);
-
-      var diff = MoveNextResultDiffer.Diff(expected, actual);
-
-      Debug.WriteLine("\r\n-----Diffed Values-----");
-      foreach (var diffResult in diff)
-        Debug.WriteLine(diffResult);
-
-      // Assert
-      CollectionAssert.AreEqual(expected, actual);
+      TraversalTest(treeString, testTreeIndex, testScenarioIndex, false, false);
     }
 
     [TestMethod]
@@ -159,33 +68,7 @@ namespace Arborist.Tests
       int testTreeIndex,
       int testScenarioIndex)
     {
-      // Arrange
-      var rootNodes = EnumerableTreeNode.Create(TreeSerializer.DeserializeRoots(treeString));
-      var treenumerable = rootNodes.ToTreenumerable().Select(visit => visit.Node);
-      var testScenario = TreeTraversalTestData.TestTrees[testTreeIndex].TestScenarios[testScenarioIndex];
-
-      var expected = testScenario.ExpectedBreadthFirstResults;
-
-      Debug.WriteLine("-----Expected Values-----");
-      MoveNextResultsDebugWriter.WriteMoveNextResults(expected);
-
-      // Act
-      var actual =
-        treenumerable
-        .ToBreadthFirstMoveNext(testScenario.SchedulingPredicate)
-        .ToArray();
-
-      Debug.WriteLine("\r\n-----Actual Values-----");
-      MoveNextResultsDebugWriter.WriteMoveNextResults(expected);
-
-      var diff = MoveNextResultDiffer.Diff(expected, actual);
-
-      Debug.WriteLine("\r\n-----Diffed Values-----");
-      foreach (var diffResult in diff)
-        Debug.WriteLine(diffResult);
-
-      // Assert
-      CollectionAssert.AreEqual(expected, actual);
+      TraversalTest(treeString, testTreeIndex, testScenarioIndex, false, true);
     }
 
     [TestMethod]
@@ -227,6 +110,62 @@ namespace Arborist.Tests
 
       // Assert
       CollectionAssert.AreEqual(Sort(breadthFirst), Sort(depthFirst));
+    }
+
+    private void TraversalTest(
+      string treeString,
+      int testTreeIndex,
+      int testScenarioIndex,
+      bool depthFirstTest,
+      bool enumerableTreenumeratorTest)
+    {
+      // Arrange
+      var testScenario = TreeTraversalTestData.TestTrees[testTreeIndex].TestScenarios[testScenarioIndex];
+
+      ITreenumerable<string> treenumerable;
+
+      if (enumerableTreenumeratorTest)
+      {
+        var rootNodes = EnumerableTreeNode.Create(TreeSerializer.DeserializeRoots(treeString));
+        treenumerable = rootNodes.ToTreenumerable().Select(visit => visit.Node);
+      }
+      else
+      {
+        IEnumerable<INodeContainerWithIndexableChildren<string>> roots = TreeSerializer.DeserializeRoots(treeString);
+        treenumerable = roots.ToTreenumerable().Select(visit => visit.Node);
+      }
+
+      var expected =
+        depthFirstTest
+        ? testScenario.ExpectedDepthFirstResults
+        : testScenario.ExpectedBreadthFirstResults;
+
+      Debug.WriteLine("--------- Tree ---------");
+      Debug.WriteLine(treeString);
+
+      Debug.WriteLine("\r\n-----Expected Values-----");
+      MoveNextResultsDebugWriter.WriteMoveNextResults(expected);
+
+      var moveNextEnumerable =
+        depthFirstTest
+        ? treenumerable.ToDepthFirstMoveNext(testScenario.SchedulingPredicate)
+        : treenumerable.ToBreadthFirstMoveNext(testScenario.SchedulingPredicate);
+
+      // Act
+      Debug.WriteLine("\r\n-----Actual Values-----");
+      var actual =
+        moveNextEnumerable
+        .Do(visit => Debug.WriteLine(visit))
+        .ToArray();
+
+      var diff = MoveNextResultDiffer.Diff(expected, actual);
+
+      Debug.WriteLine("\r\n-----Diffed Values-----");
+      foreach (var diffResult in diff)
+        Debug.WriteLine(diffResult);
+
+      // Assert
+      CollectionAssert.AreEqual(expected, actual);
     }
   }
 }

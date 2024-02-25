@@ -23,10 +23,12 @@ namespace Arborist.Treenumerators
       //Current = sentinalNodeVisit;
     }
 
-    private readonly Func<TRootNode, TNode> _Map;
     private readonly IEnumerator<TRootNode> _RootsEnumerator;
+    private readonly Func<TRootNode, TNode> _Map;
+    private readonly Func<TRootNode, IEnumerator<TRootNode>> _ChildrenGetter;
 
-    private readonly VirtualNodeVisitPool<TRootNode> _NodePool;
+    private readonly VirtualNodeVisitPool<IEnumerator<TRootNode>> _NodeVisitPool =
+      new VirtualNodeVisitPool<IEnumerator<TRootNode>>();
 
     private Deque<VirtualNodeVisit<TRootNode>> _CurrentLevel =
       new Deque<VirtualNodeVisit<TRootNode>>();
@@ -36,8 +38,6 @@ namespace Arborist.Treenumerators
 
     private Stack<IEnumerator<TRootNode>> _ChildrenStack =
       new Stack<IEnumerator<TRootNode>>();
-
-    private readonly Func<TRootNode, IEnumerator<TRootNode>> _ChildrenGetter;
 
     protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
     {
@@ -213,6 +213,12 @@ namespace Arborist.Treenumerators
       //return false;
     }
 
+    private void ReturnVirtualNodeVisit(VirtualNodeVisit<IEnumerator<TRootNode>> virtualNodeVisit)
+    {
+      virtualNodeVisit.Node.Dispose();
+      _NodeVisitPool.Return(virtualNodeVisit);
+    }
+
     public override void Dispose()
     {
       _RootsEnumerator?.Dispose();
@@ -220,6 +226,9 @@ namespace Arborist.Treenumerators
 
       while (_ChildrenStack.Count > 0)
         _ChildrenStack.Pop().Dispose();
+
+      //while (_CurrentLevel.Count > 0)
+      //  ReturnVirtualNodeVisit(_CurrentLevel.RemoveFromBack());
     }
   }
 }
