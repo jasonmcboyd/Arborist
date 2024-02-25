@@ -40,12 +40,12 @@ namespace Arborist.Tests.Utils
 
     public override int GetHashCode() => (State, Node, VisitCount, OriginalPosition).GetHashCode();
 
-    public static implicit operator MoveNextResult<TNode>((TreenumeratorState, TNode, int, NodePosition) tuple)
-      => new MoveNextResult<TNode>(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, default);
+    public static implicit operator MoveNextResult<TNode>((TreenumeratorState, TNode, int, NodePosition, NodePosition) tuple)
+      => new MoveNextResult<TNode>(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5);
 
     public override string ToString()
     {
-      return $"{TreenumeratorStateMap.ToChar(State)}, {Node}, {VisitCount}, ({OriginalPosition.SiblingIndex}, {OriginalPosition.Depth})";
+      return $"{TreenumeratorStateMap.ToChar(State)} {Node} {VisitCount} {OriginalPosition} {Position}";
     }
   }
 
@@ -61,7 +61,7 @@ namespace Arborist.Tests.Utils
 
     public static IEnumerable<MoveNextResult<TNode>> ToDepthFirstMoveNext<TNode>(
       this ITreenumerable<TNode> source)
-      => source.ToDepthFirstMoveNext(_ => SchedulingStrategy.ScheduleForTraversal);
+      => source.ToDepthFirstMoveNext(_ => SchedulingStrategy.TraverseSubtree);
 
     public static IEnumerable<MoveNextResult<TNode>> ToDepthFirstMoveNext<TNode>(
       this ITreenumerable<TNode> source,
@@ -69,7 +69,7 @@ namespace Arborist.Tests.Utils
     {
       using (var treenumerator = source.GetDepthFirstTreenumerator())
       {
-        var schedulingStrategy = SchedulingStrategy.ScheduleForTraversal; 
+        var schedulingStrategy = SchedulingStrategy.TraverseSubtree; 
         while (treenumerator.MoveNext(schedulingStrategy))
         {
           yield return Create(treenumerator);
@@ -83,7 +83,7 @@ namespace Arborist.Tests.Utils
 
     public static IEnumerable<MoveNextResult<TNode>> ToBreadthFirstMoveNext<TNode>(
       this ITreenumerable<TNode> source)
-      => source.ToBreadthFirstMoveNext(_ => SchedulingStrategy.ScheduleForTraversal);
+      => source.ToBreadthFirstMoveNext(_ => SchedulingStrategy.TraverseSubtree);
 
     public static IEnumerable<MoveNextResult<TNode>> ToBreadthFirstMoveNext<TNode>(
       this ITreenumerable<TNode> source,
@@ -91,7 +91,7 @@ namespace Arborist.Tests.Utils
     {
       using (var treenumerator = source.GetBreadthFirstTreenumerator())
       {
-        var schedulingStrategy = SchedulingStrategy.ScheduleForTraversal; 
+        var schedulingStrategy = SchedulingStrategy.TraverseSubtree; 
 
         while (treenumerator.MoveNext(schedulingStrategy))
         {

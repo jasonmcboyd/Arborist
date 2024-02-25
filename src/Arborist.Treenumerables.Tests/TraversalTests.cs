@@ -46,17 +46,19 @@ namespace Arborist.Treenumerables.Tests
 
       var expected = testScenario.ExpectedDepthFirstResults;
 
-      Debug.WriteLine("-----Expected Values-----");
+      Debug.WriteLine("--------- Tree ---------");
+      Debug.WriteLine($"\r\n{treeString}");
+
+      Debug.WriteLine("\r\n-----Expected Values-----");
       MoveNextResultsDebugWriter.WriteMoveNextResults(expected);
 
       // Act
+      Debug.WriteLine("\r\n-----Actual Values-----");
       var actual =
         treenumerable
         .ToDepthFirstMoveNext(testScenario.SchedulingPredicate)
+        .Do(x => Debug.WriteLine(x))
         .ToArray();
-
-      Debug.WriteLine("\r\n-----Actual Values-----");
-      MoveNextResultsDebugWriter.WriteMoveNextResults(expected);
 
       var diff = MoveNextResultDiffer.Diff(expected, actual);
 
@@ -83,7 +85,10 @@ namespace Arborist.Treenumerables.Tests
 
       var expected = testScenario.ExpectedDepthFirstResults;
 
-      Debug.WriteLine("-----Expected Values-----");
+      Debug.WriteLine("--------- Tree ---------");
+      Debug.WriteLine(treeString);
+
+      Debug.WriteLine("\r\n-----Expected Values-----");
       MoveNextResultsDebugWriter.WriteMoveNextResults(expected);
 
       // Act

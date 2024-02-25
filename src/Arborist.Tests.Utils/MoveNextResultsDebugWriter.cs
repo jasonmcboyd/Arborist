@@ -11,7 +11,7 @@ namespace Arborist.Tests.Utils
 
       var results = new List<string[]>()
       {
-        new string[] { " ", "S", "N", "VC", "OP" }
+        new string[] { " ", "S", "N", "VC", "OP", "P" }
       };
 
       foreach (var moveNextResult in moveNextResults)
@@ -42,7 +42,8 @@ namespace Arborist.Tests.Utils
           TreenumeratorStateMap.ToChar(result.State).ToString(),
           result.Node.ToString(),
           result.VisitCount.ToString(),
-          result.OriginalPosition.ToString()
+          result.OriginalPosition.ToString(),
+          result.Position.ToString()
         };
     }
 
@@ -55,6 +56,7 @@ namespace Arborist.Tests.Utils
       var nodeDiff = CreateValueDiffString(expected.Node, actual.Node);
       var visitCountDiff = CreateValueDiffString(expected.VisitCount, actual.VisitCount);
       var originalPositionDiff = CreateValueDiffString(expected.OriginalPosition, actual.OriginalPosition);
+      var positionDiff = CreateValueDiffString(expected.Position, actual.Position);
 
       return new string[] { prefix, stateDiff, nodeDiff, visitCountDiff, originalPositionDiff };
     }

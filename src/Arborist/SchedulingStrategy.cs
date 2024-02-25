@@ -1,14 +1,14 @@
 ﻿namespace Arborist
 {
+  // TODO: I think TraversalStrategy is a better name.
   public enum SchedulingStrategy
   {
-    // Traverse node, traverse descendants
-    ScheduleForTraversal,
-    // Skip node, traverse descendants
-    SkipNode,
-    // Traverse node, skip descendants
-    SkipDescendantSubtrees,
-    // Skip node, skip descendants
-    SkipSubtree,
+                     // | Traverse  |  Traverse   |
+                     // |   Node    | Descendants |
+                     // |-----------|-------------|
+    TraverseSubtree, // |     T     |      T      |
+    SkipDescendants, // |     T     |      F      |
+    SkipNode,        // |     F     |      T      |
+    SkipSubtree,     // |     F     |      F      |
   }
 }

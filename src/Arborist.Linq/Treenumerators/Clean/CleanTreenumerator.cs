@@ -18,7 +18,7 @@ namespace Arborist.Linq.Treenumerators
     {
       while (true)
       {
-        if (InnerTreenumerator.MoveNext(SchedulingStrategy.ScheduleForTraversal))
+        if (InnerTreenumerator.MoveNext(SchedulingStrategy.TraverseSubtree))
           return false;
 
 

@@ -28,7 +28,7 @@ namespace Arborist.Treenumerables.Tests
       {
         SchedulingStrategy.SkipNode,
         SchedulingStrategy.SkipSubtree,
-        SchedulingStrategy.SkipDescendantSubtrees,
+        SchedulingStrategy.SkipDescendants,
       };
 
       foreach (var treeString in treeStrings)
@@ -60,7 +60,7 @@ namespace Arborist.Treenumerables.Tests
         new Func<ITreenumerator<string>, SchedulingStrategy>(
           visit =>
             filterCharacter == null || filterCharacter != visit.Node
-            ? SchedulingStrategy.ScheduleForTraversal
+            ? SchedulingStrategy.TraverseSubtree
             : filterStrategy.Value);
 
       Debug.WriteLine("-----Breadth First-----");

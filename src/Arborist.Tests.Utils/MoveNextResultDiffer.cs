@@ -23,7 +23,7 @@ namespace Arborist.Tests.Utils
 
       var results = new List<string[]>
       {
-        new string[] { " ", "S", "N", "VC", "OP" }
+        new string[] { " ", "S", "N", "VC", "OP", "P" }
       };
 
       if (diff.OldText.Lines.Count != diff.NewText.Lines.Count)
@@ -103,6 +103,7 @@ namespace Arborist.Tests.Utils
           TreenumeratorStateMap.ToChar(result.State).ToString(),
           result.Node.ToString(),
           result.VisitCount.ToString(),
+          result.OriginalPosition.ToString(),
           result.Position.ToString()
         };
     }
@@ -116,8 +117,9 @@ namespace Arborist.Tests.Utils
       var nodeDiff = WriteValueDiffs(expected.Node, actual.Node);
       var visitCountDiff = WriteValueDiffs(expected.VisitCount, actual.VisitCount);
       var originalPositionDiff = WriteValueDiffs(expected.OriginalPosition, actual.OriginalPosition);
+      var positionDiff = WriteValueDiffs(expected.Position, actual.Position);
 
-      return new string[] { prefix, stateDiff, nodeDiff, visitCountDiff, originalPositionDiff };
+      return new string[] { prefix, stateDiff, nodeDiff, visitCountDiff, originalPositionDiff, positionDiff };
     }
 
     private static string WriteValueDiffs<TValue>(TValue expected, TValue actual)

@@ -8,12 +8,12 @@ namespace Arborist.Linq
     {
       using (var treenumerator = source.GetDepthFirstTreenumerator())
       {
-        if (!treenumerator.MoveNext(SchedulingStrategy.ScheduleForTraversal))
+        if (!treenumerator.MoveNext(SchedulingStrategy.TraverseSubtree))
           yield break;
 
         var previousVisit = treenumerator.ToNodeVisit();
 
-        while (treenumerator.MoveNext(SchedulingStrategy.ScheduleForTraversal))
+        while (treenumerator.MoveNext(SchedulingStrategy.TraverseSubtree))
         {
           var currentVisit = treenumerator.ToNodeVisit();
 
