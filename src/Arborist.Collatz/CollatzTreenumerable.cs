@@ -1,5 +1,5 @@
-﻿using Arborist.Treenumerables.Nodes;
-using Arborist.Treenumerables.Treenumerables;
+﻿using Arborist.Nodes;
+using Arborist.Treenumerables;
 using System.Collections.Generic;
 
 namespace Arborist.Collatz

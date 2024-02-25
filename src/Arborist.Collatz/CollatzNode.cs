@@ -1,4 +1,4 @@
-﻿using Arborist.Treenumerables.Nodes;
+﻿using Arborist.Nodes;
 using System;
 
 namespace Arborist.Collatz

@@ -1,5 +1,5 @@
-using Arborist.Tests.Utils;
-using Arborist.Treenumerables.SimpleSerializer;
+using Arborist.TestUtils;
+using Arborist.SimpleSerializer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Diagnostics;

@@ -1,6 +1,4 @@
-using Arborist.Tests.Utils;
-using Arborist.Treenumerables;
-using Arborist.Treenumerables.Nodes;
+using Arborist.Nodes;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 
