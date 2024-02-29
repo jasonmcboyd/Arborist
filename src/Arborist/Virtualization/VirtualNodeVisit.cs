@@ -10,5 +10,13 @@ namespace Arborist.Virtualization
     public NodePosition OriginalPosition { get; set; }
     public NodePosition Position { get; set; }
     public SchedulingStrategy SchedulingStrategy { get; set; }
+
+    public bool SkippingNode =>
+      SchedulingStrategy == SchedulingStrategy.SkipNode
+      || SchedulingStrategy == SchedulingStrategy.SkipSubtree;
+
+    public bool SkippingDescendants =>
+      SchedulingStrategy == SchedulingStrategy.SkipDescendants
+      || SchedulingStrategy == SchedulingStrategy.SkipSubtree;
   }
 }

@@ -72,8 +72,16 @@ namespace Arborist.TestUtils
         }
         else if (expectedDiff.Type == ChangeType.Deleted)
         {
-          results.Add(CreateMoveNextResultStringArray("-", actual));
-          expectedPointer++;
+          if (actual == null)
+          {
+            results.Add(CreateMoveNextResultStringArray("-", expected));
+            actualPointer++;
+          }
+          else
+          {
+            results.Add(CreateMoveNextResultStringArray("-", actual));
+            expectedPointer++;
+          }
         }
         else
         {

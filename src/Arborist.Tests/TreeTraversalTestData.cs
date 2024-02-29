@@ -106,6 +106,15 @@ namespace Arborist.Tests
               Description = "Skip levels 1, 2, 3 node",
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
+                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "a", 1, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "b", 0, (0, 1), (0, 1)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (0, 2), (0, 1)),
+                (TreenumeratorState.SchedulingNode, "d", 0, (0, 3), (0, 1)),
+                (TreenumeratorState.SchedulingNode, "e", 0, (0, 4), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "a", 2, (0, 0), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "e", 1, (0, 4), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "e", 2, (0, 4), (0, 1)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
@@ -166,6 +175,9 @@ namespace Arborist.Tests
               Description = "Skip all nodes",
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
+                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "b", 0, (0, 1), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (0, 2), (0, 0)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
@@ -177,9 +189,16 @@ namespace Arborist.Tests
             new TestScenario
             {
               SchedulingPredicate = visit => visit.OriginalPosition.Depth == 0 ? SchedulingStrategy.SkipNode : SchedulingStrategy.TraverseSubtree,
-              Description = "Skip level 0",
+              Description = "Skip level 0 node",
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
+                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "b", 0, (0, 1), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "b", 1, (0, 1), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (0, 2), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "b", 2, (0, 1), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "c", 1, (0, 2), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "c", 2, (0, 2), (0, 1)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
@@ -195,9 +214,16 @@ namespace Arborist.Tests
             new TestScenario
             {
               SchedulingPredicate = visit => visit.OriginalPosition.Depth == 1 ? SchedulingStrategy.SkipNode : SchedulingStrategy.TraverseSubtree,
-              Description = "Skip level 1",
+              Description = "Skip level 1 node",
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
+                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "a", 1, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "b", 0, (0, 1), (0, 1)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (0, 2), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "a", 2, (0, 0), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "c", 1, (0, 2), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "c", 2, (0, 2), (0, 1)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
@@ -213,9 +239,16 @@ namespace Arborist.Tests
             new TestScenario
             {
               SchedulingPredicate = visit => visit.OriginalPosition.Depth == 2 ? SchedulingStrategy.SkipNode : SchedulingStrategy.TraverseSubtree,
-              Description = "Skip level 2",
+              Description = "Skip level 2 node",
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
+                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "a", 1, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "b", 0, (0, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "a", 2, (0, 0), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "b", 1, (0, 1), (0, 1)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (0, 2), (0, 2)),
+                (TreenumeratorState.VisitingNode,   "b", 2, (0, 1), (0, 1)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
@@ -231,9 +264,14 @@ namespace Arborist.Tests
             new TestScenario
             {
               SchedulingPredicate = visit => visit.OriginalPosition.Depth == 0 || visit.OriginalPosition.Depth == 2 ? SchedulingStrategy.SkipNode : SchedulingStrategy.TraverseSubtree,
-              Description = "Skip level 0 and level 2",
+              Description = "Skip level 0 and level 2 nodes",
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
+                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "b", 0, (0, 1), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "b", 1, (0, 1), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (0, 2), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "b", 2, (0, 1), (0, 0)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
@@ -388,6 +426,19 @@ namespace Arborist.Tests
               Description = "Traverse all",
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
+                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "a", 1, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "b", 0, (0, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "a", 2, (0, 0), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "b", 1, (0, 1), (0, 1)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (0, 2), (0, 2)),
+                (TreenumeratorState.VisitingNode,   "b", 2, (0, 1), (0, 1)),
+                (TreenumeratorState.SchedulingNode, "d", 0, (1, 2), (1, 2)),
+                (TreenumeratorState.VisitingNode,   "b", 3, (0, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "c", 1, (0, 2), (0, 2)),
+                (TreenumeratorState.VisitingNode,   "c", 2, (0, 2), (0, 2)),
+                (TreenumeratorState.VisitingNode,   "d", 1, (1, 2), (1, 2)),
+                (TreenumeratorState.VisitingNode,   "d", 2, (1, 2), (1, 2)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
@@ -410,9 +461,20 @@ namespace Arborist.Tests
             new TestScenario
             {
               SchedulingPredicate = visit => visit.Node == "b" ? SchedulingStrategy.SkipNode : SchedulingStrategy.TraverseSubtree,
-              Description = "Skip level 1",
+              Description = "Skip level 1 node",
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
+                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "a", 1, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "b", 0, (0, 1), (0, 1)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (0, 2), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "a", 2, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "d", 0, (1, 2), (1, 1)),
+                (TreenumeratorState.VisitingNode,   "a", 3, (0, 0), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "c", 1, (0, 2), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "c", 2, (0, 2), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "d", 1, (1, 2), (1, 1)),
+                (TreenumeratorState.VisitingNode,   "d", 2, (1, 2), (1, 1)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
@@ -505,6 +567,28 @@ namespace Arborist.Tests
               Description = "Skip level 1, sibling 1 node",
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
+                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "a", 1, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "b", 0, (0, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "a", 2, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (1, 1), (1, 1)),
+                (TreenumeratorState.SchedulingNode, "f", 0, (0, 2), (1, 1)),
+                (TreenumeratorState.VisitingNode,   "a", 3, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "g", 0, (1, 2), (2, 1)),
+                (TreenumeratorState.VisitingNode,   "a", 4, (0, 0), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "b", 1, (0, 1), (0, 1)),
+                (TreenumeratorState.SchedulingNode, "d", 0, (0, 2), (0, 2)),
+                (TreenumeratorState.VisitingNode,   "b", 2, (0, 1), (0, 1)),
+                (TreenumeratorState.SchedulingNode, "e", 0, (1, 2), (1, 2)),
+                (TreenumeratorState.VisitingNode,   "b", 3, (0, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "f", 1, (0, 2), (1, 1)),
+                (TreenumeratorState.VisitingNode,   "f", 2, (0, 2), (1, 1)),
+                (TreenumeratorState.VisitingNode,   "g", 1, (1, 2), (2, 1)),
+                (TreenumeratorState.VisitingNode,   "g", 2, (1, 2), (2, 1)),
+                (TreenumeratorState.VisitingNode,   "d", 1, (0, 2), (0, 2)),
+                (TreenumeratorState.VisitingNode,   "d", 2, (0, 2), (0, 2)),
+                (TreenumeratorState.VisitingNode,   "e", 1, (1, 2), (1, 2)),
+                (TreenumeratorState.VisitingNode,   "e", 2, (1, 2), (1, 2)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
@@ -655,6 +739,33 @@ namespace Arborist.Tests
               Description = "Skip levels 1 & 3, sibling 1 node",
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
+                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "a", 1, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "b", 0, (0, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "a", 2, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (1, 1), (1, 1)),
+                (TreenumeratorState.SchedulingNode, "d", 0, (0, 2), (1, 1)),
+                (TreenumeratorState.VisitingNode,   "a", 3, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "e", 0, (1, 2), (2, 1)),
+                (TreenumeratorState.VisitingNode,   "a", 4, (0, 0), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "b", 1, (0, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "b", 2, (0, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "d", 1, (0, 2), (1, 1)),
+                (TreenumeratorState.VisitingNode,   "d", 2, (0, 2), (1, 1)),
+                (TreenumeratorState.VisitingNode,   "e", 1, (1, 2), (2, 1)),
+                (TreenumeratorState.SchedulingNode, "f", 0, (0, 3), (0, 2)),
+                (TreenumeratorState.VisitingNode,   "e", 2, (1, 2), (2, 1)),
+                (TreenumeratorState.SchedulingNode, "g", 0, (1, 3), (1, 2)),
+                (TreenumeratorState.SchedulingNode, "h", 0, (0, 4), (1, 2)),
+                (TreenumeratorState.VisitingNode,   "e", 3, (1, 2), (2, 1)),
+                (TreenumeratorState.SchedulingNode, "i", 0, (1, 4), (2, 2)),
+                (TreenumeratorState.VisitingNode,   "e", 4, (1, 2), (2, 1)),
+                (TreenumeratorState.VisitingNode,   "f", 1, (0, 3), (0, 2)),
+                (TreenumeratorState.VisitingNode,   "f", 2, (0, 3), (0, 2)),
+                (TreenumeratorState.VisitingNode,   "h", 1, (0, 4), (1, 2)),
+                (TreenumeratorState.VisitingNode,   "h", 2, (0, 4), (1, 2)),
+                (TreenumeratorState.VisitingNode,   "i", 1, (1, 4), (2, 2)),
+                (TreenumeratorState.VisitingNode,   "i", 2, (1, 4), (2, 2)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
@@ -697,6 +808,23 @@ namespace Arborist.Tests
               Description = "Skip root and all sibling 1 nodes",
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
+                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "b", 0, (0, 1), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (1, 1), (1, 0)),
+                (TreenumeratorState.SchedulingNode, "d", 0, (0, 2), (1, 0)),
+                (TreenumeratorState.SchedulingNode, "e", 0, (1, 2), (2, 0)),
+                (TreenumeratorState.SchedulingNode, "f", 0, (0, 3), (2, 0)),
+                (TreenumeratorState.SchedulingNode, "g", 0, (1, 3), (3, 0)),
+                (TreenumeratorState.SchedulingNode, "h", 0, (0, 4), (3, 0)),
+                (TreenumeratorState.SchedulingNode, "i", 0, (1, 4), (4, 0)),
+                (TreenumeratorState.VisitingNode,   "b", 1, (0, 1), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "b", 2, (0, 1), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "d", 1, (0, 2), (1, 0)),
+                (TreenumeratorState.VisitingNode,   "d", 2, (0, 2), (1, 0)),
+                (TreenumeratorState.VisitingNode,   "f", 1, (0, 3), (2, 0)),
+                (TreenumeratorState.VisitingNode,   "f", 2, (0, 3), (2, 0)),
+                (TreenumeratorState.VisitingNode,   "h", 1, (0, 4), (3, 0)),
+                (TreenumeratorState.VisitingNode,   "h", 2, (0, 4), (3, 0)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
@@ -797,6 +925,13 @@ namespace Arborist.Tests
               Description = "Skip all nodes",
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
+                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "b", 0, (0, 1), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (1, 1), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "e", 0, (0, 2), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "f", 0, (1, 2), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "g", 0, (2, 2), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "d", 0, (2, 1), (0, 0)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
@@ -815,6 +950,29 @@ namespace Arborist.Tests
               Description = "Skip level 1, sibling 1 node",
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
+                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "a", 1, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "b", 0, (0, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "a", 2, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (1, 1), (1, 1)),
+                (TreenumeratorState.SchedulingNode, "e", 0, (0, 2), (1, 1)),
+                (TreenumeratorState.VisitingNode,   "a", 3, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "f", 0, (1, 2), (2, 1)),
+                (TreenumeratorState.VisitingNode,   "a", 4, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "g", 0, (2, 2), (3, 1)),
+                (TreenumeratorState.VisitingNode,   "a", 5, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "d", 0, (2, 1), (4, 1)),
+                (TreenumeratorState.VisitingNode,   "a", 6, (0, 0), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "b", 1, (0, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "b", 2, (0, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "e", 1, (0, 2), (1, 1)),
+                (TreenumeratorState.VisitingNode,   "e", 2, (0, 2), (1, 1)),
+                (TreenumeratorState.VisitingNode,   "f", 1, (1, 2), (2, 1)),
+                (TreenumeratorState.VisitingNode,   "f", 2, (1, 2), (2, 1)),
+                (TreenumeratorState.VisitingNode,   "g", 1, (2, 2), (3, 1)),
+                (TreenumeratorState.VisitingNode,   "g", 2, (2, 2), (3, 1)),
+                (TreenumeratorState.VisitingNode,   "d", 1, (2, 1), (4, 1)),
+                (TreenumeratorState.VisitingNode,   "d", 2, (2, 1), (4, 1)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
@@ -855,13 +1013,12 @@ namespace Arborist.Tests
                 (TreenumeratorState.SchedulingNode, "b", 0, (0, 1), (0, 1)),
                 (TreenumeratorState.VisitingNode,   "a", 2, (0, 0), (0, 0)),
                 (TreenumeratorState.SchedulingNode, "c", 0, (1, 1), (1, 1)),
+                (TreenumeratorState.SchedulingNode, "d", 0, (2, 1), (1, 1)),
                 (TreenumeratorState.VisitingNode,   "a", 3, (0, 0), (0, 0)),
-                (TreenumeratorState.SchedulingNode, "d", 0, (2, 1), (2, 1)),
-                (TreenumeratorState.VisitingNode,   "a", 4, (0, 0), (0, 0)),
                 (TreenumeratorState.VisitingNode,   "b", 1, (0, 1), (0, 1)),
                 (TreenumeratorState.VisitingNode,   "b", 2, (0, 1), (0, 1)),
-                (TreenumeratorState.VisitingNode,   "d", 1, (2, 1), (2, 1)),
-                (TreenumeratorState.VisitingNode,   "d", 2, (2, 1), (2, 1)),
+                (TreenumeratorState.VisitingNode,   "d", 1, (2, 1), (1, 1)),
+                (TreenumeratorState.VisitingNode,   "d", 2, (2, 1), (1, 1)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
@@ -872,11 +1029,10 @@ namespace Arborist.Tests
                 (TreenumeratorState.VisitingNode,   "b", 2, (0, 1), (0, 1)),
                 (TreenumeratorState.VisitingNode,   "a", 2, (0, 0), (0, 0)),
                 (TreenumeratorState.SchedulingNode, "c", 0, (1, 1), (1, 1)),
+                (TreenumeratorState.SchedulingNode, "d", 0, (2, 1), (1, 1)),
+                (TreenumeratorState.VisitingNode,   "d", 1, (2, 1), (1, 1)),
+                (TreenumeratorState.VisitingNode,   "d", 2, (2, 1), (1, 1)),
                 (TreenumeratorState.VisitingNode,   "a", 3, (0, 0), (0, 0)),
-                (TreenumeratorState.SchedulingNode, "d", 0, (2, 1), (2, 1)),
-                (TreenumeratorState.VisitingNode,   "d", 1, (2, 1), (2, 1)),
-                (TreenumeratorState.VisitingNode,   "d", 2, (2, 1), (2, 1)),
-                (TreenumeratorState.VisitingNode,   "a", 4, (0, 0), (0, 0)),
               }
             },
             // Skip descendant subtrees
@@ -987,6 +1143,12 @@ namespace Arborist.Tests
               Description = "Skip all nodes",
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
+                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "b", 0, (0, 1), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (1, 1), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "d", 0, (1, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "e", 0, (0, 1), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "f", 0, (1, 1), (0, 0)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
@@ -1004,6 +1166,23 @@ namespace Arborist.Tests
               Description = "Skip level 0, sibling 1 node",
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
+                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "d", 0, (1, 0), (1, 0)),
+                (TreenumeratorState.SchedulingNode, "e", 0, (0, 1), (1, 0)),
+                (TreenumeratorState.SchedulingNode, "f", 0, (1, 1), (2, 0)),
+                (TreenumeratorState.VisitingNode,   "a", 1, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "b", 0, (0, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "a", 2, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (1, 1), (1, 1)),
+                (TreenumeratorState.VisitingNode,   "a", 3, (0, 0), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "e", 1, (0, 1), (1, 0)),
+                (TreenumeratorState.VisitingNode,   "e", 2, (0, 1), (1, 0)),
+                (TreenumeratorState.VisitingNode,   "f", 1, (1, 1), (2, 0)),
+                (TreenumeratorState.VisitingNode,   "f", 2, (1, 1), (2, 0)),
+                (TreenumeratorState.VisitingNode,   "b", 1, (0, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "b", 2, (0, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "c", 1, (1, 1), (1, 1)),
+                (TreenumeratorState.VisitingNode,   "c", 2, (1, 1), (1, 1)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
@@ -1154,6 +1333,10 @@ namespace Arborist.Tests
               Description = "Skip all nodes",
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
+                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "b", 0, (0, 1), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (1, 1), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "d", 0, (2, 1), (0, 0)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
@@ -1169,6 +1352,16 @@ namespace Arborist.Tests
               Description = "Skip level 0 nodes",
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
+                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "b", 0, (0, 1), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (1, 1), (1, 0)),
+                (TreenumeratorState.SchedulingNode, "d", 0, (2, 1), (2, 0)),
+                (TreenumeratorState.VisitingNode,   "b", 1, (0, 1), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "b", 2, (0, 1), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "c", 1, (1, 1), (1, 0)),
+                (TreenumeratorState.VisitingNode,   "c", 2, (1, 1), (1, 0)),
+                (TreenumeratorState.VisitingNode,   "d", 1, (2, 1), (2, 0)),
+                (TreenumeratorState.VisitingNode,   "d", 2, (2, 1), (2, 0)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
@@ -1190,6 +1383,12 @@ namespace Arborist.Tests
               Description = "Skip level 1 nodes",
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
+                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "a", 1, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "b", 0, (0, 1), (0, 1)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (1, 1), (0, 1)),
+                (TreenumeratorState.SchedulingNode, "d", 0, (2, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "a", 2, (0, 0), (0, 0)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
@@ -1207,6 +1406,17 @@ namespace Arborist.Tests
               Description = "Skip level 1, sibling 0 node",
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
+                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "a", 1, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "b", 0, (0, 1), (0, 1)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (1, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "a", 2, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "d", 0, (2, 1), (1, 1)),
+                (TreenumeratorState.VisitingNode,   "a", 3, (0, 0), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "c", 1, (1, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "c", 2, (1, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "d", 1, (2, 1), (1, 1)),
+                (TreenumeratorState.VisitingNode,   "d", 2, (2, 1), (1, 1)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
@@ -1229,6 +1439,17 @@ namespace Arborist.Tests
               Description = "Skip level 1, sibling 1 node",
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
+                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "a", 1, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "b", 0, (0, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "a", 2, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (1, 1), (1, 1)),
+                (TreenumeratorState.SchedulingNode, "d", 0, (2, 1), (1, 1)),
+                (TreenumeratorState.VisitingNode,   "a", 3, (0, 0), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "b", 1, (0, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "b", 2, (0, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "d", 1, (2, 1), (1, 1)),
+                (TreenumeratorState.VisitingNode,   "d", 2, (2, 1), (1, 1)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
@@ -1251,6 +1472,17 @@ namespace Arborist.Tests
               Description = "Skip level 1, sibling 2 node",
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
+                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "a", 1, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "b", 0, (0, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "a", 2, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (1, 1), (1, 1)),
+                (TreenumeratorState.VisitingNode,   "a", 3, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "d", 0, (2, 1), (2, 1)),
+                (TreenumeratorState.VisitingNode,   "b", 1, (0, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "b", 2, (0, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "c", 1, (1, 1), (1, 1)),
+                (TreenumeratorState.VisitingNode,   "c", 2, (1, 1), (1, 1)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
@@ -1290,22 +1522,18 @@ namespace Arborist.Tests
                 (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
                 (TreenumeratorState.VisitingNode,   "a", 1, (0, 0), (0, 0)),
                 (TreenumeratorState.SchedulingNode, "b", 0, (0, 1), (0, 1)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (1, 1), (0, 1)),
+                (TreenumeratorState.SchedulingNode, "d", 0, (2, 1), (0, 1)),
                 (TreenumeratorState.VisitingNode,   "a", 2, (0, 0), (0, 0)),
-                (TreenumeratorState.SchedulingNode, "c", 0, (1, 1), (1, 1)),
-                (TreenumeratorState.VisitingNode,   "a", 3, (0, 0), (0, 0)),
-                (TreenumeratorState.SchedulingNode, "d", 0, (2, 1), (2, 1)),
-                (TreenumeratorState.VisitingNode,   "a", 4, (0, 0), (0, 0)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
                 (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
                 (TreenumeratorState.VisitingNode,   "a", 1, (0, 0), (0, 0)),
                 (TreenumeratorState.SchedulingNode, "b", 0, (0, 1), (0, 1)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (1, 1), (0, 1)),
+                (TreenumeratorState.SchedulingNode, "d", 0, (2, 1), (0, 1)),
                 (TreenumeratorState.VisitingNode,   "a", 2, (0, 0), (0, 0)),
-                (TreenumeratorState.SchedulingNode, "c", 0, (1, 1), (1, 1)),
-                (TreenumeratorState.VisitingNode,   "a", 3, (0, 0), (0, 0)),
-                (TreenumeratorState.SchedulingNode, "d", 0, (2, 1), (2, 1)),
-                (TreenumeratorState.VisitingNode,   "a", 4, (0, 0), (0, 0)),
               }
             },
             new TestScenario
@@ -1317,30 +1545,28 @@ namespace Arborist.Tests
                 (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
                 (TreenumeratorState.VisitingNode,   "a", 1, (0, 0), (0, 0)),
                 (TreenumeratorState.SchedulingNode, "b", 0, (0, 1), (0, 1)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (1, 1), (0, 1)),
                 (TreenumeratorState.VisitingNode,   "a", 2, (0, 0), (0, 0)),
-                (TreenumeratorState.SchedulingNode, "c", 0, (1, 1), (1, 1)),
+                (TreenumeratorState.SchedulingNode, "d", 0, (2, 1), (1, 1)),
                 (TreenumeratorState.VisitingNode,   "a", 3, (0, 0), (0, 0)),
-                (TreenumeratorState.SchedulingNode, "d", 0, (2, 1), (2, 1)),
-                (TreenumeratorState.VisitingNode,   "a", 4, (0, 0), (0, 0)),
-                (TreenumeratorState.VisitingNode,   "c", 1, (1, 1), (1, 1)),
-                (TreenumeratorState.VisitingNode,   "c", 2, (1, 1), (1, 1)),
-                (TreenumeratorState.VisitingNode,   "d", 1, (2, 1), (2, 1)),
-                (TreenumeratorState.VisitingNode,   "d", 2, (2, 1), (2, 1)),
+                (TreenumeratorState.VisitingNode,   "c", 1, (1, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "c", 2, (1, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "d", 1, (2, 1), (1, 1)),
+                (TreenumeratorState.VisitingNode,   "d", 2, (2, 1), (1, 1)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
                 (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
                 (TreenumeratorState.VisitingNode,   "a", 1, (0, 0), (0, 0)),
                 (TreenumeratorState.SchedulingNode, "b", 0, (0, 1), (0, 1)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (1, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "c", 1, (1, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "c", 2, (1, 1), (0, 1)),
                 (TreenumeratorState.VisitingNode,   "a", 2, (0, 0), (0, 0)),
-                (TreenumeratorState.SchedulingNode, "c", 0, (1, 1), (1, 1)),
-                (TreenumeratorState.VisitingNode,   "c", 1, (1, 1), (1, 1)),
-                (TreenumeratorState.VisitingNode,   "c", 2, (1, 1), (1, 1)),
+                (TreenumeratorState.SchedulingNode, "d", 0, (2, 1), (1, 1)),
+                (TreenumeratorState.VisitingNode,   "d", 1, (2, 1), (1, 1)),
+                (TreenumeratorState.VisitingNode,   "d", 2, (2, 1), (1, 1)),
                 (TreenumeratorState.VisitingNode,   "a", 3, (0, 0), (0, 0)),
-                (TreenumeratorState.SchedulingNode, "d", 0, (2, 1), (2, 1)),
-                (TreenumeratorState.VisitingNode,   "d", 1, (2, 1), (2, 1)),
-                (TreenumeratorState.VisitingNode,   "d", 2, (2, 1), (2, 1)),
-                (TreenumeratorState.VisitingNode,   "a", 4, (0, 0), (0, 0)),
               }
             },
             new TestScenario
@@ -1354,13 +1580,12 @@ namespace Arborist.Tests
                 (TreenumeratorState.SchedulingNode, "b", 0, (0, 1), (0, 1)),
                 (TreenumeratorState.VisitingNode,   "a", 2, (0, 0), (0, 0)),
                 (TreenumeratorState.SchedulingNode, "c", 0, (1, 1), (1, 1)),
+                (TreenumeratorState.SchedulingNode, "d", 0, (2, 1), (1, 1)),
                 (TreenumeratorState.VisitingNode,   "a", 3, (0, 0), (0, 0)),
-                (TreenumeratorState.SchedulingNode, "d", 0, (2, 1), (2, 1)),
-                (TreenumeratorState.VisitingNode,   "a", 4, (0, 0), (0, 0)),
                 (TreenumeratorState.VisitingNode,   "b", 1, (0, 1), (0, 1)),
                 (TreenumeratorState.VisitingNode,   "b", 2, (0, 1), (0, 1)),
-                (TreenumeratorState.VisitingNode,   "d", 1, (2, 1), (2, 1)),
-                (TreenumeratorState.VisitingNode,   "d", 2, (2, 1), (2, 1)),
+                (TreenumeratorState.VisitingNode,   "d", 1, (2, 1), (1, 1)),
+                (TreenumeratorState.VisitingNode,   "d", 2, (2, 1), (1, 1)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
@@ -1371,11 +1596,10 @@ namespace Arborist.Tests
                 (TreenumeratorState.VisitingNode,   "b", 2, (0, 1), (0, 1)),
                 (TreenumeratorState.VisitingNode,   "a", 2, (0, 0), (0, 0)),
                 (TreenumeratorState.SchedulingNode, "c", 0, (1, 1), (1, 1)),
+                (TreenumeratorState.SchedulingNode, "d", 0, (2, 1), (1, 1)),
+                (TreenumeratorState.VisitingNode,   "d", 1, (2, 1), (1, 1)),
+                (TreenumeratorState.VisitingNode,   "d", 2, (2, 1), (1, 1)),
                 (TreenumeratorState.VisitingNode,   "a", 3, (0, 0), (0, 0)),
-                (TreenumeratorState.SchedulingNode, "d", 0, (2, 1), (2, 1)),
-                (TreenumeratorState.VisitingNode,   "d", 1, (2, 1), (2, 1)),
-                (TreenumeratorState.VisitingNode,   "d", 2, (2, 1), (2, 1)),
-                (TreenumeratorState.VisitingNode,   "a", 4, (0, 0), (0, 0)),
               }
             },
             new TestScenario
@@ -1391,7 +1615,6 @@ namespace Arborist.Tests
                 (TreenumeratorState.SchedulingNode, "c", 0, (1, 1), (1, 1)),
                 (TreenumeratorState.VisitingNode,   "a", 3, (0, 0), (0, 0)),
                 (TreenumeratorState.SchedulingNode, "d", 0, (2, 1), (2, 1)),
-                (TreenumeratorState.VisitingNode,   "a", 4, (0, 0), (0, 0)),
                 (TreenumeratorState.VisitingNode,   "b", 1, (0, 1), (0, 1)),
                 (TreenumeratorState.VisitingNode,   "b", 2, (0, 1), (0, 1)),
                 (TreenumeratorState.VisitingNode,   "c", 1, (1, 1), (1, 1)),
@@ -1410,7 +1633,6 @@ namespace Arborist.Tests
                 (TreenumeratorState.VisitingNode,   "c", 2, (1, 1), (1, 1)),
                 (TreenumeratorState.VisitingNode,   "a", 3, (0, 0), (0, 0)),
                 (TreenumeratorState.SchedulingNode, "d", 0, (2, 1), (2, 1)),
-                (TreenumeratorState.VisitingNode,   "a", 4, (0, 0), (0, 0)),
               }
             },
             // Skip descendant subtree
@@ -1655,9 +1877,19 @@ namespace Arborist.Tests
             new TestScenario
             {
               SchedulingPredicate = visit => visit.Node == "a" ? SchedulingStrategy.SkipNode : SchedulingStrategy.TraverseSubtree,
-              Description = "Skip level 0, sibling 0 nodes",
+              Description = "Skip level 0, sibling 0 node",
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
+                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (0, 1), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "b", 0, (1, 0), (1, 0)),
+                (TreenumeratorState.VisitingNode,   "c", 1, (0, 1), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "c", 2, (0, 1), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "b", 1, (1, 0), (1, 0)),
+                (TreenumeratorState.SchedulingNode, "d", 0, (0, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "b", 2, (1, 0), (1, 0)),
+                (TreenumeratorState.VisitingNode,   "d", 1, (0, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "d", 2, (0, 1), (0, 1)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
@@ -1676,9 +1908,19 @@ namespace Arborist.Tests
             new TestScenario
             {
               SchedulingPredicate = visit => visit.Node == "b" ? SchedulingStrategy.SkipNode : SchedulingStrategy.TraverseSubtree,
-              Description = "Skip level 0, sibling 1 nodes",
+              Description = "Skip level 0, sibling 1 node",
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
+                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "b", 0, (1, 0), (1, 0)),
+                (TreenumeratorState.SchedulingNode, "d", 0, (0, 1), (1, 0)),
+                (TreenumeratorState.VisitingNode,   "a", 1, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (0, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "a", 2, (0, 0), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "d", 1, (0, 1), (1, 0)),
+                (TreenumeratorState.VisitingNode,   "d", 2, (0, 1), (1, 0)),
+                (TreenumeratorState.VisitingNode,   "c", 1, (0, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "c", 2, (0, 1), (0, 1)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
@@ -1700,6 +1942,12 @@ namespace Arborist.Tests
               Description = "Skip all but level 1, sibling 1 node",
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
+                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (0, 1), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "b", 0, (1, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "d", 0, (0, 1), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "d", 1, (0, 1), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "d", 2, (0, 1), (0, 0)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
@@ -1765,6 +2013,10 @@ namespace Arborist.Tests
               Description = "Skip all nodes",
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
+                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "b", 0, (1, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (0, 1), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "d", 0, (1, 1), (0, 0)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
@@ -1780,6 +2032,16 @@ namespace Arborist.Tests
               Description = "Skip level 0, sibling 1 node",
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
+                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "b", 0, (1, 0), (1, 0)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (0, 1), (1, 0)),
+                (TreenumeratorState.SchedulingNode, "d", 0, (1, 1), (2, 0)),
+                (TreenumeratorState.VisitingNode,   "a", 1, (0, 0), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "a", 2, (0, 0), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "c", 1, (0, 1), (1, 0)),
+                (TreenumeratorState.VisitingNode,   "c", 2, (0, 1), (1, 0)),
+                (TreenumeratorState.VisitingNode,   "d", 1, (1, 1), (2, 0)),
+                (TreenumeratorState.VisitingNode,   "d", 2, (1, 1), (2, 0)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
@@ -1812,21 +2074,21 @@ namespace Arborist.Tests
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
                 (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "b", 0, (1, 0), (1, 0)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (2, 0), (2, 0)),
                 (TreenumeratorState.VisitingNode,   "a", 1, (0, 0), (0, 0)),
                 (TreenumeratorState.VisitingNode,   "a", 2, (0, 0), (0, 0)),
-                (TreenumeratorState.SchedulingNode, "b", 0, (1, 0), (1, 0)),
                 (TreenumeratorState.VisitingNode,   "b", 1, (1, 0), (1, 0)),
                 (TreenumeratorState.SchedulingNode, "d", 0, (0, 1), (0, 1)),
-                (TreenumeratorState.VisitingNode,   "d", 1, (0, 1), (0, 1)),
-                (TreenumeratorState.VisitingNode,   "d", 2, (0, 1), (0, 1)),
                 (TreenumeratorState.VisitingNode,   "b", 2, (1, 0), (1, 0)),
                 (TreenumeratorState.SchedulingNode, "e", 0, (1, 1), (1, 1)),
-                (TreenumeratorState.VisitingNode,   "e", 1, (1, 1), (1, 1)),
-                (TreenumeratorState.VisitingNode,   "e", 2, (1, 1), (1, 1)),
                 (TreenumeratorState.VisitingNode,   "b", 3, (1, 0), (1, 0)),
-                (TreenumeratorState.SchedulingNode, "c", 0, (2, 0), (2, 0)),
                 (TreenumeratorState.VisitingNode,   "c", 1, (2, 0), (2, 0)),
                 (TreenumeratorState.VisitingNode,   "c", 2, (2, 0), (2, 0)),
+                (TreenumeratorState.VisitingNode,   "d", 1, (0, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "d", 2, (0, 1), (0, 1)),
+                (TreenumeratorState.VisitingNode,   "e", 1, (1, 1), (1, 1)),
+                (TreenumeratorState.VisitingNode,   "e", 2, (1, 1), (1, 1)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
@@ -1855,6 +2117,19 @@ namespace Arborist.Tests
               Description = "Skip level 0, sibling 1 node",
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
+                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "b", 0, (1, 0), (1, 0)),
+                (TreenumeratorState.SchedulingNode, "d", 0, (0, 1), (1, 0)),
+                (TreenumeratorState.SchedulingNode, "e", 0, (1, 1), (2, 0)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (2, 0), (3, 0)),
+                (TreenumeratorState.VisitingNode,   "a", 1, (0, 0), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "a", 2, (0, 0), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "d", 1, (0, 1), (1, 0)),
+                (TreenumeratorState.VisitingNode,   "d", 2, (0, 1), (1, 0)),
+                (TreenumeratorState.VisitingNode,   "e", 1, (1, 1), (2, 0)),
+                (TreenumeratorState.VisitingNode,   "e", 2, (1, 1), (2, 0)),
+                (TreenumeratorState.VisitingNode,   "c", 1, (2, 0), (3, 0)),
+                (TreenumeratorState.VisitingNode,   "c", 2, (2, 0), (3, 0)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
@@ -1938,9 +2213,9 @@ namespace Arborist.Tests
               {
                 (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
                 (TreenumeratorState.SchedulingNode, "b", 0, (1, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (2, 0), (1, 0)),
                 (TreenumeratorState.VisitingNode,   "b", 1, (1, 0), (0, 0)),
                 (TreenumeratorState.VisitingNode,   "b", 2, (1, 0), (0, 0)),
-                (TreenumeratorState.SchedulingNode, "c", 0, (2, 0), (1, 0)),
                 (TreenumeratorState.VisitingNode,   "c", 1, (2, 0), (1, 0)),
                 (TreenumeratorState.VisitingNode,   "c", 2, (2, 0), (1, 0)),
               },
@@ -1962,10 +2237,10 @@ namespace Arborist.Tests
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
                 (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
-                (TreenumeratorState.VisitingNode,   "a", 1, (0, 0), (0, 0)),
-                (TreenumeratorState.VisitingNode,   "a", 2, (0, 0), (0, 0)),
                 (TreenumeratorState.SchedulingNode, "b", 0, (1, 0), (1, 0)),
                 (TreenumeratorState.SchedulingNode, "c", 0, (2, 0), (1, 0)),
+                (TreenumeratorState.VisitingNode,   "a", 1, (0, 0), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "a", 2, (0, 0), (0, 0)),
                 (TreenumeratorState.VisitingNode,   "c", 1, (2, 0), (1, 0)),
                 (TreenumeratorState.VisitingNode,   "c", 2, (2, 0), (1, 0)),
               },
@@ -1987,12 +2262,12 @@ namespace Arborist.Tests
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
                 (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "b", 0, (1, 0), (1, 0)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (2, 0), (2, 0)),
                 (TreenumeratorState.VisitingNode,   "a", 1, (0, 0), (0, 0)),
                 (TreenumeratorState.VisitingNode,   "a", 2, (0, 0), (0, 0)),
-                (TreenumeratorState.SchedulingNode, "b", 0, (1, 0), (1, 0)),
                 (TreenumeratorState.VisitingNode,   "b", 1, (1, 0), (1, 0)),
                 (TreenumeratorState.VisitingNode,   "b", 2, (1, 0), (1, 0)),
-                (TreenumeratorState.SchedulingNode, "c", 0, (2, 0), (2, 0)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
@@ -2012,6 +2287,13 @@ namespace Arborist.Tests
               Description = "Skip level 0, sibling 0 subtree",
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
+                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "b", 0, (1, 0), (0, 0)),
+                (TreenumeratorState.SchedulingNode, "c", 0, (2, 0), (1, 0)),
+                (TreenumeratorState.VisitingNode,   "b", 1, (1, 0), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "b", 2, (1, 0), (0, 0)),
+                (TreenumeratorState.VisitingNode,   "c", 1, (2, 0), (1, 0)),
+                (TreenumeratorState.VisitingNode,   "c", 2, (2, 0), (1, 0)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {

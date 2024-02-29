@@ -33,7 +33,6 @@ namespace Arborist.Treenumerators
       new Stack<VirtualNodeVisit<IEnumerator<TRootNode>>>();
 
     private bool _HasCachedChild = false;
-
     private int _MostRecentDepthTraversed = -1;
 
     public SchedulingStrategy SchedulingStrategy { get; private set; }
@@ -123,10 +122,10 @@ namespace Arborist.Treenumerators
     {
       var previousVisit = _Stack.Pop();
 
+      previousVisit.SchedulingStrategy = schedulingStrategy;
+
       if (schedulingStrategy == SchedulingStrategy.SkipNode)
       {
-        previousVisit.SchedulingStrategy = SchedulingStrategy.SkipNode;
-
         var children = GetNodeChildren(previousVisit);
 
         if (children.MoveNext())
@@ -242,7 +241,6 @@ namespace Arborist.Treenumerators
         return true;
       }
 
-      previousVisit.SchedulingStrategy = schedulingStrategy;
       previousVisit.VisitCount++;
       previousVisit.TreenumeratorState = TreenumeratorState.VisitingNode;
 
