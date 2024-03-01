@@ -21,8 +21,10 @@ namespace Arborist.Tests
         "a(b,c)",
         "a(b(c))",
         "a(b(c,d))",
+        "a(b(c,d)),e(f(g,h))",
         "a(b,c),d(e,f)",
-        "a(b(d,e),c(f,g))"
+        "a(b(d,e),c(f,g))",
+        "a(b(c)),d(e(f))",
       };
 
       var filterStrategies = new[]
@@ -54,7 +56,7 @@ namespace Arborist.Tests
 
       MoveNextResult<string>[] Sort(IEnumerable<MoveNextResult<string>> nodes) =>
         nodes
-        .OrderBy(x => (x.State, x.OriginalPosition, x.Node))
+        .OrderBy(x => (x.State, x.OriginalPosition.Depth, x.OriginalPosition.SiblingIndex, x.Node))
         .ToArray();
 
       var visitStrategy =
