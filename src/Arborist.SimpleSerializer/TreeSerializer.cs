@@ -81,11 +81,11 @@ namespace Arborist.SimpleSerializer
       return rootNodes;
     }
 
-    public static string Serialize(ITreenumerable<string> treenumerable)
+    public static string Serialize(this ITreenumerable<string> treenumerable)
       => Serialize(treenumerable, node => node);
 
     public static string Serialize<TNode>(
-      ITreenumerable<TNode> treenumerable,
+      this ITreenumerable<TNode> treenumerable,
       Func<TNode, string> map)
     {
       var builder = new StringBuilder();
