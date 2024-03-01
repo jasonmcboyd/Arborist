@@ -4,6 +4,8 @@ using Arborist.Treenumerables;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Text;
 
 namespace Arborist.SimpleSerializer
 {
@@ -83,7 +85,39 @@ namespace Arborist.SimpleSerializer
       ITreenumerable<TNode> treenumerable,
       Func<TNode, string> map)
     {
-      throw new NotImplementedException();
+      var builder = new StringBuilder();
+
+      using (var treenumerator = treenumerable.GetDepthFirstTreenumerator())
+      {
+        int previousDepth = -1;
+
+        while (treenumerator.MoveNext(SchedulingStrategy.TraverseSubtree))
+        {
+          if (treenumerator.VisitCount != 1)
+            continue;
+
+          var depth = treenumerator.Position.Depth;
+
+          if (previousDepth != -1)
+          {
+            if (depth > previousDepth)
+              builder.Append('(');
+            else if (depth < previousDepth)
+              builder.Append("),");
+            else
+              builder.Append(',');
+          }
+
+          builder.Append(map(treenumerator.Node));
+
+          previousDepth = treenumerator.Position.Depth;
+        }
+
+        while (previousDepth-- > 0)
+          builder.Append(')');
+
+        return builder.ToString();
+      }
     }
   }
 }
