@@ -149,16 +149,10 @@ namespace Arborist.Treenumerators
         return true;
       }
 
-      if (previousVisit.VisitCount == 1)
+      if (previousVisit.VisitCount == 1
+        && previousVisit.SchedulingStrategy != SchedulingStrategy.SkipDescendants
+        && MoveToFirstChild(previousVisit))
       {
-        if (previousVisit.SchedulingStrategy != SchedulingStrategy.SkipDescendants
-          && MoveToFirstChild(previousVisit))
-          return true;
-
-        previousVisit.VisitCount++;
-
-        UpdateStateFromVirtualNodeVisit(previousVisit);
-
         return true;
       }
 

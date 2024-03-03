@@ -257,38 +257,30 @@ namespace Arborist.Treenumerators
       {
         var previousVisit = _Stack.Pop();
 
-        if (previousVisit.VisitCount == 1)
+        if (previousVisit.VisitCount == 1
+          && previousVisit.SchedulingStrategy != SchedulingStrategy.SkipDescendants)
         {
           var children = GetNodeChildren(previousVisit);
 
-          if (children?.MoveNext() != true
-            || previousVisit.SchedulingStrategy == SchedulingStrategy.SkipDescendants)
+          if (children?.MoveNext() == true)
           {
-            previousVisit.VisitCount++;
+            var childrenNode =
+              _NodeVisitPool
+              .Lease(
+                TreenumeratorState.SchedulingNode,
+                children,
+                0,
+                (0, previousVisit.OriginalPosition.Depth + 1),
+                (previousVisit.VisitCount - 1, previousVisit.Position.Depth + 1),
+                SchedulingStrategy.TraverseSubtree);
 
             _Stack.Push(previousVisit);
+            _Stack.Push(childrenNode);
 
-            UpdateStateFromVirtualNodeVisit(previousVisit);
+            UpdateStateFromVirtualNodeVisit(childrenNode);
 
             return true;
           }
-
-          var childrenNode =
-            _NodeVisitPool
-            .Lease(
-              TreenumeratorState.SchedulingNode,
-              children,
-              0,
-              (0, previousVisit.OriginalPosition.Depth + 1),
-              (previousVisit.VisitCount - 1, previousVisit.Position.Depth + 1),
-              SchedulingStrategy.TraverseSubtree);
-
-          _Stack.Push(previousVisit);
-          _Stack.Push(childrenNode);
-
-          UpdateStateFromVirtualNodeVisit(childrenNode);
-
-          return true;
         }
 
         if (previousVisit.Node.MoveNext())
