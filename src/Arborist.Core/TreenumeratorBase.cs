@@ -13,8 +13,9 @@ namespace Arborist.Core
       if (State == TreenumeratorState.EnumerationNotStarted)
         throw new InvalidOperationException("Enumeration has not begun.");
 
-      if (State == TreenumeratorState.EnumerationFinished)
-        throw new InvalidOperationException("Enumeration has completed.");
+      // TODO:
+      //if (State == TreenumeratorState.EnumerationFinished)
+      //  throw new InvalidOperationException("Enumeration has completed.");
     }
 
     private TNode _Node;

@@ -24,10 +24,11 @@ namespace Arborist.SimpleSerializer
       string tree,
       Func<string, TResult> map)
     {
-      // TODO: I am reversing because for some reason my lizard brain
+      // TODO:
+      // I am reversing because for some reason my lizard brain
       // finds this more intuitive. I want to change this in the future
-      // to avoid the performance penalty of reversing before and after,
-      // but I am not that worried about performance right now so this is
+      // to avoid the performance penalty of reversing two times, but I
+      // am not that worried about performance right now so this is
       // good enough.
       var tokens = Tokenizer.Tokenize(tree).Reverse();
 

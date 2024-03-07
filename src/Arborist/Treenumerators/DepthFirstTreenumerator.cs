@@ -431,11 +431,6 @@ namespace Arborist.Treenumerators
     private void OnEnumerationFinished()
     {
       State = TreenumeratorState.EnumerationFinished;
-      Node = default;
-      VisitCount = default;
-      OriginalPosition = default;
-      Position = default;
-      SchedulingStrategy = default;
     }
 
     private VirtualNodeVisit<IEnumerator<TRootNode>> GetParentVisit()

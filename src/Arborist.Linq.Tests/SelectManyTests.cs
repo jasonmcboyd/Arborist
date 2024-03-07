@@ -1,8 +1,8 @@
-using Arborist.Core;
-using Arborist.Nodes;
+using Arborist.SimpleSerializer;
 using Arborist.TestUtils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 
@@ -11,146 +11,177 @@ namespace Arborist.Linq.Tests
   [TestClass]
   public class SelectManyTests
   {
-    static SelectManyTests()
+    public static IEnumerable<object[]> GetTestData()
     {
-      _TreenumerableTestDataFactory = new TreenumerableTestDataFactory(TestTrees); 
+      return new[]
+      {
+        new[]
+        {
+          "",
+          "a",
+          ""
+        },
+        new[]
+        {
+          "a",
+          "b,c",
+          "ab,ac"
+        },
+        new[]
+        {
+          "a",
+          "b(c)",
+          "ab(ac)"
+        },
+        new[]
+        {
+          "a(b(d),c)",
+          "a(b(d),c)",
+          "aa(ab(ad),ac,ba(bb(bd),bc,da(db(dd),dc)),ca(cb(cd),cc))"
+        },
+        new[]
+        {
+          "a(b(d),c)",
+          "e",
+          "ae(be(de),ce)"
+        },
+        new[]
+        {
+          "a(b)",
+          "c",
+          "ac(bc)"
+        },
+        new[]
+        {
+          "a(b)",
+          "c(d)",
+          "ac(ad,bc(bd))"
+        },
+        new[]
+        {
+          "a(b)",
+          "c,d",
+          "ac,ad(bc,bd)"
+        },
+        new[]
+        {
+          "a(b,c)",
+          "d",
+          "ad(bd,cd)"
+        },
+        new[]
+        {
+          "a(b,c)",
+          "d(e)",
+          "ad(ae,bd(be),cd(ce))"
+        },
+        new[]
+        {
+          "a(b,c)",
+          "d(e,f)",
+          "ad(ae,af,bd(be,bf),cd,(ce,cf))"
+        },
+        new[]
+        {
+          "a(b,c)",
+          "d,e",
+          "ad,ae(bd,be,cd,ce)"
+        },
+        new[]
+        {
+          "a(d),b,c(e)",
+          "f",
+          "af(df),bf,cf(ef)"
+        },
+        new[]
+        {
+          "a,b",
+          "c",
+          "ac,bc"
+        },
+        new[]
+        {
+          "a,b",
+          "c(d)",
+          "ac(ad),bc(bd)"
+        },
+        new[]
+        {
+          "a,b",
+          "c,d",
+          "ac,ad,bc,bd"
+        },
+        new[]
+        {
+          "a,b(c)",
+          "a(b)",
+          "aa(ab),ba(bb,ca(cb))"
+        },
+      };
     }
 
-    private static TreenumerableTestDataFactory _TreenumerableTestDataFactory;
-
-    public static IEnumerable<object[]> GetTestData()
-      => _TreenumerableTestDataFactory.GetTestData();
-
     public static string GetTestDisplayName(MethodInfo methodInfo, object[] data)
-      => _TreenumerableTestDataFactory.GetTestDisplayName(methodInfo, data);
-
-    private static TreeTestDefinition[] TestTrees =>
-      new TreeTestDefinition[]
-      {
-        // Empty Tree
-        new TreeTestDefinition
-        {
-          TreeString = "",
-          TestScenarios = new List<TestScenario>
-          {
-            // No skipping
-            new TestScenario
-            {
-              SchedulingPredicate = visit => SchedulingStrategy.TraverseSubtree,
-              TreenumerableMap = treenumerable => treenumerable.PruneAfter(_ => true),
-              Description = "Traverse all, prune after all",
-              ExpectedBreadthFirstResults = new MoveNextResult<string>[]
-              {
-              },
-              ExpectedDepthFirstResults = new MoveNextResult<string>[]
-              {
-              }
-            },
-          }
-        },
-
-        // Three root nodes, no children.
-        new TreeTestDefinition
-        {
-          TreeString = "a,b,c",
-          TestScenarios = new List<TestScenario>
-          {
-            // No skipping
-            new TestScenario
-            {
-              SchedulingPredicate = visit => SchedulingStrategy.TraverseSubtree,
-              TreenumerableMap = treenumerable => treenumerable.PruneAfter(_ => true),
-              Description = "Traverse all, prune after all",
-              ExpectedBreadthFirstResults = new MoveNextResult<string>[]
-              {
-                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
-                (TreenumeratorState.SchedulingNode, "b", 0, (1, 0), (1, 0)),
-                (TreenumeratorState.SchedulingNode, "c", 0, (2, 0), (2, 0)),
-                (TreenumeratorState.VisitingNode,   "a", 1, (0, 0), (0, 0)),
-                (TreenumeratorState.VisitingNode,   "a", 2, (0, 0), (0, 0)),
-                (TreenumeratorState.VisitingNode,   "b", 1, (1, 0), (1, 0)),
-                (TreenumeratorState.VisitingNode,   "b", 2, (1, 0), (1, 0)),
-                (TreenumeratorState.VisitingNode,   "c", 1, (2, 0), (2, 0)),
-                (TreenumeratorState.VisitingNode,   "c", 2, (2, 0), (2, 0)),
-              },
-              ExpectedDepthFirstResults = new MoveNextResult<string>[]
-              {
-                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
-                (TreenumeratorState.VisitingNode,   "a", 1, (0, 0), (0, 0)),
-                (TreenumeratorState.VisitingNode,   "a", 2, (0, 0), (0, 0)),
-                (TreenumeratorState.SchedulingNode, "b", 0, (1, 0), (1, 0)),
-                (TreenumeratorState.VisitingNode,   "b", 1, (1, 0), (1, 0)),
-                (TreenumeratorState.VisitingNode,   "b", 2, (1, 0), (1, 0)),
-                (TreenumeratorState.SchedulingNode, "c", 0, (2, 0), (2, 0)),
-                (TreenumeratorState.VisitingNode,   "c", 1, (2, 0), (2, 0)),
-                (TreenumeratorState.VisitingNode,   "c", 2, (2, 0), (2, 0)),
-              }
-            },
-            // Skip subtree
-            new TestScenario
-            {
-              SchedulingPredicate = visit => SchedulingStrategy.SkipSubtree,
-              TreenumerableMap = treenumerable => treenumerable.PruneAfter(_ => true),
-              Description = "Skip all subtrees, prune after all",
-              ExpectedBreadthFirstResults = new MoveNextResult<string>[]
-              {
-              },
-              ExpectedDepthFirstResults = new MoveNextResult<string>[]
-              {
-                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
-                (TreenumeratorState.SchedulingNode, "b", 0, (1, 0), (0, 0)),
-                (TreenumeratorState.SchedulingNode, "c", 0, (2, 0), (0, 0)),
-              }
-            },
-          }
-        },
-
-        // Two-level complete ternary tree.
-        new TreeTestDefinition
-        {
-          TreeString = "a(b,c,d)",
-          TestScenarios = new List<TestScenario>
-          {
-            // No skipping
-            new TestScenario
-            {
-              SchedulingPredicate = visit => SchedulingStrategy.TraverseSubtree,
-              TreenumerableMap = treenumerable => treenumerable.PruneAfter(_ => true),
-              Description = "Traverse all, prune after all",
-              ExpectedBreadthFirstResults = new MoveNextResult<string>[]
-              {
-              },
-              ExpectedDepthFirstResults = new MoveNextResult<string>[]
-              {
-                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
-                (TreenumeratorState.VisitingNode,   "a", 1, (0, 0), (0, 0)),
-                (TreenumeratorState.VisitingNode,   "a", 2, (0, 0), (0, 0)),
-              }
-            },
-          }
-        }
-      };
+      => $"{data[0]} | {data[1]}";
 
     [TestMethod]
-    public void SelectMany()
+    [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
+    public void SelectMany_BreadthFirst(
+      string treeString,
+      string innerTreeString,
+      string expectedResults)
+    {
+      SelectManyTest(treeString, innerTreeString, expectedResults, false);
+    }
+
+    [TestMethod]
+    [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
+    public void SelectMany_DepthFirst(
+      string treeString,
+      string innerTreeString,
+      string expectedResults)
+    {
+      SelectManyTest(treeString, innerTreeString, expectedResults, true);
+    }
+
+    private void SelectManyTest(
+      string treeString,
+      string innerTreeString,
+      string expectedResults,
+      bool isDepthFirstTest)
     {
       // Arrange
-      var subtree = IndexableTreeNode.Create(1, 2, 3).ToTreenumerable();
+      var treenumerable = TreeSerializer.Deserialize(treeString);
+      var innerTreenumerable = TreeSerializer.Deserialize(innerTreeString);
 
-      var root = IndexableTreeNode.Create(subtree, subtree, subtree);
+      var sut =
+        treenumerable
+        .SelectMany(x => innerTreenumerable.Select(y => x + y.Node));
 
-      var treenumerable = root.ToTreenumerable();
+      var expected =
+        isDepthFirstTest
+        ? TreeSerializer.Deserialize(expectedResults).ToDepthFirstMoveNext().ToArray()
+        : TreeSerializer.Deserialize(expectedResults).ToBreadthFirstMoveNext().ToArray();
+
+      Debug.WriteLine("-----Expected Values-----");
+      foreach (var value in expected)
+        Debug.WriteLine(value);
 
       // Act
+      Debug.WriteLine("\r\n-----Actual Values-----");
       var actual =
-        treenumerable
-        .SelectMany()
-        .PreOrderTraversal()
+        (isDepthFirstTest
+        ? sut.ToDepthFirstMoveNext()
+        : sut.ToBreadthFirstMoveNext())
+        .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
-      // Assert
-      var expected = new[] { 1, 2, 3 };
+      var diff = MoveNextResultDiffer.Diff(expected, actual);
 
+      Debug.WriteLine("\r\n-----Diffed Values-----");
+      foreach (var diffResult in diff)
+        Debug.WriteLine(diffResult);
+
+      // Assert
       CollectionAssert.AreEqual(expected, actual);
     }
   }

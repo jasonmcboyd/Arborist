@@ -1,6 +1,6 @@
 ﻿using Arborist.Core;
 
-namespace Arborist.Linq
+namespace Arborist.Linq.Extensions
 {
   internal static class TreenumeratorExtensions
   {

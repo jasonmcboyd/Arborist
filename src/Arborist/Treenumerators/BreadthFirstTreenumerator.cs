@@ -220,11 +220,6 @@ namespace Arborist.Treenumerators
     private void OnEnumerationFinished()
     {
       State = TreenumeratorState.EnumerationFinished;
-      Node = default;
-      VisitCount = default;
-      OriginalPosition = default;
-      Position = default;
-      SchedulingStrategy = default;
     }
 
     private bool MoveToFirstChild(VirtualNodeVisit<TRootNode> visit) =>
@@ -289,12 +284,6 @@ namespace Arborist.Treenumerators
       visit.Node.Dispose();
       _ChildrenVisitPool.Return(visit);
     }
-
-    private VirtualNodeVisit<IEnumerator<TRootNode>> GetChildren(VirtualNodeVisit<TRootNode> visit) =>
-      GetChildren(visit, x => x.Node);
-
-    private VirtualNodeVisit<IEnumerator<TRootNode>> GetChildren(VirtualNodeVisit<IEnumerator<TRootNode>> visit) =>
-      GetChildren(visit, x => x.Node.Current);
 
     private VirtualNodeVisit<IEnumerator<TRootNode>> GetChildren<T>(
       VirtualNodeVisit<T> visit,
