@@ -11,35 +11,46 @@ namespace Arborist.Linq
     {
       var branch = new List<NodeVisit<T>>();
 
-      foreach (var visit in source.GetDepthFirstTraversal())
+      using (var treenumerator = source.GetDepthFirstTreenumerator())
       {
-        if (visit.VisitCount == 0)
-          continue;
-
-        if (visit.OriginalPosition.Depth == 0 && visit.VisitCount == 1)
-          branch.Clear();
-
-        if (branch.Count == 0)
+        while (treenumerator.MoveNext(SchedulingStrategy.TraverseSubtree))
         {
-          branch.Add(visit);
-          continue;
-        }
+          if (treenumerator.VisitCount == 0)
+            continue;
 
-        var depthComparison = visit.OriginalPosition.Depth.CompareTo(branch.Last().OriginalPosition.Depth);
+          if (branch.Count == 0)
+          {
+            branch.Add(treenumerator.ToNodeVisit());
+            continue;
+          }
 
-        if (depthComparison < 0)
-          branch.RemoveLast();
-        else if (depthComparison == 0)
-        {
-          var result = branch.Select(branchStep => branchStep.Node).ToArray();
+          var depth = treenumerator.OriginalPosition.Depth;
 
-          if (branch.Count == 1)
+          if (depth > branch.Count - 1)
+          {
+            branch.Add(treenumerator.ToNodeVisit());
+          }
+          else if (depth < branch.Count - 1)
+          {
+            if (branch.Last().VisitCount == 1)
+              yield return branch.Select(visit => visit.Node).ToArray();
+
             branch.RemoveLast();
+            branch.RemoveLast();
+            branch.Add(treenumerator.ToNodeVisit());
+          }
+          else
+          {
+            if (branch.Last().VisitCount == 1)
+              yield return branch.Select(visit => visit.Node).ToArray();
 
-          yield return result;
+            branch.Clear();
+            branch.Add(treenumerator.ToNodeVisit());
+          }
         }
-        else
-          branch.Add(visit);
+
+        if (branch.Last().VisitCount == 1)
+          yield return branch.Select(visit => visit.Node).ToArray();
       }
     }
   }
