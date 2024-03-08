@@ -1,4 +1,5 @@
 ﻿using Arborist.Core;
+using Arborist.Linq.Treenumerables;
 using Arborist.Linq.Treenumerators;
 using System;
 
@@ -33,9 +34,9 @@ namespace Arborist.Linq
       Func<NodeVisit<TSource>, TResult> selector,
       Func<NodeVisit<TSource>, ITreenumerable<TResult>> scionGenerator,
       Func<NodeVisit<TSource>, bool> predicate)
-      => TreenumerableFactory.Create(
+      => new DelegatingTreenumerable<TSource, TResult>(
         source,
-        breadthFirstTreenumerator => throw new NotSupportedException(),
+        breadthFirstTreenumerator => throw new NotImplementedException(),
         depthFirstTreenumerator => new GraftDepthFirstTreenumerator<TSource, TResult>(depthFirstTreenumerator, selector, scionGenerator, predicate));
   }
 }
