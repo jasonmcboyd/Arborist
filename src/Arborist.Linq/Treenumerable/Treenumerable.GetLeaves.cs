@@ -13,26 +13,29 @@ namespace Arborist.Linq
         if (!treenumerator.MoveNext(SchedulingStrategy.TraverseSubtree))
           yield break;
 
-        var previousVisit = treenumerator.ToNodeVisit();
+        treenumerator.MoveNext(SchedulingStrategy.TraverseSubtree);
+
+        NodeVisit<T> previousVisit = default;
+        NodeVisit<T> currentVisit = treenumerator.ToNodeVisit();
 
         while (treenumerator.MoveNext(SchedulingStrategy.TraverseSubtree))
         {
-          var currentVisit = treenumerator.ToNodeVisit();
-
-          if (currentVisit.OriginalPosition.Depth != previousVisit.OriginalPosition.Depth)
-          {
-            previousVisit = currentVisit;
+          if (treenumerator.VisitCount == 0)
             continue;
-          }
 
-          if (currentVisit.VisitCount != 2)
+          previousVisit = currentVisit;
+          currentVisit = treenumerator.ToNodeVisit();
+
+          if (previousVisit.VisitCount == 1)
           {
-            previousVisit = currentVisit;
-            continue;
+            if (previousVisit.OriginalPosition.Depth > currentVisit.OriginalPosition.Depth
+              || previousVisit.OriginalPosition.Depth == currentVisit.OriginalPosition.Depth)
+              yield return previousVisit.Node;
           }
-
-          yield return currentVisit.Node;
         }
+
+        if (currentVisit.VisitCount == 1)
+          yield return currentVisit.Node;
       }
     }
   }
