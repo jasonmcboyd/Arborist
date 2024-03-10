@@ -1,4 +1,5 @@
 using Arborist.SimpleSerializer;
+using Arborist.TestUtils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -15,37 +16,37 @@ namespace Arborist.Linq.Tests
       yield return new object[]
       {
         "a",
-        new[] { "a" }
+        "a"
       };
       yield return new object[]
       {
         "a,b,c",
-        new[] { "a", "b", "c" }
+        "a,b,c"
       };
       yield return new object[]
       {
         "a(b,c)",
-        new[] { "a", "ab", "ac" }
+        "a(ab,ac)"
       };
       yield return new object[]
       {
         "a(b(e,f,g),c(h,i,j))",
-        new[] { "a", "ab", "abe", "abf", "abg", "c", "ch", "ci", "cj" }
+        "a(ab(abe,abf,abg),ac(ach,aci,acj))"
       };
       yield return new object[]
       {
         "a(b(c))",
-        new[] { "a", "ab", "abc" }
+        "a(ab(abc))"
       };
       yield return new object[]
       {
         "a(b,c),d(e,f)",
-        new[] { "a", "ab", "ac", "d", "de", "df" }
+        "a(ab,ac),d(de,df)"
       };
       yield return new object[]
       {
         "a,b(c),d(e(f))",
-        new[] { "a", "b", "bc", "d", "de", "def" }
+        "a,b(bc),d(de(def))"
       };
     }
 
@@ -56,21 +57,57 @@ namespace Arborist.Linq.Tests
 
     [TestMethod]
     [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
-    public void RootfixScan(
+    public void RootfixScanTest_BreadthFirst(
       string treeString,
-      string[] expected)
+      string expectedTree)
+    {
+      RootfixScanTest(treeString, expectedTree, false);
+    }
+
+    [TestMethod]
+    [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
+    public void RootfixScanTest_DepthFirst(
+      string treeString,
+      string expectedTree)
+    {
+      RootfixScanTest(treeString, expectedTree, true);
+    }
+
+    public void RootfixScanTest(
+      string treeString,
+      string expectedTree,
+      bool isDepthFirstTest)
     {
       // Arrange
       var treenumerable = TreeSerializer.Deserialize(treeString);
 
-      // Act
-      var actual =
+      var sut =
         treenumerable
-        .Do(visit => Debug.WriteLine((visit.Node, visit.VisitCount, visit.OriginalPosition.SiblingIndex, visit.OriginalPosition.Depth)))
-        .RootfixScan((visit, accumulate) => visit.Node + accumulate.Node)
-        .Do(visit => Debug.WriteLine((visit.Node, visit.VisitCount, visit.OriginalPosition.SiblingIndex, visit.OriginalPosition.Depth)))
-        .PreOrderTraversal()
+        .RootfixScan((visit, accumulate) => visit.Node + accumulate.Node, "");
+
+      var expected =
+        isDepthFirstTest
+        ? TreeSerializer.Deserialize(expectedTree).ToDepthFirstMoveNext().ToArray()
+        : TreeSerializer.Deserialize(expectedTree).ToBreadthFirstMoveNext().ToArray();
+
+      Debug.WriteLine("-----Expected Values-----");
+      foreach (var value in expected)
+        Debug.WriteLine(value);
+
+      // Act
+      Debug.WriteLine("\r\n-----Actual Values-----");
+      var actual =
+        (isDepthFirstTest
+        ? sut.ToDepthFirstMoveNext()
+        : sut.ToBreadthFirstMoveNext())
+        .Do(visit => Debug.WriteLine(visit))
         .ToArray();
+
+      var diff = MoveNextResultDiffer.Diff(expected, actual);
+
+      Debug.WriteLine("\r\n-----Diffed Values-----");
+      foreach (var diffResult in diff)
+        Debug.WriteLine(diffResult);
 
       // Assert
       CollectionAssert.AreEqual(expected, actual);

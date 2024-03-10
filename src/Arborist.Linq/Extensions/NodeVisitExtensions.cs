@@ -1,4 +1,6 @@
-﻿namespace Arborist.Linq.Extensions
+﻿using System.ComponentModel;
+
+namespace Arborist.Linq.Extensions
 {
   public static class NodeVisitExtensions
   {
