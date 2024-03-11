@@ -83,7 +83,7 @@ namespace Arborist.Linq.Tests
 
       var sut =
         treenumerable
-        .RootfixScan((visit, accumulate) => visit.Node + accumulate.Node, "");
+        .RootfixScan((accumulate, visit) => accumulate.Node + visit.Node, "");
 
       var expected =
         isDepthFirstTest

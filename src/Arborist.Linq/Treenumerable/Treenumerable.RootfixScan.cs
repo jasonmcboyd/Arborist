@@ -6,13 +6,13 @@ namespace Arborist.Linq
 {
   public static partial class Treenumerable
   {
-    public static ITreenumerable<TNode> RootfixScan<TInner, TNode>(
-      this ITreenumerable<TInner> source,
-      Func<NodeVisit<TNode>, NodeVisit<TInner>, TNode> accumulator,
-      TNode seed)
+    public static ITreenumerable<TAccumulate> RootfixScan<TNode, TAccumulate>(
+      this ITreenumerable<TNode> source,
+      Func<NodeVisit<TAccumulate>, NodeVisit<TNode>, TAccumulate> accumulator,
+      TAccumulate seed)
       => TreenumerableFactory.Create(
         source,
-        breadthFirstTreenumerator => new RootfixScanDepthFirstTreenumerator<TInner, TNode>(breadthFirstTreenumerator, accumulator, seed),
-        depthFirstTreenumerator => new RootfixScanDepthFirstTreenumerator<TInner, TNode>(depthFirstTreenumerator, accumulator, seed));
+        breadthFirstTreenumerator => new RootfixScanDepthFirstTreenumerator<TNode, TAccumulate>(breadthFirstTreenumerator, accumulator, seed),
+        depthFirstTreenumerator => new RootfixScanDepthFirstTreenumerator<TNode, TAccumulate>(depthFirstTreenumerator, accumulator, seed));
   }
 }
