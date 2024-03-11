@@ -12,7 +12,7 @@ namespace Arborist.Linq
       TAccumulate seed)
       => TreenumerableFactory.Create(
         source,
-        breadthFirstTreenumerator => new RootfixScanDepthFirstTreenumerator<TNode, TAccumulate>(breadthFirstTreenumerator, accumulator, seed),
+        breadthFirstTreenumerator => new RootfixScanBreadthFirstTreenumerator<TNode, TAccumulate>(breadthFirstTreenumerator, accumulator, seed),
         depthFirstTreenumerator => new RootfixScanDepthFirstTreenumerator<TNode, TAccumulate>(depthFirstTreenumerator, accumulator, seed));
   }
 }
