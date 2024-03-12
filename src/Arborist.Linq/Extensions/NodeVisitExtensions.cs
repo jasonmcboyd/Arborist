@@ -15,5 +15,19 @@ namespace Arborist.Linq.Extensions
           visit.Position,
           visit.SchedulingStrategy);
     }
+
+    public static NodeVisit<TResult> WithNode<TSource, TResult>(
+      this NodeVisit<TSource> visit,
+      TResult node)
+    {
+      return
+        new NodeVisit<TResult>(
+          visit.TreenumeratorState,
+          node,
+          visit.VisitCount,
+          visit.OriginalPosition,
+          visit.Position,
+          visit.SchedulingStrategy);
+    }
   }
 }
