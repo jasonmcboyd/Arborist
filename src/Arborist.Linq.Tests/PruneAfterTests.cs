@@ -3,6 +3,7 @@ using Arborist.Linq;
 using Arborist.SimpleSerializer;
 using Arborist.TestUtils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -151,7 +152,7 @@ namespace Arborist.Linq.Tests
         Debug.WriteLine(value);
 
       // Act
-      Debug.WriteLine("\r\n-----Actual Values-----");
+      Debug.WriteLine($"{Environment.NewLine}-----Actual Values-----");
       var actual =
         treenumerable
         .ToDepthFirstMoveNext(testScenario.SchedulingPredicate)
@@ -181,14 +182,14 @@ namespace Arborist.Linq.Tests
       foreach (var value in expected)
         Debug.WriteLine(value);
 
-      Debug.WriteLine("\r\n-----Actual Before Values-----");
+      Debug.WriteLine($"{Environment.NewLine}-----Actual Before Values-----");
       treenumerable
       .ToBreadthFirstMoveNext(visit => SchedulingStrategy.TraverseSubtree)
       .Do(visit => Debug.WriteLine(visit))
       .ToArray();
 
       // Act
-      Debug.WriteLine("\r\n-----Actual Values-----");
+      Debug.WriteLine($"{Environment.NewLine}-----Actual Values-----");
       var actual =
         treenumerable
         .ToBreadthFirstMoveNext(testScenario.SchedulingPredicate)

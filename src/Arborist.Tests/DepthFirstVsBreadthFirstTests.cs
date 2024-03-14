@@ -73,7 +73,7 @@ namespace Arborist.Tests
         .Do(x => Debug.WriteLine(x))
         .ToArray();
 
-      Debug.WriteLine("\r\n-----Depth First------");
+      Debug.WriteLine($"{Environment.NewLine}-----Depth First------");
       var depthFirst =
         treenumerable
         .ToDepthFirstMoveNext(visitStrategy)

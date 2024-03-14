@@ -4,6 +4,7 @@ using Arborist.Nodes;
 using Arborist.SimpleSerializer;
 using Arborist.TestUtils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -101,7 +102,7 @@ namespace Arborist.Tests
         .Do(x => Debug.WriteLine(x))
         .ToArray();
 
-      Debug.WriteLine("\r\n-----Depth First------");
+      Debug.WriteLine($"{Environment.NewLine}-----Depth First------");
       var depthFirst =
         treenumerable
         .ToDepthFirstMoveNext(testScenario.SchedulingPredicate)
@@ -143,7 +144,7 @@ namespace Arborist.Tests
       Debug.WriteLine("--------- Tree ---------");
       Debug.WriteLine(treeString);
 
-      Debug.WriteLine("\r\n-----Expected Values-----");
+      Debug.WriteLine($"{Environment.NewLine}-----Expected Values-----");
       MoveNextResultsDebugWriter.WriteMoveNextResults(expected);
 
       var moveNextEnumerable =
@@ -152,7 +153,7 @@ namespace Arborist.Tests
         : treenumerable.ToBreadthFirstMoveNext(testScenario.SchedulingPredicate);
 
       // Act
-      Debug.WriteLine("\r\n-----Actual Values-----");
+      Debug.WriteLine($"{Environment.NewLine}-----Actual Values-----");
       var actual =
         moveNextEnumerable
         .Do(visit => Debug.WriteLine(visit))
@@ -160,7 +161,7 @@ namespace Arborist.Tests
 
       var diff = MoveNextResultDiffer.Diff(expected, actual);
 
-      Debug.WriteLine("\r\n-----Diffed Values-----");
+      Debug.WriteLine($"{Environment.NewLine}-----Diffed Values-----");
       foreach (var diffResult in diff)
         Debug.WriteLine(diffResult);
 

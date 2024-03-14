@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System;
 
 namespace Arborist.Tests
 {
@@ -59,7 +60,7 @@ namespace Arborist.Tests
         Debug.WriteLine(value);
 
       // Act
-      Debug.WriteLine("\r\n-----Actual Values-----");
+      Debug.WriteLine($"{Environment.NewLine}-----Actual Values-----");
       var actual =
         treenumerable
         .ToDepthFirstMoveNext()

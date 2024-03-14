@@ -11,7 +11,7 @@ namespace Arborist.Linq
       Func<TSource, ITreenumerable<TResult>> selector)
       => TreenumerableFactory.Create(
         source,
-        breadthFirstTreenumerator => throw new NotSupportedException(),
+        breadthFirstTreenumerator => new SelectManyBreadthFirstTreenumerator<TSource, TResult>(breadthFirstTreenumerator, selector),
         depthFirstTreenumerator => new SelectManyDepthFirstTreenumerator<TSource, TResult>(depthFirstTreenumerator, selector));
   }
 }

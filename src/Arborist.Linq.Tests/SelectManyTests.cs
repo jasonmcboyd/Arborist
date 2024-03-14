@@ -1,6 +1,7 @@
 using Arborist.SimpleSerializer;
 using Arborist.TestUtils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -167,7 +168,7 @@ namespace Arborist.Linq.Tests
         Debug.WriteLine(value);
 
       // Act
-      Debug.WriteLine("\r\n-----Actual Values-----");
+      Debug.WriteLine($"{Environment.NewLine}-----Actual Values-----");
       var actual =
         (isDepthFirstTest
         ? sut.ToDepthFirstMoveNext()
@@ -177,7 +178,7 @@ namespace Arborist.Linq.Tests
 
       var diff = MoveNextResultDiffer.Diff(expected, actual);
 
-      Debug.WriteLine("\r\n-----Diffed Values-----");
+      Debug.WriteLine($"{Environment.NewLine}-----Diffed Values-----");
       foreach (var diffResult in diff)
         Debug.WriteLine(diffResult);
 

@@ -17,8 +17,8 @@ namespace Arborist.TestUtils
 
       var diffBuilder = new SideBySideDiffBuilder(new Differ());
 
-      var expectedText = string.Join("\r\n", expectedResults.Select(x => x.ToString()));
-      var actualText = string.Join("\r\n", actualResults.Select(x => x.ToString()));
+      var expectedText = string.Join($"{Environment.NewLine}", expectedResults.Select(x => x.ToString()));
+      var actualText = string.Join($"{Environment.NewLine}", actualResults.Select(x => x.ToString()));
 
       var diff = diffBuilder.BuildDiffModel(expectedText, actualText);
 

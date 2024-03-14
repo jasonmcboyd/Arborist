@@ -1,6 +1,7 @@
-﻿using Arborist.TestUtils;
-using Arborist.SimpleSerializer;
+﻿using Arborist.SimpleSerializer;
+using Arborist.TestUtils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -97,11 +98,11 @@ namespace Arborist.Tests
       Debug.WriteLine("-----Tree-----");
       Debug.WriteLine(treeString);
 
-      Debug.WriteLine("\r\n-----Expected Values-----");
+      Debug.WriteLine($"{Environment.NewLine}-----Expected Values-----");
       foreach (var value in expected)
         Debug.WriteLine(value);
 
-      Debug.WriteLine("\r\n-----Actual Values-----");
+      Debug.WriteLine($"{Environment.NewLine}-----Actual Values-----");
       var actual =
         Tokenizer
         .Tokenize(treeString)
