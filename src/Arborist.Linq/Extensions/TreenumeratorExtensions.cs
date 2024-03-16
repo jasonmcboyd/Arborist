@@ -12,8 +12,7 @@ namespace Arborist.Linq.Extensions
           treenumerator.Node,
           treenumerator.VisitCount,
           treenumerator.OriginalPosition,
-          treenumerator.Position,
-          treenumerator.SchedulingStrategy);
+          treenumerator.Position);
     }
   }
 }

@@ -17,8 +17,6 @@ namespace Arborist.Linq.Treenumerators
     private readonly ITreenumerator<TInner> _InnerTreenumerator;
     private readonly Func<NodeVisit<TInner>, TNode> _Selector;
 
-    public SchedulingStrategy SchedulingStrategy => _InnerTreenumerator.SchedulingStrategy;
-
     public TNode Node { get; private set; } = default;
 
     public int VisitCount => _InnerTreenumerator.VisitCount;

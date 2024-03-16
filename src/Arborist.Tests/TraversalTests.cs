@@ -89,7 +89,7 @@ namespace Arborist.Tests
 
       var testScenario = TreeTraversalTestData.TestTrees[testTreeIndex].TestScenarios[testScenarioIndex];
 
-      MoveNextResult<string>[] Sort(IEnumerable<MoveNextResult<string>> nodes) =>
+      NodeVisit<string>[] Sort(IEnumerable<NodeVisit<string>> nodes) =>
         nodes
         .OrderBy(x => (x.Mode, x.OriginalPosition.Depth, x.OriginalPosition.SiblingIndex, x.Node))
         .ToArray();
@@ -98,14 +98,14 @@ namespace Arborist.Tests
       Debug.WriteLine("-----Breadth First-----");
       var breadthFirst =
         treenumerable
-        .ToBreadthFirstMoveNext(testScenario.SchedulingPredicate)
+        .GetBreadthFirstTraversal(testScenario.SchedulingStrategySelector)
         .Do(x => Debug.WriteLine(x))
         .ToArray();
 
       Debug.WriteLine($"{Environment.NewLine}-----Depth First------");
       var depthFirst =
         treenumerable
-        .ToDepthFirstMoveNext(testScenario.SchedulingPredicate)
+        .GetDepthFirstTraversal(testScenario.SchedulingStrategySelector)
         .Do(x => Debug.WriteLine(x))
         .ToArray();
 
@@ -145,12 +145,12 @@ namespace Arborist.Tests
       Debug.WriteLine(treeString);
 
       Debug.WriteLine($"{Environment.NewLine}-----Expected Values-----");
-      MoveNextResultsDebugWriter.WriteMoveNextResults(expected);
+      NodeVisitsDebugWriter.WriteNodeVisits(expected);
 
       var moveNextEnumerable =
         depthFirstTest
-        ? treenumerable.ToDepthFirstMoveNext(testScenario.SchedulingPredicate)
-        : treenumerable.ToBreadthFirstMoveNext(testScenario.SchedulingPredicate);
+        ? treenumerable.GetDepthFirstTraversal(testScenario.SchedulingStrategySelector)
+        : treenumerable.GetBreadthFirstTraversal(testScenario.SchedulingStrategySelector);
 
       // Act
       Debug.WriteLine($"{Environment.NewLine}-----Actual Values-----");
@@ -159,7 +159,7 @@ namespace Arborist.Tests
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
-      var diff = MoveNextResultDiffer.Diff(expected, actual);
+      var diff = NodeVisitDiffer.Diff(expected, actual);
 
       Debug.WriteLine($"{Environment.NewLine}-----Diffed Values-----");
       foreach (var diffResult in diff)

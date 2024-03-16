@@ -1,7 +1,7 @@
 ﻿using Arborist.Core;
 using Arborist.Linq;
-using Arborist.TestUtils;
 using Arborist.SimpleSerializer;
+using Arborist.TestUtils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -54,30 +54,30 @@ namespace Arborist.Tests
         .ToTreenumerable()
         .Select(visit => visit.Node);
 
-      MoveNextResult<string>[] Sort(IEnumerable<MoveNextResult<string>> nodes) =>
+      NodeVisit<string>[] Sort(IEnumerable<NodeVisit<string>> nodes) =>
         nodes
-        .OrderBy(x => (x.Mode, x.OriginalPosition.Depth, x.OriginalPosition.SiblingIndex, x.Node))
+        .OrderBy(nodeVisit => (nodeVisit.Mode, nodeVisit.OriginalPosition.Depth, nodeVisit.OriginalPosition.SiblingIndex, nodeVisit.Node))
         .ToArray();
 
-      var visitStrategy =
-        new Func<ITreenumerator<string>, SchedulingStrategy>(
-          visit =>
-            filterCharacter == null || filterCharacter != visit.Node
+      var schedulingStrategySelector =
+        new Func<NodeVisit<string>, SchedulingStrategy>(
+          nodeVisit =>
+            filterCharacter == null || filterCharacter != nodeVisit.Node
             ? SchedulingStrategy.TraverseSubtree
             : filterStrategy.Value);
 
       Debug.WriteLine("-----Breadth First-----");
       var breadthFirst =
         treenumerable
-        .ToBreadthFirstMoveNext(visitStrategy)
-        .Do(x => Debug.WriteLine(x))
+        .GetBreadthFirstTraversal(schedulingStrategySelector)
+        .Do(nodeVisit => Debug.WriteLine(nodeVisit))
         .ToArray();
 
       Debug.WriteLine($"{Environment.NewLine}-----Depth First------");
       var depthFirst =
         treenumerable
-        .ToDepthFirstMoveNext(visitStrategy)
-        .Do(x => Debug.WriteLine(x))
+        .GetDepthFirstTraversal(schedulingStrategySelector)
+        .Do(nodeVisit => Debug.WriteLine(nodeVisit))
         .ToArray();
 
       CollectionAssert.AreEqual(Sort(breadthFirst), Sort(depthFirst));

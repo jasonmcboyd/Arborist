@@ -1,11 +1,12 @@
-using Arborist.TestUtils;
+using Arborist.Linq;
 using Arborist.SimpleSerializer;
+using Arborist.TestUtils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System;
 
 namespace Arborist.Tests
 {
@@ -63,7 +64,7 @@ namespace Arborist.Tests
       Debug.WriteLine($"{Environment.NewLine}-----Actual Values-----");
       var actual =
         treenumerable
-        .ToDepthFirstMoveNext()
+        .GetDepthFirstTraversal()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 

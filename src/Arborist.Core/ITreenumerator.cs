@@ -6,7 +6,6 @@ namespace Arborist.Core
   {
     bool MoveNext(SchedulingStrategy schedulingStrategy);
 
-    SchedulingStrategy SchedulingStrategy { get; }
     TNode Node { get; }
     int VisitCount { get; }
     TreenumeratorMode Mode { get; }

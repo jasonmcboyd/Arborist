@@ -5,6 +5,7 @@ using Arborist.SimpleSerializer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Diagnostics;
 using System.Linq;
+using System;
 
 namespace Arborist.Linq.Tests
 {
@@ -23,12 +24,12 @@ namespace Arborist.Linq.Tests
       var actual =
         treenumerable
         .Where(visit => visit.OriginalPosition.Depth != 0)
-        .ToBreadthFirstMoveNext()
+        .GetBreadthFirstTraversal()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<string>[]
+      var expected = new[]
       {
         (TreenumeratorMode.SchedulingNode, "b", 0, (0, 0), (0, 0)),
         (TreenumeratorMode.VisitingNode,   "b", 1, (0, 0), (0, 0)),
@@ -53,12 +54,12 @@ namespace Arborist.Linq.Tests
       var actual =
         treenumerable
         .Where(visit => visit.OriginalPosition.Depth != 1)
-        .ToBreadthFirstMoveNext()
+        .GetBreadthFirstTraversal()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<string>[]
+      var expected = new[]
       {
         (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
         (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
@@ -83,12 +84,12 @@ namespace Arborist.Linq.Tests
       var actual =
         treenumerable
         .Where(visit => visit.OriginalPosition.Depth != 2)
-        .ToBreadthFirstMoveNext()
+        .GetBreadthFirstTraversal()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<string>[]
+      var expected = new[]
       {
         (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
         (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
@@ -96,7 +97,8 @@ namespace Arborist.Linq.Tests
         (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0), (0, 0)),
         (TreenumeratorMode.VisitingNode,   "b", 1, (0, 1), (0, 1)),
         (TreenumeratorMode.VisitingNode,   "b", 2, (0, 1), (0, 1)),
-      };
+      }
+      .ToNodeVisitArray();
 
       CollectionAssert.AreEqual(expected, actual);
     }
@@ -113,12 +115,12 @@ namespace Arborist.Linq.Tests
       var actual =
         treenumerable
         .Where(visit => visit.OriginalPosition.Depth == 0)
-        .ToBreadthFirstMoveNext()
+        .GetBreadthFirstTraversal()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<string>[]
+      var expected = new[]
       {
         (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
         (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
@@ -140,12 +142,12 @@ namespace Arborist.Linq.Tests
       var actual =
         treenumerable
         .Where(visit => visit.OriginalPosition.Depth != 0)
-        .ToBreadthFirstMoveNext()
+        .GetBreadthFirstTraversal()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<string>[]
+      var expected = new[]
       {
         (TreenumeratorMode.SchedulingNode, "b", 0, (0, 0), (0, 0)),
         (TreenumeratorMode.SchedulingNode, "c", 0, (1, 0), (1, 0)),
@@ -170,12 +172,12 @@ namespace Arborist.Linq.Tests
       var actual =
         treenumerable
         .Where(visit => !(visit.OriginalPosition.Depth == 1 && visit.OriginalPosition.SiblingIndex == 0))
-        .ToBreadthFirstMoveNext()
+        .GetBreadthFirstTraversal()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<string>[]
+      var expected = new[]
       {
         (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
         (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
@@ -204,12 +206,12 @@ namespace Arborist.Linq.Tests
       var actual =
         treenumerable
         .Where(visit => !(visit.OriginalPosition.Depth == 1 && visit.OriginalPosition.SiblingIndex == 1))
-        .ToBreadthFirstMoveNext()
+        .GetBreadthFirstTraversal()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<string>[]
+      var expected = new[]
       {
         (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
         (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
@@ -238,12 +240,12 @@ namespace Arborist.Linq.Tests
       var actual =
         treenumerable
         .Where(visit => !(visit.OriginalPosition.Depth == 1 && visit.OriginalPosition.SiblingIndex == 2))
-        .ToBreadthFirstMoveNext()
+        .GetBreadthFirstTraversal()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<string>[]
+      var expected = new[]
       {
         (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
         (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
@@ -272,14 +274,12 @@ namespace Arborist.Linq.Tests
       var actual =
         treenumerable
         .Where(_ => false)
-        .ToBreadthFirstMoveNext()
+        .GetBreadthFirstTraversal()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<string>[]
-      {
-      };
+      var expected = Array.Empty<NodeVisit<string>>();
 
       CollectionAssert.AreEqual(expected, actual);
     }
@@ -296,12 +296,12 @@ namespace Arborist.Linq.Tests
       var actual =
         treenumerable
         .Where(_ => true)
-        .ToBreadthFirstMoveNext()
+        .GetBreadthFirstTraversal()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<string>[]
+      var expected = new[]
       {
         (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
         (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
@@ -332,12 +332,12 @@ namespace Arborist.Linq.Tests
       var actual =
         treenumerable
         .Where(visit => visit.OriginalPosition.Depth != 0)
-        .ToDepthFirstMoveNext()
+        .GetDepthFirstTraversal()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<string>[]
+      var expected = new[]
       {
         (TreenumeratorMode.SchedulingNode, "b", 0, (0, 0), (0, 0)),
         (TreenumeratorMode.VisitingNode,   "b", 1, (0, 0), (0, 0)),
@@ -362,12 +362,12 @@ namespace Arborist.Linq.Tests
       var actual =
         treenumerable
         .Where(visit => visit.OriginalPosition.Depth != 1)
-        .ToDepthFirstMoveNext()
+        .GetDepthFirstTraversal()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<string>[]
+      var expected = new[]
       {
         (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
         (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
@@ -375,7 +375,7 @@ namespace Arborist.Linq.Tests
         (TreenumeratorMode.VisitingNode,   "c", 1, (0, 1), (0, 1)),
         (TreenumeratorMode.VisitingNode,   "c", 2, (0, 1), (0, 1)),
         (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0), (0, 0)),
-      };
+      }.ToNodeVisitArray();
 
       CollectionAssert.AreEqual(expected, actual);
     }
@@ -392,12 +392,12 @@ namespace Arborist.Linq.Tests
       var actual =
         treenumerable
         .Where(visit => visit.OriginalPosition.Depth != 2)
-        .ToDepthFirstMoveNext()
+        .GetDepthFirstTraversal()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<string>[]
+      var expected = new[]
       {
         (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
         (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
@@ -405,7 +405,7 @@ namespace Arborist.Linq.Tests
         (TreenumeratorMode.VisitingNode,   "b", 1, (0, 1), (0, 1)),
         (TreenumeratorMode.VisitingNode,   "b", 2, (0, 1), (0, 1)),
         (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0), (0, 0)),
-      };
+      }.ToNodeVisitArray();
 
       CollectionAssert.AreEqual(expected, actual);
     }
@@ -422,12 +422,12 @@ namespace Arborist.Linq.Tests
       var actual =
         treenumerable
         .Where(visit => visit.OriginalPosition.Depth == 0)
-        .ToDepthFirstMoveNext()
+        .GetDepthFirstTraversal()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<string>[]
+      var expected = new[]
       {
         (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
         (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
@@ -449,12 +449,12 @@ namespace Arborist.Linq.Tests
       var actual =
         treenumerable
         .Where(visit => visit.OriginalPosition.Depth != 0)
-        .ToDepthFirstMoveNext()
+        .GetDepthFirstTraversal()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<string>[]
+      var expected = new[]
       {
         (TreenumeratorMode.SchedulingNode, "b", 0, (0, 0), (0, 0)),
         (TreenumeratorMode.VisitingNode,   "b", 1, (0, 0), (0, 0)),
@@ -479,12 +479,12 @@ namespace Arborist.Linq.Tests
       var actual =
         treenumerable
         .Where(visit => !(visit.OriginalPosition.Depth == 1 && visit.OriginalPosition.SiblingIndex == 0))
-        .ToDepthFirstMoveNext()
+        .GetDepthFirstTraversal()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<string>[]
+      var expected = new[]
       {
         (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
         (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
@@ -513,12 +513,12 @@ namespace Arborist.Linq.Tests
       var actual =
         treenumerable
         .Where(visit => !(visit.OriginalPosition.Depth == 1 && visit.OriginalPosition.SiblingIndex == 1))
-        .ToDepthFirstMoveNext()
+        .GetDepthFirstTraversal()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<string>[]
+      var expected = new[]
       {
         (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
         (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
@@ -547,12 +547,12 @@ namespace Arborist.Linq.Tests
       var actual =
         treenumerable
         .Where(visit => !(visit.OriginalPosition.Depth == 1 && visit.OriginalPosition.SiblingIndex == 2))
-        .ToDepthFirstMoveNext()
+        .GetDepthFirstTraversal()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<string>[]
+      var expected = new[]
       {
         (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
         (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
@@ -581,14 +581,12 @@ namespace Arborist.Linq.Tests
       var actual =
         treenumerable
         .Where(_ => false)
-        .ToDepthFirstMoveNext()
+        .GetDepthFirstTraversal()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<string>[]
-      {
-      };
+      var expected = Array.Empty<NodeVisit<string>>();
 
       CollectionAssert.AreEqual(expected, actual);
     }
@@ -605,12 +603,12 @@ namespace Arborist.Linq.Tests
       var actual =
         treenumerable
         .Where(_ => true)
-        .ToDepthFirstMoveNext()
+        .GetDepthFirstTraversal()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<string>[]
+      var expected = new[]
       {
         (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
         (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
@@ -639,12 +637,12 @@ namespace Arborist.Linq.Tests
       var actual =
         treenumerable
         .Where(visit => visit.Node == "a")
-        .ToDepthFirstMoveNext()
+        .GetDepthFirstTraversal()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<string>[]
+      var expected = new[]
       {
         (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
         (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
@@ -666,12 +664,12 @@ namespace Arborist.Linq.Tests
       var actual =
         treenumerable
         .Where(visit => visit.Node == "b")
-        .ToDepthFirstMoveNext()
+        .GetDepthFirstTraversal()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<string>[]
+      var expected = new[]
       {
         (TreenumeratorMode.SchedulingNode, "b", 0, (0, 0), (0, 0)),
         (TreenumeratorMode.VisitingNode,   "b", 1, (0, 0), (0, 0)),

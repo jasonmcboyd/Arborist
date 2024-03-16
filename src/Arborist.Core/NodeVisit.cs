@@ -9,15 +9,13 @@ namespace Arborist.Core
       TNode node,
       int visitCount,
       NodePosition originalPosition,
-      NodePosition position,
-      SchedulingStrategy schedulingStrategy)
+      NodePosition position)
     {
       Mode = mode;
       Node = node;
       VisitCount = visitCount;
       OriginalPosition = originalPosition;
       Position = position;
-      SchedulingStrategy = schedulingStrategy;
     }
 
     public TreenumeratorMode Mode { get; }
@@ -25,11 +23,10 @@ namespace Arborist.Core
     public int VisitCount { get; }
     public NodePosition OriginalPosition { get; }
     public NodePosition Position { get; }
-    public SchedulingStrategy SchedulingStrategy { get; }
 
     public override string ToString()
     {
-      return $"{ModeToChar()}  {SchedulingStrategyToChar()}  {OriginalPosition}  {Position}  {VisitCount}  {Node}";
+      return $"{ModeToChar()}  {OriginalPosition}  {Position}  {VisitCount}  {Node}";
     }
 
     private char ModeToChar()
@@ -44,26 +41,6 @@ namespace Arborist.Core
           return 'S';
         case TreenumeratorMode.VisitingNode:
           return 'V';
-        default:
-          throw new NotImplementedException();
-      }
-    }
-
-    private char SchedulingStrategyToChar()
-    {
-      if (Mode != TreenumeratorMode.SchedulingNode)
-        return '_';
-
-      switch (SchedulingStrategy)
-      {
-        case SchedulingStrategy.SkipDescendants:
-          return 'D';
-        case SchedulingStrategy.SkipNode:
-          return 'N';
-        case SchedulingStrategy.SkipSubtree:
-          return 'S';
-        case SchedulingStrategy.TraverseSubtree:
-          return 'T';
         default:
           throw new NotImplementedException();
       }

@@ -5,9 +5,9 @@ using System.Linq;
 
 namespace Arborist.TestUtils
 {
-  public static class MoveNextResultsDebugWriter
+  public static class NodeVisitsDebugWriter
   {
-    public static void WriteMoveNextResults<TNode>(MoveNextResult<TNode>[] moveNextResults)
+    public static void WriteNodeVisits<TNode>(NodeVisit<TNode>[] moveNextResults)
     {
 
       var results = new List<string[]>()
@@ -16,7 +16,7 @@ namespace Arborist.TestUtils
       };
 
       foreach (var moveNextResult in moveNextResults)
-        results.Add(CreateMoveNextResultStringArray(" ", moveNextResult));
+        results.Add(CreateNodeVisitStringArray(" ", moveNextResult));
 
       var maxColumnWidths =
         results[0]
@@ -34,7 +34,7 @@ namespace Arborist.TestUtils
     private static void WriteStringPartsToDebug(string[] stringParts, int[] maxColumnWidths)
       => Debug.WriteLine(string.Join(" ", stringParts.Select((x, i) => x.PadRight(maxColumnWidths[i], ' '))));
 
-    private static string[] CreateMoveNextResultStringArray<TNode>(string prefix, MoveNextResult<TNode> result)
+    private static string[] CreateNodeVisitStringArray<TNode>(string prefix, NodeVisit<TNode> result)
     {
       return
         new string[]
@@ -48,10 +48,10 @@ namespace Arborist.TestUtils
         };
     }
 
-    private static string[] CreateMoveNextResultDiffs<TNode>(
+    private static string[] CreateNodeVisitDiffs<TNode>(
       string prefix,
-      MoveNextResult<TNode> expected,
-      MoveNextResult<TNode> actual)
+      NodeVisit<TNode> expected,
+      NodeVisit<TNode> actual)
     {
       var modeDiff = CreateValueDiffString(expected.Mode, actual.Mode);
       var nodeDiff = CreateValueDiffString(expected.Node, actual.Node);

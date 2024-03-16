@@ -160,8 +160,8 @@ namespace Arborist.Linq.Tests
 
       var expected =
         isDepthFirstTest
-        ? TreeSerializer.Deserialize(expectedResults).ToDepthFirstMoveNext().ToArray()
-        : TreeSerializer.Deserialize(expectedResults).ToBreadthFirstMoveNext().ToArray();
+        ? TreeSerializer.Deserialize(expectedResults).GetDepthFirstTraversal().ToArray()
+        : TreeSerializer.Deserialize(expectedResults).GetBreadthFirstTraversal().ToArray();
 
       Debug.WriteLine("-----Expected Values-----");
       foreach (var value in expected)
@@ -171,12 +171,12 @@ namespace Arborist.Linq.Tests
       Debug.WriteLine($"{Environment.NewLine}-----Actual Values-----");
       var actual =
         (isDepthFirstTest
-        ? sut.ToDepthFirstMoveNext()
-        : sut.ToBreadthFirstMoveNext())
+        ? sut.GetDepthFirstTraversal()
+        : sut.GetBreadthFirstTraversal())
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
-      var diff = MoveNextResultDiffer.Diff(expected, actual);
+      var diff = NodeVisitDiffer.Diff(expected, actual);
 
       Debug.WriteLine($"{Environment.NewLine}-----Diffed Values-----");
       foreach (var diffResult in diff)

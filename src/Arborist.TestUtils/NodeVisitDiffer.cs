@@ -8,9 +8,9 @@ using System.Linq;
 
 namespace Arborist.TestUtils
 {
-  public static class MoveNextResultDiffer
+  public static class NodeVisitDiffer
   {
-    public static IEnumerable<string> Diff<TNode>(MoveNextResult<TNode>[] expectedResults, MoveNextResult<TNode>[] actualResults)
+    public static IEnumerable<string> Diff<TNode>(NodeVisit<TNode>[] expectedResults, NodeVisit<TNode>[] actualResults)
     {
       if (expectedResults.Length != actualResults.Length)
         throw new Exception("The expected results and actual results should have the same number of items");
@@ -41,45 +41,45 @@ namespace Arborist.TestUtils
         var expected =
           expectedPointer < expectedResults.Length
           ? expectedResults[expectedPointer]
-          : null;
+          : default(NodeVisit<TNode>?);
 
         var actual =
           actualPointer < actualResults.Length
           ? actualResults[actualPointer]
-          : null;
+          : default(NodeVisit<TNode>?);
 
         if (expectedDiff.Type == ChangeType.Unchanged)
         {
-          results.Add(WriteMoveNextResultDiffs(" ", expected, actual));
+          results.Add(WriteNodeVisitDiffs(" ", expected.Value, actual.Value));
           expectedPointer++;
           actualPointer++;
         }
         else if (expectedDiff.Type == ChangeType.Modified)
         {
-          results.Add(WriteMoveNextResultDiffs("M", expected, actual));
+          results.Add(WriteNodeVisitDiffs("M", expected.Value, actual.Value));
           expectedPointer++;
           actualPointer++;
         }
         else if (expectedDiff.Type == ChangeType.Inserted)
         {
-          results.Add(CreateMoveNextResultStringArray("+", expected));
+          results.Add(CreateNodeVisitStringArray("+", expected.Value));
           expectedPointer++;
         }
         else if (expectedDiff.Type == ChangeType.Imaginary)
         {
-          results.Add(CreateMoveNextResultStringArray("I", actual));
+          results.Add(CreateNodeVisitStringArray("I", actual.Value));
           actualPointer++;
         }
         else if (expectedDiff.Type == ChangeType.Deleted)
         {
           if (actual == null)
           {
-            results.Add(CreateMoveNextResultStringArray("-", expected));
+            results.Add(CreateNodeVisitStringArray("-", expected.Value));
             actualPointer++;
           }
           else
           {
-            results.Add(CreateMoveNextResultStringArray("-", actual));
+            results.Add(CreateNodeVisitStringArray("-", actual.Value));
             expectedPointer++;
           }
         }
@@ -103,7 +103,7 @@ namespace Arborist.TestUtils
         yield return string.Join(" ", result.Select((x, i) => x.PadRight(maxColumnWidths[i], ' ')));
     }
 
-    private static string[] CreateMoveNextResultStringArray<TNode>(string prefix, MoveNextResult<TNode> result)
+    private static string[] CreateNodeVisitStringArray<TNode>(string prefix, NodeVisit<TNode> result)
     {
       return
         new string[]
@@ -117,10 +117,10 @@ namespace Arborist.TestUtils
         };
     }
 
-    private static string[] WriteMoveNextResultDiffs<TNode>(
+    private static string[] WriteNodeVisitDiffs<TNode>(
       string prefix,
-      MoveNextResult<TNode> expected,
-      MoveNextResult<TNode> actual)
+      NodeVisit<TNode> expected,
+      NodeVisit<TNode> actual)
     {
       var modeDiff = WriteValueDiffs(expected.Mode, actual.Mode);
       var nodeDiff = WriteValueDiffs(expected.Node, actual.Node);

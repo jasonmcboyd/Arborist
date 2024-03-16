@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Arborist.Core;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Arborist.TestUtils
 {
@@ -12,6 +14,20 @@ namespace Arborist.TestUtils
         action(item);
         yield return item;
       }
+    }
+
+    public static NodeVisit<T>[] ToNodeVisitArray<T>(this IEnumerable<(TreenumeratorMode, T, int, (int, int), (int, int))> source)
+    {
+      return
+        source
+        .Select(nodeVisit =>
+          new NodeVisit<T>(
+            nodeVisit.Item1,
+            nodeVisit.Item2,
+            nodeVisit.Item3,
+            nodeVisit.Item4,
+            nodeVisit.Item5))
+        .ToArray();
     }
   }
 }

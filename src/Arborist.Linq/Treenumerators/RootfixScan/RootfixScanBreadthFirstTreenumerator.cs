@@ -22,8 +22,7 @@ namespace Arborist.Linq.Treenumerators
           seed,
           1,
           (0, -1),
-          (0, -1),
-          SchedulingStrategy.TraverseSubtree);
+          (0, -1));
 
       _Queue.AddToBack(seedVisit);
     }
@@ -62,8 +61,7 @@ namespace Arborist.Linq.Treenumerators
           visit.Node,
           InnerTreenumerator.VisitCount,
           InnerTreenumerator.OriginalPosition,
-          InnerTreenumerator.Position,
-          InnerTreenumerator.SchedulingStrategy);
+          InnerTreenumerator.Position);
 
       _Queue[0] = newVisit;
 
@@ -90,7 +88,6 @@ namespace Arborist.Linq.Treenumerators
       VisitCount = nodeVisit.VisitCount;
       OriginalPosition = nodeVisit.OriginalPosition;
       Position = nodeVisit.Position;
-      SchedulingStrategy = nodeVisit.SchedulingStrategy;
     }
   }
 }

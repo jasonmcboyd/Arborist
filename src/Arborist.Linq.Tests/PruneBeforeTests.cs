@@ -5,6 +5,7 @@ using Arborist.SimpleSerializer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Diagnostics;
 using System.Linq;
+using System;
 
 namespace Arborist.Linq.Tests
 {
@@ -23,12 +24,12 @@ namespace Arborist.Linq.Tests
       var actual =
         treenumerable
         .PruneBefore(visit => visit.OriginalPosition.Depth == 2)
-        .ToBreadthFirstMoveNext()
+        .GetBreadthFirstTraversal()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<string>[]
+      var expected = new[]
       {
         (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
         (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
@@ -40,7 +41,8 @@ namespace Arborist.Linq.Tests
         (TreenumeratorMode.VisitingNode,   "b", 2, (0, 1), (0, 1)),
         (TreenumeratorMode.VisitingNode,   "e", 1, (1, 1), (1, 1)),
         (TreenumeratorMode.VisitingNode,   "e", 2, (1, 1), (1, 1)),
-      };
+      }
+      .ToNodeVisitArray();
 
       CollectionAssert.AreEqual(expected, actual);
     }
@@ -57,12 +59,12 @@ namespace Arborist.Linq.Tests
       var actual =
         treenumerable
         .PruneBefore(visit => visit.OriginalPosition.Depth == 1)
-        .ToBreadthFirstMoveNext()
+        .GetBreadthFirstTraversal()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<string>[]
+      var expected = new[]
       {
         (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
         (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
@@ -84,12 +86,12 @@ namespace Arborist.Linq.Tests
       var actual =
         treenumerable
         .PruneBefore(visit => visit.OriginalPosition.Depth == 0)
-        .ToBreadthFirstMoveNext()
+        .GetBreadthFirstTraversal()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<string>[]
+      var expected = new[]
       {
         (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
       };
@@ -107,12 +109,12 @@ namespace Arborist.Linq.Tests
       var actual =
         treenumerable
         .PruneBefore(visit => visit.Node == "c")
-        .ToDepthFirstMoveNext()
+        .GetDepthFirstTraversal()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<string>[]
+      var expected = new[]
       {
         (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
         (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
@@ -141,14 +143,12 @@ namespace Arborist.Linq.Tests
       var actual =
         treenumerable
         .PruneBefore(visit => visit.Node == "a")
-        .ToDepthFirstMoveNext()
+        .GetDepthFirstTraversal()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<string>[]
-      {
-      };
+      var expected = Array.Empty<NodeVisit<string>>();
 
       CollectionAssert.AreEqual(expected, actual);
     }
@@ -165,12 +165,12 @@ namespace Arborist.Linq.Tests
       var actual =
         treenumerable
         .PruneBefore(visit => visit.Node == "a")
-        .ToDepthFirstMoveNext()
+        .GetDepthFirstTraversal()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<string>[]
+      var expected = new[]
       {
         (TreenumeratorMode.SchedulingNode, "b", 0, (0, 0), (0, 0)),
         (TreenumeratorMode.VisitingNode,   "b", 1, (0, 0), (0, 0)),
@@ -192,12 +192,12 @@ namespace Arborist.Linq.Tests
       var actual =
         treenumerable
         .PruneBefore(visit => visit.Node == "b")
-        .ToDepthFirstMoveNext()
+        .GetDepthFirstTraversal()
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
       // Assert
-      var expected = new MoveNextResult<string>[]
+      var expected = new[]
       {
         (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
         (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),

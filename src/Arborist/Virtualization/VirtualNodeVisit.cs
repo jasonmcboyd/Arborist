@@ -2,6 +2,7 @@
 
 namespace Arborist.Virtualization
 {
+  // TODO: I am not sure how much value this provides.
   internal class VirtualNodeVisit<TNode>
   {
     public TreenumeratorMode Mode { get; set; }

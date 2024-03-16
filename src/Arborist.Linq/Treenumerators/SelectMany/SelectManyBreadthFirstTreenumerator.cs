@@ -14,7 +14,7 @@ namespace Arborist.Linq.Treenumerators
     {
       _Selector = selector;
 
-      _Stack.Push(new NodeVisit<TResult>(TreenumeratorMode.VisitingNode, default, 1, (0, -1), (0, -1), SchedulingStrategy.TraverseSubtree));
+      _Stack.Push(new NodeVisit<TResult>(TreenumeratorMode.VisitingNode, default, 1, (0, -1), (0, -1)));
     }
 
     public readonly Func<TSource, ITreenumerable<TResult>> _Selector;
@@ -69,8 +69,7 @@ namespace Arborist.Linq.Treenumerators
           _NodeTreenumerator.Node,
           _NodeTreenumerator.VisitCount,
           (_Stack.Peek().VisitCount - 1, InnerTreenumerator.OriginalPosition.Depth),
-          (_Stack.Peek().VisitCount - 1, InnerTreenumerator.Position.Depth),
-          SchedulingStrategy.TraverseSubtree));
+          (_Stack.Peek().VisitCount - 1, InnerTreenumerator.Position.Depth)));
 
       UpdateStateFromNodeVisit(_Stack.Peek());
 
@@ -114,7 +113,6 @@ namespace Arborist.Linq.Treenumerators
       VisitCount = visit.VisitCount;
       OriginalPosition = visit.OriginalPosition;
       Position = visit.Position;
-      SchedulingStrategy = visit.SchedulingStrategy;
     }
   }
 }

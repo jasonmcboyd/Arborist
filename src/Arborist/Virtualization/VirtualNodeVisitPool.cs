@@ -1,5 +1,4 @@
 ﻿using Arborist.Core;
-using Arborist.Virtualization;
 using System.Collections.Generic;
 
 namespace Arborist.Virtualization
@@ -52,15 +51,6 @@ namespace Arborist.Virtualization
         }
       }
     }
-
-    public VirtualNodeVisit<TNode> Lease(ITreenumerator<TNode> treenumerator)
-      => Lease(
-        treenumerator.Mode,
-        treenumerator.Node,
-        treenumerator.VisitCount,
-        treenumerator.OriginalPosition,
-        treenumerator.Position,
-        treenumerator.SchedulingStrategy);
 
     public VirtualNodeVisit<TNode> Lease(
       TreenumeratorMode mode,

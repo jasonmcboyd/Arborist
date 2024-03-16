@@ -39,15 +39,11 @@ namespace Arborist.Linq.Tests
             // No skipping
             new TestScenario
             {
-              SchedulingPredicate = visit => SchedulingStrategy.TraverseSubtree,
+              SchedulingStrategySelector = visit => SchedulingStrategy.TraverseSubtree,
               TreenumerableMap = treenumerable => treenumerable.PruneAfter(_ => true),
               Description = "Prune after all, traverse all",
-              ExpectedBreadthFirstResults = new MoveNextResult<string>[]
-              {
-              },
-              ExpectedDepthFirstResults = new MoveNextResult<string>[]
-              {
-              }
+              ExpectedBreadthFirstResults = Array.Empty<NodeVisit<string>>(),
+              ExpectedDepthFirstResults = Array.Empty<NodeVisit<string>>()
             },
           }
         },
@@ -61,10 +57,10 @@ namespace Arborist.Linq.Tests
             // No skipping
             new TestScenario
             {
-              SchedulingPredicate = visit => SchedulingStrategy.TraverseSubtree,
+              SchedulingStrategySelector = visit => SchedulingStrategy.TraverseSubtree,
               TreenumerableMap = treenumerable => treenumerable.PruneAfter(_ => true),
               Description = "Prune after all, traverse all",
-              ExpectedBreadthFirstResults = new MoveNextResult<string>[]
+              ExpectedBreadthFirstResults = new[]
               {
                 (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
                 (TreenumeratorMode.SchedulingNode, "b", 0, (1, 0), (1, 0)),
@@ -72,8 +68,8 @@ namespace Arborist.Linq.Tests
                 (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
                 (TreenumeratorMode.VisitingNode,   "b", 1, (1, 0), (1, 0)),
                 (TreenumeratorMode.VisitingNode,   "c", 1, (2, 0), (2, 0)),
-              },
-              ExpectedDepthFirstResults = new MoveNextResult<string>[]
+              }.ToNodeVisitArray(),
+              ExpectedDepthFirstResults = new[]
               {
                 (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
                 (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
@@ -81,26 +77,26 @@ namespace Arborist.Linq.Tests
                 (TreenumeratorMode.VisitingNode,   "b", 1, (1, 0), (1, 0)),
                 (TreenumeratorMode.SchedulingNode, "c", 0, (2, 0), (2, 0)),
                 (TreenumeratorMode.VisitingNode,   "c", 1, (2, 0), (2, 0)),
-              }
+              }.ToNodeVisitArray()
             },
             // Skip subtree
             new TestScenario
             {
-              SchedulingPredicate = visit => SchedulingStrategy.SkipSubtree,
+              SchedulingStrategySelector = visit => SchedulingStrategy.SkipSubtree,
               TreenumerableMap = treenumerable => treenumerable.PruneAfter(_ => true),
               Description = "Prune after all, Skip all subtrees",
-              ExpectedBreadthFirstResults = new MoveNextResult<string>[]
+              ExpectedBreadthFirstResults = new[]
               {
                 (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
                 (TreenumeratorMode.SchedulingNode, "b", 0, (1, 0), (0, 0)),
                 (TreenumeratorMode.SchedulingNode, "c", 0, (2, 0), (0, 0)),
-              },
-              ExpectedDepthFirstResults = new MoveNextResult<string>[]
+              }.ToNodeVisitArray(),
+              ExpectedDepthFirstResults = new[]
               {
                 (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
                 (TreenumeratorMode.SchedulingNode, "b", 0, (1, 0), (0, 0)),
                 (TreenumeratorMode.SchedulingNode, "c", 0, (2, 0), (0, 0)),
-              }
+              }.ToNodeVisitArray()
             },
           }
         },
@@ -114,19 +110,19 @@ namespace Arborist.Linq.Tests
             // No skipping
             new TestScenario
             {
-              SchedulingPredicate = visit => SchedulingStrategy.TraverseSubtree,
+              SchedulingStrategySelector = visit => SchedulingStrategy.TraverseSubtree,
               TreenumerableMap = treenumerable => treenumerable.PruneAfter(_ => true),
               Description = "Prune after all, traverse all",
-              ExpectedBreadthFirstResults = new MoveNextResult<string>[]
+              ExpectedBreadthFirstResults = new[]
               {
                 (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
                 (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
-              },
-              ExpectedDepthFirstResults = new MoveNextResult<string>[]
+              }.ToNodeVisitArray(),
+              ExpectedDepthFirstResults = new[]
               {
                 (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
                 (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
-              }
+              }.ToNodeVisitArray()
             },
           }
         }
@@ -155,7 +151,7 @@ namespace Arborist.Linq.Tests
       Debug.WriteLine($"{Environment.NewLine}-----Actual Values-----");
       var actual =
         treenumerable
-        .ToDepthFirstMoveNext(testScenario.SchedulingPredicate)
+        .GetDepthFirstTraversal(testScenario.SchedulingStrategySelector)
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
@@ -184,7 +180,7 @@ namespace Arborist.Linq.Tests
 
       Debug.WriteLine($"{Environment.NewLine}-----Actual Before Values-----");
       treenumerable
-      .ToBreadthFirstMoveNext(visit => SchedulingStrategy.TraverseSubtree)
+      .GetBreadthFirstTraversal(visit => SchedulingStrategy.TraverseSubtree)
       .Do(visit => Debug.WriteLine(visit))
       .ToArray();
 
@@ -192,7 +188,7 @@ namespace Arborist.Linq.Tests
       Debug.WriteLine($"{Environment.NewLine}-----Actual Values-----");
       var actual =
         treenumerable
-        .ToBreadthFirstMoveNext(testScenario.SchedulingPredicate)
+        .GetBreadthFirstTraversal(testScenario.SchedulingStrategySelector)
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
