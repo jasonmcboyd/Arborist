@@ -40,7 +40,7 @@ namespace Arborist.TestUtils
         new string[]
         {
           prefix,
-          TreenumeratorStateMap.ToChar(result.State).ToString(),
+          TreenumeratorModeMap.ToChar(result.Mode).ToString(),
           result.Node.ToString(),
           result.VisitCount.ToString(),
           result.OriginalPosition.ToString(),
@@ -53,13 +53,13 @@ namespace Arborist.TestUtils
       MoveNextResult<TNode> expected,
       MoveNextResult<TNode> actual)
     {
-      var stateDiff = CreateValueDiffString(expected.State, actual.State);
+      var modeDiff = CreateValueDiffString(expected.Mode, actual.Mode);
       var nodeDiff = CreateValueDiffString(expected.Node, actual.Node);
       var visitCountDiff = CreateValueDiffString(expected.VisitCount, actual.VisitCount);
       var originalPositionDiff = CreateValueDiffString(expected.OriginalPosition, actual.OriginalPosition);
       var positionDiff = CreateValueDiffString(expected.Position, actual.Position);
 
-      return new string[] { prefix, stateDiff, nodeDiff, visitCountDiff, originalPositionDiff };
+      return new string[] { prefix, modeDiff, nodeDiff, visitCountDiff, originalPositionDiff };
     }
 
     private static string CreateValueDiffString<TValue>(TValue expected, TValue actual)
@@ -72,8 +72,8 @@ namespace Arborist.TestUtils
 
     private static string PropertyValueToString<TValue>(TValue value)
     {
-      if (value is TreenumeratorState state)
-        return TreenumeratorStateMap.ToChar(state).ToString();
+      if (value is TreenumeratorMode mode)
+        return TreenumeratorModeMap.ToChar(mode).ToString();
 
       return value.ToString();
     }

@@ -6,14 +6,14 @@ namespace Arborist.Linq
   public readonly struct NodeVisit<TNode>
   {
     public NodeVisit(
-      TreenumeratorState treenumeratorState,
+      TreenumeratorMode mode,
       TNode node,
       int visitCount,
       NodePosition originalPosition,
       NodePosition position,
       SchedulingStrategy schedulingStrategy)
     {
-      TreenumeratorState = treenumeratorState;
+      Mode = mode;
       Node = node;
       VisitCount = visitCount;
       OriginalPosition = originalPosition;
@@ -21,7 +21,7 @@ namespace Arborist.Linq
       SchedulingStrategy = schedulingStrategy;
     }
 
-    public TreenumeratorState TreenumeratorState { get; }
+    public TreenumeratorMode Mode { get; }
     public TNode Node { get; }
     public int VisitCount { get; }
     public NodePosition OriginalPosition { get; }
@@ -30,20 +30,20 @@ namespace Arborist.Linq
 
     public override string ToString()
     {
-      return $"{StateToChar()}  {SchedulingStrategyToChar()}  {Node}  {VisitCount}  {OriginalPosition}  {Position}";
+      return $"{ModeToChar()}  {SchedulingStrategyToChar()}  {Node}  {VisitCount}  {OriginalPosition}  {Position}";
     }
 
-    private char StateToChar()
+    private char ModeToChar()
     {
-      switch (TreenumeratorState)
+      switch (Mode)
       {
-        case TreenumeratorState.EnumerationFinished:
+        case TreenumeratorMode.EnumerationFinished:
           return 'F';
-        case TreenumeratorState.EnumerationNotStarted:
+        case TreenumeratorMode.EnumerationNotStarted:
           return 'N';
-        case TreenumeratorState.SchedulingNode:
+        case TreenumeratorMode.SchedulingNode:
           return 'S';
-        case TreenumeratorState.VisitingNode:
+        case TreenumeratorMode.VisitingNode:
           return 'V';
         default:
           throw new NotImplementedException();
@@ -52,7 +52,7 @@ namespace Arborist.Linq
 
     private char SchedulingStrategyToChar()
     {
-      if (TreenumeratorState != TreenumeratorState.SchedulingNode)
+      if (Mode != TreenumeratorMode.SchedulingNode)
         return '_';
 
       switch (SchedulingStrategy)

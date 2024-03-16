@@ -8,7 +8,7 @@ namespace Arborist.Linq.Extensions
     {
       return
         new NodeVisit<TNode>(
-          visit.TreenumeratorState,
+          visit.Mode,
           visit.Node,
           visit.VisitCount + 1,
           visit.OriginalPosition,
@@ -22,7 +22,7 @@ namespace Arborist.Linq.Extensions
     {
       return
         new NodeVisit<TResult>(
-          visit.TreenumeratorState,
+          visit.Mode,
           node,
           visit.VisitCount,
           visit.OriginalPosition,

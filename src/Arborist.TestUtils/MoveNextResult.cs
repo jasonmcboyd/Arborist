@@ -7,20 +7,26 @@ namespace Arborist.TestUtils
   public class MoveNextResult<TNode>
   {
     public MoveNextResult(
-      TreenumeratorState state,
+      TreenumeratorMode mode,
       TNode node,
       int visitCount,
       NodePosition originalPosition,
       NodePosition position)
     {
-      State = state;
+      Mode = mode;
       Node = node;
       VisitCount = visitCount;
       OriginalPosition = originalPosition;
       Position = position;
     }
 
-    public TreenumeratorState State { get; }
+    public TreenumeratorMode Mode { get; }
+
+    public MoveNextResult(TreenumeratorMode _Mode)
+    {
+      Mode = _Mode;
+    }
+
     public TNode Node { get; }
     public int VisitCount { get; }
     public NodePosition OriginalPosition { get; }
@@ -32,21 +38,21 @@ namespace Arborist.TestUtils
         return false;
 
       return
-        State == other.State
+        Mode == other.Mode
         && Equals(other.Node, Node)
         && other.VisitCount == VisitCount
         && other.OriginalPosition == OriginalPosition
         && other.Position == Position;
     }
 
-    public override int GetHashCode() => (State, Node, VisitCount, OriginalPosition).GetHashCode();
+    public override int GetHashCode() => (Mode, Node, VisitCount, OriginalPosition).GetHashCode();
 
-    public static implicit operator MoveNextResult<TNode>((TreenumeratorState, TNode, int, NodePosition, NodePosition) tuple)
+    public static implicit operator MoveNextResult<TNode>((TreenumeratorMode, TNode, int, NodePosition, NodePosition) tuple)
       => new MoveNextResult<TNode>(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4, tuple.Item5);
 
     public override string ToString()
     {
-      return $"{TreenumeratorStateMap.ToChar(State)} {Node} {VisitCount} {OriginalPosition} {Position}";
+      return $"{TreenumeratorModeMap.ToChar(Mode)} {Node} {VisitCount} {OriginalPosition} {Position}";
     }
   }
 
@@ -54,7 +60,7 @@ namespace Arborist.TestUtils
   {
     public static MoveNextResult<TNode> Create<TNode>(ITreenumerator<TNode> treenumerator)
       => new MoveNextResult<TNode>(
-        treenumerator.State,
+        treenumerator.Mode,
         treenumerator.Node,
         treenumerator.VisitCount,
         treenumerator.OriginalPosition,

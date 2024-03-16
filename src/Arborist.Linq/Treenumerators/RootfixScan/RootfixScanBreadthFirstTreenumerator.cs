@@ -18,7 +18,7 @@ namespace Arborist.Linq.Treenumerators
 
       var seedVisit =
         new NodeVisit<TAccumulate>(
-          TreenumeratorState.VisitingNode,
+          TreenumeratorMode.VisitingNode,
           seed,
           1,
           (0, -1),
@@ -34,7 +34,7 @@ namespace Arborist.Linq.Treenumerators
 
     protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
     {
-      if (State == TreenumeratorState.SchedulingNode)
+      if (Mode == TreenumeratorMode.SchedulingNode)
       {
         if (schedulingStrategy == SchedulingStrategy.SkipNode
           || schedulingStrategy == SchedulingStrategy.SkipSubtree)
@@ -44,7 +44,7 @@ namespace Arborist.Linq.Treenumerators
       if (!InnerTreenumerator.MoveNext(schedulingStrategy))
         return false;
 
-      if (InnerTreenumerator.State == TreenumeratorState.SchedulingNode)
+      if (InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode)
       {
         OnSchedulingNode();
 
@@ -58,7 +58,7 @@ namespace Arborist.Linq.Treenumerators
 
       var newVisit =
         new NodeVisit<TAccumulate>(
-          InnerTreenumerator.State,
+          InnerTreenumerator.Mode,
           visit.Node,
           InnerTreenumerator.VisitCount,
           InnerTreenumerator.OriginalPosition,
@@ -85,7 +85,7 @@ namespace Arborist.Linq.Treenumerators
 
     private void UpdateStateFromNodeVisit(NodeVisit<TAccumulate> nodeVisit)
     {
-      State = nodeVisit.TreenumeratorState;
+      Mode = nodeVisit.Mode;
       Node = nodeVisit.Node;
       VisitCount = nodeVisit.VisitCount;
       OriginalPosition = nodeVisit.OriginalPosition;

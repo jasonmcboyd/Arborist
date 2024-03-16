@@ -7,14 +7,14 @@ namespace Arborist.Core
     // TODO: I am thinking I might want to remove throwing and just
     // return default similar to IEnumerable. That would likely
     // requiring removing the EnumerationNotStarted and the
-    // EnumerationFinished states.
+    // EnumerationFinished modes.
     private void ValidateState()
     {
-      if (State == TreenumeratorState.EnumerationNotStarted)
+      if (Mode == TreenumeratorMode.EnumerationNotStarted)
         throw new InvalidOperationException("Enumeration has not begun.");
 
       // TODO:
-      //if (State == TreenumeratorState.EnumerationFinished)
+      //if (Mode == TreenumeratorMode.EnumerationFinished)
       //  throw new InvalidOperationException("Enumeration has completed.");
     }
 
@@ -78,19 +78,19 @@ namespace Arborist.Core
       protected set => _SchedulingStrategy = value;
     }
 
-    public TreenumeratorState State { get; protected set; } = TreenumeratorState.EnumerationNotStarted;
+    public TreenumeratorMode Mode { get; protected set; } = TreenumeratorMode.EnumerationNotStarted;
 
     public abstract void Dispose();
 
     public bool MoveNext(SchedulingStrategy schedulingStrategy)
     {
-      if (State == TreenumeratorState.EnumerationFinished)
+      if (Mode == TreenumeratorMode.EnumerationFinished)
         return false;
 
       if (OnMoveNext(schedulingStrategy))
         return true;
 
-      State = TreenumeratorState.EnumerationFinished;
+      Mode = TreenumeratorMode.EnumerationFinished;
 
       return false;
     }

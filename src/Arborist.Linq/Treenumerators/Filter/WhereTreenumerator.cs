@@ -19,10 +19,10 @@ namespace Arborist.Linq.Treenumerators
 
     protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
     {
-      if (State == TreenumeratorState.EnumerationFinished)
+      if (Mode == TreenumeratorMode.EnumerationFinished)
         return false;
 
-      if (State != TreenumeratorState.SchedulingNode)
+      if (Mode != TreenumeratorMode.SchedulingNode)
         return OnVisitingNode();
 
       return OnSchedulingNode(schedulingStrategy);
@@ -34,7 +34,7 @@ namespace Arborist.Linq.Treenumerators
 
       while (InnerTreenumerator.MoveNext(schedulingStrategy))
       {
-        if (InnerTreenumerator.State == TreenumeratorState.VisitingNode
+        if (InnerTreenumerator.Mode == TreenumeratorMode.VisitingNode
           || _Predicate(InnerTreenumerator.ToNodeVisit()))
         {
           UpdateState();
@@ -59,9 +59,9 @@ namespace Arborist.Linq.Treenumerators
 
     private void UpdateState()
     {
-      State = InnerTreenumerator.State;
+      Mode = InnerTreenumerator.Mode;
 
-      if (State != TreenumeratorState.EnumerationFinished)
+      if (Mode != TreenumeratorMode.EnumerationFinished)
       {
         Node = InnerTreenumerator.Node;
         VisitCount = InnerTreenumerator.VisitCount;

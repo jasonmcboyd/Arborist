@@ -66,21 +66,21 @@ namespace Arborist.Linq.Tests
               Description = "Prune after all, traverse all",
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
-                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
-                (TreenumeratorState.SchedulingNode, "b", 0, (1, 0), (1, 0)),
-                (TreenumeratorState.SchedulingNode, "c", 0, (2, 0), (2, 0)),
-                (TreenumeratorState.VisitingNode,   "a", 1, (0, 0), (0, 0)),
-                (TreenumeratorState.VisitingNode,   "b", 1, (1, 0), (1, 0)),
-                (TreenumeratorState.VisitingNode,   "c", 1, (2, 0), (2, 0)),
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (1, 0), (1, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (2, 0), (2, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "b", 1, (1, 0), (1, 0)),
+                (TreenumeratorMode.VisitingNode,   "c", 1, (2, 0), (2, 0)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
-                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
-                (TreenumeratorState.VisitingNode,   "a", 1, (0, 0), (0, 0)),
-                (TreenumeratorState.SchedulingNode, "b", 0, (1, 0), (1, 0)),
-                (TreenumeratorState.VisitingNode,   "b", 1, (1, 0), (1, 0)),
-                (TreenumeratorState.SchedulingNode, "c", 0, (2, 0), (2, 0)),
-                (TreenumeratorState.VisitingNode,   "c", 1, (2, 0), (2, 0)),
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (1, 0), (1, 0)),
+                (TreenumeratorMode.VisitingNode,   "b", 1, (1, 0), (1, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (2, 0), (2, 0)),
+                (TreenumeratorMode.VisitingNode,   "c", 1, (2, 0), (2, 0)),
               }
             },
             // Skip subtree
@@ -91,15 +91,15 @@ namespace Arborist.Linq.Tests
               Description = "Prune after all, Skip all subtrees",
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
-                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
-                (TreenumeratorState.SchedulingNode, "b", 0, (1, 0), (0, 0)),
-                (TreenumeratorState.SchedulingNode, "c", 0, (2, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (1, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (2, 0), (0, 0)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
-                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
-                (TreenumeratorState.SchedulingNode, "b", 0, (1, 0), (0, 0)),
-                (TreenumeratorState.SchedulingNode, "c", 0, (2, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (1, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (2, 0), (0, 0)),
               }
             },
           }
@@ -119,13 +119,13 @@ namespace Arborist.Linq.Tests
               Description = "Prune after all, traverse all",
               ExpectedBreadthFirstResults = new MoveNextResult<string>[]
               {
-                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
-                (TreenumeratorState.VisitingNode,   "a", 1, (0, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
               },
               ExpectedDepthFirstResults = new MoveNextResult<string>[]
               {
-                (TreenumeratorState.SchedulingNode, "a", 0, (0, 0), (0, 0)),
-                (TreenumeratorState.VisitingNode,   "a", 1, (0, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
               }
             },
           }

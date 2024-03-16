@@ -2,7 +2,6 @@
 using Arborist.Linq.Extensions;
 using System;
 using System.Collections.Generic;
-using System.Drawing.Printing;
 
 namespace Arborist.Linq.Treenumerators
 {
@@ -16,7 +15,7 @@ namespace Arborist.Linq.Treenumerators
     {
       _Selector = selector;
 
-      _Stack.Push(new NodeVisit<TResult>(TreenumeratorState.VisitingNode, default, 1, (0, -1), (0, -1), SchedulingStrategy.TraverseSubtree));
+      _Stack.Push(new NodeVisit<TResult>(TreenumeratorMode.VisitingNode, default, 1, (0, -1), (0, -1), SchedulingStrategy.TraverseSubtree));
     }
 
     public readonly Func<TSource, ITreenumerable<TResult>> _Selector;
@@ -29,10 +28,10 @@ namespace Arborist.Linq.Treenumerators
 
     protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
     {
-      if (State == TreenumeratorState.EnumerationFinished)
+      if (Mode == TreenumeratorMode.EnumerationFinished)
         return false;
 
-      if (State == TreenumeratorState.EnumerationNotStarted)
+      if (Mode == TreenumeratorMode.EnumerationNotStarted)
         return OnStarting();
 
       if (_HasCachedVisit)
@@ -50,7 +49,7 @@ namespace Arborist.Linq.Treenumerators
       if (MoveNextInnerSubtree())
         return true;
 
-      State = TreenumeratorState.EnumerationFinished;
+      Mode = TreenumeratorMode.EnumerationFinished;
 
       return false;
     }
@@ -59,13 +58,13 @@ namespace Arborist.Linq.Treenumerators
     {
       if (!MoveNextInnerTreenumerator())
       {
-        State = TreenumeratorState.EnumerationFinished;
+        Mode = TreenumeratorMode.EnumerationFinished;
         return false;
       }
 
       _Stack.Push(
         new NodeVisit<TResult>(
-          _NodeTreenumerator.State,
+          _NodeTreenumerator.Mode,
           _NodeTreenumerator.Node,
           _NodeTreenumerator.VisitCount,
           (_Stack.Peek().VisitCount - 1, InnerTreenumerator.OriginalPosition.Depth),
@@ -120,7 +119,7 @@ namespace Arborist.Linq.Treenumerators
       {
         _Stack.Push(
           new NodeVisit<TResult>(
-            _NodeTreenumerator.State,
+            _NodeTreenumerator.Mode,
             _NodeTreenumerator.Node,
             _NodeTreenumerator.VisitCount,
             (_Stack.Peek().VisitCount - 1, InnerTreenumerator.OriginalPosition.Depth),
@@ -143,7 +142,7 @@ namespace Arborist.Linq.Treenumerators
 
         _Stack.Push(
           new NodeVisit<TResult>(
-            _NodeTreenumerator.State,
+            _NodeTreenumerator.Mode,
             _NodeTreenumerator.Node,
             _NodeTreenumerator.VisitCount,
             (_Stack.Peek().VisitCount - 1, InnerTreenumerator.OriginalPosition.Depth),
@@ -180,7 +179,7 @@ namespace Arborist.Linq.Treenumerators
         {
           _Stack.Push(
             new NodeVisit<TResult>(
-              _NodeTreenumerator.State,
+              _NodeTreenumerator.Mode,
               _NodeTreenumerator.Node,
               _NodeTreenumerator.VisitCount,
               (_Stack.Peek().VisitCount - 1, _Stack.Peek().OriginalPosition.Depth + 1),
@@ -199,7 +198,7 @@ namespace Arborist.Linq.Treenumerators
 
             _Stack.Push(
               new NodeVisit<TResult>(
-                _NodeTreenumerator.State,
+                _NodeTreenumerator.Mode,
                 _NodeTreenumerator.Node,
                 visit.VisitCount + 1,
                 visit.OriginalPosition,
@@ -222,7 +221,7 @@ namespace Arborist.Linq.Treenumerators
             {
               _Stack.Push(
                 new NodeVisit<TResult>(
-                  _NodeTreenumerator.State,
+                  _NodeTreenumerator.Mode,
                   _NodeTreenumerator.Node,
                   _NodeTreenumerator.VisitCount,
                   (_Stack.Peek().VisitCount - 1, InnerTreenumerator.OriginalPosition.Depth),
@@ -237,7 +236,7 @@ namespace Arborist.Linq.Treenumerators
 
               _Stack.Push(
                 new NodeVisit<TResult>(
-                  _NodeTreenumerator.State,
+                  _NodeTreenumerator.Mode,
                   _NodeTreenumerator.Node,
                   _NodeTreenumerator.VisitCount,
                   (_Stack.Peek().VisitCount - 1, InnerTreenumerator.OriginalPosition.Depth),
@@ -259,7 +258,7 @@ namespace Arborist.Linq.Treenumerators
 
     private void UpdateStateFromNodeVisit(NodeVisit<TResult> visit)
     {
-      State = visit.TreenumeratorState;
+      Mode = visit.Mode;
       Node = visit.Node;
       VisitCount = visit.VisitCount;
       OriginalPosition = visit.OriginalPosition;

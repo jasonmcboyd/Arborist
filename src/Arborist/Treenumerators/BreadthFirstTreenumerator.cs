@@ -41,10 +41,10 @@ namespace Arborist.Treenumerators
 
     protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
     {
-      if (State == TreenumeratorState.EnumerationFinished)
+      if (Mode == TreenumeratorMode.EnumerationFinished)
         return false;
 
-      if (State == TreenumeratorState.EnumerationNotStarted)
+      if (Mode == TreenumeratorMode.EnumerationNotStarted)
         return OnStarting();
 
       while (true)
@@ -54,11 +54,11 @@ namespace Arborist.Treenumerators
 
         if (_CurrentLevel.Count == 0)
         {
-          State = TreenumeratorState.EnumerationFinished;
+          Mode = TreenumeratorMode.EnumerationFinished;
           return false;
         }
 
-        if (State == TreenumeratorState.SchedulingNode)
+        if (Mode == TreenumeratorMode.SchedulingNode)
         {
           var onScheduling = OnScheduling(schedulingStrategy);
 
@@ -124,7 +124,7 @@ namespace Arborist.Treenumerators
         return true;
       }
 
-      scheduledVisit.TreenumeratorState = TreenumeratorState.VisitingNode;
+      scheduledVisit.Mode = TreenumeratorMode.VisitingNode;
 
       _NextLevel.AddToBack(GetNodeVisitFromChildEnumeratorVisit(scheduledVisit));
 
@@ -165,7 +165,7 @@ namespace Arborist.Treenumerators
 
       if (_CurrentLevel.Count == 0)
       {
-        State = TreenumeratorState.VisitingNode;
+        Mode = TreenumeratorMode.VisitingNode;
         return null;
       }
 
@@ -189,7 +189,7 @@ namespace Arborist.Treenumerators
       var sentinal =
         _NodeVisitPool
         .Lease(
-          TreenumeratorState.VisitingNode,
+          TreenumeratorMode.VisitingNode,
           sentinalNode,
           1,
           (0, -1),
@@ -201,7 +201,7 @@ namespace Arborist.Treenumerators
       var children =
         _ChildrenVisitPool
         .Lease(
-          TreenumeratorState.SchedulingNode,
+          TreenumeratorMode.SchedulingNode,
           _RootsEnumerator,
           0,
           (0, 0),
@@ -219,7 +219,7 @@ namespace Arborist.Treenumerators
 
     private void OnEnumerationFinished()
     {
-      State = TreenumeratorState.EnumerationFinished;
+      Mode = TreenumeratorMode.EnumerationFinished;
     }
 
     private bool MoveToFirstChild(VirtualNodeVisit<TRootNode> visit) =>
@@ -242,7 +242,7 @@ namespace Arborist.Treenumerators
 
       var previousVisit = _CurrentLevel[0];
 
-      children.TreenumeratorState = TreenumeratorState.SchedulingNode;
+      children.Mode = TreenumeratorMode.SchedulingNode;
       children.VisitCount = 0;
       children.OriginalPosition = (0, visit.OriginalPosition.Depth + 1);
       children.Position = (previousVisit.VisitCount - 1, previousVisit.Position.Depth + 1);
@@ -268,7 +268,7 @@ namespace Arborist.Treenumerators
 
       var children = _ChildrenStack.Peek();
 
-      children.TreenumeratorState = TreenumeratorState.SchedulingNode;
+      children.Mode = TreenumeratorMode.SchedulingNode;
       children.VisitCount = 0;
       children.OriginalPosition = children.OriginalPosition.AddToSiblingIndex(1);
       children.Position = (previousVisit.VisitCount - 1, previousVisit.Position.Depth + 1);
@@ -299,7 +299,7 @@ namespace Arborist.Treenumerators
       return
         _ChildrenVisitPool
         .Lease(
-          TreenumeratorState.VisitingNode,
+          TreenumeratorMode.VisitingNode,
           childrenEnumerator,
           0,
           (0, visit.OriginalPosition.Depth + 1),
@@ -312,7 +312,7 @@ namespace Arborist.Treenumerators
       return
         _NodeVisitPool
         .Lease(
-          children.TreenumeratorState,
+          children.Mode,
           children.Node.Current,
           children.VisitCount,
           children.OriginalPosition,
@@ -322,7 +322,7 @@ namespace Arborist.Treenumerators
 
     private void UpdateStateFromVirtualNodeVisit(VirtualNodeVisit<TRootNode> visit)
     {
-      State = visit.TreenumeratorState;
+      Mode = visit.Mode;
       Node = _Map(visit.Node);
       VisitCount = visit.VisitCount;
       OriginalPosition = visit.OriginalPosition;

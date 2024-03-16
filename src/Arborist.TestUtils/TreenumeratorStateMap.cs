@@ -3,35 +3,35 @@ using System;
 
 namespace Arborist.TestUtils
 {
-  internal static class TreenumeratorStateMap
+  internal static class TreenumeratorModeMap
   {
-    public static TreenumeratorState ToState(char character)
+    public static TreenumeratorMode ToMode(char character)
     {
       switch (character)
       {
         case 'S':
-          return TreenumeratorState.SchedulingNode;
+          return TreenumeratorMode.SchedulingNode;
         case 'N':
-          return TreenumeratorState.EnumerationNotStarted;
+          return TreenumeratorMode.EnumerationNotStarted;
         case 'V':
-          return TreenumeratorState.VisitingNode;
+          return TreenumeratorMode.VisitingNode;
         case 'F':
-          return TreenumeratorState.EnumerationFinished;
+          return TreenumeratorMode.EnumerationFinished;
         default:
           throw new InvalidOperationException();
       }
     }
-    public static char ToChar(TreenumeratorState state)
+    public static char ToChar(TreenumeratorMode mode)
     {
-      switch (state)
+      switch (mode)
       {
-        case TreenumeratorState.EnumerationNotStarted:
+        case TreenumeratorMode.EnumerationNotStarted:
           return 'N';
-        case TreenumeratorState.EnumerationFinished:
+        case TreenumeratorMode.EnumerationFinished:
           return 'F';
-        case TreenumeratorState.SchedulingNode:
+        case TreenumeratorMode.SchedulingNode:
           return 'S';
-        case TreenumeratorState.VisitingNode:
+        case TreenumeratorMode.VisitingNode:
           return 'V';
         default:
           throw new InvalidOperationException();

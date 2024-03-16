@@ -16,11 +16,11 @@ namespace Arborist.Linq.Treenumerators
     public NodePosition Position => default;
     public SchedulingStrategy SchedulingStrategy => default;
 
-    public TreenumeratorState State { get; private set; } = TreenumeratorState.EnumerationNotStarted;
+    public TreenumeratorMode Mode { get; private set; } = TreenumeratorMode.EnumerationNotStarted;
 
     public bool MoveNext(SchedulingStrategy schedulingStrategy)
     {
-      State = TreenumeratorState.EnumerationFinished;
+      Mode = TreenumeratorMode.EnumerationFinished;
 
       return false;
     }

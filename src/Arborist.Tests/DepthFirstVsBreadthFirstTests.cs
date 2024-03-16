@@ -56,7 +56,7 @@ namespace Arborist.Tests
 
       MoveNextResult<string>[] Sort(IEnumerable<MoveNextResult<string>> nodes) =>
         nodes
-        .OrderBy(x => (x.State, x.OriginalPosition.Depth, x.OriginalPosition.SiblingIndex, x.Node))
+        .OrderBy(x => (x.Mode, x.OriginalPosition.Depth, x.OriginalPosition.SiblingIndex, x.Node))
         .ToArray();
 
       var visitStrategy =

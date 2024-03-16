@@ -1,6 +1,6 @@
 ﻿namespace Arborist.Core
 {
-  public enum TreenumeratorState
+  public enum TreenumeratorMode
   {
     EnumerationNotStarted,
     EnumerationFinished,

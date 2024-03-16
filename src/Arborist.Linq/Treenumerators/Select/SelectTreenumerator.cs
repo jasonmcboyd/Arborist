@@ -23,7 +23,7 @@ namespace Arborist.Linq.Treenumerators
 
     public int VisitCount => _InnerTreenumerator.VisitCount;
 
-    public TreenumeratorState State => _InnerTreenumerator.State;
+    public TreenumeratorMode Mode => _InnerTreenumerator.Mode;
 
     public NodePosition OriginalPosition => _InnerTreenumerator.OriginalPosition;
 

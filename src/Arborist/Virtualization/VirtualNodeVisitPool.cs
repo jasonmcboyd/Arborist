@@ -55,7 +55,7 @@ namespace Arborist.Virtualization
 
     public VirtualNodeVisit<TNode> Lease(ITreenumerator<TNode> treenumerator)
       => Lease(
-        treenumerator.State,
+        treenumerator.Mode,
         treenumerator.Node,
         treenumerator.VisitCount,
         treenumerator.OriginalPosition,
@@ -63,7 +63,7 @@ namespace Arborist.Virtualization
         treenumerator.SchedulingStrategy);
 
     public VirtualNodeVisit<TNode> Lease(
-      TreenumeratorState state,
+      TreenumeratorMode mode,
       TNode node,
       int visitCount,
       NodePosition originalPosition,
@@ -82,7 +82,7 @@ namespace Arborist.Virtualization
         _Leased++;
       }
 
-      result.TreenumeratorState = state;
+      result.Mode = mode;
       result.Node = node;
       result.VisitCount = visitCount;
       result.OriginalPosition = originalPosition;

@@ -17,7 +17,7 @@ namespace Arborist.Linq.Treenumerators
 
       var seedVisit =
         new NodeVisit<TAccumulate>(
-          TreenumeratorState.VisitingNode,
+          TreenumeratorMode.VisitingNode,
           seed,
           1,
           (0, -1),
@@ -54,7 +54,7 @@ namespace Arborist.Linq.Treenumerators
 
       var newVisit =
         new NodeVisit<TAccumulate>(
-          InnerTreenumerator.State,
+          InnerTreenumerator.Mode,
           node,
           InnerTreenumerator.VisitCount,
           InnerTreenumerator.OriginalPosition,
@@ -70,7 +70,7 @@ namespace Arborist.Linq.Treenumerators
 
     private void UpdateStateFromNodeVisit(NodeVisit<TAccumulate> nodeVisit)
     {
-      State = nodeVisit.TreenumeratorState;
+      Mode = nodeVisit.Mode;
       Node = nodeVisit.Node;
       VisitCount = nodeVisit.VisitCount;
       OriginalPosition = nodeVisit.OriginalPosition;
