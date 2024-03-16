@@ -1,6 +1,6 @@
 using Arborist.Linq;
-using Arborist.TestUtils;
 using Arborist.SimpleSerializer;
+using Arborist.TestUtils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Diagnostics;

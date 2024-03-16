@@ -1,7 +1,6 @@
-﻿using Arborist.Core;
-using System;
+﻿using System;
 
-namespace Arborist.Linq
+namespace Arborist.Core
 {
   public readonly struct NodeVisit<TNode>
   {
@@ -30,7 +29,7 @@ namespace Arborist.Linq
 
     public override string ToString()
     {
-      return $"{ModeToChar()}  {SchedulingStrategyToChar()}  {Node}  {VisitCount}  {OriginalPosition}  {Position}";
+      return $"{ModeToChar()}  {SchedulingStrategyToChar()}  {OriginalPosition}  {Position}  {VisitCount}  {Node}";
     }
 
     private char ModeToChar()
