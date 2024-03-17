@@ -1,4 +1,6 @@
-﻿namespace Arborist.Core
+﻿using Arborist.Core;
+
+namespace Arborist
 {
   public abstract class TreenumeratorWrapper<TInner, TNode>
     : TreenumeratorBase<TNode>
