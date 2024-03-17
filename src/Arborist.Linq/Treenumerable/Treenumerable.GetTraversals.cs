@@ -9,18 +9,18 @@ namespace Arborist.Linq
   {
     public static IEnumerable<NodeVisit<TNode>> GetDepthFirstTraversal<TNode>(
       this ITreenumerable<TNode> source,
-      Func<NodeVisit<TNode>, SchedulingStrategy> schedulingStrategySelector)
+      Func<NodeVisit<TNode>, TraversalStrategy> traversalStrategySelector)
     {
       using (var treenumerator = source.GetDepthFirstTreenumerator())
-        return GetTraversal(treenumerator, schedulingStrategySelector);
+        return GetTraversal(treenumerator, traversalStrategySelector);
     }
 
     public static IEnumerable<NodeVisit<TNode>> GetBreadthFirstTraversal<TNode>(
       this ITreenumerable<TNode> source,
-      Func<NodeVisit<TNode>, SchedulingStrategy> schedulingStrategySelector)
+      Func<NodeVisit<TNode>, TraversalStrategy> traversalStrategySelector)
     {
       using (var treenumerator = source.GetBreadthFirstTreenumerator())
-        return GetTraversal(treenumerator, schedulingStrategySelector);
+        return GetTraversal(treenumerator, traversalStrategySelector);
     }
 
     public static IEnumerable<NodeVisit<TNode>> GetDepthFirstTraversal<TNode>(
@@ -39,21 +39,21 @@ namespace Arborist.Linq
 
     private static IEnumerable<NodeVisit<TNode>> GetTraversal<TNode>(
       this ITreenumerator<TNode> treenumerator,
-      Func<NodeVisit<TNode>, SchedulingStrategy> schedulingStrategySelector)
+      Func<NodeVisit<TNode>, TraversalStrategy> traversalStrategySelector)
     {
       if (!treenumerator.MoveNext())
         yield break;
 
       yield return treenumerator.ToNodeVisit();
 
-      var schedulingStrategy = schedulingStrategySelector(treenumerator.ToNodeVisit());
+      var traversalStrategy = traversalStrategySelector(treenumerator.ToNodeVisit());
 
-      while (treenumerator.MoveNext(schedulingStrategy))
+      while (treenumerator.MoveNext(traversalStrategy))
       {
         yield return treenumerator.ToNodeVisit();
 
         if (treenumerator.Mode == TreenumeratorMode.SchedulingNode)
-          schedulingStrategy = schedulingStrategySelector(treenumerator.ToNodeVisit());
+          traversalStrategy = traversalStrategySelector(treenumerator.ToNodeVisit());
       }
     }
 

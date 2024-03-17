@@ -18,7 +18,7 @@ namespace Arborist.Linq.Treenumerators
     
   //  private bool _Disposed;
 
-  //  protected override bool OnMoveNext(schedulingStrategy schedulingStrategy)
+  //  protected override bool OnMoveNext(traversalStrategy traversalStrategy)
   //  {
   //    throw new NotImplementedException();
   //  }

@@ -17,40 +17,40 @@ namespace Arborist.Linq.Treenumerators
 
     private readonly Func<NodeVisit<TNode>, bool> _Predicate;
 
-    protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
+    protected override bool OnMoveNext(TraversalStrategy traversalStrategy)
     {
       if (Mode == TreenumeratorMode.EnumerationFinished)
         return false;
 
       if (Mode == TreenumeratorMode.SchedulingNode)
-        schedulingStrategy = GetSchedulingStrategy(schedulingStrategy);
+        traversalStrategy = GetTraversalStrategy(traversalStrategy);
 
-      var result = InnerTreenumerator.MoveNext(schedulingStrategy);
+      var result = InnerTreenumerator.MoveNext(traversalStrategy);
 
       UpdateState();
 
       return result;
     }
 
-    private SchedulingStrategy GetSchedulingStrategy(SchedulingStrategy schedulingStrategy)
+    private TraversalStrategy GetTraversalStrategy(TraversalStrategy traversalStrategy)
     {
       var skippingNode =
-        schedulingStrategy == SchedulingStrategy.SkipSubtree
-        || schedulingStrategy == SchedulingStrategy.SkipNode;
+        traversalStrategy == TraversalStrategy.SkipSubtree
+        || traversalStrategy == TraversalStrategy.SkipNode;
 
       var skippingDescendants =
         _Predicate(this.ToNodeVisit())
-        || schedulingStrategy == SchedulingStrategy.SkipDescendants
-        || schedulingStrategy == SchedulingStrategy.SkipSubtree;
+        || traversalStrategy == TraversalStrategy.SkipDescendants
+        || traversalStrategy == TraversalStrategy.SkipSubtree;
 
       if (skippingNode && skippingDescendants)
-        return SchedulingStrategy.SkipSubtree;
+        return TraversalStrategy.SkipSubtree;
       else if (skippingNode && !skippingDescendants)
-        return SchedulingStrategy.SkipNode;
+        return TraversalStrategy.SkipNode;
       else if (!skippingNode && skippingDescendants)
-        return SchedulingStrategy.SkipDescendants;
+        return TraversalStrategy.SkipDescendants;
       else
-        return SchedulingStrategy.TraverseSubtree;
+        return TraversalStrategy.TraverseSubtree;
     }
 
     private void UpdateState()

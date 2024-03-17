@@ -58,7 +58,7 @@ namespace Arborist.Virtualization
       int visitCount,
       NodePosition originalPosition,
       NodePosition position,
-      SchedulingStrategy schedulingStrategy)
+      TraversalStrategy traversalStrategy)
     {
       VirtualNodeVisit<TNode> result;
 
@@ -77,7 +77,7 @@ namespace Arborist.Virtualization
       result.VisitCount = visitCount;
       result.OriginalPosition = originalPosition;
       result.Position = position;
-      result.SchedulingStrategy = schedulingStrategy;
+      result.TraversalStrategy = traversalStrategy;
 
       return result;
     }

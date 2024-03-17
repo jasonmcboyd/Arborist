@@ -29,9 +29,9 @@ namespace Arborist.Tests
 
       var filterStrategies = new[]
       {
-        SchedulingStrategy.SkipNode,
-        SchedulingStrategy.SkipSubtree,
-        SchedulingStrategy.SkipDescendants,
+        TraversalStrategy.SkipNode,
+        TraversalStrategy.SkipSubtree,
+        TraversalStrategy.SkipDescendants,
       };
 
       foreach (var treeString in treeStrings)
@@ -46,7 +46,7 @@ namespace Arborist.Tests
 
     [TestMethod]
     [DynamicData(nameof(GetData), DynamicDataSourceType.Method)]
-    public void Test(string treeString, SchedulingStrategy? filterStrategy, string filterCharacter)
+    public void Test(string treeString, TraversalStrategy? filterStrategy, string filterCharacter)
     {
       var treenumerable =
         TreeSerializer
@@ -59,24 +59,24 @@ namespace Arborist.Tests
         .OrderBy(nodeVisit => (nodeVisit.Mode, nodeVisit.OriginalPosition.Depth, nodeVisit.OriginalPosition.SiblingIndex, nodeVisit.Node))
         .ToArray();
 
-      var schedulingStrategySelector =
-        new Func<NodeVisit<string>, SchedulingStrategy>(
+      var traversalStrategySelector =
+        new Func<NodeVisit<string>, TraversalStrategy>(
           nodeVisit =>
             filterCharacter == null || filterCharacter != nodeVisit.Node
-            ? SchedulingStrategy.TraverseSubtree
+            ? TraversalStrategy.TraverseSubtree
             : filterStrategy.Value);
 
       Debug.WriteLine("-----Breadth First-----");
       var breadthFirst =
         treenumerable
-        .GetBreadthFirstTraversal(schedulingStrategySelector)
+        .GetBreadthFirstTraversal(traversalStrategySelector)
         .Do(nodeVisit => Debug.WriteLine(nodeVisit))
         .ToArray();
 
       Debug.WriteLine($"{Environment.NewLine}-----Depth First------");
       var depthFirst =
         treenumerable
-        .GetDepthFirstTraversal(schedulingStrategySelector)
+        .GetDepthFirstTraversal(traversalStrategySelector)
         .Do(nodeVisit => Debug.WriteLine(nodeVisit))
         .ToArray();
 

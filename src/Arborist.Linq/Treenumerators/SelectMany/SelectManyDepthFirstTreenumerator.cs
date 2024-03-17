@@ -26,7 +26,7 @@ namespace Arborist.Linq.Treenumerators
 
     private bool _HasCachedVisit = false;
 
-    protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
+    protected override bool OnMoveNext(TraversalStrategy traversalStrategy)
     {
       if (Mode == TreenumeratorMode.EnumerationFinished)
         return false;
@@ -43,7 +43,7 @@ namespace Arborist.Linq.Treenumerators
         return true;
       }
 
-      if (MoveNextNodeTreenumerator(schedulingStrategy))
+      if (MoveNextNodeTreenumerator(traversalStrategy))
         return true;
 
       if (MoveNextInnerSubtree())
@@ -81,10 +81,10 @@ namespace Arborist.Linq.Treenumerators
 
       while (true)
       {
-        if (InnerTreenumerator.MoveNext(SchedulingStrategy.TraverseSubtree))
+        if (InnerTreenumerator.MoveNext(TraversalStrategy.TraverseSubtree))
         {
-          // Ignore the scheduling step.
-          if (InnerTreenumerator.VisitCount == 0)
+          // Ignore the scheduling node visit.
+          if (InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode)
             continue;
 
           var newDepth = InnerTreenumerator.OriginalPosition.Depth;
@@ -94,7 +94,7 @@ namespace Arborist.Linq.Treenumerators
 
           _NodeTreenumerator = _Selector(InnerTreenumerator.Node).GetDepthFirstTreenumerator();
 
-          if (_NodeTreenumerator.MoveNext(SchedulingStrategy.TraverseSubtree))
+          if (_NodeTreenumerator.MoveNext(TraversalStrategy.TraverseSubtree))
             return true;
 
           _NodeTreenumerator.Dispose();
@@ -152,14 +152,14 @@ namespace Arborist.Linq.Treenumerators
       return true;
     }
 
-    private bool MoveNextNodeTreenumerator(SchedulingStrategy schedulingStrategy)
+    private bool MoveNextNodeTreenumerator(TraversalStrategy traversalStrategy)
     {
       if (_NodeTreenumerator == null)
         return false;
 
       var previousOriginalPosition = _NodeTreenumerator.OriginalPosition;
 
-      if (_NodeTreenumerator.MoveNext(schedulingStrategy))
+      if (_NodeTreenumerator.MoveNext(traversalStrategy))
       {
         var newOriginalPosition = _NodeTreenumerator.OriginalPosition;
 

@@ -1,7 +1,6 @@
 ﻿namespace Arborist.Core
 {
-  // TODO: I think TraversalStrategy is a better name.
-  public enum SchedulingStrategy
+  public enum TraversalStrategy
   {
                      // | Traverse  |  Traverse   |
                      // |   Node    | Descendants |

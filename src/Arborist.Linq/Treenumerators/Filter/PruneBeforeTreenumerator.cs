@@ -17,20 +17,20 @@ namespace Arborist.Linq.Treenumerators
 
     private readonly Func<NodeVisit<TNode>, bool> _Predicate;
 
-    protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
+    protected override bool OnMoveNext(TraversalStrategy traversalStrategy)
     {
       if (Mode == TreenumeratorMode.EnumerationFinished)
         return false;
 
       if (Mode == TreenumeratorMode.VisitingNode)
-        schedulingStrategy = SchedulingStrategy.TraverseSubtree;
+        traversalStrategy = TraversalStrategy.TraverseSubtree;
 
-      return InnerTreenumeratorMoveNext(schedulingStrategy);
+      return InnerTreenumeratorMoveNext(traversalStrategy);
     }
 
-    private bool InnerTreenumeratorMoveNext(SchedulingStrategy schedulingStrategy)
+    private bool InnerTreenumeratorMoveNext(TraversalStrategy traversalStrategy)
     {
-      while (InnerTreenumerator.MoveNext(schedulingStrategy))
+      while (InnerTreenumerator.MoveNext(traversalStrategy))
       {
         if (InnerTreenumerator.Mode == TreenumeratorMode.VisitingNode
           || !_Predicate(InnerTreenumerator.ToNodeVisit()))
@@ -40,7 +40,7 @@ namespace Arborist.Linq.Treenumerators
           return true;
         }
 
-        schedulingStrategy = SchedulingStrategy.SkipSubtree;
+        traversalStrategy = TraversalStrategy.SkipSubtree;
       }
 
       UpdateState();

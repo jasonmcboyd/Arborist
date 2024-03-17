@@ -10,14 +10,14 @@ namespace Arborist.Virtualization
     public int VisitCount { get; set; }
     public NodePosition OriginalPosition { get; set; }
     public NodePosition Position { get; set; }
-    public SchedulingStrategy SchedulingStrategy { get; set; }
+    public TraversalStrategy TraversalStrategy { get; set; }
 
     public bool SkippingNode =>
-      SchedulingStrategy == SchedulingStrategy.SkipNode
-      || SchedulingStrategy == SchedulingStrategy.SkipSubtree;
+      TraversalStrategy == TraversalStrategy.SkipNode
+      || TraversalStrategy == TraversalStrategy.SkipSubtree;
 
     public bool SkippingDescendants =>
-      SchedulingStrategy == SchedulingStrategy.SkipDescendants
-      || SchedulingStrategy == SchedulingStrategy.SkipSubtree;
+      TraversalStrategy == TraversalStrategy.SkipDescendants
+      || TraversalStrategy == TraversalStrategy.SkipSubtree;
   }
 }

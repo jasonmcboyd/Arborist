@@ -66,28 +66,28 @@ namespace Arborist.Core
       protected set => _Position = value;
     }
 
-    private SchedulingStrategy _SchedulingStrategy;
-    public SchedulingStrategy SchedulingStrategy
+    private TraversalStrategy _TraversalStrategy;
+    public TraversalStrategy TraversalStrategy
     {
       get
       {
         ValidateState();
 
-        return _SchedulingStrategy;
+        return _TraversalStrategy;
       }
-      protected set => _SchedulingStrategy = value;
+      protected set => _TraversalStrategy = value;
     }
 
     public TreenumeratorMode Mode { get; protected set; } = TreenumeratorMode.EnumerationNotStarted;
 
     public abstract void Dispose();
 
-    public bool MoveNext(SchedulingStrategy schedulingStrategy)
+    public bool MoveNext(TraversalStrategy traversalStrategy)
     {
       if (Mode == TreenumeratorMode.EnumerationFinished)
         return false;
 
-      if (OnMoveNext(schedulingStrategy))
+      if (OnMoveNext(traversalStrategy))
         return true;
 
       Mode = TreenumeratorMode.EnumerationFinished;
@@ -95,6 +95,6 @@ namespace Arborist.Core
       return false;
     }
 
-    protected abstract bool OnMoveNext(SchedulingStrategy schedulingStrategy);
+    protected abstract bool OnMoveNext(TraversalStrategy traversalStrategy);
   }
 }

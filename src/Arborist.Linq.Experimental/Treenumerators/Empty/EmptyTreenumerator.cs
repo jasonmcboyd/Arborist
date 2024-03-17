@@ -14,11 +14,11 @@ namespace Arborist.Linq.Treenumerators
     public int VisitCount => default;
     public NodePosition OriginalPosition => default;
     public NodePosition Position => default;
-    public SchedulingStrategy SchedulingStrategy => default;
+    public TraversalStrategy TraversalStrategy => default;
 
     public TreenumeratorMode Mode { get; private set; } = TreenumeratorMode.EnumerationNotStarted;
 
-    public bool MoveNext(SchedulingStrategy schedulingStrategy)
+    public bool MoveNext(TraversalStrategy traversalStrategy)
     {
       Mode = TreenumeratorMode.EnumerationFinished;
 

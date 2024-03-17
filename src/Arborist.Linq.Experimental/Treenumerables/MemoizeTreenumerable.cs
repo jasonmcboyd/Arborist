@@ -53,7 +53,7 @@ namespace Arborist.Linq.Treenumerables
       //  {
       //    if (index > _BreadthFirstMemo.Count && !_BreadthFirstTreenumeratorExhausted)
       //    {
-      //      if (_BreadthFirstTreenumerator.MoveNext(SchedulingStrategy.ScheduleForTraversal))
+      //      if (_BreadthFirstTreenumerator.MoveNext(TraversalStrategy.ScheduleForTraversal))
       //        _BreadthFirstMemo.Add(_BreadthFirstTreenumerator.Node);
       //      else
       //        _BreadthFirstTreenumeratorExhausted = true;
@@ -76,7 +76,7 @@ namespace Arborist.Linq.Treenumerables
       //  {
       //    if (index > _BreadthFirstMemo.Count && !_BreadthFirstTreenumeratorExhausted)
       //    {
-      //      if (_BreadthFirstTreenumerator.MoveNext(SchedulingStrategy.ScheduleForTraversal))
+      //      if (_BreadthFirstTreenumerator.MoveNext(TraversalStrategy.ScheduleForTraversal))
       //        _BreadthFirstMemo.Add(_BreadthFirstTreenumerator.Node);
       //      else
       //        _BreadthFirstTreenumeratorExhausted = true;
@@ -99,7 +99,7 @@ namespace Arborist.Linq.Treenumerables
       //  {
       //    if (index > _DepthFirstMemo.Count && !_DepthFirstTreenumeratorExhausted)
       //    {
-      //      if (_DepthFirstTreenumerator.MoveNext(SchedulingStrategy.ScheduleForTraversal))
+      //      if (_DepthFirstTreenumerator.MoveNext(TraversalStrategy.ScheduleForTraversal))
       //        _DepthFirstMemo.Add(_DepthFirstTreenumerator.Node);
       //      else
       //        _DepthFirstTreenumeratorExhausted = true;

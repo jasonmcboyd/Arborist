@@ -25,14 +25,14 @@ namespace Arborist.TestUtils
     {
       switch (mode)
       {
-        case TreenumeratorMode.EnumerationNotStarted:
-          return 'N';
-        case TreenumeratorMode.EnumerationFinished:
-          return 'F';
         case TreenumeratorMode.SchedulingNode:
           return 'S';
+        case TreenumeratorMode.EnumerationNotStarted:
+          return 'N';
         case TreenumeratorMode.VisitingNode:
           return 'V';
+        case TreenumeratorMode.EnumerationFinished:
+          return 'F';
         default:
           throw new InvalidOperationException();
       }

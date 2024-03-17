@@ -26,7 +26,7 @@ namespace Arborist.Core
 
     public override string ToString()
     {
-      return $"{ModeToChar()}  {OriginalPosition}  {Position}  {VisitCount}  {Node}";
+      return $"{OriginalPosition}  {Position}  {ModeToChar()}  {VisitCount}  {Node}";
     }
 
     private char ModeToChar()

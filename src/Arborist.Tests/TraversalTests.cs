@@ -98,14 +98,14 @@ namespace Arborist.Tests
       Debug.WriteLine("-----Breadth First-----");
       var breadthFirst =
         treenumerable
-        .GetBreadthFirstTraversal(testScenario.SchedulingStrategySelector)
+        .GetBreadthFirstTraversal(testScenario.TraversalStrategySelector)
         .Do(x => Debug.WriteLine(x))
         .ToArray();
 
       Debug.WriteLine($"{Environment.NewLine}-----Depth First------");
       var depthFirst =
         treenumerable
-        .GetDepthFirstTraversal(testScenario.SchedulingStrategySelector)
+        .GetDepthFirstTraversal(testScenario.TraversalStrategySelector)
         .Do(x => Debug.WriteLine(x))
         .ToArray();
 
@@ -144,16 +144,19 @@ namespace Arborist.Tests
       Debug.WriteLine("--------- Tree ---------");
       Debug.WriteLine(treeString);
 
-      Debug.WriteLine($"{Environment.NewLine}-----Expected Values-----");
-      NodeVisitsDebugWriter.WriteNodeVisits(expected);
+      Debug.WriteLine($"{Environment.NewLine}---- Expected Values ----");
+      NodeVisitsDebugWriter.WriteNodeVisitHeader();
+      foreach (var nodeVisit in expected)
+        Debug.WriteLine(nodeVisit);
 
       var moveNextEnumerable =
         depthFirstTest
-        ? treenumerable.GetDepthFirstTraversal(testScenario.SchedulingStrategySelector)
-        : treenumerable.GetBreadthFirstTraversal(testScenario.SchedulingStrategySelector);
+        ? treenumerable.GetDepthFirstTraversal(testScenario.TraversalStrategySelector)
+        : treenumerable.GetBreadthFirstTraversal(testScenario.TraversalStrategySelector);
 
       // Act
-      Debug.WriteLine($"{Environment.NewLine}-----Actual Values-----");
+      Debug.WriteLine($"{Environment.NewLine}----- Actual Values -----");
+      NodeVisitsDebugWriter.WriteNodeVisitHeader();
       var actual =
         moveNextEnumerable
         .Do(visit => Debug.WriteLine(visit))

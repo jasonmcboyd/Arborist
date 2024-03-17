@@ -39,7 +39,7 @@ namespace Arborist.Linq.Tests
             // No skipping
             new TestScenario
             {
-              SchedulingStrategySelector = visit => SchedulingStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
               TreenumerableMap = treenumerable => treenumerable.PruneAfter(_ => true),
               Description = "Prune after all, traverse all",
               ExpectedBreadthFirstResults = Array.Empty<NodeVisit<string>>(),
@@ -57,7 +57,7 @@ namespace Arborist.Linq.Tests
             // No skipping
             new TestScenario
             {
-              SchedulingStrategySelector = visit => SchedulingStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
               TreenumerableMap = treenumerable => treenumerable.PruneAfter(_ => true),
               Description = "Prune after all, traverse all",
               ExpectedBreadthFirstResults = new[]
@@ -82,7 +82,7 @@ namespace Arborist.Linq.Tests
             // Skip subtree
             new TestScenario
             {
-              SchedulingStrategySelector = visit => SchedulingStrategy.SkipSubtree,
+              TraversalStrategySelector = visit => TraversalStrategy.SkipSubtree,
               TreenumerableMap = treenumerable => treenumerable.PruneAfter(_ => true),
               Description = "Prune after all, Skip all subtrees",
               ExpectedBreadthFirstResults = new[]
@@ -110,7 +110,7 @@ namespace Arborist.Linq.Tests
             // No skipping
             new TestScenario
             {
-              SchedulingStrategySelector = visit => SchedulingStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
               TreenumerableMap = treenumerable => treenumerable.PruneAfter(_ => true),
               Description = "Prune after all, traverse all",
               ExpectedBreadthFirstResults = new[]
@@ -143,15 +143,17 @@ namespace Arborist.Linq.Tests
 
       var expected = testScenario.ExpectedDepthFirstResults;
 
-      Debug.WriteLine("-----Expected Values-----");
-      foreach (var value in expected)
-        Debug.WriteLine(value);
+      Debug.WriteLine("---- Expected Values ----");
+      NodeVisitsDebugWriter.WriteNodeVisitHeader();
+      foreach (var nodeVisit in expected)
+        Debug.WriteLine(nodeVisit);
 
       // Act
-      Debug.WriteLine($"{Environment.NewLine}-----Actual Values-----");
+      Debug.WriteLine($"{Environment.NewLine}----- Actual Values -----");
+      NodeVisitsDebugWriter.WriteNodeVisitHeader();
       var actual =
         treenumerable
-        .GetDepthFirstTraversal(testScenario.SchedulingStrategySelector)
+        .GetDepthFirstTraversal(testScenario.TraversalStrategySelector)
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
@@ -180,7 +182,7 @@ namespace Arborist.Linq.Tests
 
       Debug.WriteLine($"{Environment.NewLine}-----Actual Before Values-----");
       treenumerable
-      .GetBreadthFirstTraversal(visit => SchedulingStrategy.TraverseSubtree)
+      .GetBreadthFirstTraversal(visit => TraversalStrategy.TraverseSubtree)
       .Do(visit => Debug.WriteLine(visit))
       .ToArray();
 
@@ -188,7 +190,7 @@ namespace Arborist.Linq.Tests
       Debug.WriteLine($"{Environment.NewLine}-----Actual Values-----");
       var actual =
         treenumerable
-        .GetBreadthFirstTraversal(testScenario.SchedulingStrategySelector)
+        .GetBreadthFirstTraversal(testScenario.TraversalStrategySelector)
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 

@@ -30,9 +30,9 @@ namespace Arborist.Linq.Treenumerators
 
     private readonly Stack<NodeVisit<TAccumulate>> _Stack = new Stack<NodeVisit<TAccumulate>>();
 
-    protected override bool OnMoveNext(SchedulingStrategy schedulingStrategy)
+    protected override bool OnMoveNext(TraversalStrategy traversalStrategy)
     {
-      if (!InnerTreenumerator.MoveNext(schedulingStrategy))
+      if (!InnerTreenumerator.MoveNext(traversalStrategy))
         return false;
 
       var previousDepth = _Stack.Peek().OriginalPosition.Depth;
