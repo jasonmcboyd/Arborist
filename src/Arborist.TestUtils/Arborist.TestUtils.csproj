@@ -6,10 +6,15 @@
 
   <ItemGroup>
     <PackageReference Include="DiffPlex" Version="1.7.2" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.1" />
+    <PackageReference Include="MSTest.TestFramework" Version="3.1.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Arborist.Core\Arborist.Core.csproj" />
+    <ProjectReference Include="..\Arborist.Linq\Arborist.Linq.csproj" />
+    <ProjectReference Include="..\Arborist.SimpleSerializer\Arborist.SimpleSerializer.csproj" />
+    <ProjectReference Include="..\Arborist\Arborist.csproj" />
   </ItemGroup>
 
 </Project>

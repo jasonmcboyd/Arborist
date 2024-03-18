@@ -124,78 +124,119 @@ namespace Arborist.Linq.Tests
                 (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
               }.ToNodeVisitArray()
             },
+            // Skip subtree
+            new TestScenario
+            {
+              TraversalStrategySelector = visit => visit.Node == "c" ? TraversalStrategy.SkipSubtree : TraversalStrategy.TraverseSubtree,
+              TreenumerableMap = treenumerable => treenumerable.PruneAfter(_ => false),
+              Description = "Prune after none, skip c subtree",
+              ExpectedBreadthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (0, 1), (0, 1)),
+                (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (1, 1), (1, 1)),
+                (TreenumeratorMode.SchedulingNode, "d", 0, (2, 1), (1, 1)),
+                (TreenumeratorMode.VisitingNode,   "a", 3, (0, 0), (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "b", 1, (0, 1), (0, 1)),
+                (TreenumeratorMode.VisitingNode,   "d", 1, (2, 1), (1, 1)),
+              }.ToNodeVisitArray(),
+              ExpectedDepthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (0, 1), (0, 1)),
+                (TreenumeratorMode.VisitingNode,   "b", 1, (0, 1), (0, 1)),
+                (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (1, 1), (1, 1)),
+                (TreenumeratorMode.SchedulingNode, "d", 0, (2, 1), (1, 1)),
+                (TreenumeratorMode.VisitingNode,   "d", 1, (2, 1), (1, 1)),
+                (TreenumeratorMode.VisitingNode,   "a", 3, (0, 0), (0, 0)),
+              }.ToNodeVisitArray()
+            },
           }
         }
       };
 
     [TestMethod]
     [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
-    public void PruneAfter_DepthFirst(
+    public void PruneAfter_BreadthFirst_EnumerableNodes(
       string treeString,
       string testDescription,
       int testIndex,
       int testScenarioIndex)
     {
-      // Arrange
       var testScenario = _TreenumerableTestDataFactory.GetTestScenario(testIndex, testScenarioIndex);
 
-      var treenumerable = testScenario.TreenumerableMap(TreeSerializer.Deserialize(treeString));
-
-      var expected = testScenario.ExpectedDepthFirstResults;
-
-      Debug.WriteLine("---- Expected Values ----");
-      NodeVisitsDebugWriter.WriteNodeVisitHeader();
-      foreach (var nodeVisit in expected)
-        Debug.WriteLine(nodeVisit);
-
-      // Act
-      Debug.WriteLine($"{Environment.NewLine}----- Actual Values -----");
-      NodeVisitsDebugWriter.WriteNodeVisitHeader();
-      var actual =
-        treenumerable
-        .GetDepthFirstTraversal(testScenario.TraversalStrategySelector)
-        .Do(visit => Debug.WriteLine(visit))
-        .ToArray();
-
-      // Assert
-      CollectionAssert.AreEqual(expected, actual);
+      TestMethods
+      .TraversalTest(
+        treeString,
+        testScenario.TreenumerableMap,
+        testScenario.TraversalStrategySelector,
+        testScenario.ExpectedBreadthFirstResults,
+        false,
+        true);
     }
 
     [TestMethod]
     [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
-    public void PruneAfter_BreadthFirst(
+    public void PruneAfter_DepthFirst_EnumerableNodes(
       string treeString,
       string testDescription,
       int testIndex,
       int testScenarioIndex)
     {
-      // Arrange
       var testScenario = _TreenumerableTestDataFactory.GetTestScenario(testIndex, testScenarioIndex);
 
-      var treenumerable = testScenario.TreenumerableMap(TreeSerializer.Deserialize(treeString));
+      TestMethods
+      .TraversalTest(
+        treeString,
+        testScenario.TreenumerableMap,
+        testScenario.TraversalStrategySelector,
+        testScenario.ExpectedBreadthFirstResults,
+        true,
+        true);
+    }
 
-      var expected = testScenario.ExpectedBreadthFirstResults;
+    [TestMethod]
+    [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
+    public void PruneAfter_BreadthFirst_IndexableNodes(
+      string treeString,
+      string testDescription,
+      int testIndex,
+      int testScenarioIndex)
+    {
+      var testScenario = _TreenumerableTestDataFactory.GetTestScenario(testIndex, testScenarioIndex);
 
-      Debug.WriteLine("-----Expected Values-----");
-      foreach (var value in expected)
-        Debug.WriteLine(value);
+      TestMethods
+      .TraversalTest(
+        treeString,
+        testScenario.TreenumerableMap,
+        testScenario.TraversalStrategySelector,
+        testScenario.ExpectedBreadthFirstResults,
+        false,
+        false);
+    }
 
-      Debug.WriteLine($"{Environment.NewLine}-----Actual Before Values-----");
-      treenumerable
-      .GetBreadthFirstTraversal(visit => TraversalStrategy.TraverseSubtree)
-      .Do(visit => Debug.WriteLine(visit))
-      .ToArray();
+    [TestMethod]
+    [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
+    public void PruneAfter_DepthFirst_IndexableNodes(
+      string treeString,
+      string testDescription,
+      int testIndex,
+      int testScenarioIndex)
+    {
+      var testScenario = _TreenumerableTestDataFactory.GetTestScenario(testIndex, testScenarioIndex);
 
-      // Act
-      Debug.WriteLine($"{Environment.NewLine}-----Actual Values-----");
-      var actual =
-        treenumerable
-        .GetBreadthFirstTraversal(testScenario.TraversalStrategySelector)
-        .Do(visit => Debug.WriteLine(visit))
-        .ToArray();
-
-      // Assert
-      CollectionAssert.AreEqual(expected, actual);
+      TestMethods
+      .TraversalTest(
+        treeString,
+        testScenario.TreenumerableMap,
+        testScenario.TraversalStrategySelector,
+        testScenario.ExpectedBreadthFirstResults,
+        true,
+        false);
     }
   }
 }
