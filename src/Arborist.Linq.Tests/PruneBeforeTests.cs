@@ -213,7 +213,7 @@ namespace Arborist.Linq.Tests
         treeString,
         testScenario.TreenumerableMap,
         testScenario.TraversalStrategySelector,
-        testScenario.ExpectedBreadthFirstResults,
+        testScenario.ExpectedDepthFirstResults,
         true,
         true);
     }
@@ -253,7 +253,7 @@ namespace Arborist.Linq.Tests
         treeString,
         testScenario.TreenumerableMap,
         testScenario.TraversalStrategySelector,
-        testScenario.ExpectedBreadthFirstResults,
+        testScenario.ExpectedDepthFirstResults,
         true,
         false);
     }
