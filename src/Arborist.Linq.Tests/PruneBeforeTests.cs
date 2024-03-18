@@ -44,6 +44,30 @@ namespace Arborist.Linq.Tests
           }
         },
 
+        // Three levels, one node per level
+        new TreeTestDefinition
+        {
+          TreeString = "a(b(c))",
+          TestScenarios = new List<TestScenario>
+          {
+            // Skip node
+            new TestScenario
+            {
+              TraversalStrategySelector = visit => visit.OriginalPosition.Depth == 0 ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
+              TreenumerableMap = treenumerable => treenumerable.PruneBefore(visit => visit.OriginalPosition.Depth == 1),
+              Description = "Prune before level 1, skip root node",
+              ExpectedBreadthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+              }.ToNodeVisitArray(),
+              ExpectedDepthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+              }.ToNodeVisitArray()
+            },
+          }
+        },
+
         // Two-level complete ternary tree.
         new TreeTestDefinition
         {
