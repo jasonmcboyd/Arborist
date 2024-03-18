@@ -172,15 +172,15 @@ namespace Arborist.Linq.Tests
               Description = "Where !a, Skip b subtree",
               ExpectedBreadthFirstResults = new[]
               {
-                (TreenumeratorMode.SchedulingNode, "b", 0, (1, 0), (0, 0)),
-                (TreenumeratorMode.SchedulingNode, "c", 0, (2, 0), (1, 0)),
-                (TreenumeratorMode.VisitingNode,   "c", 0, (2, 0), (1, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (0, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (1, 0), (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "c", 0, (1, 0), (0, 0)),
               }.ToNodeVisitArray(),
               ExpectedDepthFirstResults = new[]
               {
-                (TreenumeratorMode.SchedulingNode, "b", 0, (1, 0), (0, 0)),
-                (TreenumeratorMode.SchedulingNode, "c", 0, (2, 0), (1, 0)),
-                (TreenumeratorMode.VisitingNode,   "c", 0, (2, 0), (1, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (0, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (1, 0), (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "c", 0, (1, 0), (0, 0)),
               }.ToNodeVisitArray()
             },
           }
@@ -222,7 +222,7 @@ namespace Arborist.Linq.Tests
         treeString,
         testScenario.TreenumerableMap,
         testScenario.TraversalStrategySelector,
-        testScenario.ExpectedBreadthFirstResults,
+        testScenario.ExpectedDepthFirstResults,
         true,
         true);
     }
@@ -262,7 +262,7 @@ namespace Arborist.Linq.Tests
         treeString,
         testScenario.TreenumerableMap,
         testScenario.TraversalStrategySelector,
-        testScenario.ExpectedBreadthFirstResults,
+        testScenario.ExpectedDepthFirstResults,
         true,
         false);
     }
