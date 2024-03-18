@@ -94,15 +94,7 @@ namespace Arborist.Treenumerators
 
         _CurrentLevel[0].VisitCount++;
 
-        if (_CurrentLevel[0].VisitCount != 2)
-          return null;
-
-        if (_CurrentLevel[0].OriginalPosition.Depth == -1)
-          return null;
-
-        UpdateStateFromVirtualNodeVisit(_CurrentLevel[0]);
-
-        return true;
+        return null;
       }
 
       if (traversalStrategy == TraversalStrategy.SkipSubtree)
@@ -112,16 +104,7 @@ namespace Arborist.Treenumerators
 
         _CurrentLevel[0].VisitCount++;
 
-        if (_ChildrenStack.Count == 0
-          && _CurrentLevel[0].VisitCount != 2)
-          return null;
-
-        if (_CurrentLevel[0].OriginalPosition.Depth == -1)
-          return null;
-
-        UpdateStateFromVirtualNodeVisit(_CurrentLevel[0]);
-
-        return true;
+        return null;
       }
 
       scheduledVisit.Mode = TreenumeratorMode.VisitingNode;
