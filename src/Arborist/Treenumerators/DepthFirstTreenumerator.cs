@@ -233,12 +233,7 @@ namespace Arborist.Treenumerators
 
         parentVisit.VisitCount++;
 
-        if (parentVisit.VisitCount != 2)
-          return null;
-
-        UpdateStateFromVirtualNodeVisit(parentVisit);
-
-        return true;
+        return null;
       }
 
       previousVisit.VisitCount++;
@@ -371,14 +366,6 @@ namespace Arborist.Treenumerators
             ReturnVirtualNodeVisit(visit);
             continue;
           }
-        }
-
-        if (visit.VisitCount == 1)
-        {
-          visit.VisitCount++;
-          UpdateStateFromVirtualNodeVisit(visit);
-          _Stack.Push(visit);
-          return true;
         }
 
         if (_MostRecentDepthTraversed > visit.OriginalPosition.Depth)
