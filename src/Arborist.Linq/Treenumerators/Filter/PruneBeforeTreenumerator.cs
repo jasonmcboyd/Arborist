@@ -17,6 +17,8 @@ namespace Arborist.Linq.Treenumerators
 
     private readonly Func<NodeVisit<TNode>, bool> _Predicate;
 
+    private int _SkippedSiblingCount = 0;
+
     protected override bool OnMoveNext(TraversalStrategy traversalStrategy)
     {
       if (Mode == TreenumeratorMode.EnumerationFinished)
@@ -40,6 +42,8 @@ namespace Arborist.Linq.Treenumerators
           return true;
         }
 
+        _SkippedSiblingCount++;
+
         traversalStrategy = TraversalStrategy.SkipSubtree;
       }
 
@@ -55,10 +59,9 @@ namespace Arborist.Linq.Treenumerators
       {
         Node = InnerTreenumerator.Node;
         VisitCount = InnerTreenumerator.VisitCount;
-        OriginalPosition = InnerTreenumerator.OriginalPosition;
+        OriginalPosition = InnerTreenumerator.OriginalPosition + (-_SkippedSiblingCount, 0);
         Position = InnerTreenumerator.Position;
       }
     }
   }
 }
-

@@ -173,6 +173,41 @@ namespace Arborist.Linq.Tests
           }
         },
 
+        new TreeTestDefinition
+        {
+          TreeString = "a,b(d),c",
+          TestScenarios = new List<TestScenario>
+          {
+            // No skipping
+            new TestScenario
+            {
+              TraversalStrategySelector = visit => visit.Node == "b" ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
+              TreenumerableMap = treenumerable => treenumerable.PruneAfter(_ => false),
+              Description = "Prune after none, skio level 0 sibling 1 node",
+              ExpectedBreadthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (1, 0), (1, 0)),
+                (TreenumeratorMode.SchedulingNode, "d", 0, (0, 1), (1, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (2, 0), (2, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "d", 1, (0, 1), (1, 0)),
+                (TreenumeratorMode.VisitingNode,   "c", 1, (2, 0), (2, 0)),
+              }.ToNodeVisitArray(),
+              ExpectedDepthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (1, 0), (1, 0)),
+                (TreenumeratorMode.SchedulingNode, "d", 0, (0, 1), (1, 0)),
+                (TreenumeratorMode.VisitingNode,   "d", 1, (0, 1), (1, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (2, 0), (2, 0)),
+                (TreenumeratorMode.VisitingNode,   "c", 1, (2, 0), (2, 0)),
+              }.ToNodeVisitArray()
+            },
+          }
+        },
+
         // Three root nodes, no children.
         new TreeTestDefinition
         {
