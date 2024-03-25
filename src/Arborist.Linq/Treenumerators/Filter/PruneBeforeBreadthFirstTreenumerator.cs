@@ -5,10 +5,10 @@ using System.Collections.Generic;
 
 namespace Arborist.Linq.Treenumerators
 {
-  internal class PruneBeforeTreenumerator<TNode>
+  internal class PruneBeforeBreadthFirstTreenumerator<TNode>
     : TreenumeratorWrapper<TNode>
   {
-    public PruneBeforeTreenumerator(
+    public PruneBeforeBreadthFirstTreenumerator(
       ITreenumerator<TNode> innerTreenumerator,
       Func<NodeVisit<TNode>, bool> predicate)
       : base(innerTreenumerator)
