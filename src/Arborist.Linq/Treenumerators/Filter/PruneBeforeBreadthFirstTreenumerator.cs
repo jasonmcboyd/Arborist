@@ -1,7 +1,8 @@
 ﻿using Arborist.Core;
 using Arborist.Linq.Extensions;
+using Nito.Collections;
 using System;
-using System.Collections.Generic;
+using System.Linq;
 
 namespace Arborist.Linq.Treenumerators
 {
@@ -14,11 +15,14 @@ namespace Arborist.Linq.Treenumerators
       : base(innerTreenumerator)
     {
       _Predicate = predicate;
+      _SkippedSiblingCounts.AddToBack(0);
     }
 
     private readonly Func<NodeVisit<TNode>, bool> _Predicate;
 
-    private List<int> _SkippedSiblingsCount = new List<int>();
+    private Deque<int> _SkippedSiblingCounts = new Deque<int>();
+
+    private int _CurrentNodesSkippedChildrenCount = 0;
 
     protected override bool OnMoveNext(TraversalStrategy traversalStrategy)
     {
@@ -33,33 +37,44 @@ namespace Arborist.Linq.Treenumerators
 
     private bool InnerTreenumeratorMoveNext(TraversalStrategy traversalStrategy)
     {
-      var currentDepth =
-        Mode == TreenumeratorMode.EnumerationNotStarted
-        ? -1
-        : InnerTreenumerator.OriginalPosition.Depth;
+      var adjustedTraversalStrategy = traversalStrategy;
+
+      if (traversalStrategy == TraversalStrategy.SkipSubtree
+        && InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode
+        && InnerTreenumerator.OriginalPosition.Depth == 0)
+      {
+        _SkippedSiblingCounts.RemoveFromBack();
+      }
 
       while (InnerTreenumerator.MoveNext(traversalStrategy))
       {
-        if (InnerTreenumerator.OriginalPosition.Depth < currentDepth)
+        adjustedTraversalStrategy = traversalStrategy;
+
+        if (InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode)
         {
-          _SkippedSiblingsCount.RemoveAt(_SkippedSiblingsCount.Count - 1);
+          var skipped = _Predicate(InnerTreenumerator.ToNodeVisit());
+
+          if (skipped)
+          {
+            _CurrentNodesSkippedChildrenCount++;
+            traversalStrategy = TraversalStrategy.SkipSubtree;
+            continue;
+          }
+          else
+          {
+            _SkippedSiblingCounts.AddToBack(_CurrentNodesSkippedChildrenCount);
+          }
         }
-        else if (InnerTreenumerator.OriginalPosition.Depth > currentDepth)
+        else if (InnerTreenumerator.VisitCount < 2)
         {
-          _SkippedSiblingsCount.Add(0);
+          _SkippedSiblingCounts.RemoveFromFront();
+          _CurrentNodesSkippedChildrenCount = 0;
         }
 
-        if (InnerTreenumerator.Mode == TreenumeratorMode.VisitingNode
-          || !_Predicate(InnerTreenumerator.ToNodeVisit()))
-        {
-          UpdateState();
 
-          return true;
-        }
+        UpdateState();
 
-        _SkippedSiblingsCount[InnerTreenumerator.OriginalPosition.Depth]++;
-
-        traversalStrategy = TraversalStrategy.SkipSubtree;
+        return true;
       }
 
       UpdateState();
@@ -70,11 +85,17 @@ namespace Arborist.Linq.Treenumerators
     private void UpdateState()
     {
       Mode = InnerTreenumerator.Mode;
+
       if (Mode != TreenumeratorMode.EnumerationFinished)
       {
+        var skippedSiblingsCount =
+          InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode
+          ? _SkippedSiblingCounts.Last()
+          : _SkippedSiblingCounts[0];
+
         Node = InnerTreenumerator.Node;
         VisitCount = InnerTreenumerator.VisitCount;
-        OriginalPosition = InnerTreenumerator.OriginalPosition + (-_SkippedSiblingsCount[InnerTreenumerator.OriginalPosition.Depth], 0);
+        OriginalPosition = InnerTreenumerator.OriginalPosition + (-skippedSiblingsCount, 0);
         Position = InnerTreenumerator.Position;
       }
     }
