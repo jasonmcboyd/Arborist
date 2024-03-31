@@ -14,7 +14,7 @@ namespace Arborist.Linq
         TreenumerableFactory.Create(
           source,
           breadthFirstEnumerator => new PruneBeforeBreadthFirstTreenumerator<T>(breadthFirstEnumerator, visit => predicate(visit)),
-          depthFirstEnumerator => new PruneBeforeTreenumerator<T>(depthFirstEnumerator, visit => predicate(visit)));
+          depthFirstEnumerator => new PruneBeforeDepthFirstTreenumerator<T>(depthFirstEnumerator, visit => predicate(visit)));
 
       return result;
     }
