@@ -4,10 +4,10 @@ using System;
 
 namespace Arborist.Linq.Treenumerators
 {
-  internal class WhereTreenumerator<TNode>
+  internal class WhereDepthFirstTreenumerator<TNode>
     : TreenumeratorWrapper<TNode>
   {
-    public WhereTreenumerator(
+    public WhereDepthFirstTreenumerator(
       ITreenumerator<TNode> innerTreenumerator,
       Func<NodeVisit<TNode>, bool> predicate)
       : base(innerTreenumerator)
@@ -71,5 +71,3 @@ namespace Arborist.Linq.Treenumerators
     }
   }
 }
-
-

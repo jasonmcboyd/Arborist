@@ -202,18 +202,18 @@ namespace Arborist.Linq.Tests
             {
               TraversalStrategySelector = visit => visit.Node == "b" ? TraversalStrategy.SkipSubtree : TraversalStrategy.TraverseSubtree,
               TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.Node != "a"),
-              Description = "Where !a, Skip b subtree",
+              Description = "Where not a, Skip b subtree",
               ExpectedBreadthFirstResults = new[]
               {
                 (TreenumeratorMode.SchedulingNode, "b", 0, (0, 0), (0, 0)),
                 (TreenumeratorMode.SchedulingNode, "c", 0, (1, 0), (0, 0)),
-                (TreenumeratorMode.VisitingNode,   "c", 0, (1, 0), (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "c", 1, (1, 0), (0, 0)),
               }.ToNodeVisitArray(),
               ExpectedDepthFirstResults = new[]
               {
                 (TreenumeratorMode.SchedulingNode, "b", 0, (0, 0), (0, 0)),
                 (TreenumeratorMode.SchedulingNode, "c", 0, (1, 0), (0, 0)),
-                (TreenumeratorMode.VisitingNode,   "c", 0, (1, 0), (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "c", 1, (1, 0), (0, 0)),
               }.ToNodeVisitArray()
             },
           }
