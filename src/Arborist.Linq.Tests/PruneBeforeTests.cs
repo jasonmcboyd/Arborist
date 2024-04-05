@@ -163,6 +163,50 @@ namespace Arborist.Linq.Tests
             },
             new TestScenario
             {
+              TraversalStrategySelector = visit => visit.Node == "c" ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
+              TreenumerableMap = treenumerable => treenumerable.PruneBefore(visit => visit.Node == "b"),
+              Description = "Prune before level 1 sibling 0, skip level 1 sibling 1 node",
+              ExpectedBreadthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (0, 1), (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "d", 0, (1, 1), (1, 1)),
+                (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0), (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "d", 1, (1, 1), (1, 1)),
+              }.ToNodeVisitArray(),
+              ExpectedDepthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (0, 1), (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "d", 0, (1, 1), (0, 1)),
+                (TreenumeratorMode.VisitingNode,   "d", 1, (1, 1), (0, 1)),
+                (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0), (0, 0)),
+              }.ToNodeVisitArray()
+            },
+            new TestScenario
+            {
+              TraversalStrategySelector = visit => visit.OriginalPosition.Depth == 1 ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
+              TreenumerableMap = treenumerable => treenumerable.PruneBefore(visit => visit.Node == "b"),
+              Description = "Prune before level 1 sibling 0, skip level 1 nodes",
+              ExpectedBreadthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (0, 1), (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "d", 0, (1, 1), (0, 1)),
+              }.ToNodeVisitArray(),
+              ExpectedDepthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (0, 1), (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "d", 0, (1, 1), (0, 1)),
+              }.ToNodeVisitArray()
+            },
+            new TestScenario
+            {
               TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
               TreenumerableMap = treenumerable => treenumerable.PruneBefore(visit => visit.Node == "c"),
               Description = "Prune before level 1 sibling 1, traverse all",
@@ -187,6 +231,33 @@ namespace Arborist.Linq.Tests
                 (TreenumeratorMode.SchedulingNode, "d", 0, (1, 1), (1, 1)),
                 (TreenumeratorMode.VisitingNode,   "d", 1, (1, 1), (1, 1)),
                 (TreenumeratorMode.VisitingNode,   "a", 3, (0, 0), (0, 0)),
+              }.ToNodeVisitArray()
+            },
+          }
+        },
+
+        new TreeTestDefinition
+        {
+          TreeString = "a(d),b(e),c(f)",
+          TestScenarios = new List<TestScenario>
+          {
+            // No skipping
+            new TestScenario
+            {
+              TraversalStrategySelector = visit => TraversalStrategy.SkipNode,
+              TreenumerableMap = treenumerable => treenumerable.PruneBefore(visit => visit.OriginalPosition.Depth == 1),
+              Description = "Prune before level 1, skip all nodes",
+              ExpectedBreadthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (1, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (2, 0), (0, 0)),
+              }.ToNodeVisitArray(),
+              ExpectedDepthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (1, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (2, 0), (0, 0)),
               }.ToNodeVisitArray()
             },
           }
@@ -370,6 +441,61 @@ namespace Arborist.Linq.Tests
                 (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
                 (TreenumeratorMode.SchedulingNode, "c", 0, (1, 0), (0, 0)),
                 (TreenumeratorMode.VisitingNode,   "c", 1, (1, 0), (0, 0)),
+              }.ToNodeVisitArray()
+            },
+            // Skip node
+            new TestScenario
+            {
+              TraversalStrategySelector = visit => visit.Node == "a" ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
+              TreenumerableMap = treenumerable => treenumerable.PruneBefore(visit => visit.Node == "b"),
+              Description = "Prune before 'b', skip 'a' node",
+              ExpectedBreadthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (1, 0), (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "c", 1, (1, 0), (0, 0)),
+              }.ToNodeVisitArray(),
+              ExpectedDepthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (1, 0), (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "c", 1, (1, 0), (0, 0)),
+              }.ToNodeVisitArray()
+            },
+            new TestScenario
+            {
+              TraversalStrategySelector = visit => visit.Node == "b" ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
+              TreenumerableMap = treenumerable => treenumerable.PruneBefore(visit => visit.Node == "a"),
+              Description = "Prune before 'a', skip 'b' node",
+              ExpectedBreadthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "b", 0, (0, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (1, 0), (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "c", 1, (1, 0), (0, 0)),
+              }.ToNodeVisitArray(),
+              ExpectedDepthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "b", 0, (0, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (1, 0), (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "c", 1, (1, 0), (0, 0)),
+              }.ToNodeVisitArray()
+            },
+            new TestScenario
+            {
+              TraversalStrategySelector = visit => TraversalStrategy.SkipNode,
+              TreenumerableMap = treenumerable => treenumerable.PruneBefore(visit => false),
+              Description = "Prune before none, skip all nodes",
+              ExpectedBreadthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (1, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (2, 0), (0, 0)),
+              }.ToNodeVisitArray(),
+              ExpectedDepthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (1, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (2, 0), (0, 0)),
               }.ToNodeVisitArray()
             },
           }

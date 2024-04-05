@@ -70,6 +70,7 @@ namespace Arborist.Linq.Treenumerators
     private void UpdateState()
     {
       Mode = InnerTreenumerator.Mode;
+
       if (Mode != TreenumeratorMode.EnumerationFinished)
       {
         Node = InnerTreenumerator.Node;

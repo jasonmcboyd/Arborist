@@ -65,7 +65,8 @@ namespace Arborist.Linq.Treenumerators
             _SkippedSiblingCounts.AddToBack(_CurrentNodesSkippedChildrenCount);
           }
         }
-        else if (InnerTreenumerator.VisitCount < 2)
+        else if (InnerTreenumerator.VisitCount == 1)
+          //&& InnerTreenumerator.Position.Depth > 0)
         {
           _SkippedSiblingCounts.RemoveFromFront();
           _CurrentNodesSkippedChildrenCount = 0;
