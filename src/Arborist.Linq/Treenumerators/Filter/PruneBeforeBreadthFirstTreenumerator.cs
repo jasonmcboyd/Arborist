@@ -37,8 +37,6 @@ namespace Arborist.Linq.Treenumerators
 
     private bool InnerTreenumeratorMoveNext(TraversalStrategy traversalStrategy)
     {
-      var adjustedTraversalStrategy = traversalStrategy;
-
       var previousNodeSkipped =
         InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode
         && traversalStrategy == TraversalStrategy.SkipNode;
@@ -60,8 +58,6 @@ namespace Arborist.Linq.Treenumerators
 
       while (InnerTreenumerator.MoveNext(traversalStrategy))
       {
-        adjustedTraversalStrategy = traversalStrategy;
-
         if (InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode)
         {
           var skipped = _Predicate(InnerTreenumerator.ToNodeVisit());
@@ -82,7 +78,6 @@ namespace Arborist.Linq.Treenumerators
           _SkippedSiblingsCounts.RemoveFromFront();
           _CurrentNodesSkippedChildrenCount = 0;
         }
-
 
         UpdateState();
 
