@@ -15,12 +15,12 @@ namespace Arborist.Linq.Treenumerators
       : base(innerTreenumerator)
     {
       _Predicate = predicate;
-      _SkippedSiblingCounts.AddToBack(0);
+      _SkippedSiblingsCounts.AddToBack(0);
     }
 
     private readonly Func<NodeVisit<TNode>, bool> _Predicate;
 
-    private Deque<int> _SkippedSiblingCounts = new Deque<int>();
+    private Deque<int> _SkippedSiblingsCounts = new Deque<int>();
 
     private int _CurrentNodesSkippedChildrenCount = 0;
 
@@ -39,12 +39,24 @@ namespace Arborist.Linq.Treenumerators
     {
       var adjustedTraversalStrategy = traversalStrategy;
 
-      if (traversalStrategy == TraversalStrategy.SkipSubtree
-        && InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode
+      var previousNodeSkipped =
+        InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode
+        && traversalStrategy == TraversalStrategy.SkipNode;
+
+      var previousSubtreeSkipped =
+        InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode
+        && traversalStrategy == TraversalStrategy.SkipSubtree;
+
+      if ((previousSubtreeSkipped || previousNodeSkipped)
         && InnerTreenumerator.OriginalPosition.Depth == 0)
       {
-        _SkippedSiblingCounts.RemoveFromBack();
+        _SkippedSiblingsCounts.RemoveFromBack();
       }
+
+      var previousDepth =
+        InnerTreenumerator.Mode == TreenumeratorMode.EnumerationNotStarted
+        ? -1
+        : InnerTreenumerator.OriginalPosition.Depth;
 
       while (InnerTreenumerator.MoveNext(traversalStrategy))
       {
@@ -62,13 +74,12 @@ namespace Arborist.Linq.Treenumerators
           }
           else
           {
-            _SkippedSiblingCounts.AddToBack(_CurrentNodesSkippedChildrenCount);
+            _SkippedSiblingsCounts.AddToBack(_CurrentNodesSkippedChildrenCount);
           }
         }
         else if (InnerTreenumerator.VisitCount == 1)
-          //&& InnerTreenumerator.Position.Depth > 0)
         {
-          _SkippedSiblingCounts.RemoveFromFront();
+          _SkippedSiblingsCounts.RemoveFromFront();
           _CurrentNodesSkippedChildrenCount = 0;
         }
 
@@ -91,8 +102,8 @@ namespace Arborist.Linq.Treenumerators
       {
         var skippedSiblingsCount =
           InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode
-          ? _SkippedSiblingCounts.Last()
-          : _SkippedSiblingCounts[0];
+          ? _SkippedSiblingsCounts.Last()
+          : _SkippedSiblingsCounts[0];
 
         Node = InnerTreenumerator.Node;
         VisitCount = InnerTreenumerator.VisitCount;
