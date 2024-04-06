@@ -24,6 +24,8 @@ namespace Arborist.Linq.Treenumerators
 
     private int _CurrentNodesSkippedChildrenCount = 0;
 
+    private int _PrunedRootNodesCount = 0;
+
     protected override bool OnMoveNext(TraversalStrategy traversalStrategy)
     {
       if (Mode == TreenumeratorMode.EnumerationFinished)
@@ -64,12 +66,21 @@ namespace Arborist.Linq.Treenumerators
 
           if (skipped)
           {
+            if (InnerTreenumerator.OriginalPosition.Depth == 0)
+              _PrunedRootNodesCount++;
+
             _CurrentNodesSkippedChildrenCount++;
             traversalStrategy = TraversalStrategy.SkipSubtree;
             continue;
           }
           else
           {
+            if (InnerTreenumerator.Position.Depth == 0
+              && previousDepth == 0)
+            {
+              _CurrentNodesSkippedChildrenCount = _PrunedRootNodesCount; 
+            }
+
             _SkippedSiblingsCounts.AddToBack(_CurrentNodesSkippedChildrenCount);
           }
         }

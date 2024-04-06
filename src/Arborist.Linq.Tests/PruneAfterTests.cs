@@ -72,6 +72,50 @@ namespace Arborist.Linq.Tests
           }
         },
 
+        new TreeTestDefinition
+        {
+          TreeString = "a(b(e),c(f),d(g))",
+          TestScenarios = new List<TestScenario>
+          {
+            // Skip node
+            new TestScenario
+            {
+              TraversalStrategySelector = visit => visit.OriginalPosition.Depth == 0 ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
+              TreenumerableMap = treenumerable => treenumerable.PruneAfter(visit => visit.OriginalPosition.Depth == 0),
+              Description = "prune after level 0, skip level 0 nodes",
+              ExpectedBreadthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+              }.ToNodeVisitArray(),
+              ExpectedDepthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+              }.ToNodeVisitArray()
+            },
+            new TestScenario
+            {
+              TraversalStrategySelector = visit => visit.OriginalPosition.Depth == 1 ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
+              TreenumerableMap = treenumerable => treenumerable.PruneAfter(visit => visit.OriginalPosition.Depth == 1),
+              Description = "prune after level 1, skip level 1 nodes",
+              ExpectedBreadthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (0, 1), (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (1, 1), (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "d", 0, (2, 1), (0, 1)),
+              }.ToNodeVisitArray(),
+              ExpectedDepthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (0, 1), (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (1, 1), (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "d", 0, (2, 1), (0, 1)),
+              }.ToNodeVisitArray()
+            },
+          }
+        },
         // Two-level complete ternary tree.
         new TreeTestDefinition
         {
