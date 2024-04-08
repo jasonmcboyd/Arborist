@@ -224,16 +224,26 @@ namespace Arborist.Treenumerators
 
           return true;
         }
-        else
-        {
-          ReturnVirtualNodeVisit(previousVisit);
-        }
 
-        var parentVisit = _Stack.Peek();
+        // TODO:
+        ReturnVirtualNodeVisit(previousVisit);
 
-        parentVisit.VisitCount++;
+        return MoveUpTheTreeStack();
+        //else
+        //{
+        //  ReturnVirtualNodeVisit(previousVisit);
 
-        return null;
+        //  var onMoveUpTheTreeStack = MoveUpTheTreeStack();
+
+        //  if (onMoveUpTheTreeStack.HasValue)
+        //    return onMoveUpTheTreeStack.Value;
+        //}
+
+        //var parentVisit = _Stack.Peek();
+
+        //parentVisit.VisitCount++;
+
+        //return null;
       }
 
       previousVisit.VisitCount++;
@@ -349,7 +359,8 @@ namespace Arborist.Treenumerators
 
             _Stack.Push(visit);
 
-            if (parentVisit.Position.Depth == -1)
+            if (parentVisit.Position.Depth == -1
+              || _MostRecentDepthTraversed <= parentVisit.OriginalPosition.Depth + 1)
             {
               UpdateStateFromVirtualNodeVisit(visit);
             }

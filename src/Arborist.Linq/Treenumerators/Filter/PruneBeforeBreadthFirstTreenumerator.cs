@@ -75,7 +75,7 @@ namespace Arborist.Linq.Treenumerators
           }
           else
           {
-            if (InnerTreenumerator.Position.Depth == 0
+            if (InnerTreenumerator.OriginalPosition.Depth == 0
               && previousDepth == 0)
             {
               _CurrentNodesSkippedChildrenCount = _PrunedRootNodesCount; 
