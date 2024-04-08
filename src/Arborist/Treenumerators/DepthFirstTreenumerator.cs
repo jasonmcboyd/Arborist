@@ -225,25 +225,9 @@ namespace Arborist.Treenumerators
           return true;
         }
 
-        // TODO:
         ReturnVirtualNodeVisit(previousVisit);
 
         return MoveUpTheTreeStack();
-        //else
-        //{
-        //  ReturnVirtualNodeVisit(previousVisit);
-
-        //  var onMoveUpTheTreeStack = MoveUpTheTreeStack();
-
-        //  if (onMoveUpTheTreeStack.HasValue)
-        //    return onMoveUpTheTreeStack.Value;
-        //}
-
-        //var parentVisit = _Stack.Peek();
-
-        //parentVisit.VisitCount++;
-
-        //return null;
       }
 
       previousVisit.VisitCount++;
