@@ -1,8 +1,7 @@
 ﻿using Arborist.Core;
-using Arborist.Linq.Treenumerators.Memoize;
 using System;
 
-namespace Arborist.Linq.Treenumerators
+namespace Arborist.Linq.Experimental.Treenumerators
 {
   internal class MemoizeTreenumerator<TNode> : TreenumeratorBase<TNode>
   {

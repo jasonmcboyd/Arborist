@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Arborist.Linq.Treenumerators
+namespace Arborist.Linq.Experimental.Treenumerators
 {
   internal class GraftDepthFirstTreenumerator<TInner, TNode>
     : TreenumeratorWrapper<TInner, TNode>

@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Arborist.Linq
+namespace Arborist.Linq.Experimental
 {
   public static partial class Treenumerable
   {

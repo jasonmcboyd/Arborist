@@ -1,7 +1,7 @@
 ﻿using Arborist.Core;
-using Arborist.Linq.Treenumerables;
+using Arborist.Linq.Experimental.Treenumerables;
 
-namespace Arborist.Linq
+namespace Arborist.Linq.Experimental
 {
   public static partial class Treenumerable
   {

@@ -1,9 +1,9 @@
 ﻿using Arborist.Core;
+using Arborist.Linq.Experimental.Treenumerators;
 using Arborist.Linq.Treenumerables;
-using Arborist.Linq.Treenumerators;
 using System;
 
-namespace Arborist.Linq
+namespace Arborist.Linq.Experimental
 {
   public static partial class Treenumerable
   {

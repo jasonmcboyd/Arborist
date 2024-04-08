@@ -1,7 +1,7 @@
 ﻿using Arborist.Core;
 using System;
 
-namespace Arborist.Linq.Treenumerators.Memoize
+namespace Arborist.Linq.Experimental.Treenumerators
 {
   internal struct MoveNextResult<TNode>
   {

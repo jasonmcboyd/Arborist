@@ -1,10 +1,9 @@
 ﻿using Arborist.Core;
-using Arborist.Linq.Treenumerators;
-using Arborist.Linq.Treenumerators.Memoize;
+using Arborist.Linq.Experimental.Treenumerators;
 using System;
 using System.Collections.Generic;
 
-namespace Arborist.Linq.Treenumerables
+namespace Arborist.Linq.Experimental.Treenumerables
 {
   internal class MemoizeTreenumerable<TNode> : ITreenumerableBuffer<TNode>
   {
