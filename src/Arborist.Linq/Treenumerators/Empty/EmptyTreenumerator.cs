@@ -10,12 +10,12 @@ namespace Arborist.Linq
 
     public static EmptyTreenumerator<TNode> Instance { get; } = new EmptyTreenumerator<TNode>();
 
-    public TNode Node => default;
+    public TNode Node { get; } = default;
     public int VisitCount => default;
     public NodePosition OriginalPosition => (0, -1);
     public NodePosition Position => (0, -1);
     public TraversalStrategy TraversalStrategy => default;
-    public TreenumeratorMode Mode { get; private set; } = default;
+    public TreenumeratorMode Mode => default;
 
     public bool MoveNext(TraversalStrategy traversalStrategy) => false;
 
