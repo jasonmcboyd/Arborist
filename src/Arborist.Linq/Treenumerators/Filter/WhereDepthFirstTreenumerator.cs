@@ -22,7 +22,7 @@ namespace Arborist.Linq.Treenumerators
 
     protected override bool OnMoveNext(TraversalStrategy traversalStrategy)
     {
-      if (Mode == TreenumeratorMode.EnumerationFinished)
+      if (EnumerationFinished)
         return false;
 
       if (Mode == TreenumeratorMode.VisitingNode)
@@ -35,10 +35,12 @@ namespace Arborist.Linq.Treenumerators
     {
       var adjustedTraversalStrategy = traversalStrategy;
 
-      var currentDepth =
-        Mode == TreenumeratorMode.EnumerationNotStarted
-        ? -1
-        : InnerTreenumerator.Position.Depth;
+      // TODO:
+      //var currentDepth =
+      //  Mode == TreenumeratorMode.EnumerationNotStarted
+      //  ? -1
+      //  : InnerTreenumerator.Position.Depth;
+      var currentDepth = InnerTreenumerator.Position.Depth;
 
       while (InnerTreenumerator.MoveNext(adjustedTraversalStrategy))
       {
@@ -89,7 +91,7 @@ namespace Arborist.Linq.Treenumerators
 
       var depthDelta = InnerTreenumerator.OriginalPosition.Depth - _SkippedSiblingsCount.Count;
 
-      if (Mode != TreenumeratorMode.EnumerationFinished)
+      if (!EnumerationFinished)
       {
         Node = InnerTreenumerator.Node;
         VisitCount = InnerTreenumerator.VisitCount;

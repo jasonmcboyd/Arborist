@@ -41,10 +41,7 @@ namespace Arborist.Treenumerators
 
     protected override bool OnMoveNext(TraversalStrategy traversalStrategy)
     {
-      if (Mode == TreenumeratorMode.EnumerationFinished)
-        return false;
-
-      if (Mode == TreenumeratorMode.EnumerationNotStarted)
+      if (OriginalPosition.Depth == -1)
         return OnStarting();
 
       while (true)
@@ -54,7 +51,8 @@ namespace Arborist.Treenumerators
 
         if (_CurrentLevel.Count == 0)
         {
-          Mode = TreenumeratorMode.EnumerationFinished;
+          EnumerationFinished = true;
+
           return false;
         }
 
@@ -162,7 +160,7 @@ namespace Arborist.Treenumerators
     {
       if (!_RootsEnumerator.MoveNext())
       {
-        OnEnumerationFinished();
+        EnumerationFinished = true;
 
         return false;
       }
@@ -198,11 +196,6 @@ namespace Arborist.Treenumerators
       UpdateStateFromVirtualNodeVisit(childVisit);
 
       return true;
-    }
-
-    private void OnEnumerationFinished()
-    {
-      Mode = TreenumeratorMode.EnumerationFinished;
     }
 
     private bool MoveToFirstChild(VirtualNodeVisit<TRootNode> visit) =>

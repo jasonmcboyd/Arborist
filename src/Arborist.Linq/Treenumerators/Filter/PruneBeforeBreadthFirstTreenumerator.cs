@@ -26,9 +26,11 @@ namespace Arborist.Linq.Treenumerators
 
     private int _PrunedRootNodesCount = 0;
 
+    private bool _EnumerationFinished = false;
+
     protected override bool OnMoveNext(TraversalStrategy traversalStrategy)
     {
-      if (Mode == TreenumeratorMode.EnumerationFinished)
+      if (_EnumerationFinished)
         return false;
 
       if (Mode == TreenumeratorMode.VisitingNode)
@@ -53,10 +55,12 @@ namespace Arborist.Linq.Treenumerators
         _SkippedSiblingsCounts.RemoveFromBack();
       }
 
-      var previousDepth =
-        InnerTreenumerator.Mode == TreenumeratorMode.EnumerationNotStarted
-        ? -1
-        : InnerTreenumerator.OriginalPosition.Depth;
+      // TODO:
+      //var previousDepth =
+      //  InnerTreenumerator.Mode == TreenumeratorMode.EnumerationNotStarted
+      //  ? -1
+      //  : InnerTreenumerator.OriginalPosition.Depth;
+      var previousDepth = InnerTreenumerator.OriginalPosition.Depth;
 
       while (InnerTreenumerator.MoveNext(traversalStrategy))
       {
@@ -104,7 +108,7 @@ namespace Arborist.Linq.Treenumerators
     {
       Mode = InnerTreenumerator.Mode;
 
-      if (Mode != TreenumeratorMode.EnumerationFinished)
+      if (!_EnumerationFinished)
       {
         var skippedSiblingsCount =
           InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode

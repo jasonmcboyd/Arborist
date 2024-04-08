@@ -19,7 +19,7 @@ namespace Arborist.Linq.Treenumerators
 
     protected override bool OnMoveNext(TraversalStrategy traversalStrategy)
     {
-      if (Mode == TreenumeratorMode.EnumerationFinished)
+      if (EnumerationFinished)
         return false;
 
       if (Mode == TreenumeratorMode.SchedulingNode)
@@ -56,7 +56,8 @@ namespace Arborist.Linq.Treenumerators
     private void UpdateState()
     {
       Mode = InnerTreenumerator.Mode;
-      if (Mode != TreenumeratorMode.EnumerationFinished)
+
+      if (!EnumerationFinished)
       {
         Node = InnerTreenumerator.Node;
         VisitCount = InnerTreenumerator.VisitCount;

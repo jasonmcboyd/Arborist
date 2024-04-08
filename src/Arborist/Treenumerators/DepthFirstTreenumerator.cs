@@ -7,7 +7,7 @@ using System.Linq;
 namespace Arborist.Treenumerators
 {
   internal sealed class DepthFirstTreenumerator<TRootNode, TNode>
-    : ITreenumerator<TNode>
+    : TreenumeratorBase<TNode>
   {
     public DepthFirstTreenumerator(
       IEnumerable<TRootNode> rootNodes,
@@ -35,19 +35,11 @@ namespace Arborist.Treenumerators
     private bool _HasCachedChild = false;
     private int _MostRecentDepthTraversed = -1;
 
-    public TraversalStrategy TraversalStrategy { get; private set; }
-    public TNode Node { get; private set; }
-    public int VisitCount { get; private set; }
-    public TreenumeratorMode Mode { get; private set; }
-    public NodePosition OriginalPosition { get; private set; }
-    public NodePosition Position { get; private set; }
+    private bool _EnumerationStarted => OriginalPosition.Depth != -1;
 
-    public bool MoveNext(TraversalStrategy traversalStrategy)
+    protected override bool OnMoveNext(TraversalStrategy traversalStrategy)
     {
-      if (Mode == TreenumeratorMode.EnumerationFinished)
-        return false;
-
-      if (Mode == TreenumeratorMode.EnumerationNotStarted)
+      if (!_EnumerationStarted)
         return OnStarting();
 
       while (true)
@@ -80,7 +72,7 @@ namespace Arborist.Treenumerators
     {
       if (!_RootsEnumerator.MoveNext())
       {
-        OnEnumerationFinished();
+        EnumerationFinished = true;
 
         return false;
       }
@@ -185,7 +177,7 @@ namespace Arborist.Treenumerators
             {
               ReturnVirtualNodeVisit(previousVisit);
 
-              OnEnumerationFinished();
+              EnumerationFinished = true;
 
               return false;
             }
@@ -322,7 +314,7 @@ namespace Arborist.Treenumerators
 
         if (visit.Position.Depth == -1)
         {
-          OnEnumerationFinished();
+          EnumerationFinished = true;
 
           return false;
         }
@@ -410,11 +402,6 @@ namespace Arborist.Treenumerators
       }
     }
 
-    private void OnEnumerationFinished()
-    {
-      Mode = TreenumeratorMode.EnumerationFinished;
-    }
-
     private VirtualNodeVisit<IEnumerator<TRootNode>> GetParentVisit()
     {
       if (_Stack.Count == 0
@@ -469,7 +456,7 @@ namespace Arborist.Treenumerators
       _NodeVisitPool.Return(virtualNodeVisit);
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
       while (_Stack.Count > 0)
         ReturnVirtualNodeVisit(_Stack.Pop());

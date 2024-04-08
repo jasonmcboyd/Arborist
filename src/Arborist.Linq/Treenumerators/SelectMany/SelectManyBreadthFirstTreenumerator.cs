@@ -27,10 +27,10 @@ namespace Arborist.Linq.Treenumerators
 
     protected override bool OnMoveNext(TraversalStrategy traversalStrategy)
     {
-      if (Mode == TreenumeratorMode.EnumerationFinished)
+      if (EnumerationFinished)
         return false;
 
-      if (Mode == TreenumeratorMode.EnumerationNotStarted)
+      if (OriginalPosition.Depth == -1)
         return OnStarting();
 
       if (_HasCachedVisit)
@@ -59,7 +59,8 @@ namespace Arborist.Linq.Treenumerators
     {
       if (!MoveNextInnerTreenumerator())
       {
-        Mode = TreenumeratorMode.EnumerationFinished;
+        EnumerationFinished = true;
+
         return false;
       }
 

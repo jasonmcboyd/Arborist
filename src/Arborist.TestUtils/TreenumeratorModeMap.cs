@@ -11,12 +11,8 @@ namespace Arborist.TestUtils
       {
         case 'S':
           return TreenumeratorMode.SchedulingNode;
-        case 'N':
-          return TreenumeratorMode.EnumerationNotStarted;
         case 'V':
           return TreenumeratorMode.VisitingNode;
-        case 'F':
-          return TreenumeratorMode.EnumerationFinished;
         default:
           throw new InvalidOperationException();
       }
@@ -27,12 +23,8 @@ namespace Arborist.TestUtils
       {
         case TreenumeratorMode.SchedulingNode:
           return 'S';
-        case TreenumeratorMode.EnumerationNotStarted:
-          return 'N';
         case TreenumeratorMode.VisitingNode:
           return 'V';
-        case TreenumeratorMode.EnumerationFinished:
-          return 'F';
         default:
           throw new InvalidOperationException();
       }

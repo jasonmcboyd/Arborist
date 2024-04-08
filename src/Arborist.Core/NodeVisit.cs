@@ -33,10 +33,6 @@ namespace Arborist.Core
     {
       switch (Mode)
       {
-        case TreenumeratorMode.EnumerationFinished:
-          return 'F';
-        case TreenumeratorMode.EnumerationNotStarted:
-          return 'N';
         case TreenumeratorMode.SchedulingNode:
           return 'S';
         case TreenumeratorMode.VisitingNode:
