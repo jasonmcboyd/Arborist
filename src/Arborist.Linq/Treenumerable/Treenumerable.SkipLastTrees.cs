@@ -10,6 +10,7 @@ namespace Arborist.Linq
       this ITreenumerable<T> source,
       int count)
     {
+
       var treeCount = source.GetRoots().Count();
 
       var takeCount = Math.Max(treeCount - count, 0);

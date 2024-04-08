@@ -1,17 +1,17 @@
 ﻿using Arborist.Core;
 using System;
 
-namespace Arborist.Linq.Treenumerators
+namespace Arborist.Linq.Experimental.Treenumerators
 {
-  internal class RepeatDepthFirstTreenumerator<TNode> : TreenumeratorBase<TNode>
+  internal class RepeatTreesDepthFirstTreenumerator<TNode> : TreenumeratorBase<TNode>
   {
-    public RepeatDepthFirstTreenumerator(
+    public RepeatTreesDepthFirstTreenumerator(
       ITreenumerable<TNode> treenumerable)
     {
       _Treenumerable = treenumerable;
     }
 
-    public RepeatDepthFirstTreenumerator(
+    public RepeatTreesDepthFirstTreenumerator(
       ITreenumerable<TNode> treenumerable,
       int count)
     {
