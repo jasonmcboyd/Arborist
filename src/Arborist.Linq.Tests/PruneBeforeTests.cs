@@ -572,8 +572,8 @@ namespace Arborist.Linq.Tests
                 (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
                 (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
                 (TreenumeratorMode.SchedulingNode, "b", 0, (0, 1), (0, 1)),
-                (TreenumeratorMode.SchedulingNode, "c", 0, (0, 1), (0, 1)),
-                (TreenumeratorMode.SchedulingNode, "d", 0, (0, 1), (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (1, 1), (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "d", 0, (2, 1), (0, 1)),
               }.ToNodeVisitArray(),
               ExpectedDepthFirstResults = new[]
               {
