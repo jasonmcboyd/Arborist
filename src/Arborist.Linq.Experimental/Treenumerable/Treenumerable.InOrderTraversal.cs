@@ -20,11 +20,15 @@ namespace Arborist.Linq.Experimental
       // constrain the problem enough that I can eliminate the ambiguity. After
       // some more thought I decided if I enforce the following rules:
       //
-      // Given a Tree *, a left rotation operation L, a right rotation operation R,
-      // and a in-order traversal operation IO, and the following rules:
-      //
       // 1. L(R(*)) = * = R(L(*))
       // 2. IO(L(*)) = IO(*) = IO(R(*))
+      //
+      // Where:
+      // -----------
+      // * is a tree
+      // L is the left rotation operation
+      // R is the right rotation operation
+      // IO is the in-order traversal operation
       //
       // These rules can be satisfied if the in-order traversal operation yields
       // the parent node after the first child subtree.
