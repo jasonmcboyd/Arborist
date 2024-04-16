@@ -35,11 +35,6 @@ namespace Arborist.Linq.Treenumerators
 
     private bool InnerTreenumeratorMoveNext(TraversalStrategy traversalStrategy)
     {
-      // TODO:
-      //var currentDepth =
-      //  Mode == TreenumeratorMode.EnumerationNotStarted
-      //  ? -1
-      //  : InnerTreenumerator.OriginalPosition.Depth;
       var currentDepth = InnerTreenumerator.OriginalPosition.Depth;
 
       while (InnerTreenumerator.MoveNext(traversalStrategy))
