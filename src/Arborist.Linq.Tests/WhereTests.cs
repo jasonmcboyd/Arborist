@@ -541,6 +541,30 @@ namespace Arborist.Linq.Tests
                 (TreenumeratorMode.VisitingNode,   "c", 2, (1, 0), (2, 0)),
               }.ToNodeVisitArray()
             },
+            new TestScenario
+            {
+              TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
+              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.OriginalPosition.Depth == 1),
+              Description = "Where level 1",
+              ExpectedBreadthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "d", 0, (0, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "e", 0, (1, 0), (1, 0)),
+                (TreenumeratorMode.SchedulingNode, "f", 0, (2, 0), (2, 0)),
+                (TreenumeratorMode.VisitingNode,   "d", 1, (0, 0), (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "e", 1, (1, 0), (1, 0)),
+                (TreenumeratorMode.VisitingNode,   "f", 1, (2, 0), (2, 0)),
+              }.ToNodeVisitArray(),
+              ExpectedDepthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "d", 0, (0, 0), (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "d", 1, (0, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "e", 0, (1, 0), (1, 0)),
+                (TreenumeratorMode.VisitingNode,   "e", 1, (1, 0), (1, 0)),
+                (TreenumeratorMode.SchedulingNode, "f", 0, (2, 0), (2, 0)),
+                (TreenumeratorMode.VisitingNode,   "f", 1, (2, 0), (2, 0)),
+              }.ToNodeVisitArray()
+            },
 
             // Skip subtree
             new TestScenario
