@@ -36,7 +36,8 @@ namespace Arborist.TestUtils
       }
 
       Debug.WriteLine("--------- Test Name ---------");
-      Debug.WriteLine($"{serializedTree} -> {testDescription}");
+      Debug.WriteLine(serializedTree);
+      Debug.WriteLine(testDescription);
 
       Debug.WriteLine($"{Environment.NewLine}---- Expected Values ----");
       NodeVisitsDebugWriter.WriteNodeVisitHeader();
