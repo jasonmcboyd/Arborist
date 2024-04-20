@@ -722,7 +722,7 @@ namespace Arborist.Linq.Tests
                 (TreenumeratorMode.SchedulingNode, "c", 0, (1, 0), (3, 0)),
                 (TreenumeratorMode.VisitingNode,   "d", 1, (0, 1), (0, 0)),
                 (TreenumeratorMode.VisitingNode,   "e", 1, (1, 1), (1, 0)),
-                (TreenumeratorMode.VisitingNode,   "f", 1, (1, 1), (2, 0)),
+                (TreenumeratorMode.VisitingNode,   "f", 1, (2, 1), (2, 0)),
                 (TreenumeratorMode.VisitingNode,   "c", 1, (1, 0), (3, 0)),
               }.ToNodeVisitArray(),
               ExpectedDepthFirstResults = new[]
