@@ -965,6 +965,7 @@ namespace Arborist.Linq.Tests
       TestMethods
       .TraversalTest(
         treeString,
+        testDescription,
         testScenario.TreenumerableMap,
         testScenario.TraversalStrategySelector,
         testScenario.ExpectedBreadthFirstResults,
@@ -985,6 +986,7 @@ namespace Arborist.Linq.Tests
       TestMethods
       .TraversalTest(
         treeString,
+        testDescription,
         testScenario.TreenumerableMap,
         testScenario.TraversalStrategySelector,
         testScenario.ExpectedDepthFirstResults,
@@ -1005,6 +1007,7 @@ namespace Arborist.Linq.Tests
       TestMethods
       .TraversalTest(
         treeString,
+        testDescription,
         testScenario.TreenumerableMap,
         testScenario.TraversalStrategySelector,
         testScenario.ExpectedBreadthFirstResults,
@@ -1025,6 +1028,7 @@ namespace Arborist.Linq.Tests
       TestMethods
       .TraversalTest(
         treeString,
+        testDescription,
         testScenario.TreenumerableMap,
         testScenario.TraversalStrategySelector,
         testScenario.ExpectedDepthFirstResults,

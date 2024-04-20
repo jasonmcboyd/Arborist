@@ -937,6 +937,29 @@ namespace Arborist.Linq.Tests
             new TestScenario
             {
               TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
+              TreenumerableMap = treenumerable => treenumerable.Where(_ => true),
+              Description = "Where all, traverse all",
+              ExpectedBreadthFirstResults = new[] {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (1, 0), (1, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (2, 0), (2, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "b", 1, (1, 0), (1, 0)),
+                (TreenumeratorMode.VisitingNode,   "c", 1, (2, 0), (2, 0)),
+              }.ToNodeVisitArray(),
+              ExpectedDepthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0), (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0), (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (1, 0), (1, 0)),
+                (TreenumeratorMode.VisitingNode,   "b", 1, (1, 0), (1, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (2, 0), (2, 0)),
+                (TreenumeratorMode.VisitingNode,   "c", 1, (2, 0), (2, 0)),
+              }.ToNodeVisitArray()
+            },
+            new TestScenario
+            {
+              TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
               TreenumerableMap = treenumerable => treenumerable.Where(_ => false),
               Description = "Where none, traverse all",
               ExpectedBreadthFirstResults = Array.Empty<NodeVisit<string>>(),
@@ -947,8 +970,7 @@ namespace Arborist.Linq.Tests
               TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
               TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.OriginalPosition.SiblingIndex != 0),
               Description = "Where not sibling 0, traverse all",
-              ExpectedBreadthFirstResults = new[]
-              {
+              ExpectedBreadthFirstResults = new[] {
                 (TreenumeratorMode.SchedulingNode, "b", 0, (0, 0), (0, 0)),
                 (TreenumeratorMode.SchedulingNode, "c", 0, (1, 0), (1, 0)),
                 (TreenumeratorMode.VisitingNode,   "b", 1, (0, 0), (0, 0)),
@@ -982,6 +1004,7 @@ namespace Arborist.Linq.Tests
                 (TreenumeratorMode.VisitingNode,   "c", 1, (1, 0), (1, 0)),
               }.ToNodeVisitArray()
             },
+
             // Skip subtree
             new TestScenario
             {
@@ -1095,6 +1118,7 @@ namespace Arborist.Linq.Tests
       TestMethods
       .TraversalTest(
         treeString,
+        testDescription,
         testScenario.TreenumerableMap,
         testScenario.TraversalStrategySelector,
         testScenario.ExpectedBreadthFirstResults,
@@ -1115,6 +1139,7 @@ namespace Arborist.Linq.Tests
       TestMethods
       .TraversalTest(
         treeString,
+        testDescription,
         testScenario.TreenumerableMap,
         testScenario.TraversalStrategySelector,
         testScenario.ExpectedDepthFirstResults,
@@ -1135,6 +1160,7 @@ namespace Arborist.Linq.Tests
       TestMethods
       .TraversalTest(
         treeString,
+        testDescription,
         testScenario.TreenumerableMap,
         testScenario.TraversalStrategySelector,
         testScenario.ExpectedBreadthFirstResults,
@@ -1155,6 +1181,7 @@ namespace Arborist.Linq.Tests
       TestMethods
       .TraversalTest(
         treeString,
+        testDescription,
         testScenario.TreenumerableMap,
         testScenario.TraversalStrategySelector,
         testScenario.ExpectedDepthFirstResults,

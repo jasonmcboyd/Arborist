@@ -14,6 +14,7 @@ namespace Arborist.TestUtils
   {
     public static void TraversalTest(
       string serializedTree,
+      string testDescription,
       Func<ITreenumerable<string>, ITreenumerable<string>> operation,
       Func<NodeVisit<string>, TraversalStrategy> traversalStrategySelector,
       NodeVisit<string>[] expectedTraversal,
@@ -34,8 +35,8 @@ namespace Arborist.TestUtils
         treenumerable = roots.ToTreenumerable().Select(visit => visit.Node);
       }
 
-      Debug.WriteLine("--------- Tree ---------");
-      Debug.WriteLine(serializedTree);
+      Debug.WriteLine("--------- Test Name ---------");
+      Debug.WriteLine($"{serializedTree} -> {testDescription}");
 
       Debug.WriteLine($"{Environment.NewLine}---- Expected Values ----");
       NodeVisitsDebugWriter.WriteNodeVisitHeader();

@@ -6,10 +6,10 @@ using System.Linq;
 
 namespace Arborist.Linq.Treenumerators
 {
-  internal class PruneBeforeBreadthFirstTreenumerator<TNode>
+  internal class WhereBreadthFirstTreenumerator<TNode>
     : TreenumeratorWrapper<TNode>
   {
-    public PruneBeforeBreadthFirstTreenumerator(
+    public WhereBreadthFirstTreenumerator(
       ITreenumerator<TNode> innerTreenumerator,
       Func<NodeVisit<TNode>, bool> predicate)
       : base(innerTreenumerator)
@@ -69,7 +69,7 @@ namespace Arborist.Linq.Treenumerators
               _PrunedRootNodesCount++;
 
             _CurrentNodesSkippedChildrenCount++;
-            traversalStrategy = TraversalStrategy.SkipSubtree;
+            traversalStrategy = TraversalStrategy.SkipNode;
             continue;
           }
           else
