@@ -20,8 +20,8 @@ namespace Arborist.Linq.Treenumerators
 
     private readonly Func<NodeVisit<TNode>, bool> _Predicate;
 
-    private Stack<NodeVisit<TNode>> _NodeVisits = new Stack<NodeVisit<TNode>>();
-    private Stack<NodeVisit<TNode>> _SkippedNodeVisits = new Stack<NodeVisit<TNode>>();
+    private readonly Stack<NodeVisit<TNode>> _NodeVisits = new Stack<NodeVisit<TNode>>();
+    private readonly Stack<NodeVisit<TNode>> _SkippedNodeVisits = new Stack<NodeVisit<TNode>>();
 
     private bool _EnumerationFinished = false;
 

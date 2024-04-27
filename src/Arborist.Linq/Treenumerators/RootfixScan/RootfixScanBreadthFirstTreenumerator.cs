@@ -28,7 +28,7 @@ namespace Arborist.Linq.Treenumerators
 
     private readonly Func<NodeVisit<TAccumulate>, NodeVisit<TNode>, TAccumulate> _Accumulator;
 
-    private Deque<NodeVisit<TAccumulate>> _Queue = new Deque<NodeVisit<TAccumulate>>();
+    private readonly Deque<NodeVisit<TAccumulate>> _Queue = new Deque<NodeVisit<TAccumulate>>();
 
     protected override bool OnMoveNext(TraversalStrategy traversalStrategy)
     {

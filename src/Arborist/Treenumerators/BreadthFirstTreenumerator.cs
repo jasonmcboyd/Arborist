@@ -36,7 +36,7 @@ namespace Arborist.Treenumerators
     private Deque<VirtualNodeVisit<TRootNode>> _NextLevel =
       new Deque<VirtualNodeVisit<TRootNode>>();
 
-    private Stack<VirtualNodeVisit<IEnumerator<TRootNode>>> _ChildrenStack =
+    private readonly Stack<VirtualNodeVisit<IEnumerator<TRootNode>>> _ChildrenStack =
       new Stack<VirtualNodeVisit<IEnumerator<TRootNode>>>();
 
     protected override bool OnMoveNext(TraversalStrategy traversalStrategy)
@@ -186,9 +186,6 @@ namespace Arborist.Treenumerators
     private bool MoveToFirstChild(VirtualNodeVisit<TRootNode> visit) =>
       MoveToFirstChild(visit, x => x.Node);
 
-    private bool MoveToFirstChild(VirtualNodeVisit<IEnumerator<TRootNode>> visit) =>
-      MoveToFirstChild(visit, x => x.Node.Current);
-
     private bool MoveToFirstChild<T>(
       VirtualNodeVisit<T> visit,
       Func<VirtualNodeVisit<T>, TRootNode> map)
@@ -200,8 +197,6 @@ namespace Arborist.Treenumerators
         ReturnChildrenVirtualNodeVisit(children);
         return false;
       }
-
-      var previousVisit = _CurrentLevel[0];
 
       children.Mode = TreenumeratorMode.SchedulingNode;
       children.VisitCount = 0;
@@ -223,8 +218,6 @@ namespace Arborist.Treenumerators
 
       if (_ChildrenStack.Count == 0)
         return false;
-
-      var previousVisit = _CurrentLevel[0];
 
       var children = _ChildrenStack.Peek();
 

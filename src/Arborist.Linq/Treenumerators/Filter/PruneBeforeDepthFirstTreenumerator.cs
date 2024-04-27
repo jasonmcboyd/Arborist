@@ -18,7 +18,7 @@ namespace Arborist.Linq.Treenumerators
 
     private readonly Func<NodeVisit<TNode>, bool> _Predicate;
 
-    private List<int> _SkippedSiblingsCounts = new List<int>();
+    private readonly List<int> _SkippedSiblingsCounts = new List<int>();
 
     private bool _EnumerationFinished = false;
 

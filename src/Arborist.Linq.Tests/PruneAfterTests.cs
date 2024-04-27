@@ -15,7 +15,7 @@ namespace Arborist.Linq.Tests
       _TreenumerableTestDataFactory = new TreenumerableTestDataFactory(TestTrees); 
     }
 
-    private static TreenumerableTestDataFactory _TreenumerableTestDataFactory;
+    private static readonly TreenumerableTestDataFactory _TreenumerableTestDataFactory;
 
     public static IEnumerable<object[]> GetTestData()
       => _TreenumerableTestDataFactory.GetTestData();

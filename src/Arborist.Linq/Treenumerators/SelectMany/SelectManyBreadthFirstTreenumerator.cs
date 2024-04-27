@@ -19,7 +19,7 @@ namespace Arborist.Linq.Treenumerators
 
     public readonly Func<TSource, ITreenumerable<TResult>> _Selector;
 
-    private Stack<NodeVisit<TResult>> _Stack = new Stack<NodeVisit<TResult>>();
+    private readonly Stack<NodeVisit<TResult>> _Stack = new Stack<NodeVisit<TResult>>();
 
     private ITreenumerator<TResult> _NodeTreenumerator;
 

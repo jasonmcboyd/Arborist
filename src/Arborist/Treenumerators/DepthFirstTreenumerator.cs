@@ -35,11 +35,11 @@ namespace Arborist.Treenumerators
     private bool _HasCachedChild = false;
     private int _MostRecentDepthTraversed = -1;
 
-    private bool _EnumerationStarted => Position.Depth != -1;
+    private bool EnumerationStarted => Position.Depth != -1;
 
     protected override bool OnMoveNext(TraversalStrategy traversalStrategy)
     {
-      if (!_EnumerationStarted)
+      if (!EnumerationStarted)
         return OnStarting();
 
       while (true)
@@ -145,8 +145,6 @@ namespace Arborist.Treenumerators
 
         if (previousVisit.Node.MoveNext())
         {
-          var nextSiblingIndexIncrement = previousVisit.SkippingNode ? 0 : 1;
-
           previousVisit =
             _NodeVisitPool
             .Lease(

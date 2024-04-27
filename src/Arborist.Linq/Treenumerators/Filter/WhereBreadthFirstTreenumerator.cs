@@ -20,7 +20,7 @@ namespace Arborist.Linq.Treenumerators
 
     private readonly Func<NodeVisit<TNode>, bool> _Predicate;
 
-    private Deque<int> _SkippedSiblingsCounts = new Deque<int>();
+    private readonly Deque<int> _SkippedSiblingsCounts = new Deque<int>();
 
     private int _CurrentNodesSkippedChildrenCount = 0;
 
@@ -91,6 +91,8 @@ namespace Arborist.Linq.Treenumerators
       }
 
       UpdateState();
+
+      _EnumerationFinished = true;
 
       return false;
     }

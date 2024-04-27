@@ -21,9 +21,9 @@ namespace Arborist.Linq.Treenumerators
 
     private readonly Func<NodeVisit<TNode>, bool> _Predicate;
 
-    private Deque<NodePositionAndSkippedStatus> _Positions = new Deque<NodePositionAndSkippedStatus>();
+    private readonly Deque<NodePositionAndSkippedStatus> _Positions = new Deque<NodePositionAndSkippedStatus>();
 
-    private Stack<NodePositionAndSkippedStatus> _CachedPositions = new Stack<NodePositionAndSkippedStatus>();
+    private readonly Stack<NodePositionAndSkippedStatus> _CachedPositions = new Stack<NodePositionAndSkippedStatus>();
 
     private bool _EnumerationFinished = false;
 
@@ -107,6 +107,8 @@ namespace Arborist.Linq.Treenumerators
 
       UpdateState();
 
+      _EnumerationFinished = true;
+
       return false;
     }
 
@@ -127,7 +129,7 @@ namespace Arborist.Linq.Treenumerators
       }
     }
     
-    private struct NodePositionAndSkippedStatus
+    private readonly struct NodePositionAndSkippedStatus
     {
       public NodePositionAndSkippedStatus(NodePosition nodePosition, bool skipped)
       {

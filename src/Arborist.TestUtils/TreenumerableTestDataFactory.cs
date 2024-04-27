@@ -10,7 +10,7 @@ namespace Arborist.TestUtils
       _TreeTestDefinitions = treeTestDefinitions;
     }
 
-    private TreeTestDefinition[] _TreeTestDefinitions;
+    private readonly TreeTestDefinition[] _TreeTestDefinitions;
 
     public IEnumerable<TreeTestScenarioDefinition> GetTestScenarios()
     {
