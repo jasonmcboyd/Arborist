@@ -46,12 +46,12 @@ namespace Arborist.Linq.Treenumerators
         && traversalStrategy == TraversalStrategy.SkipSubtree;
 
       if (previousSubtreeSkipped
-        && InnerTreenumerator.OriginalPosition.Depth == 0)
+        && InnerTreenumerator.Position.Depth == 0)
       {
         _SkippedSiblingsCounts.RemoveFromBack();
       }
 
-      var previousDepth = InnerTreenumerator.OriginalPosition.Depth;
+      var previousDepth = InnerTreenumerator.Position.Depth;
 
       while (InnerTreenumerator.MoveNext(traversalStrategy))
       {
@@ -61,7 +61,7 @@ namespace Arborist.Linq.Treenumerators
 
           if (skipped)
           {
-            if (InnerTreenumerator.OriginalPosition.Depth == 0)
+            if (InnerTreenumerator.Position.Depth == 0)
               _PrunedRootNodesCount++;
 
             _CurrentNodesSkippedChildrenCount++;
@@ -70,7 +70,7 @@ namespace Arborist.Linq.Treenumerators
           }
           else
           {
-            if (InnerTreenumerator.OriginalPosition.Depth == 0
+            if (InnerTreenumerator.Position.Depth == 0
               && previousDepth == 0)
             {
               _CurrentNodesSkippedChildrenCount = _PrunedRootNodesCount; 
@@ -108,7 +108,7 @@ namespace Arborist.Linq.Treenumerators
 
         Node = InnerTreenumerator.Node;
         VisitCount = InnerTreenumerator.VisitCount;
-        OriginalPosition = InnerTreenumerator.OriginalPosition + (-skippedSiblingsCount, 0);
+        Position = InnerTreenumerator.Position + (-skippedSiblingsCount, 0);
       }
     }
   }

@@ -8,7 +8,7 @@ namespace Arborist
 
     public int VisitCount { get; protected set; } = 0;
 
-    public NodePosition OriginalPosition { get; protected set; } = (0, -1);
+    public NodePosition Position { get; protected set; } = (0, -1);
 
     public TraversalStrategy TraversalStrategy { get; protected set; } = default;
 

@@ -34,13 +34,13 @@ namespace Arborist.Linq.Treenumerators
       if (!InnerTreenumerator.MoveNext(traversalStrategy))
         return false;
 
-      var previousDepth = _Stack.Peek().OriginalPosition.Depth;
-      var currentDepth = InnerTreenumerator.OriginalPosition.Depth;
+      var previousDepth = _Stack.Peek().Position.Depth;
+      var currentDepth = InnerTreenumerator.Position.Depth;
 
       var schedulingNewRootNode =
         currentDepth == 0
         && InnerTreenumerator.VisitCount == 0
-        && InnerTreenumerator.OriginalPosition.SiblingIndex > 0;
+        && InnerTreenumerator.Position.SiblingIndex > 0;
 
       if (currentDepth < previousDepth || schedulingNewRootNode)
         _Stack.Pop();
@@ -55,7 +55,7 @@ namespace Arborist.Linq.Treenumerators
           InnerTreenumerator.Mode,
           node,
           InnerTreenumerator.VisitCount,
-          InnerTreenumerator.OriginalPosition);
+          InnerTreenumerator.Position);
 
       _Stack.Push(newVisit);
 
@@ -69,7 +69,7 @@ namespace Arborist.Linq.Treenumerators
       Mode = nodeVisit.Mode;
       Node = nodeVisit.Node;
       VisitCount = nodeVisit.VisitCount;
-      OriginalPosition = nodeVisit.OriginalPosition;
+      Position = nodeVisit.Position;
     }
   }
 }

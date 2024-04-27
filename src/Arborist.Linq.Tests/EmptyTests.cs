@@ -18,7 +18,7 @@ namespace Arborist.Linq.Tests
       // Act
 
       // Assert
-      Assert.AreEqual(new NodePosition(0, -1), treenumerator.OriginalPosition);
+      Assert.AreEqual(new NodePosition(0, -1), treenumerator.Position);
       Assert.AreEqual(default(TreenumeratorMode), treenumerator.Mode);
       Assert.AreEqual(0, treenumerator.VisitCount);
       Assert.AreEqual(0, treenumerator.Node);
@@ -64,7 +64,7 @@ namespace Arborist.Linq.Tests
       // Act
 
       // Assert
-      Assert.AreEqual(new NodePosition(0, -1), treenumerator.OriginalPosition);
+      Assert.AreEqual(new NodePosition(0, -1), treenumerator.Position);
       Assert.AreEqual(default(TreenumeratorMode), treenumerator.Mode);
       Assert.AreEqual(0, treenumerator.VisitCount);
       Assert.AreEqual(0, treenumerator.Node);

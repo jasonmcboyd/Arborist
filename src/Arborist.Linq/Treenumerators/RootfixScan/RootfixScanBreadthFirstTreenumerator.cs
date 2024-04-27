@@ -58,7 +58,7 @@ namespace Arborist.Linq.Treenumerators
           InnerTreenumerator.Mode,
           visit.Node,
           InnerTreenumerator.VisitCount,
-          InnerTreenumerator.OriginalPosition);
+          InnerTreenumerator.Position);
 
       _Queue[0] = newVisit;
 
@@ -83,7 +83,7 @@ namespace Arborist.Linq.Treenumerators
       Mode = nodeVisit.Mode;
       Node = nodeVisit.Node;
       VisitCount = nodeVisit.VisitCount;
-      OriginalPosition = nodeVisit.OriginalPosition;
+      Position = nodeVisit.Position;
     }
   }
 }

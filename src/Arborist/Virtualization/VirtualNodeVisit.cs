@@ -8,7 +8,7 @@ namespace Arborist.Virtualization
     public TreenumeratorMode Mode { get; set; }
     public TNode Node { get; set; }
     public int VisitCount { get; set; }
-    public NodePosition OriginalPosition { get; set; }
+    public NodePosition Position { get; set; }
     public TraversalStrategy TraversalStrategy { get; set; }
 
     public bool SkippingNode =>

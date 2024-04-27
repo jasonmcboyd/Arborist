@@ -55,7 +55,7 @@ namespace Arborist.Tests
 
       NodeVisit<string>[] Sort(IEnumerable<NodeVisit<string>> nodes) =>
         nodes
-        .OrderBy(nodeVisit => (nodeVisit.Mode, nodeVisit.OriginalPosition.Depth, nodeVisit.OriginalPosition.SiblingIndex, nodeVisit.Node))
+        .OrderBy(nodeVisit => (nodeVisit.Mode, nodeVisit.Position.Depth, nodeVisit.Position.SiblingIndex, nodeVisit.Node))
         .ToArray();
 
       var traversalStrategySelector =

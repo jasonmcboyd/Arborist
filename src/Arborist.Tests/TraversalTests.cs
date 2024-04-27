@@ -91,7 +91,7 @@ namespace Arborist.Tests
 
       NodeVisit<string>[] Sort(IEnumerable<NodeVisit<string>> nodes) =>
         nodes
-        .OrderBy(x => (x.Mode, x.OriginalPosition.Depth, x.OriginalPosition.SiblingIndex, x.Node))
+        .OrderBy(x => (x.Mode, x.Position.Depth, x.Position.SiblingIndex, x.Node))
         .ToArray();
 
       // Act

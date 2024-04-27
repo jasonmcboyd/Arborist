@@ -23,7 +23,7 @@ namespace Arborist.Linq.Treenumerators
 
     public TreenumeratorMode Mode => _InnerTreenumerator.Mode;
 
-    public NodePosition OriginalPosition => _InnerTreenumerator.OriginalPosition;
+    public NodePosition Position => _InnerTreenumerator.Position;
 
     public bool MoveNext(TraversalStrategy traversalStrategy)
     {

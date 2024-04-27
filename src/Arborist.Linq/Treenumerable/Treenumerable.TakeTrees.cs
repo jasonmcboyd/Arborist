@@ -12,6 +12,6 @@ namespace Arborist.Linq
     public static ITreenumerable<T> TakeTrees<T>(
       this ITreenumerable<T> source,
       int count)
-      => source.PruneBefore(visit => visit.OriginalPosition.Depth == 0 && visit.OriginalPosition.SiblingIndex >= count);
+      => source.PruneBefore(visit => visit.Position.Depth == 0 && visit.Position.SiblingIndex >= count);
   }
 }

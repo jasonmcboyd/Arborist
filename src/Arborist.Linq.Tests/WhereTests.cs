@@ -54,7 +54,7 @@ namespace Arborist.Linq.Tests
             new TestScenario
             {
               TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
-              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.OriginalPosition.Depth != 0),
+              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.Position.Depth != 0),
               Description = "Where not level 0",
               ExpectedBreadthFirstResults = new[]
               {
@@ -76,7 +76,7 @@ namespace Arborist.Linq.Tests
             new TestScenario
             {
               TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
-              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.OriginalPosition.Depth != 1),
+              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.Position.Depth != 1),
               Description = "Where not level 1",
               ExpectedBreadthFirstResults = new[]
               {
@@ -98,7 +98,7 @@ namespace Arborist.Linq.Tests
             new TestScenario
             {
               TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
-              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.OriginalPosition.Depth != 2),
+              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.Position.Depth != 2),
               Description = "Where not level 2",
               ExpectedBreadthFirstResults = new[]
               {
@@ -120,7 +120,7 @@ namespace Arborist.Linq.Tests
             new TestScenario
             {
               TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
-              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.OriginalPosition.Depth == 2),
+              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.Position.Depth == 2),
               Description = "Where level 2",
               ExpectedBreadthFirstResults = new[]
               {
@@ -137,8 +137,8 @@ namespace Arborist.Linq.Tests
             // Prune before
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.OriginalPosition.Depth == 1 ? TraversalStrategy.SkipSubtree : TraversalStrategy.TraverseSubtree,
-              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.OriginalPosition.Depth != 0),
+              TraversalStrategySelector = visit => visit.Position.Depth == 1 ? TraversalStrategy.SkipSubtree : TraversalStrategy.TraverseSubtree,
+              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.Position.Depth != 0),
               Description = "Where not level 0, prune before level 1",
               ExpectedBreadthFirstResults = new[]
               {
@@ -166,7 +166,7 @@ namespace Arborist.Linq.Tests
             new TestScenario
             {
               TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
-              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.OriginalPosition.Depth < 1),
+              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.Position.Depth < 1),
               Description = "Where before level 1, traverse all",
               ExpectedBreadthFirstResults = new[]
               {
@@ -210,7 +210,7 @@ namespace Arborist.Linq.Tests
             new TestScenario
             {
               TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
-              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.OriginalPosition.Depth == 1),
+              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.Position.Depth == 1),
               Description = "Where level 1",
               ExpectedBreadthFirstResults = new[]
               {
@@ -306,7 +306,7 @@ namespace Arborist.Linq.Tests
             new TestScenario
             {
               TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
-              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.OriginalPosition.Depth < 1),
+              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.Position.Depth < 1),
               Description = "Where before level 1",
               ExpectedBreadthFirstResults = new[]
               {
@@ -332,7 +332,7 @@ namespace Arborist.Linq.Tests
             new TestScenario
             {
               TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
-              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.OriginalPosition.Depth == 1),
+              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.Position.Depth == 1),
               Description = "Where level 1",
               ExpectedBreadthFirstResults = new[]
               {
@@ -358,7 +358,7 @@ namespace Arborist.Linq.Tests
             new TestScenario
             {
               TraversalStrategySelector = visit => visit.Node == "b" ? TraversalStrategy.SkipSubtree : TraversalStrategy.TraverseSubtree,
-              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.OriginalPosition.Depth < 1),
+              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.Position.Depth < 1),
               Description = "Where before level 1, skip level 0, sibling 1 subtree",
               ExpectedBreadthFirstResults = new[]
               {
@@ -380,7 +380,7 @@ namespace Arborist.Linq.Tests
             new TestScenario
             {
               TraversalStrategySelector = visit => TraversalStrategy.SkipSubtree,
-              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.OriginalPosition.Depth < 1),
+              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.Position.Depth < 1),
               Description = "Where before level 1, skip all subtrees",
               ExpectedBreadthFirstResults = new[]
               {
@@ -407,7 +407,7 @@ namespace Arborist.Linq.Tests
             new TestScenario
             {
               TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
-              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.OriginalPosition.SiblingIndex != 0),
+              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.Position.SiblingIndex != 0),
               Description = "Where not sibling 0, traverse all",
               ExpectedBreadthFirstResults = new[]
               {
@@ -553,7 +553,7 @@ namespace Arborist.Linq.Tests
             new TestScenario
             {
               TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
-              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.OriginalPosition.SiblingIndex != 0),
+              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.Position.SiblingIndex != 0),
               Description = "Where not sibling 0, traverse all",
               ExpectedBreadthFirstResults = new[] {
                 (TreenumeratorMode.SchedulingNode, "b", 0, (0, 0)),
@@ -572,7 +572,7 @@ namespace Arborist.Linq.Tests
             new TestScenario
             {
               TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
-              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.OriginalPosition.SiblingIndex != 1),
+              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.Position.SiblingIndex != 1),
               Description = "Where not sibling 1, traverse all",
               ExpectedBreadthFirstResults = new[]
               {
@@ -601,8 +601,8 @@ namespace Arborist.Linq.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.OriginalPosition.SiblingIndex == 0 ? TraversalStrategy.SkipSubtree : TraversalStrategy.TraverseSubtree,
-              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.OriginalPosition.SiblingIndex != 1),
+              TraversalStrategySelector = visit => visit.Position.SiblingIndex == 0 ? TraversalStrategy.SkipSubtree : TraversalStrategy.TraverseSubtree,
+              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.Position.SiblingIndex != 1),
               Description = "Where not sibling 1, skip sibling 0 subtree",
               ExpectedBreadthFirstResults = new[]
               {

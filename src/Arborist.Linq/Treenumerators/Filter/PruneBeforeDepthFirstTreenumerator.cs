@@ -35,20 +35,20 @@ namespace Arborist.Linq.Treenumerators
 
     private bool InnerTreenumeratorMoveNext(TraversalStrategy traversalStrategy)
     {
-      var currentDepth = InnerTreenumerator.OriginalPosition.Depth;
+      var currentDepth = InnerTreenumerator.Position.Depth;
 
       while (InnerTreenumerator.MoveNext(traversalStrategy))
       {
-        if (InnerTreenumerator.OriginalPosition.Depth < currentDepth - 1)
+        if (InnerTreenumerator.Position.Depth < currentDepth - 1)
         {
           _SkippedSiblingsCounts.RemoveAt(_SkippedSiblingsCounts.Count - 1);
         }
-        else if (InnerTreenumerator.OriginalPosition.Depth > currentDepth)
+        else if (InnerTreenumerator.Position.Depth > currentDepth)
         {
           _SkippedSiblingsCounts.Add(0);
         }
 
-        currentDepth = InnerTreenumerator.OriginalPosition.Depth;
+        currentDepth = InnerTreenumerator.Position.Depth;
 
         if (InnerTreenumerator.Mode == TreenumeratorMode.VisitingNode
           || !_Predicate(InnerTreenumerator.ToNodeVisit()))
@@ -58,7 +58,7 @@ namespace Arborist.Linq.Treenumerators
           return true;
         }
 
-        _SkippedSiblingsCounts[InnerTreenumerator.OriginalPosition.Depth]++;
+        _SkippedSiblingsCounts[InnerTreenumerator.Position.Depth]++;
 
         traversalStrategy = TraversalStrategy.SkipSubtree;
       }
@@ -74,16 +74,16 @@ namespace Arborist.Linq.Treenumerators
     {
       Mode = InnerTreenumerator.Mode;
 
-      var originalPositionDelta =
+      var positionDelta =
         _SkippedSiblingsCounts.Count > 0
-        ? (-_SkippedSiblingsCounts[InnerTreenumerator.OriginalPosition.Depth], 0)
+        ? (-_SkippedSiblingsCounts[InnerTreenumerator.Position.Depth], 0)
         : (0, 0);
 
       if (!_EnumerationFinished)
       {
         Node = InnerTreenumerator.Node;
         VisitCount = InnerTreenumerator.VisitCount;
-        OriginalPosition = InnerTreenumerator.OriginalPosition + originalPositionDelta;
+        Position = InnerTreenumerator.Position + positionDelta;
       }
     }
   }

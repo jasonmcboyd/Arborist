@@ -47,7 +47,7 @@ namespace Arborist.Linq.Treenumerators
       if (previousSubtreeSkipped)
         _Positions[_Positions.Count - 1] = _Positions.Last().Skip();
 
-      var previousDepth = InnerTreenumerator.OriginalPosition.Depth;
+      var previousDepth = InnerTreenumerator.Position.Depth;
 
       while (InnerTreenumerator.MoveNext(traversalStrategy))
       {
@@ -65,23 +65,23 @@ namespace Arborist.Linq.Treenumerators
           {
             var priorNodePosition = _Positions.Last();
 
-            if (InnerTreenumerator.OriginalPosition.Depth == priorNodePosition.Depth)
+            if (InnerTreenumerator.Position.Depth == priorNodePosition.Depth)
             {
-              if (InnerTreenumerator.OriginalPosition.SiblingIndex > priorNodePosition.SiblingIndex)
+              if (InnerTreenumerator.Position.SiblingIndex > priorNodePosition.SiblingIndex)
               {
                 _Positions.AddToBack(new NodePositionAndSkippedStatus(priorNodePosition.SiblingIndex + 1, priorNodePosition.Depth));
               }
               else
               {
-                _Positions.AddToBack(new NodePositionAndSkippedStatus(0, InnerTreenumerator.OriginalPosition.Depth));
+                _Positions.AddToBack(new NodePositionAndSkippedStatus(0, InnerTreenumerator.Position.Depth));
               }
             }
-            else if (InnerTreenumerator.OriginalPosition.Depth > priorNodePosition.Depth)
+            else if (InnerTreenumerator.Position.Depth > priorNodePosition.Depth)
             {
               if (priorNodePosition.Depth != -1)
                 _CachedPositions.Push(priorNodePosition);
 
-              _Positions.AddToBack(new NodePositionAndSkippedStatus(0, InnerTreenumerator.OriginalPosition.Depth));
+              _Positions.AddToBack(new NodePositionAndSkippedStatus(0, InnerTreenumerator.Position.Depth));
             }
             else
             {
@@ -123,7 +123,7 @@ namespace Arborist.Linq.Treenumerators
 
         Node = InnerTreenumerator.Node;
         VisitCount = InnerTreenumerator.VisitCount;
-        OriginalPosition = position.Position;
+        Position = position.Position;
       }
     }
     

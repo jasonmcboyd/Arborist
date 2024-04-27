@@ -28,8 +28,8 @@ namespace Arborist.Linq
 
           if (previousVisit.VisitCount == 1)
           {
-            if (previousVisit.OriginalPosition.Depth > currentVisit.OriginalPosition.Depth
-              || previousVisit.OriginalPosition.Depth == currentVisit.OriginalPosition.Depth)
+            if (previousVisit.Position.Depth > currentVisit.Position.Depth
+              || previousVisit.Position.Depth == currentVisit.Position.Depth)
               yield return previousVisit.Node;
           }
         }

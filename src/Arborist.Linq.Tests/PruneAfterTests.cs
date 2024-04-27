@@ -88,7 +88,7 @@ namespace Arborist.Linq.Tests
             // Skip descendants
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.OriginalPosition.Depth == 0 ? TraversalStrategy.SkipDescendants : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Position.Depth == 0 ? TraversalStrategy.SkipDescendants : TraversalStrategy.TraverseSubtree,
               TreenumerableMap = treenumerable => treenumerable.PruneAfter(_ => false),
               Description = "Prune after none, skip level 0 descendants",
               ExpectedBreadthFirstResults = new[]

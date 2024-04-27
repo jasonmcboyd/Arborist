@@ -11,7 +11,7 @@ namespace Arborist.Linq.Extensions
           visit.Mode,
           visit.Node,
           visit.VisitCount + 1,
-          visit.OriginalPosition);
+          visit.Position);
     }
 
     public static NodeVisit<TResult> WithNode<TSource, TResult>(
@@ -23,7 +23,7 @@ namespace Arborist.Linq.Extensions
           visit.Mode,
           node,
           visit.VisitCount,
-          visit.OriginalPosition);
+          visit.Position);
     }
   }
 }

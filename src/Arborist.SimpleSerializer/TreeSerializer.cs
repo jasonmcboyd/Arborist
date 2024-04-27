@@ -100,7 +100,7 @@ namespace Arborist.SimpleSerializer
           if (treenumerator.VisitCount != 1)
             continue;
 
-          var depth = treenumerator.OriginalPosition.Depth;
+          var depth = treenumerator.Position.Depth;
 
           if (previousDepth != -1)
           {
@@ -114,7 +114,7 @@ namespace Arborist.SimpleSerializer
 
           builder.Append(map(treenumerator.Node));
 
-          previousDepth = treenumerator.OriginalPosition.Depth;
+          previousDepth = treenumerator.Position.Depth;
         }
 
         while (previousDepth-- > 0)

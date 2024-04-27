@@ -35,7 +35,7 @@ namespace Arborist.Treenumerators
     private bool _HasCachedChild = false;
     private int _MostRecentDepthTraversed = -1;
 
-    private bool _EnumerationStarted => OriginalPosition.Depth != -1;
+    private bool _EnumerationStarted => Position.Depth != -1;
 
     protected override bool OnMoveNext(TraversalStrategy traversalStrategy)
     {
@@ -133,7 +133,7 @@ namespace Arborist.Treenumerators
           }
 
           previousVisit.Mode = TreenumeratorMode.SchedulingNode;
-          previousVisit.OriginalPosition += (1, 0);
+          previousVisit.Position += (1, 0);
           previousVisit.TraversalStrategy = TraversalStrategy.TraverseSubtree;
 
           _Stack.Push(previousVisit);
@@ -153,7 +153,7 @@ namespace Arborist.Treenumerators
               TreenumeratorMode.SchedulingNode,
               previousVisit.Node,
               0,
-              previousVisit.OriginalPosition.AddToSiblingIndex(1),
+              previousVisit.Position.AddToSiblingIndex(1),
               TraversalStrategy.TraverseSubtree);
 
           _Stack.Push(previousVisit);
@@ -197,7 +197,7 @@ namespace Arborist.Treenumerators
                 TreenumeratorMode.SchedulingNode,
                 children,
                 0,
-                (0, previousVisit.OriginalPosition.Depth + 1),
+                (0, previousVisit.Position.Depth + 1),
                 TraversalStrategy.TraverseSubtree);
 
             _Stack.Push(previousVisit);
@@ -217,7 +217,7 @@ namespace Arborist.Treenumerators
               TreenumeratorMode.SchedulingNode,
               previousVisit.Node,
               0,
-              previousVisit.OriginalPosition.AddToSiblingIndex(1),
+              previousVisit.Position.AddToSiblingIndex(1),
               TraversalStrategy.TraverseSubtree);
 
           var parentVisit = _Stack.Peek();
@@ -226,7 +226,7 @@ namespace Arborist.Treenumerators
 
           parentVisit.VisitCount++;
 
-          if (parentVisit.OriginalPosition.Depth == -1)
+          if (parentVisit.Position.Depth == -1)
           {
             UpdateStateFromVirtualNodeVisit(previousVisit);
           }
@@ -256,14 +256,14 @@ namespace Arborist.Treenumerators
       {
         visit = GetParentVisit();
 
-        if (visit.OriginalPosition.Depth == -1)
+        if (visit.Position.Depth == -1)
         {
           EnumerationFinished = true;
 
           return false;
         }
 
-        if (_MostRecentDepthTraversed > visit.OriginalPosition.Depth)
+        if (_MostRecentDepthTraversed > visit.Position.Depth)
         {
           visit.VisitCount++;
 
@@ -283,12 +283,12 @@ namespace Arborist.Treenumerators
 
             visit.Mode = TreenumeratorMode.SchedulingNode;
             visit.VisitCount = 0;
-            visit.OriginalPosition += (1, 0);
+            visit.Position += (1, 0);
             visit.TraversalStrategy = TraversalStrategy.TraverseSubtree;
 
             _Stack.Push(visit);
 
-            if (parentVisit.OriginalPosition.Depth == -1)
+            if (parentVisit.Position.Depth == -1)
             {
               UpdateStateFromVirtualNodeVisit(visit);
             }
@@ -320,7 +320,7 @@ namespace Arborist.Treenumerators
         && _SkippedStack.Count > 0)
       {
         return
-          _Stack.Peek().OriginalPosition.Depth > _SkippedStack.Peek().OriginalPosition.Depth
+          _Stack.Peek().Position.Depth > _SkippedStack.Peek().Position.Depth
           ? _Stack.Pop()
           : _SkippedStack.Pop();
       }
@@ -347,13 +347,13 @@ namespace Arborist.Treenumerators
       Mode = visit.Mode;
       Node = _Map(visit.Node.Current);
       VisitCount = visit.VisitCount;
-      OriginalPosition = visit.OriginalPosition;
+      Position = visit.Position;
       TraversalStrategy = visit.TraversalStrategy;
 
       if (Mode == TreenumeratorMode.VisitingNode
         && (TraversalStrategy == TraversalStrategy.SkipDescendants
           || TraversalStrategy == TraversalStrategy.TraverseSubtree))
-        _MostRecentDepthTraversed = OriginalPosition.Depth;
+        _MostRecentDepthTraversed = Position.Depth;
     }
 
     private void ReturnVirtualNodeVisit(VirtualNodeVisit<IEnumerator<TRootNode>> virtualNodeVisit)

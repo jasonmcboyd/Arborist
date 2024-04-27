@@ -8,22 +8,22 @@ namespace Arborist.Core
       TreenumeratorMode mode,
       TNode node,
       int visitCount,
-      NodePosition originalPosition)
+      NodePosition position)
     {
       Mode = mode;
       Node = node;
       VisitCount = visitCount;
-      OriginalPosition = originalPosition;
+      Position = position;
     }
 
     public TreenumeratorMode Mode { get; }
     public TNode Node { get; }
     public int VisitCount { get; }
-    public NodePosition OriginalPosition { get; }
+    public NodePosition Position { get; }
 
     public override string ToString()
     {
-      return $"{OriginalPosition}  {ModeToChar()}  {VisitCount}  {Node}";
+      return $"{Position}  {ModeToChar()}  {VisitCount}  {Node}";
     }
 
     private char ModeToChar()

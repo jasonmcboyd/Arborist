@@ -24,7 +24,7 @@ namespace Arborist.Linq
             continue;
           }
 
-          var depth = treenumerator.OriginalPosition.Depth;
+          var depth = treenumerator.Position.Depth;
 
           if (depth > branch.Count - 1)
           {

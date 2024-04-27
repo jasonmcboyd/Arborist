@@ -7,6 +7,6 @@ namespace Arborist.Linq
     public static ITreenumerable<T> SkipTrees<T>(
       this ITreenumerable<T> source,
       int count)
-      => source.PruneBefore(step => step.OriginalPosition.Depth == 0 && step.OriginalPosition.SiblingIndex < count);
+      => source.PruneBefore(step => step.Position.Depth == 0 && step.Position.SiblingIndex < count);
   }
 }

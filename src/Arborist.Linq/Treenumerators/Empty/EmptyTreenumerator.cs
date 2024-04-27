@@ -12,7 +12,7 @@ namespace Arborist.Linq
 
     public TNode Node { get; } = default;
     public int VisitCount => default;
-    public NodePosition OriginalPosition => (0, -1);
+    public NodePosition Position => (0, -1);
     public TraversalStrategy TraversalStrategy => default;
     public TreenumeratorMode Mode => default;
 

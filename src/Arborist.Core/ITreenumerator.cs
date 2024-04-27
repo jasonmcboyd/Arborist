@@ -9,6 +9,6 @@ namespace Arborist.Core
     TNode Node { get; }
     int VisitCount { get; }
     TreenumeratorMode Mode { get; }
-    NodePosition OriginalPosition { get; }
+    NodePosition Position { get; }
   }
 }

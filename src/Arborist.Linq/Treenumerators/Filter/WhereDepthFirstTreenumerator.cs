@@ -51,7 +51,7 @@ namespace Arborist.Linq.Treenumerators
             _NodeVisits.Push(currentNodeVisit);
 
             if (_SkippedNodeVisits.Count > 0
-              && _SkippedNodeVisits.Peek().OriginalPosition.Depth == currentNodeVisit.OriginalPosition.Depth)
+              && _SkippedNodeVisits.Peek().Position.Depth == currentNodeVisit.Position.Depth)
             {
               _SkippedNodeVisits.Pop();
               _NodeVisits.Push(_NodeVisits.Pop().IncrementVisitCount());
@@ -68,7 +68,7 @@ namespace Arborist.Linq.Treenumerators
         {
           var isSkippedNode =
             _SkippedNodeVisits.Count > 0
-            && _SkippedNodeVisits.Peek().OriginalPosition == currentNodeVisit.OriginalPosition;
+            && _SkippedNodeVisits.Peek().Position == currentNodeVisit.Position;
 
           if (isSkippedNode)
           {
@@ -84,11 +84,11 @@ namespace Arborist.Linq.Treenumerators
             continue;
           }
 
-          if (currentNodeVisit.OriginalPosition.Depth < previousNodeVisit.OriginalPosition.Depth)
+          if (currentNodeVisit.Position.Depth < previousNodeVisit.Position.Depth)
           {
             if (_SkippedNodeVisits.Count > 0)
             {
-              if (_SkippedNodeVisits.Peek().OriginalPosition.Depth > _NodeVisits.Peek().OriginalPosition.Depth)
+              if (_SkippedNodeVisits.Peek().Position.Depth > _NodeVisits.Peek().Position.Depth)
               {
                 _SkippedNodeVisits.Pop();
 
@@ -102,7 +102,7 @@ namespace Arborist.Linq.Treenumerators
 
             _NodeVisits.Pop();
           }
-          else if (currentNodeVisit.OriginalPosition.Depth > previousNodeVisit.OriginalPosition.Depth)
+          else if (currentNodeVisit.Position.Depth > previousNodeVisit.Position.Depth)
           {
             _NodeVisits.Push(currentNodeVisit);
           }
@@ -136,7 +136,7 @@ namespace Arborist.Linq.Treenumerators
     {
       if (_SkippedNodeVisits.Count > 0)
       {
-        if (_SkippedNodeVisits.Peek().OriginalPosition.Depth > _NodeVisits.Peek().OriginalPosition.Depth)
+        if (_SkippedNodeVisits.Peek().Position.Depth > _NodeVisits.Peek().Position.Depth)
           _SkippedNodeVisits.Pop();
         else
           _NodeVisits.Pop();
@@ -161,7 +161,7 @@ namespace Arborist.Linq.Treenumerators
       {
         Node = InnerTreenumerator.Node;
         VisitCount = InnerTreenumerator.VisitCount;
-        OriginalPosition = (siblingIndex, InnerTreenumerator.OriginalPosition.Depth + depthDelta);
+        Position = (siblingIndex, InnerTreenumerator.Position.Depth + depthDelta);
         //OriginalPosition = InnerTreenumerator.OriginalPosition + originalPositionDelta;
       }
     }

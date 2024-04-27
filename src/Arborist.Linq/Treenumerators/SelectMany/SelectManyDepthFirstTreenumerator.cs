@@ -31,7 +31,7 @@ namespace Arborist.Linq.Treenumerators
       if (EnumerationFinished)
         return false;
 
-      if (OriginalPosition.Depth == -1)
+      if (Position.Depth == -1)
         return OnStarting();
 
       if (_HasCachedVisit)
@@ -67,7 +67,7 @@ namespace Arborist.Linq.Treenumerators
           _NodeTreenumerator.Mode,
           _NodeTreenumerator.Node,
           _NodeTreenumerator.VisitCount,
-          (_Stack.Peek().VisitCount - 1, InnerTreenumerator.OriginalPosition.Depth)));
+          (_Stack.Peek().VisitCount - 1, InnerTreenumerator.Position.Depth)));
 
       UpdateStateFromNodeVisit(_Stack.Peek());
 
@@ -76,7 +76,7 @@ namespace Arborist.Linq.Treenumerators
 
     private bool MoveNextInnerTreenumerator()
     {
-      var previousDepth = _Stack.Peek().OriginalPosition.Depth;
+      var previousDepth = _Stack.Peek().Position.Depth;
 
       while (true)
       {
@@ -86,7 +86,7 @@ namespace Arborist.Linq.Treenumerators
           if (InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode)
             continue;
 
-          var newDepth = InnerTreenumerator.OriginalPosition.Depth;
+          var newDepth = InnerTreenumerator.Position.Depth;
 
           if (newDepth < previousDepth)
             return true;
@@ -106,12 +106,12 @@ namespace Arborist.Linq.Treenumerators
 
     private bool MoveNextInnerSubtree()
     {
-      var previousDepth = InnerTreenumerator.OriginalPosition.Depth;
+      var previousDepth = InnerTreenumerator.Position.Depth;
 
       if (!MoveNextInnerTreenumerator())
         return false;
 
-      var newDepth = InnerTreenumerator.OriginalPosition.Depth;
+      var newDepth = InnerTreenumerator.Position.Depth;
 
       if (newDepth > previousDepth)
       {
@@ -120,7 +120,7 @@ namespace Arborist.Linq.Treenumerators
             _NodeTreenumerator.Mode,
             _NodeTreenumerator.Node,
             _NodeTreenumerator.VisitCount,
-            (_Stack.Peek().VisitCount - 1, InnerTreenumerator.OriginalPosition.Depth)));
+            (_Stack.Peek().VisitCount - 1, InnerTreenumerator.Position.Depth)));
       }
       else if (newDepth < previousDepth)
       {
@@ -141,7 +141,7 @@ namespace Arborist.Linq.Treenumerators
             _NodeTreenumerator.Mode,
             _NodeTreenumerator.Node,
             _NodeTreenumerator.VisitCount,
-            (_Stack.Peek().VisitCount - 1, InnerTreenumerator.OriginalPosition.Depth)));
+            (_Stack.Peek().VisitCount - 1, InnerTreenumerator.Position.Depth)));
       }
 
       UpdateStateFromNodeVisit(_Stack.Peek());
@@ -154,13 +154,13 @@ namespace Arborist.Linq.Treenumerators
       if (_NodeTreenumerator == null)
         return false;
 
-      var previousOriginalPosition = _NodeTreenumerator.OriginalPosition;
+      var previousPosition = _NodeTreenumerator.Position;
 
       if (_NodeTreenumerator.MoveNext(traversalStrategy))
       {
-        var newOriginalPosition = _NodeTreenumerator.OriginalPosition;
+        var newPosition = _NodeTreenumerator.Position;
 
-        if (newOriginalPosition.Depth < previousOriginalPosition.Depth)
+        if (newPosition.Depth < previousPosition.Depth)
         {
           _Stack.Pop();
           _Stack.Push(_Stack.Pop().IncrementVisitCount());
@@ -169,14 +169,14 @@ namespace Arborist.Linq.Treenumerators
 
           return true;
         }
-        else if (newOriginalPosition.Depth > previousOriginalPosition.Depth)
+        else if (newPosition.Depth > previousPosition.Depth)
         {
           _Stack.Push(
             new NodeVisit<TResult>(
               _NodeTreenumerator.Mode,
               _NodeTreenumerator.Node,
               _NodeTreenumerator.VisitCount,
-              (_Stack.Peek().VisitCount - 1, _Stack.Peek().OriginalPosition.Depth + 1)));
+              (_Stack.Peek().VisitCount - 1, _Stack.Peek().Position.Depth + 1)));
 
           UpdateStateFromNodeVisit(_Stack.Peek());
 
@@ -184,7 +184,7 @@ namespace Arborist.Linq.Treenumerators
         }
         else
         {
-          if (previousOriginalPosition == newOriginalPosition)
+          if (previousPosition == newPosition)
           {
             var visit = _Stack.Pop();
 
@@ -193,28 +193,28 @@ namespace Arborist.Linq.Treenumerators
                 _NodeTreenumerator.Mode,
                 _NodeTreenumerator.Node,
                 visit.VisitCount + 1,
-                visit.OriginalPosition));
+                visit.Position));
 
             UpdateStateFromNodeVisit(_Stack.Peek());
 
             return true;
           }
 
-          if (previousOriginalPosition.Depth == 0
-            && _NodeTreenumerator.OriginalPosition.Depth == 0
-            && newOriginalPosition.SiblingIndex > previousOriginalPosition.SiblingIndex)
+          if (previousPosition.Depth == 0
+            && _NodeTreenumerator.Position.Depth == 0
+            && newPosition.SiblingIndex > previousPosition.SiblingIndex)
           {
             _Stack.Pop();
             _Stack.Push(_Stack.Pop().IncrementVisitCount());
 
-            if (InnerTreenumerator.OriginalPosition.Depth == 0)
+            if (InnerTreenumerator.Position.Depth == 0)
             {
               _Stack.Push(
                 new NodeVisit<TResult>(
                   _NodeTreenumerator.Mode,
                   _NodeTreenumerator.Node,
                   _NodeTreenumerator.VisitCount,
-                  (_Stack.Peek().VisitCount - 1, InnerTreenumerator.OriginalPosition.Depth)));
+                  (_Stack.Peek().VisitCount - 1, InnerTreenumerator.Position.Depth)));
 
               UpdateStateFromNodeVisit(_Stack.Peek());
             }
@@ -227,7 +227,7 @@ namespace Arborist.Linq.Treenumerators
                   _NodeTreenumerator.Mode,
                   _NodeTreenumerator.Node,
                   _NodeTreenumerator.VisitCount,
-                  (_Stack.Peek().VisitCount - 1, InnerTreenumerator.OriginalPosition.Depth)));
+                  (_Stack.Peek().VisitCount - 1, InnerTreenumerator.Position.Depth)));
 
               _HasCachedVisit = true;
             }
@@ -247,7 +247,7 @@ namespace Arborist.Linq.Treenumerators
       Mode = visit.Mode;
       Node = visit.Node;
       VisitCount = visit.VisitCount;
-      OriginalPosition = visit.OriginalPosition;
+      Position = visit.Position;
     }
   }
 }

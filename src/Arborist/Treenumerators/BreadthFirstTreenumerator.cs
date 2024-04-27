@@ -41,7 +41,7 @@ namespace Arborist.Treenumerators
 
     protected override bool OnMoveNext(TraversalStrategy traversalStrategy)
     {
-      if (OriginalPosition.Depth == -1)
+      if (Position.Depth == -1)
         return OnStarting();
 
       while (true)
@@ -98,7 +98,7 @@ namespace Arborist.Treenumerators
 
       previousVisit.VisitCount++;
 
-      if (previousVisit.OriginalPosition.Depth == -1)
+      if (previousVisit.Position.Depth == -1)
         return null;
 
       UpdateStateFromVirtualNodeVisit(previousVisit);
@@ -205,7 +205,7 @@ namespace Arborist.Treenumerators
 
       children.Mode = TreenumeratorMode.SchedulingNode;
       children.VisitCount = 0;
-      children.OriginalPosition = (0, visit.OriginalPosition.Depth + 1);
+      children.Position = (0, visit.Position.Depth + 1);
       children.TraversalStrategy = TraversalStrategy.TraverseSubtree;
 
       _ChildrenStack.Push(children);
@@ -230,7 +230,7 @@ namespace Arborist.Treenumerators
 
       children.Mode = TreenumeratorMode.SchedulingNode;
       children.VisitCount = 0;
-      children.OriginalPosition = children.OriginalPosition.AddToSiblingIndex(1);
+      children.Position = children.Position.AddToSiblingIndex(1);
       children.TraversalStrategy = TraversalStrategy.TraverseSubtree;
 
       UpdateStateFromVirtualNodeVisit(GetNodeVisitFromChildEnumeratorVisit(children));
@@ -261,7 +261,7 @@ namespace Arborist.Treenumerators
           TreenumeratorMode.VisitingNode,
           childrenEnumerator,
           0,
-          (0, visit.OriginalPosition.Depth + 1),
+          (0, visit.Position.Depth + 1),
           TraversalStrategy.TraverseSubtree);
     }
 
@@ -273,7 +273,7 @@ namespace Arborist.Treenumerators
           children.Mode,
           children.Node.Current,
           children.VisitCount,
-          children.OriginalPosition,
+          children.Position,
           children.TraversalStrategy);
     }
 
@@ -282,7 +282,7 @@ namespace Arborist.Treenumerators
       Mode = visit.Mode;
       Node = _Map(visit.Node);
       VisitCount = visit.VisitCount;
-      OriginalPosition = visit.OriginalPosition;
+      Position = visit.Position;
       TraversalStrategy = visit.TraversalStrategy;
     }
 
