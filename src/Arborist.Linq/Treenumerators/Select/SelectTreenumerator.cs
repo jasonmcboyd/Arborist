@@ -25,8 +25,6 @@ namespace Arborist.Linq.Treenumerators
 
     public NodePosition OriginalPosition => _InnerTreenumerator.OriginalPosition;
 
-    public NodePosition Position => _InnerTreenumerator.Position;
-
     public bool MoveNext(TraversalStrategy traversalStrategy)
     {
       var hasNext = _InnerTreenumerator.MoveNext(traversalStrategy);

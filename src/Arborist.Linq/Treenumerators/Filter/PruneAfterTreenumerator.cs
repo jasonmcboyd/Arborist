@@ -60,7 +60,6 @@ namespace Arborist.Linq.Treenumerators
         Node = InnerTreenumerator.Node;
         VisitCount = InnerTreenumerator.VisitCount;
         OriginalPosition = InnerTreenumerator.OriginalPosition;
-        Position = InnerTreenumerator.Position;
       }
     }
   }

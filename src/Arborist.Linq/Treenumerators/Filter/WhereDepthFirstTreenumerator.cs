@@ -163,7 +163,6 @@ namespace Arborist.Linq.Treenumerators
         VisitCount = InnerTreenumerator.VisitCount;
         OriginalPosition = (siblingIndex, InnerTreenumerator.OriginalPosition.Depth + depthDelta);
         //OriginalPosition = InnerTreenumerator.OriginalPosition + originalPositionDelta;
-        Position = InnerTreenumerator.Position + (0, depthDelta);
       }
     }
   }

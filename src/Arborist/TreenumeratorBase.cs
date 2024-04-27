@@ -10,8 +10,6 @@ namespace Arborist
 
     public NodePosition OriginalPosition { get; protected set; } = (0, -1);
 
-    public NodePosition Position { get; protected set; } = (0, -1);
-
     public TraversalStrategy TraversalStrategy { get; protected set; } = default;
 
     public TreenumeratorMode Mode { get; protected set; } = default;

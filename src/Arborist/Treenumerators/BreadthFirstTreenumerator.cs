@@ -161,7 +161,6 @@ namespace Arborist.Treenumerators
           sentinalNode,
           1,
           (0, -1),
-          (0, -1),
           TraversalStrategy.TraverseSubtree);
 
       _CurrentLevel.AddToFront(sentinal);
@@ -172,7 +171,6 @@ namespace Arborist.Treenumerators
           TreenumeratorMode.SchedulingNode,
           _RootsEnumerator,
           0,
-          (0, 0),
           (0, 0),
           TraversalStrategy.TraverseSubtree);
 
@@ -208,7 +206,6 @@ namespace Arborist.Treenumerators
       children.Mode = TreenumeratorMode.SchedulingNode;
       children.VisitCount = 0;
       children.OriginalPosition = (0, visit.OriginalPosition.Depth + 1);
-      children.Position = (previousVisit.VisitCount - 1, previousVisit.Position.Depth + 1);
       children.TraversalStrategy = TraversalStrategy.TraverseSubtree;
 
       _ChildrenStack.Push(children);
@@ -234,7 +231,6 @@ namespace Arborist.Treenumerators
       children.Mode = TreenumeratorMode.SchedulingNode;
       children.VisitCount = 0;
       children.OriginalPosition = children.OriginalPosition.AddToSiblingIndex(1);
-      children.Position = (previousVisit.VisitCount - 1, previousVisit.Position.Depth + 1);
       children.TraversalStrategy = TraversalStrategy.TraverseSubtree;
 
       UpdateStateFromVirtualNodeVisit(GetNodeVisitFromChildEnumeratorVisit(children));
@@ -266,7 +262,6 @@ namespace Arborist.Treenumerators
           childrenEnumerator,
           0,
           (0, visit.OriginalPosition.Depth + 1),
-          (0, visit.Position.Depth + 1),
           TraversalStrategy.TraverseSubtree);
     }
 
@@ -279,7 +274,6 @@ namespace Arborist.Treenumerators
           children.Node.Current,
           children.VisitCount,
           children.OriginalPosition,
-          children.Position,
           children.TraversalStrategy);
     }
 
@@ -289,7 +283,6 @@ namespace Arborist.Treenumerators
       Node = _Map(visit.Node);
       VisitCount = visit.VisitCount;
       OriginalPosition = visit.OriginalPosition;
-      Position = visit.Position;
       TraversalStrategy = visit.TraversalStrategy;
     }
 

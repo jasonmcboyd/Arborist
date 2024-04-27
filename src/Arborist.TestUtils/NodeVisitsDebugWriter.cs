@@ -6,8 +6,8 @@ namespace Arborist.TestUtils
   {
     public static void WriteNodeVisitHeader()
     {
-      Debug.WriteLine("OP      P       M  VC N");
-      Debug.WriteLine("-------------------------");
+      Debug.WriteLine("OP       M  VC N");
+      Debug.WriteLine("------------------");
     }
   }
 }

@@ -109,7 +109,6 @@ namespace Arborist.Linq.Treenumerators
         Node = InnerTreenumerator.Node;
         VisitCount = InnerTreenumerator.VisitCount;
         OriginalPosition = InnerTreenumerator.OriginalPosition + (-skippedSiblingsCount, 0);
-        Position = InnerTreenumerator.Position;
       }
     }
   }

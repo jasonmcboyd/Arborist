@@ -88,7 +88,6 @@ namespace Arborist.Treenumerators
           sentinalNode,
           1,
           (0, -1),
-          (0, -1),
           TraversalStrategy.TraverseSubtree);
 
       _Stack.Push(sentinal);
@@ -99,7 +98,6 @@ namespace Arborist.Treenumerators
           TreenumeratorMode.SchedulingNode,
           _RootsEnumerator,
           0,
-          (0, 0),
           (0, 0),
           TraversalStrategy.TraverseSubtree);
 
@@ -156,7 +154,6 @@ namespace Arborist.Treenumerators
               previousVisit.Node,
               0,
               previousVisit.OriginalPosition.AddToSiblingIndex(1),
-              previousVisit.Position.AddToSiblingIndex(nextSiblingIndexIncrement),
               TraversalStrategy.TraverseSubtree);
 
           _Stack.Push(previousVisit);
@@ -201,7 +198,6 @@ namespace Arborist.Treenumerators
                 children,
                 0,
                 (0, previousVisit.OriginalPosition.Depth + 1),
-                (previousVisit.VisitCount - 1, previousVisit.Position.Depth + 1),
                 TraversalStrategy.TraverseSubtree);
 
             _Stack.Push(previousVisit);
@@ -222,7 +218,6 @@ namespace Arborist.Treenumerators
               previousVisit.Node,
               0,
               previousVisit.OriginalPosition.AddToSiblingIndex(1),
-              previousVisit.Position.AddToSiblingIndex(1),
               TraversalStrategy.TraverseSubtree);
 
           var parentVisit = _Stack.Peek();
@@ -231,7 +226,7 @@ namespace Arborist.Treenumerators
 
           parentVisit.VisitCount++;
 
-          if (parentVisit.Position.Depth == -1)
+          if (parentVisit.OriginalPosition.Depth == -1)
           {
             UpdateStateFromVirtualNodeVisit(previousVisit);
           }
@@ -261,7 +256,7 @@ namespace Arborist.Treenumerators
       {
         visit = GetParentVisit();
 
-        if (visit.Position.Depth == -1)
+        if (visit.OriginalPosition.Depth == -1)
         {
           EnumerationFinished = true;
 
@@ -290,11 +285,10 @@ namespace Arborist.Treenumerators
             visit.VisitCount = 0;
             visit.OriginalPosition += (1, 0);
             visit.TraversalStrategy = TraversalStrategy.TraverseSubtree;
-            visit.Position = (parentVisit.VisitCount - 1, parentVisit.Position.Depth + 1);
 
             _Stack.Push(visit);
 
-            if (parentVisit.Position.Depth == -1)
+            if (parentVisit.OriginalPosition.Depth == -1)
             {
               UpdateStateFromVirtualNodeVisit(visit);
             }
@@ -354,7 +348,6 @@ namespace Arborist.Treenumerators
       Node = _Map(visit.Node.Current);
       VisitCount = visit.VisitCount;
       OriginalPosition = visit.OriginalPosition;
-      Position = visit.Position;
       TraversalStrategy = visit.TraversalStrategy;
 
       if (Mode == TreenumeratorMode.VisitingNode

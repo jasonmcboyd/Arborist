@@ -20,7 +20,6 @@ namespace Arborist.Linq.Treenumerators
           TreenumeratorMode.VisitingNode,
           seed,
           1,
-          (0, -1),
           (0, -1));
 
       _Stack.Push(seedVisit);
@@ -56,8 +55,7 @@ namespace Arborist.Linq.Treenumerators
           InnerTreenumerator.Mode,
           node,
           InnerTreenumerator.VisitCount,
-          InnerTreenumerator.OriginalPosition,
-          InnerTreenumerator.Position);
+          InnerTreenumerator.OriginalPosition);
 
       _Stack.Push(newVisit);
 
@@ -72,7 +70,6 @@ namespace Arborist.Linq.Treenumerators
       Node = nodeVisit.Node;
       VisitCount = nodeVisit.VisitCount;
       OriginalPosition = nodeVisit.OriginalPosition;
-      Position = nodeVisit.Position;
     }
   }
 }

@@ -16,7 +16,7 @@ namespace Arborist.TestUtils
       }
     }
 
-    public static NodeVisit<T>[] ToNodeVisitArray<T>(this IEnumerable<(TreenumeratorMode, T, int, (int, int), (int, int))> source)
+    public static NodeVisit<T>[] ToNodeVisitArray<T>(this IEnumerable<(TreenumeratorMode, T, int, (int, int))> source)
     {
       return
         source
@@ -25,8 +25,7 @@ namespace Arborist.TestUtils
             nodeVisit.Item1,
             nodeVisit.Item2,
             nodeVisit.Item3,
-            nodeVisit.Item4,
-            nodeVisit.Item5))
+            nodeVisit.Item4))
         .ToArray();
     }
   }
