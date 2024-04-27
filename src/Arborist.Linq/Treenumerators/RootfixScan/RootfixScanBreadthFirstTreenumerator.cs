@@ -35,8 +35,7 @@ namespace Arborist.Linq.Treenumerators
     {
       if (Mode == TreenumeratorMode.SchedulingNode)
       {
-        if (traversalStrategy == TraversalStrategy.SkipNode
-          || traversalStrategy == TraversalStrategy.SkipSubtree)
+        if (traversalStrategy == TraversalStrategy.SkipSubtree)
           _Queue.RemoveFromBack();
       }
 

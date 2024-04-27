@@ -116,57 +116,6 @@ namespace Arborist.Treenumerators
 
       previousVisit.TraversalStrategy = traversalStrategy;
 
-      if (traversalStrategy == TraversalStrategy.SkipNode)
-      {
-        var children = GetNodeChildren(previousVisit);
-
-        if (children.MoveNext())
-        {
-          _SkippedStack.Push(previousVisit);
-
-          var siblingIndex = 0;
-          var depth = 0;
-
-          var parentVisit = _Stack.Peek();
-          siblingIndex = parentVisit.VisitCount - 1;
-          depth = parentVisit.Position.Depth + 1;
-
-          previousVisit =
-            _NodeVisitPool
-            .Lease(
-              TreenumeratorMode.SchedulingNode,
-              children,
-              0,
-              (0, previousVisit.OriginalPosition.Depth + 1),
-              (siblingIndex, depth),
-              TraversalStrategy.TraverseSubtree);
-
-          _Stack.Push(previousVisit);
-
-          UpdateStateFromVirtualNodeVisit(previousVisit);
-
-          return true;
-        }
-
-        children.Dispose();
-
-        if (previousVisit.Node.MoveNext())
-        {
-          previousVisit.Mode = TreenumeratorMode.SchedulingNode;
-          previousVisit.OriginalPosition += (1, 0);
-
-          _Stack.Push(previousVisit);
-
-          UpdateStateFromVirtualNodeVisit(previousVisit);
-
-          return true;
-        }
-
-        ReturnVirtualNodeVisit(previousVisit);
-
-        return MoveUpTheTreeStack();
-      }
-
       if (traversalStrategy == TraversalStrategy.SkipSubtree)
       {
         if (_Stack.Count == 1)
@@ -317,42 +266,6 @@ namespace Arborist.Treenumerators
           EnumerationFinished = true;
 
           return false;
-        }
-
-        if (visit.TraversalStrategy == TraversalStrategy.SkipNode)
-        {
-          if (visit.Node.MoveNext())
-          {
-            var parentVisit = _Stack.Peek();
-
-            if (_MostRecentDepthTraversed > parentVisit.OriginalPosition.Depth + 1)
-              parentVisit.VisitCount++;
-
-            visit.Mode = TreenumeratorMode.SchedulingNode;
-            visit.OriginalPosition += (1, 0);
-            visit.TraversalStrategy = TraversalStrategy.TraverseSubtree;
-            visit.Position = (parentVisit.VisitCount - 1, parentVisit.Position.Depth + 1);
-
-            _Stack.Push(visit);
-
-            if (parentVisit.Position.Depth == -1
-              || _MostRecentDepthTraversed <= parentVisit.OriginalPosition.Depth + 1)
-            {
-              UpdateStateFromVirtualNodeVisit(visit);
-            }
-            else
-            {
-              _HasCachedChild = true;
-              UpdateStateFromVirtualNodeVisit(parentVisit);
-            }
-
-            return true;
-          }
-          else
-          {
-            ReturnVirtualNodeVisit(visit);
-            continue;
-          }
         }
 
         if (_MostRecentDepthTraversed > visit.OriginalPosition.Depth)

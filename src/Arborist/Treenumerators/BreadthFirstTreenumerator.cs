@@ -82,19 +82,6 @@ namespace Arborist.Treenumerators
 
       var previousVisit = _CurrentLevel[0];
 
-      if (traversalStrategy == TraversalStrategy.SkipNode)
-      {
-        if (MoveToFirstChild(scheduledVisit))
-          return true;
-
-        if (MoveToNextChild())
-          return true;
-
-        _CurrentLevel[0].VisitCount++;
-
-        return null;
-      }
-
       if (traversalStrategy == TraversalStrategy.SkipSubtree)
       {
         if (MoveToNextChild())

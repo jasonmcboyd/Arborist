@@ -40,15 +40,11 @@ namespace Arborist.Linq.Treenumerators
 
     private bool InnerTreenumeratorMoveNext(TraversalStrategy traversalStrategy)
     {
-      var previousNodeSkipped =
-        InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode
-        && traversalStrategy == TraversalStrategy.SkipNode;
-
       var previousSubtreeSkipped =
         InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode
         && traversalStrategy == TraversalStrategy.SkipSubtree;
 
-      if (previousSubtreeSkipped || previousNodeSkipped)
+      if (previousSubtreeSkipped)
         _Positions[_Positions.Count - 1] = _Positions.Last().Skip();
 
       var previousDepth = InnerTreenumerator.OriginalPosition.Depth;

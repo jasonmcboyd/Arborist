@@ -34,9 +34,9 @@ namespace Arborist.Linq.Treenumerators
 
     private TraversalStrategy GetTraversalStrategy(TraversalStrategy traversalStrategy)
     {
+      // TODO:
       var skippingNode =
-        traversalStrategy == TraversalStrategy.SkipSubtree
-        || traversalStrategy == TraversalStrategy.SkipNode;
+        traversalStrategy == TraversalStrategy.SkipSubtree;
 
       var skippingDescendants =
         _Predicate(this.ToNodeVisit())
@@ -45,8 +45,6 @@ namespace Arborist.Linq.Treenumerators
 
       if (skippingNode && skippingDescendants)
         return TraversalStrategy.SkipSubtree;
-      else if (skippingNode && !skippingDescendants)
-        return TraversalStrategy.SkipNode;
       else if (!skippingNode && skippingDescendants)
         return TraversalStrategy.SkipDescendants;
       else
