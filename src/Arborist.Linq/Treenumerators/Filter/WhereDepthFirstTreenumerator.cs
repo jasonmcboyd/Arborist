@@ -80,21 +80,9 @@ namespace Arborist.Linq.Treenumerators
       if (!_Predicate(currentNodeVisit))
       {
         // If the current node is a sibling of the previous node visited we need
-        // to figure out which stack the previous visit was pushed to and pop it off.
-        // We can use the _SkippedNodeVisists stack to figure out which stack it was
-        // pushed to because node visits in this stack to not have their positions
-        // altered.
+        // to pop the previous node visit off one of the stacks.
         if (isCurrentNodeSiblingOfPreviousNode)
-        {
-          if (IsNodeSkipped(previousNodeVisit))
-          {
-            _SkippedNodeVisits.Pop();
-          }
-          else
-          {
-            _NodeVisits.Pop();
-          }
-        }
+          PopMostRecentNodeVisitOnStacks();
 
         // Push the current node visit onto the skipped node visits stack.
         _SkippedNodeVisits.Push(currentNodeVisit);
@@ -112,6 +100,7 @@ namespace Arborist.Linq.Treenumerators
       // We can use the _SkippedNodeVisists stack to figure out which stack it was
       // pushed to because node visits in this stack to not have their positions
       // altered.
+      //
       // We may also need to use the previous sibling to calculate the sibling index
       // of the current node visit.
       if (isCurrentNodeSiblingOfPreviousNode)
@@ -149,15 +138,17 @@ namespace Arborist.Linq.Treenumerators
     {
       if (currentNodeVisit.Position.Depth < previousNodeVisit.Position.Depth)
       {
-        if (IsNodeSkipped(previousNodeVisit))
-          _SkippedNodeVisits.Pop();
-        else
-          _NodeVisits.Pop();
+        // Pop the previous node of the stacks.
+        PopMostRecentNodeVisitOnStacks();
 
+        // Do not yield if the current node was skipped.
         if (IsNodeSkipped(currentNodeVisit)
           || _DepthOfLastYieldedNode <= currentNodeVisit.Position.Depth)
+        {
           return false;
+        }
 
+        // Increment the visit count of the current node visit.
         _NodeVisits.Push(_NodeVisits.Pop().IncrementVisitCount());
       }
       else if (currentNodeVisit.Position.Depth > previousNodeVisit.Position.Depth)
@@ -189,6 +180,19 @@ namespace Arborist.Linq.Treenumerators
       return
         _SkippedNodeVisits.Count > 0
         && _SkippedNodeVisits.Peek().Position.Depth == nodeVisit.Position.Depth;
+    }
+
+    private void PopMostRecentNodeVisitOnStacks()
+    {
+      if (_SkippedNodeVisits.Count > 0
+        && _SkippedNodeVisits.Peek().Position.Depth > _NodeVisits.Peek().Position.Depth)
+      {
+        _SkippedNodeVisits.Pop();
+      }
+      else
+      {
+        _NodeVisits.Pop();
+      }
     }
 
     private void UpdateState()
