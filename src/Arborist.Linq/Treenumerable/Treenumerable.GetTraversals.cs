@@ -51,8 +51,8 @@ namespace Arborist.Linq
       // traversal strategy on the first call to MoveNext. In fact, that is
       // what I did initially. But it turned out there were some treenumerators
       // that were not handling this initial call to MoveNext correctly. By ignoring
-      // the traversal strategy, I was hiding some bugs in other treenumerators. So
-      // I decided to change the behavior here so that those bugs would be exposed
+      // the traversal strategy, I was hiding bugs. So, I decided to change the
+      // behavior here so that those bugs would be exposed
       var traversalStrategy = traversalStrategySelector(treenumerator.ToNodeVisit());
 
       if (!treenumerator.MoveNext(traversalStrategy))
