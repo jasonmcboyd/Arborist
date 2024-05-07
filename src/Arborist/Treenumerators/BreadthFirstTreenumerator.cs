@@ -152,18 +152,18 @@ namespace Arborist.Treenumerators
         return false;
       }
 
-      var sentinalNode = default(TRootNode);
+      var sentinelNode = default(TRootNode);
 
-      var sentinal =
+      var sentinel =
         _NodeVisitPool
         .Lease(
           TreenumeratorMode.VisitingNode,
-          sentinalNode,
+          sentinelNode,
           1,
           (0, -1),
           TraversalStrategy.TraverseSubtree);
 
-      _CurrentLevel.AddToFront(sentinal);
+      _CurrentLevel.AddToFront(sentinel);
 
       var children =
         _ChildrenVisitPool
