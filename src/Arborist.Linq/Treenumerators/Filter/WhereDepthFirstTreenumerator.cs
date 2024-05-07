@@ -43,6 +43,10 @@ namespace Arborist.Linq.Treenumerators
     {
       var previousNodeVisit = InnerTreenumerator.ToNodeVisit();
 
+      // Do not apply any traversal strategies to the sentinel node.
+      if (InnerTreenumerator.Position.Depth == -1)
+        traversalStrategy = TraversalStrategy.TraverseSubtree;
+
       // Enumerate until we yield something or exhaust the inner enumerator.
       while (InnerTreenumerator.MoveNext(traversalStrategy))
       {

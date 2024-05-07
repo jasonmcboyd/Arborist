@@ -41,19 +41,37 @@ namespace Arborist.Linq
       this ITreenumerator<TNode> treenumerator,
       Func<NodeVisit<TNode>, TraversalStrategy> traversalStrategySelector)
     {
-      if (!treenumerator.MoveNext())
+      // There is no reason a consumer _should_ ever pass a traversal strategy
+      // before enumeration has begun. But just because they should not does not
+      // mean they will not. If a user were to pass a traversal strategy on the
+      // very first call to MoveNext, ideally, all treenumerators would handle that
+      // correctly.
+      //
+      // So, the "correct" thing to do here might be to simply ignore the
+      // traversal strategy on the first call to MoveNext. In fact, that is
+      // what I did initially. But it turned out there were some treenumerators
+      // that were not handling this initial call to MoveNext correctly. By ignoring
+      // the traversal strategy, I was hiding some bugs in other treenumerators. So
+      // I decided to change the behavior here so that those bugs would be exposed
+      var traversalStrategy = traversalStrategySelector(treenumerator.ToNodeVisit());
+
+      if (!treenumerator.MoveNext(traversalStrategy))
         yield break;
 
       yield return treenumerator.ToNodeVisit();
 
-      var traversalStrategy = traversalStrategySelector(treenumerator.ToNodeVisit());
+      traversalStrategy = traversalStrategySelector(treenumerator.ToNodeVisit());
 
       while (treenumerator.MoveNext(traversalStrategy))
       {
         yield return treenumerator.ToNodeVisit();
 
-        if (treenumerator.Mode == TreenumeratorMode.SchedulingNode)
-          traversalStrategy = traversalStrategySelector(treenumerator.ToNodeVisit());
+        // Should only need to get the traversal strategy if we are scheduling a
+        // node. If we are traversing a node, the treenumerator should ignore
+        // the traversal strategy. I was doing that originally, but then I found
+        // that it was covering up poorly behaved treenumerators. So I changed the
+        // behavior here so that those bugs would get surfaced.
+        traversalStrategy = traversalStrategySelector(treenumerator.ToNodeVisit());
       }
     }
 

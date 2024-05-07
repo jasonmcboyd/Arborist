@@ -260,6 +260,32 @@ namespace Arborist.Linq.Tests
               }.ToNodeVisitArray()
             },
 
+            // Skip descendants
+            new TestScenario
+            {
+              TraversalStrategySelector = visit => TraversalStrategy.SkipDescendants,
+              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.Position.Depth == 1),
+              Description = "Where level 1, skip descendants",
+              ExpectedBreadthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "b", 0, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (1, 0)),
+                (TreenumeratorMode.SchedulingNode, "d", 0, (2, 0)),
+                (TreenumeratorMode.VisitingNode,   "b", 1, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "c", 1, (1, 0)),
+                (TreenumeratorMode.VisitingNode,   "d", 1, (2, 0)),
+              }.ToNodeVisitArray(),
+              ExpectedDepthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "b", 0, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "b", 1, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (1, 0)),
+                (TreenumeratorMode.VisitingNode,   "c", 1, (1, 0)),
+                (TreenumeratorMode.SchedulingNode, "d", 0, (2, 0)),
+                (TreenumeratorMode.VisitingNode,   "d", 1, (2, 0)),
+              }.ToNodeVisitArray()
+            },
+
             // Skip subtree
             new TestScenario
             {

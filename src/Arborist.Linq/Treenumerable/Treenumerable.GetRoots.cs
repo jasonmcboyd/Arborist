@@ -7,7 +7,7 @@ namespace Arborist.Linq
   {
     public static IEnumerable<T> GetRoots<T>(this ITreenumerable<T> source)
     {
-      using (var treenumerator = source.GetBreadthFirstTreenumerator())
+      using (var treenumerator = source.GetDepthFirstTreenumerator())
       {
         while(treenumerator.MoveNext(TraversalStrategy.SkipDescendants))
           if (treenumerator.VisitCount == 1)
