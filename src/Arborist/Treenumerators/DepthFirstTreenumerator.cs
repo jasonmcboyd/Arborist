@@ -190,6 +190,14 @@ namespace Arborist.Treenumerators
 
         if (previousVisit.Node.MoveNext())
         {
+          var parentVisit = _Stack.Peek();
+
+          parentVisit.VisitCount++;
+
+          _HasCachedChild = true;
+
+          UpdateStateFromVirtualNodeVisit(parentVisit);
+
           previousVisit =
             _NodeVisitPool
             .Lease(
@@ -200,8 +208,6 @@ namespace Arborist.Treenumerators
               TraversalStrategy.TraverseSubtree);
 
           _Stack.Push(previousVisit);
-
-          UpdateStateFromVirtualNodeVisit(previousVisit);
 
           return true;
         }
