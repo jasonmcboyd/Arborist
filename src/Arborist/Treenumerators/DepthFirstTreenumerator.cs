@@ -122,12 +122,7 @@ namespace Arborist.Treenumerators
         {
           _SkippedStack.Push(previousVisit);
 
-          var siblingIndex = 0;
-          var depth = 0;
-
           var parentVisit = _Stack.Peek();
-          siblingIndex = parentVisit.VisitCount - 1;
-          depth = parentVisit.Position.Depth + 1;
 
           previousVisit =
             _NodeVisitPool
@@ -195,8 +190,6 @@ namespace Arborist.Treenumerators
 
         if (previousVisit.Node.MoveNext())
         {
-          var nextSiblingIndexIncrement = previousVisit.SkippingNode ? 0 : 1;
-
           previousVisit =
             _NodeVisitPool
             .Lease(
@@ -325,7 +318,6 @@ namespace Arborist.Treenumerators
             visit.Mode = TreenumeratorMode.SchedulingNode;
             visit.Position += (1, 0);
             visit.TraversalStrategy = TraversalStrategy.TraverseSubtree;
-            visit.Position = (parentVisit.VisitCount - 1, parentVisit.Position.Depth + 1);
 
             _Stack.Push(visit);
 
@@ -371,7 +363,6 @@ namespace Arborist.Treenumerators
             visit.VisitCount = 0;
             visit.Position += (1, 0);
             visit.TraversalStrategy = TraversalStrategy.TraverseSubtree;
-            visit.Position = (parentVisit.VisitCount - 1, parentVisit.Position.Depth + 1);
 
             _Stack.Push(visit);
 
@@ -434,7 +425,6 @@ namespace Arborist.Treenumerators
       Mode = visit.Mode;
       Node = _Map(visit.Node.Current);
       VisitCount = visit.VisitCount;
-      Position = visit.Position;
       Position = visit.Position;
       TraversalStrategy = visit.TraversalStrategy;
 
