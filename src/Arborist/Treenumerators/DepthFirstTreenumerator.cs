@@ -29,29 +29,43 @@ namespace Arborist.Treenumerators
     private readonly Stack<VirtualNodeVisit<IEnumerator<TRootNode>>> _Stack =
       new Stack<VirtualNodeVisit<IEnumerator<TRootNode>>>();
 
+    private readonly Stack<VirtualNodeVisit<IEnumerator<TRootNode>>> _SkippedStack =
+      new Stack<VirtualNodeVisit<IEnumerator<TRootNode>>>();
+
     private bool _HasCachedChild = false;
     private int _MostRecentDepthTraversed = -1;
 
-    private bool EnumerationStarted => Position.Depth != -1;
+    private bool _EnumerationStarted => Position.Depth != -1;
 
     protected override bool OnMoveNext(TraversalStrategy traversalStrategy)
     {
-      if (!EnumerationStarted)
+      if (!_EnumerationStarted)
         return OnStarting();
 
-      if (_HasCachedChild)
+      while (true)
       {
-        _HasCachedChild = false;
+        if (_HasCachedChild)
+        {
+          _HasCachedChild = false;
 
-        UpdateStateFromVirtualNodeVisit(_Stack.Peek());
+          UpdateStateFromVirtualNodeVisit(_Stack.Peek());
 
-        return true;
+          return true;
+        }
+
+        if (Mode == TreenumeratorMode.SchedulingNode)
+        {
+          var onScheduling = OnScheduling(traversalStrategy);
+
+          if (onScheduling.HasValue)
+            return onScheduling.Value;
+        }
+
+        var onVisiting = OnVisiting();
+
+        if (onVisiting.HasValue)
+          return onVisiting.Value;
       }
-
-      if (Mode == TreenumeratorMode.SchedulingNode)
-        return OnScheduling(traversalStrategy);
-
-      return OnVisiting();
     }
 
     private bool OnStarting()
@@ -63,20 +77,20 @@ namespace Arborist.Treenumerators
         return false;
       }
 
-      var sentinelNode = Enumerable.Range(0, 1).Select(_ => default(TRootNode)).GetEnumerator();
+      var sentinalNode = Enumerable.Range(0, 1).Select(_ => default(TRootNode)).GetEnumerator();
 
-      sentinelNode.MoveNext();
+      sentinalNode.MoveNext();
 
-      var sentinel =
+      var sentinal =
         _NodeVisitPool
         .Lease(
           TreenumeratorMode.VisitingNode,
-          sentinelNode,
+          sentinalNode,
           1,
           (0, -1),
           TraversalStrategy.TraverseSubtree);
 
-      _Stack.Push(sentinel);
+      _Stack.Push(sentinal);
 
       var rootNode =
         _NodeVisitPool
@@ -94,23 +108,78 @@ namespace Arborist.Treenumerators
       return true;
     }
 
-    private bool OnScheduling(TraversalStrategy traversalStrategy)
+    private bool? OnScheduling(TraversalStrategy traversalStrategy)
     {
       var previousVisit = _Stack.Pop();
 
       previousVisit.TraversalStrategy = traversalStrategy;
 
+      if (traversalStrategy == TraversalStrategy.SkipNode)
+      {
+        var children = GetNodeChildren(previousVisit);
+
+        if (children.MoveNext())
+        {
+          _SkippedStack.Push(previousVisit);
+
+          var siblingIndex = 0;
+          var depth = 0;
+
+          var parentVisit = _Stack.Peek();
+          siblingIndex = parentVisit.VisitCount - 1;
+          depth = parentVisit.Position.Depth + 1;
+
+          previousVisit =
+            _NodeVisitPool
+            .Lease(
+              TreenumeratorMode.SchedulingNode,
+              children,
+              0,
+              (0, previousVisit.Position.Depth + 1),
+              TraversalStrategy.TraverseSubtree);
+
+          _Stack.Push(previousVisit);
+
+          UpdateStateFromVirtualNodeVisit(previousVisit);
+
+          return true;
+        }
+
+        children.Dispose();
+
+        if (previousVisit.Node.MoveNext())
+        {
+          previousVisit.Mode = TreenumeratorMode.SchedulingNode;
+          previousVisit.Position += (1, 0);
+
+          _Stack.Push(previousVisit);
+
+          UpdateStateFromVirtualNodeVisit(previousVisit);
+
+          return true;
+        }
+
+        ReturnVirtualNodeVisit(previousVisit);
+
+        return MoveUpTheTreeStack();
+      }
+
       if (traversalStrategy == TraversalStrategy.SkipSubtree)
       {
         if (_Stack.Count == 1)
         {
-          if (!previousVisit.Node.MoveNext())
+          while (!previousVisit.Node.MoveNext())
           {
-            ReturnVirtualNodeVisit(previousVisit);
+            if (_SkippedStack.Count == 0)
+            {
+              ReturnVirtualNodeVisit(previousVisit);
 
-            EnumerationFinished = true;
+              EnumerationFinished = true;
 
-            return false;
+              return false;
+            }
+
+            previousVisit = _SkippedStack.Pop();
           }
 
           previousVisit.Mode = TreenumeratorMode.SchedulingNode;
@@ -126,6 +195,8 @@ namespace Arborist.Treenumerators
 
         if (previousVisit.Node.MoveNext())
         {
+          var nextSiblingIndexIncrement = previousVisit.SkippingNode ? 0 : 1;
+
           previousVisit =
             _NodeVisitPool
             .Lease(
@@ -157,107 +228,57 @@ namespace Arborist.Treenumerators
       return true;
     }
 
-    private bool OnVisiting()
+    private bool? OnVisiting()
     {
-      var previousVisit = _Stack.Pop();
-
-      if (previousVisit.VisitCount == 1
-        && previousVisit.TraversalStrategy != TraversalStrategy.SkipDescendants)
+      while (true)
       {
-        var children = GetNodeChildren(previousVisit);
+        var previousVisit = _Stack.Pop();
 
-        if (children?.MoveNext() == true)
+        if (previousVisit.VisitCount == 1
+          && previousVisit.TraversalStrategy != TraversalStrategy.SkipDescendants)
         {
-          var childrenNode =
+          var children = GetNodeChildren(previousVisit);
+
+          if (children?.MoveNext() == true)
+          {
+            var childrenNode =
+              _NodeVisitPool
+              .Lease(
+                TreenumeratorMode.SchedulingNode,
+                children,
+                0,
+                (0, previousVisit.Position.Depth + 1),
+                TraversalStrategy.TraverseSubtree);
+
+            _Stack.Push(previousVisit);
+            _Stack.Push(childrenNode);
+
+            UpdateStateFromVirtualNodeVisit(childrenNode);
+
+            return true;
+          }
+        }
+
+        if (previousVisit.Node.MoveNext())
+        {
+          previousVisit =
             _NodeVisitPool
             .Lease(
               TreenumeratorMode.SchedulingNode,
-              children,
+              previousVisit.Node,
               0,
-              (0, previousVisit.Position.Depth + 1),
+              previousVisit.Position.AddToSiblingIndex(1),
               TraversalStrategy.TraverseSubtree);
 
-          _Stack.Push(previousVisit);
-          _Stack.Push(childrenNode);
-
-          UpdateStateFromVirtualNodeVisit(childrenNode);
-
-          return true;
-        }
-      }
-
-      if (previousVisit.Node.MoveNext())
-      {
-        previousVisit =
-          _NodeVisitPool
-          .Lease(
-            TreenumeratorMode.SchedulingNode,
-            previousVisit.Node,
-            0,
-            previousVisit.Position.AddToSiblingIndex(1),
-            TraversalStrategy.TraverseSubtree);
-
-        var parentVisit = _Stack.Peek();
-
-        _Stack.Push(previousVisit);
-
-        parentVisit.VisitCount++;
-
-        if (parentVisit.Position.Depth == -1)
-        {
-          UpdateStateFromVirtualNodeVisit(previousVisit);
-        }
-        else
-        {
-          _HasCachedChild = true;
-          UpdateStateFromVirtualNodeVisit(parentVisit);
-        }
-
-        return true;
-      }
-
-      ReturnVirtualNodeVisit(previousVisit);
-
-      var onMoveUpTheTreeStack = MoveUpTheTreeStack();
-
-      return onMoveUpTheTreeStack;
-    }
-
-    private bool MoveUpTheTreeStack()
-    {
-      VirtualNodeVisit<IEnumerator<TRootNode>> visit;
-
-      visit = _Stack.Pop();
-
-      while (visit.Position.Depth != -1)
-      {
-        if (_MostRecentDepthTraversed > visit.Position.Depth)
-        {
-          visit.VisitCount++;
-
-          _Stack.Push(visit);
-
-          UpdateStateFromVirtualNodeVisit(visit);
-
-          return true;
-        }
-
-        if (visit.Node.MoveNext())
-        {
           var parentVisit = _Stack.Peek();
+
+          _Stack.Push(previousVisit);
 
           parentVisit.VisitCount++;
 
-          visit.Mode = TreenumeratorMode.SchedulingNode;
-          visit.VisitCount = 0;
-          visit.Position += (1, 0);
-          visit.TraversalStrategy = TraversalStrategy.TraverseSubtree;
-
-          _Stack.Push(visit);
-
           if (parentVisit.Position.Depth == -1)
           {
-            UpdateStateFromVirtualNodeVisit(visit);
+            UpdateStateFromVirtualNodeVisit(previousVisit);
           }
           else
           {
@@ -268,14 +289,136 @@ namespace Arborist.Treenumerators
           return true;
         }
 
-        ReturnVirtualNodeVisit(visit);
+        ReturnVirtualNodeVisit(previousVisit);
 
-        visit = _Stack.Pop();
+        var onMoveUpTheTreeStack = MoveUpTheTreeStack();
+
+        if (onMoveUpTheTreeStack.HasValue)
+          return onMoveUpTheTreeStack.Value;
       }
+    }
 
-      EnumerationFinished = true;
+    private bool? MoveUpTheTreeStack()
+    {
+      VirtualNodeVisit<IEnumerator<TRootNode>> visit;
 
-      return false;
+      while (true)
+      {
+        visit = GetParentVisit();
+
+        if (visit.Position.Depth == -1)
+        {
+          EnumerationFinished = true;
+
+          return false;
+        }
+
+        if (visit.TraversalStrategy == TraversalStrategy.SkipNode)
+        {
+          if (visit.Node.MoveNext())
+          {
+            var parentVisit = _Stack.Peek();
+
+            if (_MostRecentDepthTraversed > parentVisit.Position.Depth + 1)
+              parentVisit.VisitCount++;
+
+            visit.Mode = TreenumeratorMode.SchedulingNode;
+            visit.Position += (1, 0);
+            visit.TraversalStrategy = TraversalStrategy.TraverseSubtree;
+            visit.Position = (parentVisit.VisitCount - 1, parentVisit.Position.Depth + 1);
+
+            _Stack.Push(visit);
+
+            if (parentVisit.Position.Depth == -1
+              || _MostRecentDepthTraversed <= parentVisit.Position.Depth + 1)
+            {
+              UpdateStateFromVirtualNodeVisit(visit);
+            }
+            else
+            {
+              _HasCachedChild = true;
+              UpdateStateFromVirtualNodeVisit(parentVisit);
+            }
+
+            return true;
+          }
+          else
+          {
+            ReturnVirtualNodeVisit(visit);
+            continue;
+          }
+        }
+
+        if (_MostRecentDepthTraversed > visit.Position.Depth)
+        {
+          visit.VisitCount++;
+
+          _Stack.Push(visit);
+
+          UpdateStateFromVirtualNodeVisit(visit);
+
+          return true;
+        }
+        else
+        {
+          if (visit.Node.MoveNext())
+          {
+            var parentVisit = _Stack.Peek();
+
+            parentVisit.VisitCount++;
+
+            visit.Mode = TreenumeratorMode.SchedulingNode;
+            visit.VisitCount = 0;
+            visit.Position += (1, 0);
+            visit.TraversalStrategy = TraversalStrategy.TraverseSubtree;
+            visit.Position = (parentVisit.VisitCount - 1, parentVisit.Position.Depth + 1);
+
+            _Stack.Push(visit);
+
+            if (parentVisit.Position.Depth == -1)
+            {
+              UpdateStateFromVirtualNodeVisit(visit);
+            }
+            else
+            {
+              _HasCachedChild = true;
+              UpdateStateFromVirtualNodeVisit(parentVisit);
+            }
+
+            return true;
+          }
+          else
+          {
+            ReturnVirtualNodeVisit(visit);
+            continue;
+          }
+        }
+      }
+    }
+
+    private VirtualNodeVisit<IEnumerator<TRootNode>> GetParentVisit()
+    {
+      if (_Stack.Count == 0
+        && _SkippedStack.Count == 0)
+      {
+        return null;
+      }
+      else if (_Stack.Count > 0
+        && _SkippedStack.Count > 0)
+      {
+        return
+          _Stack.Peek().Position.Depth > _SkippedStack.Peek().Position.Depth
+          ? _Stack.Pop()
+          : _SkippedStack.Pop();
+      }
+      else if (_SkippedStack.Count > 0)
+      {
+        return _SkippedStack.Pop();
+      }
+      else
+      {
+        return _Stack.Pop();
+      }
     }
 
     private IEnumerator<TRootNode> GetNodeChildren(VirtualNodeVisit<IEnumerator<TRootNode>> visit)
@@ -291,6 +434,7 @@ namespace Arborist.Treenumerators
       Mode = visit.Mode;
       Node = _Map(visit.Node.Current);
       VisitCount = visit.VisitCount;
+      Position = visit.Position;
       Position = visit.Position;
       TraversalStrategy = visit.TraversalStrategy;
 
@@ -310,6 +454,9 @@ namespace Arborist.Treenumerators
     {
       while (_Stack.Count > 0)
         ReturnVirtualNodeVisit(_Stack.Pop());
+
+      while (_SkippedStack.Count > 0)
+        ReturnVirtualNodeVisit(_SkippedStack.Pop());
 
       _RootsEnumerator?.Dispose();
     }

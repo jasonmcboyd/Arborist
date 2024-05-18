@@ -29,6 +29,7 @@ namespace Arborist.Tests
 
       var filterStrategies = new[]
       {
+        TraversalStrategy.SkipNode,
         TraversalStrategy.SkipSubtree,
         TraversalStrategy.SkipDescendants,
       };

@@ -67,7 +67,7 @@ namespace Arborist.Linq.Experimental.Treenumerators
 
       //Current = Treenumerator.Node;
 
-      //if (Current.OriginalPosition.Depth == 0)
+      //if (Current.Position.Depth == 0)
       //{
       //  if (Current.VisitCount == 1)
       //    _RootSiblingCount++;

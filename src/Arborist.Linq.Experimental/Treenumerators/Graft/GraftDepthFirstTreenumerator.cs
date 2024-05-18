@@ -33,11 +33,11 @@ namespace Arborist.Linq.Experimental.Treenumerators
     private int CalculateInnerSiblingIndexAfterMoveNext()
     {
       throw new NotImplementedException();
-      //if (InnerTreenumerator.Node.OriginalPosition.Depth == 0)
-      //  return InnerTreenumerator.Node.OriginalPosition.SiblingIndex;
+      //if (InnerTreenumerator.Node.Position.Depth == 0)
+      //  return InnerTreenumerator.Node.Position.SiblingIndex;
 
-      //if (InnerTreenumerator.Node.OriginalPosition.Depth == _InnerBranch.Last().OriginalPosition.Depth)
-      //  return _InnerBranch.Last().OriginalPosition.SiblingIndex;
+      //if (InnerTreenumerator.Node.Position.Depth == _InnerBranch.Last().Position.Depth)
+      //  return _InnerBranch.Last().Position.SiblingIndex;
 
       //return _InnerBranch.Last().VisitCount - 1;
     }
@@ -110,8 +110,8 @@ namespace Arborist.Linq.Experimental.Treenumerators
       //  _Scion,
       //  _ScionBranch,
       //  visit => visit,
-      //  () => _InnerBranch.Last().VisitCount + _Scion.Node.OriginalPosition.SiblingIndex - 1,
-      //  () => _InnerBranch.Last().OriginalPosition.Depth + _Scion.Node.OriginalPosition.Depth + 1,
+      //  () => _InnerBranch.Last().VisitCount + _Scion.Node.Position.SiblingIndex - 1,
+      //  () => _InnerBranch.Last().Position.Depth + _Scion.Node.Position.Depth + 1,
       //  traversalStrategy);
     }
 
@@ -123,7 +123,7 @@ namespace Arborist.Linq.Experimental.Treenumerators
       //  _InnerBranch,
       //  visit => visit.WithNode(_Selector(visit)),
       //  () => CalculateInnerSiblingIndexAfterMoveNext(),
-      //  () => InnerTreenumerator.Node.OriginalPosition.Depth,
+      //  () => InnerTreenumerator.Node.Position.Depth,
       //  traversalStrategy);
     }
 

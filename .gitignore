@@ -398,4 +398,4 @@ FodyWeavers.xsd
 *.sln.iml
 
 # Temporary working directory
-working/
+local-temp/

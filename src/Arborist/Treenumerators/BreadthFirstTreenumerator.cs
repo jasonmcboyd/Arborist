@@ -36,7 +36,7 @@ namespace Arborist.Treenumerators
     private Deque<VirtualNodeVisit<TRootNode>> _NextLevel =
       new Deque<VirtualNodeVisit<TRootNode>>();
 
-    private readonly Stack<VirtualNodeVisit<IEnumerator<TRootNode>>> _ChildrenStack =
+    private Stack<VirtualNodeVisit<IEnumerator<TRootNode>>> _ChildrenStack =
       new Stack<VirtualNodeVisit<IEnumerator<TRootNode>>>();
 
     protected override bool OnMoveNext(TraversalStrategy traversalStrategy)
@@ -81,6 +81,19 @@ namespace Arborist.Treenumerators
       scheduledVisit.TraversalStrategy = traversalStrategy;
 
       var previousVisit = _CurrentLevel[0];
+
+      if (traversalStrategy == TraversalStrategy.SkipNode)
+      {
+        if (MoveToFirstChild(scheduledVisit))
+          return true;
+
+        if (MoveToNextChild())
+          return true;
+
+        _CurrentLevel[0].VisitCount++;
+
+        return null;
+      }
 
       if (traversalStrategy == TraversalStrategy.SkipSubtree)
       {
@@ -152,18 +165,18 @@ namespace Arborist.Treenumerators
         return false;
       }
 
-      var sentinelNode = default(TRootNode);
+      var sentinalNode = default(TRootNode);
 
-      var sentinel =
+      var sentinal =
         _NodeVisitPool
         .Lease(
           TreenumeratorMode.VisitingNode,
-          sentinelNode,
+          sentinalNode,
           1,
           (0, -1),
           TraversalStrategy.TraverseSubtree);
 
-      _CurrentLevel.AddToFront(sentinel);
+      _CurrentLevel.AddToFront(sentinal);
 
       var children =
         _ChildrenVisitPool
@@ -186,6 +199,9 @@ namespace Arborist.Treenumerators
     private bool MoveToFirstChild(VirtualNodeVisit<TRootNode> visit) =>
       MoveToFirstChild(visit, x => x.Node);
 
+    private bool MoveToFirstChild(VirtualNodeVisit<IEnumerator<TRootNode>> visit) =>
+      MoveToFirstChild(visit, x => x.Node.Current);
+
     private bool MoveToFirstChild<T>(
       VirtualNodeVisit<T> visit,
       Func<VirtualNodeVisit<T>, TRootNode> map)
@@ -198,9 +214,12 @@ namespace Arborist.Treenumerators
         return false;
       }
 
+      var previousVisit = _CurrentLevel[0];
+
       children.Mode = TreenumeratorMode.SchedulingNode;
       children.VisitCount = 0;
       children.Position = (0, visit.Position.Depth + 1);
+      children.Position = (previousVisit.VisitCount - 1, previousVisit.Position.Depth + 1);
       children.TraversalStrategy = TraversalStrategy.TraverseSubtree;
 
       _ChildrenStack.Push(children);
@@ -219,11 +238,14 @@ namespace Arborist.Treenumerators
       if (_ChildrenStack.Count == 0)
         return false;
 
+      var previousVisit = _CurrentLevel[0];
+
       var children = _ChildrenStack.Peek();
 
       children.Mode = TreenumeratorMode.SchedulingNode;
       children.VisitCount = 0;
       children.Position = children.Position.AddToSiblingIndex(1);
+      children.Position = (previousVisit.VisitCount - 1, previousVisit.Position.Depth + 1);
       children.TraversalStrategy = TraversalStrategy.TraverseSubtree;
 
       UpdateStateFromVirtualNodeVisit(GetNodeVisitFromChildEnumeratorVisit(children));

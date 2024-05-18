@@ -2,13 +2,12 @@
 {
   public enum TraversalStrategy
   {
-    // TODO: Add option to stop traversing entirely
                      // | Traverse  |  Traverse   |
                      // |   Node    | Descendants |
                      // |-----------|-------------|
     TraverseSubtree, // |     T     |      T      |
     SkipDescendants, // |     T     |      F      |
-    //SkipNode,        // |     F     |      T      |
+    SkipNode,        // |     F     |      T      |
     SkipSubtree,     // |     F     |      F      |
   }
 }
