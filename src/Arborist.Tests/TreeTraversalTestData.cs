@@ -1996,6 +1996,47 @@ namespace Arborist.Tests
           }
         },
 
+        new TreeTestDefinition
+        {
+          TreeString = "a(b(c,d,e))",
+          TestScenarios = new List<TestScenario>
+          {
+            // No skipping
+            // Skip nodes
+            new TestScenario
+            {
+              TraversalStrategySelector = visit => visit.Position.Depth == 0 ? TraversalStrategy.TraverseSubtree : TraversalStrategy.SkipNode,
+              Description = "Skip all but level 0 nodes",
+              ExpectedBreadthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (0, 2)),
+                (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "d", 0, (1, 2)),
+                (TreenumeratorMode.VisitingNode,   "a", 3, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "e", 0, (2, 2)),
+                (TreenumeratorMode.VisitingNode,   "a", 4, (0, 0)),
+              }.ToNodeVisitArray(),
+              ExpectedDepthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (0, 2)),
+                (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "d", 0, (1, 2)),
+                (TreenumeratorMode.VisitingNode,   "a", 3, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "e", 0, (2, 2)),
+                (TreenumeratorMode.VisitingNode,   "a", 4, (0, 0)),
+              }.ToNodeVisitArray()
+            },
+            // Skip subtree
+            // Skip descendant subtree
+          }
+        },
+
         // Two two-level unary tree.
         new TreeTestDefinition
         {

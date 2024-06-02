@@ -37,5 +37,29 @@ namespace Arborist.Linq.Extensions
           visit.VisitCount,
           (siblingIndex, visit.Position.Depth));
     }
+
+    public static NodeVisit<TNode> WithDepth<TNode>(
+      this NodeVisit<TNode> visit,
+      int depth)
+    {
+      return
+        new NodeVisit<TNode>(
+          visit.Mode,
+          visit.Node,
+          visit.VisitCount,
+          (visit.Position.SiblingIndex, depth));
+    }
+
+    public static NodeVisit<TNode> WithPosition<TNode>(
+      this NodeVisit<TNode> visit,
+      NodePosition position)
+    {
+      return
+        new NodeVisit<TNode>(
+          visit.Mode,
+          visit.Node,
+          visit.VisitCount,
+          position);
+    }
   }
 }

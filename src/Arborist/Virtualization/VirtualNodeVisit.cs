@@ -1,4 +1,6 @@
 ﻿using Arborist.Core;
+using System;
+using System.Collections;
 
 namespace Arborist.Virtualization
 {
@@ -18,5 +20,28 @@ namespace Arborist.Virtualization
     public bool SkippingDescendants =>
       TraversalStrategy == TraversalStrategy.SkipDescendants
       || TraversalStrategy == TraversalStrategy.SkipSubtree;
+
+    public override string ToString()
+    {
+      var node =
+        (Node is IEnumerator enumerator)
+        ? enumerator.Current.ToString()
+        : Node.ToString();
+
+      return $"{Position}  {ModeToChar()}  {VisitCount}  {node}";
+    }
+
+    private char ModeToChar()
+    {
+      switch (Mode)
+      {
+        case TreenumeratorMode.SchedulingNode:
+          return 'S';
+        case TreenumeratorMode.VisitingNode:
+          return 'V';
+        default:
+          throw new NotImplementedException();
+      }
+    }
   }
 }
