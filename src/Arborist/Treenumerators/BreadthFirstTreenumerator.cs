@@ -101,14 +101,6 @@ namespace Arborist.Treenumerators
 
       if (traversalStrategy == TraversalStrategy.SkipSubtree)
       {
-        // TODO:
-        //if (MoveToNextChild())
-        //  return true;
-
-        //_CurrentLevel[0].VisitCount++;
-
-        //return null;
-
         _CurrentLevel[0].VisitCount++;
 
         if (previousVisit.Position.Depth == -1)
@@ -250,8 +242,6 @@ namespace Arborist.Treenumerators
 
       if (_ChildrenStack.Count == 0)
         return false;
-
-      var previousVisit = _CurrentLevel[0];
 
       var children = _ChildrenStack.Peek();
 
