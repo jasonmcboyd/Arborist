@@ -1362,7 +1362,7 @@ namespace Arborist.Tests
             {
               TraversalStrategySelector = visit =>
                 visit.Position.Depth == 1 && visit.Position.SiblingIndex == 1
-                ? TraversalStrategy.SkipSubtree
+                ? TraversalStrategy.SkipNode
                 : TraversalStrategy.TraverseSubtree,
               Description = "Skip level 1, sibling 1 node",
               ExpectedBreadthFirstResults = new[]
@@ -1445,6 +1445,7 @@ namespace Arborist.Tests
                 (TreenumeratorMode.SchedulingNode, "b", 0, (0, 1)),
                 (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0)),
                 (TreenumeratorMode.SchedulingNode, "c", 0, (1, 1)),
+                (TreenumeratorMode.VisitingNode,   "a", 3, (0, 0)),
                 (TreenumeratorMode.VisitingNode,   "d", 1, (1, 0)),
                 (TreenumeratorMode.SchedulingNode, "e", 0, (0, 1)),
                 (TreenumeratorMode.VisitingNode,   "d", 2, (1, 0)),

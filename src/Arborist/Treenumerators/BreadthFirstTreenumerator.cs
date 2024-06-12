@@ -87,22 +87,38 @@ namespace Arborist.Treenumerators
         if (MoveToFirstChild(scheduledVisit))
           return true;
 
-        if (MoveToNextChild())
-          return true;
-
         _CurrentLevel[0].VisitCount++;
 
-        return null;
+        if (previousVisit.Position.Depth == -1)
+          return null;
+
+        scheduledVisit.Mode = TreenumeratorMode.VisitingNode;
+
+        UpdateStateFromVirtualNodeVisit(previousVisit);
+
+        return true;
       }
 
       if (traversalStrategy == TraversalStrategy.SkipSubtree)
       {
-        if (MoveToNextChild())
-          return true;
+        // TODO:
+        //if (MoveToNextChild())
+        //  return true;
+
+        //_CurrentLevel[0].VisitCount++;
+
+        //return null;
 
         _CurrentLevel[0].VisitCount++;
 
-        return null;
+        if (previousVisit.Position.Depth == -1)
+          return null;
+
+        scheduledVisit.Mode = TreenumeratorMode.VisitingNode;
+
+        UpdateStateFromVirtualNodeVisit(previousVisit);
+
+        return true;
       }
 
       scheduledVisit.Mode = TreenumeratorMode.VisitingNode;
@@ -213,8 +229,6 @@ namespace Arborist.Treenumerators
         ReturnChildrenVirtualNodeVisit(children);
         return false;
       }
-
-      var previousVisit = _CurrentLevel[0];
 
       children.Mode = TreenumeratorMode.SchedulingNode;
       children.VisitCount = 0;
