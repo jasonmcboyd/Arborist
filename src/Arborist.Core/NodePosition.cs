@@ -32,6 +32,12 @@ namespace Arborist.Core
     public static NodePosition operator +(NodePosition left, (int, int) right)
       => left + (NodePosition)right;
 
+    public static NodePosition operator -(NodePosition left, NodePosition right)
+      => new NodePosition(left.SiblingIndex - right.SiblingIndex, left.Depth - right.Depth);
+
+    public static NodePosition operator -(NodePosition left, (int, int) right)
+      => left - (NodePosition)right;
+
     public NodePosition AddToDepth(int value) => new NodePosition(SiblingIndex, Depth + value);
     public NodePosition AddToSiblingIndex(int value) => new NodePosition(SiblingIndex + value, Depth);
 

@@ -872,7 +872,7 @@ namespace Arborist.Linq.Tests
             new TestScenario
             {
               TraversalStrategySelector = visit => visit.Position.Depth == 1 ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
-              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.Node != "c"),
+              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.Position != (1, 1)),
               Description = "Where not level 1 sibling 1, skip level 1 nodes",
               ExpectedBreadthFirstResults = new[]
               {
@@ -880,14 +880,14 @@ namespace Arborist.Linq.Tests
                 (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0)),
                 (TreenumeratorMode.SchedulingNode, "b", 0, (0, 1)),
                 (TreenumeratorMode.SchedulingNode, "e", 0, (0, 2)),
-                (TreenumeratorMode.VisitingNode,   "e", 1, (0, 2)),
                 (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0)),
                 (TreenumeratorMode.SchedulingNode, "f", 0, (1, 1)),
                 (TreenumeratorMode.VisitingNode,   "a", 3, (0, 0)),
                 (TreenumeratorMode.SchedulingNode, "d", 0, (2, 1)),
                 (TreenumeratorMode.SchedulingNode, "g", 0, (0, 2)),
-                (TreenumeratorMode.VisitingNode,   "g", 1, (0, 2)),
                 (TreenumeratorMode.VisitingNode,   "a", 4, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "e", 1, (0, 2)),
+                (TreenumeratorMode.VisitingNode,   "g", 1, (0, 2)),
               }.ToNodeVisitArray(),
               ExpectedDepthFirstResults = new[]
               {
@@ -949,7 +949,7 @@ namespace Arborist.Linq.Tests
                 (TreenumeratorMode.SchedulingNode, "c", 0, (1, 0)),
                 (TreenumeratorMode.VisitingNode,   "d", 1, (0, 1)),
                 (TreenumeratorMode.VisitingNode,   "e", 1, (1, 1)),
-                (TreenumeratorMode.VisitingNode,   "f", 1, (1, 1)),
+                (TreenumeratorMode.VisitingNode,   "f", 1, (2, 1)),
                 (TreenumeratorMode.VisitingNode,   "c", 1, (1, 0)),
               }.ToNodeVisitArray(),
               ExpectedDepthFirstResults = new[]
