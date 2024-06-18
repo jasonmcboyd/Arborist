@@ -90,11 +90,6 @@ namespace Arborist.Linq.Treenumerators
           else if (previousModeWasVisitingNode)
             continue;
 
-          //var lastScheduleNodeVisitWasSkipped = _NodePositionAndVisitCounts[_NodePositionAndVisitCounts.Count - 1].Skipped;
-
-          //if (lastScheduleNodeVisitWasSkipped)
-          //  _NodePositionAndVisitCounts.RemoveFromBack();
-
           _NodePositionAndVisitCounts[0] = _NodePositionAndVisitCounts[0].IncrementVisitCount();
         }
 
@@ -124,6 +119,8 @@ namespace Arborist.Linq.Treenumerators
       }
       else
       {
+        // TODO: I am not sure this block is 100% correct. I would like to add
+        // more tests to try and uncover more edge cases here.
         var previousNodePosition = _NodePositionAndVisitCounts[_NodePositionAndVisitCounts.Count - 1].Position;
 
         if (previousNodePosition.Depth == effectiveDepth)
