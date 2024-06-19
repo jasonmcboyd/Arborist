@@ -16,14 +16,14 @@ namespace Arborist.Linq.Treenumerators
       : base(innerTreenumerator)
     {
       _Predicate = predicate;
-      _Positions.AddToBack(new NodePositionAndSkippedStatus((0, -1), false));
+      _Positions.AddToBack(new NodeTraversalStatus(innerTreenumerator.Position, 0));
     }
 
     private readonly Func<NodeVisit<TNode>, bool> _Predicate;
 
-    private readonly Deque<NodePositionAndSkippedStatus> _Positions = new Deque<NodePositionAndSkippedStatus>();
+    private readonly Deque<NodeTraversalStatus> _Positions = new Deque<NodeTraversalStatus>();
 
-    private readonly Stack<NodePositionAndSkippedStatus> _CachedPositions = new Stack<NodePositionAndSkippedStatus>();
+    private readonly Stack<NodeTraversalStatus> _CachedPositions = new Stack<NodeTraversalStatus>();
 
     private bool _EnumerationFinished = false;
 
@@ -70,30 +70,30 @@ namespace Arborist.Linq.Treenumerators
           {
             var priorNodePosition = _Positions.Last();
 
-            if (InnerTreenumerator.Position.Depth == priorNodePosition.Depth)
+            if (InnerTreenumerator.Position.Depth == priorNodePosition.Position.Depth)
             {
-              if (InnerTreenumerator.Position.SiblingIndex > priorNodePosition.SiblingIndex)
+              if (InnerTreenumerator.Position.SiblingIndex > priorNodePosition.Position.SiblingIndex)
               {
-                _Positions.AddToBack(new NodePositionAndSkippedStatus(priorNodePosition.SiblingIndex + 1, priorNodePosition.Depth));
+                _Positions.AddToBack(new NodeTraversalStatus(priorNodePosition.Position + (1, 0), 0));
               }
               else
               {
-                _Positions.AddToBack(new NodePositionAndSkippedStatus(0, InnerTreenumerator.Position.Depth));
+                _Positions.AddToBack(new NodeTraversalStatus((0, priorNodePosition.Position.Depth), 0));
               }
             }
-            else if (InnerTreenumerator.Position.Depth > priorNodePosition.Depth)
+            else if (InnerTreenumerator.Position.Depth > priorNodePosition.Position.Depth)
             {
-              if (priorNodePosition.Depth != -1)
+              if (priorNodePosition.Position.Depth != -1)
                 _CachedPositions.Push(priorNodePosition);
 
-              _Positions.AddToBack(new NodePositionAndSkippedStatus(0, InnerTreenumerator.Position.Depth));
+              _Positions.AddToBack(new NodeTraversalStatus((0, InnerTreenumerator.Position.Depth), 0));
             }
             else
             {
               if (_CachedPositions.Count > 0)
                 priorNodePosition = _CachedPositions.Pop();
 
-              _Positions.AddToBack(new NodePositionAndSkippedStatus(priorNodePosition.SiblingIndex + 1, priorNodePosition.Depth));
+              _Positions.AddToBack(new NodeTraversalStatus(priorNodePosition.Position + (1, 0), 0));
             }
           }
         }
@@ -133,35 +133,30 @@ namespace Arborist.Linq.Treenumerators
         Position = position.Position;
       }
     }
-    
-    private readonly struct NodePositionAndSkippedStatus
+
+    private struct NodeTraversalStatus
     {
-      public NodePositionAndSkippedStatus(NodePosition nodePosition, bool skipped)
+      public NodeTraversalStatus(
+        NodePosition position,
+        int visitCount,
+        bool skipped = false)
       {
-        SiblingIndex = nodePosition.SiblingIndex;
-        Depth = nodePosition.Depth;
+        Position = position;
+        VisitCount = visitCount;
         Skipped = skipped;
       }
 
-      public NodePositionAndSkippedStatus(int siblingIndex, int depth) : this ((siblingIndex, depth), false)
-      {
-      }
-
-      public NodePositionAndSkippedStatus(NodePosition nodePosition) : this (nodePosition, false)
-      {
-      }
-
-      public int SiblingIndex { get; }
-      public int Depth { get; }
+      public NodePosition Position { get; }
+      public int VisitCount { get; }
       public bool Skipped { get; }
-      public NodePosition Position => (SiblingIndex, Depth);
 
-      public NodePositionAndSkippedStatus Skip() => new NodePositionAndSkippedStatus((SiblingIndex, Depth), true);
+      public NodeTraversalStatus IncrementVisitCount() =>
+        new NodeTraversalStatus(Position, VisitCount + 1, Skipped);
 
-      public override string ToString()
-      {
-        return $"{SiblingIndex}, {Depth}, {(Skipped ? 'S' : 'N')}";
-      }
+      public NodeTraversalStatus Skip() =>
+        new NodeTraversalStatus(Position, VisitCount, true);
+
+      public override string ToString() => $"({Position}), {VisitCount}, {Skipped}";
     }
   }
 }
