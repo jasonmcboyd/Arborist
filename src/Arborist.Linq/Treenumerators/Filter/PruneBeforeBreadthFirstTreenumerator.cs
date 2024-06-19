@@ -30,10 +30,14 @@ namespace Arborist.Linq.Treenumerators
     protected override bool OnMoveNext(TraversalStrategy traversalStrategy)
     {
       if (_EnumerationFinished)
+      {
         return false;
+      }
 
       if (Mode == TreenumeratorMode.VisitingNode)
+      {
         traversalStrategy = TraversalStrategy.TraverseSubtree;
+      }
 
       return InnerTreenumeratorMoveNext(traversalStrategy);
     }
@@ -49,7 +53,9 @@ namespace Arborist.Linq.Treenumerators
         && traversalStrategy == TraversalStrategy.SkipSubtree;
 
       if (previousSubtreeSkipped || previousNodeSkipped)
+      {
         _Positions[_Positions.Count - 1] = _Positions.Last().Skip();
+      }
 
       //var previousDepth = InnerTreenumerator.Position.Depth;
       var previousInnerTreenumeratorVisit = InnerTreenumerator.ToNodeVisit();
@@ -84,14 +90,18 @@ namespace Arborist.Linq.Treenumerators
             else if (InnerTreenumerator.Position.Depth > priorNodePosition.Position.Depth)
             {
               if (priorNodePosition.Position.Depth != -1)
+              {
                 _CachedPositions.Push(priorNodePosition);
+              }
 
               _Positions.AddToBack(new NodeTraversalStatus((0, InnerTreenumerator.Position.Depth), 0));
             }
             else
             {
               if (_CachedPositions.Count > 0)
+              {
                 priorNodePosition = _CachedPositions.Pop();
+              }
 
               _Positions.AddToBack(new NodeTraversalStatus(priorNodePosition.Position + (1, 0), 0));
             }
@@ -102,7 +112,9 @@ namespace Arborist.Linq.Treenumerators
           _Positions.RemoveFromFront();
 
           while (_Positions[0].Skipped)
+          {
             _Positions.RemoveFromFront();
+          }
         }
 
         UpdateState();
@@ -134,7 +146,7 @@ namespace Arborist.Linq.Treenumerators
       }
     }
 
-    private struct NodeTraversalStatus
+    private readonly struct NodeTraversalStatus
     {
       public NodeTraversalStatus(
         NodePosition position,

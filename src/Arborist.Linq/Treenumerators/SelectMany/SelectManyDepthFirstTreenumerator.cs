@@ -29,7 +29,9 @@ namespace Arborist.Linq.Treenumerators
     protected override bool OnMoveNext(TraversalStrategy traversalStrategy)
     {
       if (EnumerationFinished)
+      {
         return false;
+      }
 
       if (Position.Depth == -1)
         return OnStarting();
@@ -151,8 +153,10 @@ namespace Arborist.Linq.Treenumerators
 
     private bool MoveNextNodeTreenumerator(TraversalStrategy traversalStrategy)
     {
-      if (_NodeTreenumerator == null)
+      if (_NodeTreenumerator is null)
+      {
         return false;
+      }
 
       var previousPosition = _NodeTreenumerator.Position;
 

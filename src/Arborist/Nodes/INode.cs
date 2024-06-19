@@ -1,6 +1,6 @@
 ﻿namespace Arborist.Nodes
 {
-  public interface INodeContainer<out TNode>
+  public interface INode<out TNode>
   {
     TNode Value { get; }
   }

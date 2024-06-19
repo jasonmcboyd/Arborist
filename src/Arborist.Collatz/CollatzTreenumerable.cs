@@ -10,7 +10,7 @@ namespace Arborist.Collatz
     {
     }
 
-    private static IEnumerable<INodeContainerWithIndexableChildren<ulong>> _Roots =
-      new INodeContainerWithIndexableChildren<ulong>[] { new CollatzNode(2) };
+    private static IEnumerable<INodeWithIndexableChildren<ulong>> _Roots =
+      new INodeWithIndexableChildren<ulong>[] { new CollatzNode(2) };
   }
 }

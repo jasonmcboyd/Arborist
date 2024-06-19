@@ -32,7 +32,7 @@ namespace Arborist.Virtualization
       }
     }
 
-    public IEnumerator<INodeContainerWithIndexableChildren<TNode>> Lease(INodeContainerWithIndexableChildren<TNode> node)
+    public IEnumerator<INodeWithIndexableChildren<TNode>> Lease(INodeWithIndexableChildren<TNode> node)
     {
       VirtualEnumerator<TNode> result;
 

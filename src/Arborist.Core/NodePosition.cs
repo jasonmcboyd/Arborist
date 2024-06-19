@@ -2,7 +2,7 @@
 
 namespace Arborist.Core
 {
-  public struct NodePosition : IEqualityComparer<NodePosition>
+  public readonly struct NodePosition : IEqualityComparer<NodePosition>
   {
     public NodePosition(int siblingIndex, int depth)
     {

@@ -8,24 +8,24 @@ namespace Arborist.Treenumerables
 {
   public class IndexableTreenumerable<TNode> : ITreenumerable<TNode>
   {
-    public IndexableTreenumerable(params INodeContainerWithIndexableChildren<TNode>[] roots)
+    public IndexableTreenumerable(params INodeWithIndexableChildren<TNode>[] roots)
     {
       _Roots = roots;
     }
 
-    public IndexableTreenumerable(IEnumerable<INodeContainerWithIndexableChildren<TNode>> roots)
+    public IndexableTreenumerable(IEnumerable<INodeWithIndexableChildren<TNode>> roots)
     {
       _Roots = roots;
     }
 
-    private readonly IEnumerable<INodeContainerWithIndexableChildren<TNode>> _Roots;
+    private readonly IEnumerable<INodeWithIndexableChildren<TNode>> _Roots;
 
     public ITreenumerator<TNode> GetBreadthFirstTreenumerator()
     {
       var pool = new VirtualEnumeratorPool<TNode>();
 
       return
-        new BreadthFirstTreenumerator<INodeContainerWithIndexableChildren<TNode>, TNode>(
+        new BreadthFirstTreenumerator<INodeWithIndexableChildren<TNode>, TNode>(
           _Roots,
           node => node.Value,
           node => pool.Lease(node));
@@ -36,7 +36,7 @@ namespace Arborist.Treenumerables
       var pool = new VirtualEnumeratorPool<TNode>();
 
       return
-        new DepthFirstTreenumerator<INodeContainerWithIndexableChildren<TNode>, TNode>(
+        new DepthFirstTreenumerator<INodeWithIndexableChildren<TNode>, TNode>(
           _Roots,
           node => node.Value,
           node => pool.Lease(node));

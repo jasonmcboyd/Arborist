@@ -1,4 +1,5 @@
 using Arborist.Nodes;
+using Arborist.SimpleSerializer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 
@@ -11,9 +12,7 @@ namespace Arborist.Linq.Tests
     public void LevelOrderTraversal_TwoLevels()
     {
       // Arrange
-      var root = IndexableTreeNode.Create('a', 'b', 'c');
-
-      var treenumerable = root.ToTreenumerable();
+      var treenumerable = TreeSerializer.Deserialize("a(b,c)");
 
       // Act
       var actual =
@@ -22,7 +21,7 @@ namespace Arborist.Linq.Tests
         .ToArray();
 
       // Assert
-      var expected = new[] { 'a', 'b', 'c' };
+      var expected = new[] { "a", "b", "c" };
 
       CollectionAssert.AreEqual(expected, actual);
     }
@@ -31,12 +30,7 @@ namespace Arborist.Linq.Tests
     public void LevelOrderTraversal_MultipleLevels()
     {
       // Arrange
-      var root =
-        IndexableTreeNode.Create('a',
-          IndexableTreeNode.Create('b', 'c', 'd'),
-          IndexableTreeNode.Create('e', 'f', 'g', 'h'));
-
-      var treenumerable = root.ToTreenumerable();
+      var treenumerable = TreeSerializer.Deserialize("a(b(c,d),e(f,g,h))");
 
       // Act
       var actual =
@@ -45,7 +39,7 @@ namespace Arborist.Linq.Tests
         .ToArray();
 
       // Assert
-      var expected = new[] { 'a', 'b', 'e', 'c', 'd', 'f', 'g', 'h' };
+      var expected = new[] { "a", "b", "e", "c", "d", "f", "g", "h" };
 
       CollectionAssert.AreEqual(expected, actual);
     }
@@ -54,15 +48,7 @@ namespace Arborist.Linq.Tests
     public void LevelOrderTraversal_MultipleRoots_MultipleLevels()
     {
       // Arrange
-      var roots = new[]
-      {
-        IndexableTreeNode.Create('a',
-          IndexableTreeNode.Create('b', 'c', 'd'),
-          IndexableTreeNode.Create('e', 'f', 'g', 'h')),
-        IndexableTreeNode.Create('i', 'j', 'k')
-      };
-
-      var treenumerable = roots.ToTreenumerable();
+      var treenumerable = TreeSerializer.Deserialize("a(b(c,d),e(f,g,h)),i(j,k)");
 
       // Act
       var actual =
@@ -71,7 +57,7 @@ namespace Arborist.Linq.Tests
         .ToArray();
 
       // Assert
-      var expected = new[] { 'a', 'i', 'b', 'e', 'j', 'k', 'c', 'd', 'f', 'g', 'h' };
+      var expected = new[] { "a", "i", "b", "e", "j", "k", "c", "d", "f", "g", "h" };
 
       CollectionAssert.AreEqual(expected, actual);
     }

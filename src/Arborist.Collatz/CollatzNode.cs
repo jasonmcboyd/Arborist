@@ -3,7 +3,7 @@ using System;
 
 namespace Arborist.Collatz
 {
-  public struct CollatzNode : INodeContainerWithIndexableChildren<ulong>
+  public struct CollatzNode : INodeWithIndexableChildren<ulong>
   {
     public CollatzNode(ulong value)
     {
@@ -26,7 +26,7 @@ namespace Arborist.Collatz
       }
     }
 
-    public INodeContainerWithIndexableChildren<ulong> this[int index]
+    public INodeWithIndexableChildren<ulong> this[int index]
     {
       get
       {

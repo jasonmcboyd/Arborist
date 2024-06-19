@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace Arborist.Virtualization
 {
   internal class VirtualEnumerator<TNode>
-    : IEnumerator<INodeContainerWithIndexableChildren<TNode>>
+    : IEnumerator<INodeWithIndexableChildren<TNode>>
   {
     public VirtualEnumerator(VirtualEnumeratorPool<TNode> pool)
     {
@@ -15,14 +15,14 @@ namespace Arborist.Virtualization
 
     private readonly VirtualEnumeratorPool<TNode> _Pool;
 
-    public void SetInnerNode(INodeContainerWithIndexableChildren<TNode> innerNode) => _InnerNode = innerNode;
+    public void SetInnerNode(INodeWithIndexableChildren<TNode> innerNode) => _InnerNode = innerNode;
 
-    private INodeContainerWithIndexableChildren<TNode> _InnerNode;
+    private INodeWithIndexableChildren<TNode> _InnerNode;
 
     private int _ChildIndex = -1;
 
-    private INodeContainerWithIndexableChildren<TNode> _Current;
-    public INodeContainerWithIndexableChildren<TNode> Current
+    private INodeWithIndexableChildren<TNode> _Current;
+    public INodeWithIndexableChildren<TNode> Current
     {
       get
       {

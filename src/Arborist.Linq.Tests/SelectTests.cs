@@ -11,7 +11,7 @@ namespace Arborist.Linq.Tests
     public void PreOrderTraversal_TwoLevels()
     {
       // Arrange
-      var root = IndexableTreeNode.Create(1, 2, 3);
+      var root = Node.CreateNodeWithIndexableChildren(1, 2, 3);
 
       var treenumerable = root.ToTreenumerable();
 
@@ -32,7 +32,7 @@ namespace Arborist.Linq.Tests
     public void LevelOrderTraversal_TwoLevels()
     {
       // Arrange
-      var root = IndexableTreeNode.Create(1, 2, 3);
+      var root = Node.CreateNodeWithIndexableChildren(1, 2, 3);
 
       var treenumerable = root.ToTreenumerable();
 

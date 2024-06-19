@@ -26,12 +26,12 @@ namespace Arborist.TestUtils
 
       if (enumerableTreenumeratorTest)
       {
-        var rootNodes = EnumerableTreeNode.Create(TreeSerializer.DeserializeRoots(serializedTree));
+        var rootNodes = TreeSerializer.DeserializeRoots(serializedTree).CreateNodeWithEnumerableChildren();
         treenumerable = rootNodes.ToTreenumerable().Select(visit => visit.Node);
       }
       else
       {
-        IEnumerable<INodeContainerWithIndexableChildren<string>> roots = TreeSerializer.DeserializeRoots(serializedTree);
+        IEnumerable<INodeWithIndexableChildren<string>> roots = TreeSerializer.DeserializeRoots(serializedTree);
         treenumerable = roots.ToTreenumerable().Select(visit => visit.Node);
       }
 

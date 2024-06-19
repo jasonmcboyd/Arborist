@@ -25,10 +25,14 @@ namespace Arborist.Linq.Treenumerators
     protected override bool OnMoveNext(TraversalStrategy traversalStrategy)
     {
       if (_EnumerationFinished)
+        {
         return false;
+      }
 
       if (Mode == TreenumeratorMode.VisitingNode)
+        {
         traversalStrategy = TraversalStrategy.TraverseSubtree;
+      }
 
       return InnerTreenumeratorMoveNext(traversalStrategy);
     }
@@ -41,7 +45,9 @@ namespace Arborist.Linq.Treenumerators
       {
         while (_SkippedSiblingsCounts.Count > InnerTreenumerator.Position.Depth + 2
           || (InnerTreenumerator.Position.Depth == 0 && InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode && _SkippedSiblingsCounts.Count > 1))
+        {
           _SkippedSiblingsCounts.RemoveAt(_SkippedSiblingsCounts.Count - 1);
+        }
 
         if (InnerTreenumerator.Position.Depth > previousInnerTreenumeratorVisit.Position.Depth)
         {
@@ -51,13 +57,17 @@ namespace Arborist.Linq.Treenumerators
           && InnerTreenumerator.Position.SiblingIndex > previousInnerTreenumeratorVisit.Position.SiblingIndex)
         {
           while (_SkippedSiblingsCounts.Count > InnerTreenumerator.Position.Depth + 1)
+          {
             _SkippedSiblingsCounts.RemoveAt(_SkippedSiblingsCounts.Count - 1);
+          }
         }
 
         if (InnerTreenumerator.Mode == TreenumeratorMode.VisitingNode
           && InnerTreenumerator.VisitCount > 1
           && InnerTreenumerator.Position.Depth == Position.Depth)
+          {
           continue;
+        }
 
         if (InnerTreenumerator.Mode == TreenumeratorMode.VisitingNode
           || !_Predicate(InnerTreenumerator.ToNodeVisit()))

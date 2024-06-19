@@ -17,10 +17,10 @@ namespace Arborist.SimpleSerializer
       Func<string, TResult> map)
       => DeserializeRoots(tree, map).ToTreenumerable();
 
-    public static IEnumerable<INodeContainerWithIndexableChildren<string>> DeserializeRoots(string tree)
+    public static IEnumerable<INodeWithIndexableChildren<string>> DeserializeRoots(string tree)
       => DeserializeRoots(tree, value => value);
 
-    public static IEnumerable<INodeContainerWithIndexableChildren<TResult>> DeserializeRoots<TResult>(
+    public static IEnumerable<INodeWithIndexableChildren<TResult>> DeserializeRoots<TResult>(
       string tree,
       Func<string, TResult> map)
     {
@@ -32,18 +32,18 @@ namespace Arborist.SimpleSerializer
       // good enough.
       var tokens = Tokenizer.Tokenize(tree).Reverse();
 
-      var stack = new Stack<List<IndexableTreeNode<TResult>>>();
+      var stack = new Stack<List<NodeWithIndexableChildren<TResult>>>();
 
-      stack.Push(new List<IndexableTreeNode<TResult>>());
+      stack.Push(new List<NodeWithIndexableChildren<TResult>>());
 
-      List<IndexableTreeNode<TResult>> children = null;
+      List<NodeWithIndexableChildren<TResult>> children = null;
 
-      var rootNodes = new List<IndexableTreeNode<TResult>>();
+      var rootNodes = new List<NodeWithIndexableChildren<TResult>>();
 
       foreach (var token in tokens)
       {
         TResult value;
-        IndexableTreeNode<TResult> node;
+        NodeWithIndexableChildren<TResult> node;
 
         switch (token.TokenType)
         {
@@ -62,12 +62,12 @@ namespace Arborist.SimpleSerializer
             break;
 
           case TokenType.RightParentheses:
-            stack.Push(new List<IndexableTreeNode<TResult>>());
+            stack.Push(new List<NodeWithIndexableChildren<TResult>>());
             break;
 
           default:
             value = map(token.Symbol);
-            node = new IndexableTreeNode<TResult>(value, children);
+            node = new NodeWithIndexableChildren<TResult>(value, children);
             stack.Peek().Add(node);
             children = null;
             break;
