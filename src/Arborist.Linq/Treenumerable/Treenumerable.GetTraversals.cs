@@ -78,7 +78,7 @@ namespace Arborist.Linq
     private static IEnumerable<NodeVisit<TNode>> GetTraversal<TNode>(
       this ITreenumerator<TNode> treenumerator)
     {
-      while (treenumerator.MoveNext())
+      while (treenumerator.MoveNext(TraversalStrategy.TraverseSubtree))
         yield return treenumerator.ToNodeVisit();
     }
   }

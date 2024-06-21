@@ -10,7 +10,8 @@ namespace Arborist.Linq
       Action<NodeVisit<TNode>> onNext)
     {
       return
-        source.Select(step =>
+        source
+        .Select(step =>
         {
           onNext(step);
           return step.Node;
