@@ -13,14 +13,6 @@ namespace Arborist.Virtualization
     public NodePosition Position { get; set; }
     public TraversalStrategy TraversalStrategy { get; set; }
 
-    public bool SkippingNode =>
-      TraversalStrategy == TraversalStrategy.SkipNode
-      || TraversalStrategy == TraversalStrategy.SkipSubtree;
-
-    public bool SkippingDescendants =>
-      TraversalStrategy == TraversalStrategy.SkipDescendants
-      || TraversalStrategy == TraversalStrategy.SkipSubtree;
-
     public override string ToString()
     {
       var node =
