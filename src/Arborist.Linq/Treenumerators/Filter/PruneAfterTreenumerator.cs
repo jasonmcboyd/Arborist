@@ -17,40 +17,40 @@ namespace Arborist.Linq.Treenumerators
 
     private readonly Func<NodeVisit<TNode>, bool> _Predicate;
 
-    protected override bool OnMoveNext(TraversalStrategy traversalStrategy)
+    protected override bool OnMoveNext(NodeTraversalStrategy nodeTraversalStrategy)
     {
       if (EnumerationFinished)
         return false;
 
       if (Mode == TreenumeratorMode.SchedulingNode)
-        traversalStrategy = GetTraversalStrategy(traversalStrategy);
+        nodeTraversalStrategy = GetTraversalStrategy(nodeTraversalStrategy);
 
-      var result = InnerTreenumerator.MoveNext(traversalStrategy);
+      var result = InnerTreenumerator.MoveNext(nodeTraversalStrategy);
 
       UpdateState();
 
       return result;
     }
 
-    private TraversalStrategy GetTraversalStrategy(TraversalStrategy traversalStrategy)
+    private NodeTraversalStrategy GetTraversalStrategy(NodeTraversalStrategy nodeTraversalStrategy)
     {
       var skippingNode =
-        traversalStrategy == TraversalStrategy.SkipSubtree
-        || traversalStrategy == TraversalStrategy.SkipNode;
+        nodeTraversalStrategy == NodeTraversalStrategy.SkipSubtree
+        || nodeTraversalStrategy == NodeTraversalStrategy.SkipNode;
 
       var skippingDescendants =
         _Predicate(this.ToNodeVisit())
-        || traversalStrategy == TraversalStrategy.SkipDescendants
-        || traversalStrategy == TraversalStrategy.SkipSubtree;
+        || nodeTraversalStrategy == NodeTraversalStrategy.SkipDescendants
+        || nodeTraversalStrategy == NodeTraversalStrategy.SkipSubtree;
 
       if (skippingNode && skippingDescendants)
-        return TraversalStrategy.SkipSubtree;
+        return NodeTraversalStrategy.SkipSubtree;
       else if (skippingNode && !skippingDescendants)
-        return TraversalStrategy.SkipNode;
+        return NodeTraversalStrategy.SkipNode;
       else if (!skippingNode && skippingDescendants)
-        return TraversalStrategy.SkipDescendants;
+        return NodeTraversalStrategy.SkipDescendants;
       else
-        return TraversalStrategy.TraverseSubtree;
+        return NodeTraversalStrategy.TraverseSubtree;
     }
 
     private void UpdateState()

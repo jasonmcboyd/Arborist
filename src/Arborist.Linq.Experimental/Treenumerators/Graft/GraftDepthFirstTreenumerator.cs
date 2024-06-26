@@ -48,11 +48,11 @@ namespace Arborist.Linq.Experimental.Treenumerators
       Func<NodeVisit<T>, NodeVisit<TNode>> selector,
       Func<int> siblingIndexCalculator,
       Func<int> depthCalculator,
-      TraversalStrategy traversalStrategy)
+      NodeTraversalStrategy nodeTraversalStrategy)
     {
       // TODO:
       throw new NotImplementedException();
-      //if (!treenumerator.MoveNext(traversalStrategy))
+      //if (!treenumerator.MoveNext(nodeTraversalStrategy))
       //{
       //  if (branch.Count > 0)
       //    branch.RemoveLast();
@@ -103,7 +103,7 @@ namespace Arborist.Linq.Experimental.Treenumerators
       //return true;
     }
 
-    private bool OnScionMoveNext(TraversalStrategy traversalStrategy)
+    private bool OnScionMoveNext(NodeTraversalStrategy nodeTraversalStrategy)
     {
       throw new NotImplementedException();
       //return OnTreenumeratorMoveNext(
@@ -112,10 +112,10 @@ namespace Arborist.Linq.Experimental.Treenumerators
       //  visit => visit,
       //  () => _InnerBranch.Last().VisitCount + _Scion.Node.Position.SiblingIndex - 1,
       //  () => _InnerBranch.Last().Position.Depth + _Scion.Node.Position.Depth + 1,
-      //  traversalStrategy);
+      //  nodeTraversalStrategy);
     }
 
-    private bool OnInnerMoveNext(TraversalStrategy traversalStrategy)
+    private bool OnInnerMoveNext(NodeTraversalStrategy nodeTraversalStrategy)
     {
       throw new NotImplementedException();
       //return OnTreenumeratorMoveNext(
@@ -124,22 +124,22 @@ namespace Arborist.Linq.Experimental.Treenumerators
       //  visit => visit.WithNode(_Selector(visit)),
       //  () => CalculateInnerSiblingIndexAfterMoveNext(),
       //  () => InnerTreenumerator.Node.Position.Depth,
-      //  traversalStrategy);
+      //  nodeTraversalStrategy);
     }
 
-    protected override bool OnMoveNext(TraversalStrategy traversalStrategy)
+    protected override bool OnMoveNext(NodeTraversalStrategy nodeTraversalStrategy)
     {
       // TODO:
       throw new NotImplementedException();
       //if (_Scion == null
-      //  && traversalStrategy == TraversalStrategy.ScheduleForTraversal
+      //  && nodeTraversalStrategy == TraversalStrategy.ScheduleForTraversal
       //  && _InnerBranch.Count > 0
       //  && _Predicate(_InnerBranch.Last()))
       //  _Scion = _ScionGenerator(InnerTreenumerator.Current).GetDepthFirstTreenumerator();
 
       //if (_Scion != null)
       //{
-      //  if (OnScionMoveNext(traversalStrategy))
+      //  if (OnScionMoveNext(nodeTraversalStrategy))
       //    return true;
 
       //  _Scion = null;
@@ -156,20 +156,20 @@ namespace Arborist.Linq.Experimental.Treenumerators
       //}
 
       //if (!_ReturnedFromScion)
-      //  return OnInnerMoveNext(traversalStrategy);
+      //  return OnInnerMoveNext(nodeTraversalStrategy);
 
       //_ReturnedFromScion = false;
 
       //var priorVisit = _InnerBranch.Last();
 
-      //var onMoveNext = OnInnerMoveNext(traversalStrategy);
+      //var onMoveNext = OnInnerMoveNext(nodeTraversalStrategy);
 
       //if (priorVisit.Depth != Current.Depth)
       //  return onMoveNext;
 
       //_InnerBranch.RemoveLast();
 
-      //return OnInnerMoveNext(traversalStrategy);
+      //return OnInnerMoveNext(nodeTraversalStrategy);
     }
   }
 }

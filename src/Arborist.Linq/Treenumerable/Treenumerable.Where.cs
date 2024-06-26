@@ -11,7 +11,7 @@ namespace Arborist.Linq
       Func<NodeVisit<T>, bool> predicate)
       => TreenumerableFactory.Create(
         source,
-        breadthFirstTreenumerator => new WhereBreadthFirstTreenumerator<T>(breadthFirstTreenumerator, visit => !predicate(visit), TraversalStrategy.SkipNode),
+        breadthFirstTreenumerator => new WhereBreadthFirstTreenumerator<T>(breadthFirstTreenumerator, visit => !predicate(visit), NodeTraversalStrategy.SkipNode),
         depthFirstTreenumerator => new WhereDepthFirstTreenumerator<T>(depthFirstTreenumerator, predicate));
   }
 }

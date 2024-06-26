@@ -95,7 +95,7 @@ namespace Arborist.SimpleSerializer
       {
         int previousDepth = -1;
 
-        while (treenumerator.MoveNext(TraversalStrategy.TraverseSubtree))
+        while (treenumerator.MoveNext(NodeTraversalStrategy.TraverseSubtree))
         {
           if (treenumerator.VisitCount != 1)
             continue;

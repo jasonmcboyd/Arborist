@@ -9,18 +9,18 @@ namespace Arborist.Linq
   {
     public static IEnumerable<NodeVisit<TNode>> GetDepthFirstTraversal<TNode>(
       this ITreenumerable<TNode> source,
-      Func<NodeVisit<TNode>, TraversalStrategy> traversalStrategySelector)
+      Func<NodeVisit<TNode>, NodeTraversalStrategy> nodeTraversalStrategySelector)
     {
       using (var treenumerator = source.GetDepthFirstTreenumerator())
-        return GetTraversal(treenumerator, traversalStrategySelector);
+        return GetTraversal(treenumerator, nodeTraversalStrategySelector);
     }
 
     public static IEnumerable<NodeVisit<TNode>> GetBreadthFirstTraversal<TNode>(
       this ITreenumerable<TNode> source,
-      Func<NodeVisit<TNode>, TraversalStrategy> traversalStrategySelector)
+      Func<NodeVisit<TNode>, NodeTraversalStrategy> nodeTraversalStrategySelector)
     {
       using (var treenumerator = source.GetBreadthFirstTreenumerator())
-        return GetTraversal(treenumerator, traversalStrategySelector);
+        return GetTraversal(treenumerator, nodeTraversalStrategySelector);
     }
 
     public static IEnumerable<NodeVisit<TNode>> GetDepthFirstTraversal<TNode>(
@@ -39,7 +39,7 @@ namespace Arborist.Linq
 
     private static IEnumerable<NodeVisit<TNode>> GetTraversal<TNode>(
       this ITreenumerator<TNode> treenumerator,
-      Func<NodeVisit<TNode>, TraversalStrategy> traversalStrategySelector)
+      Func<NodeVisit<TNode>, NodeTraversalStrategy> nodeTraversalStrategySelector)
     {
       // There is no reason a consumer _should_ ever pass a traversal strategy
       // before enumeration has begun. But just because they should not does not
@@ -53,16 +53,16 @@ namespace Arborist.Linq
       // that were not handling this initial call to MoveNext correctly. By ignoring
       // the traversal strategy, I was hiding bugs. So, I decided to change the
       // behavior here so that those bugs would be exposed
-      var traversalStrategy = traversalStrategySelector(treenumerator.ToNodeVisit());
+      var nodeTraversalStrategy = nodeTraversalStrategySelector(treenumerator.ToNodeVisit());
 
-      if (!treenumerator.MoveNext(traversalStrategy))
+      if (!treenumerator.MoveNext(nodeTraversalStrategy))
         yield break;
 
       yield return treenumerator.ToNodeVisit();
 
-      traversalStrategy = traversalStrategySelector(treenumerator.ToNodeVisit());
+      nodeTraversalStrategy = nodeTraversalStrategySelector(treenumerator.ToNodeVisit());
 
-      while (treenumerator.MoveNext(traversalStrategy))
+      while (treenumerator.MoveNext(nodeTraversalStrategy))
       {
         yield return treenumerator.ToNodeVisit();
 
@@ -71,14 +71,14 @@ namespace Arborist.Linq
         // the traversal strategy. I was doing that originally, but then I found
         // that it was covering up poorly behaved treenumerators. So I changed the
         // behavior here so that those bugs would get surfaced.
-        traversalStrategy = traversalStrategySelector(treenumerator.ToNodeVisit());
+        nodeTraversalStrategy = nodeTraversalStrategySelector(treenumerator.ToNodeVisit());
       }
     }
 
     private static IEnumerable<NodeVisit<TNode>> GetTraversal<TNode>(
       this ITreenumerator<TNode> treenumerator)
     {
-      while (treenumerator.MoveNext(TraversalStrategy.TraverseSubtree))
+      while (treenumerator.MoveNext(NodeTraversalStrategy.TraverseSubtree))
         yield return treenumerator.ToNodeVisit();
     }
   }

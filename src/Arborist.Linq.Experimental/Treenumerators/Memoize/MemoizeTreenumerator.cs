@@ -15,7 +15,7 @@ namespace Arborist.Linq.Experimental.Treenumerators
     private int _Index = 0;
     private bool _GeneratorExhausted;
 
-    protected override bool OnMoveNext(TraversalStrategy traversalStrategy)
+    protected override bool OnMoveNext(NodeTraversalStrategy nodeTraversalStrategy)
     {
       throw new NotImplementedException();
       //if (_GeneratorExhausted)

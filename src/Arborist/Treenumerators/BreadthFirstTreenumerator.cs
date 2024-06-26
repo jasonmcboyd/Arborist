@@ -39,7 +39,7 @@ namespace Arborist.Treenumerators
     private Stack<VirtualNodeVisit<IEnumerator<TRootNode>>> _ChildrenStack =
       new Stack<VirtualNodeVisit<IEnumerator<TRootNode>>>();
 
-    protected override bool OnMoveNext(TraversalStrategy traversalStrategy)
+    protected override bool OnMoveNext(NodeTraversalStrategy nodeTraversalStrategy)
     {
       if (Position.Depth == -1)
         return OnStarting();
@@ -58,7 +58,7 @@ namespace Arborist.Treenumerators
 
         if (Mode == TreenumeratorMode.SchedulingNode)
         {
-          var onScheduling = OnScheduling(traversalStrategy);
+          var onScheduling = OnScheduling(nodeTraversalStrategy);
 
           if (onScheduling.HasValue)
             return onScheduling.Value;
@@ -74,15 +74,15 @@ namespace Arborist.Treenumerators
       }
     }
 
-    private bool? OnScheduling(TraversalStrategy traversalStrategy)
+    private bool? OnScheduling(NodeTraversalStrategy nodeTraversalStrategy)
     {
       var scheduledVisit = _ChildrenStack.Peek();
 
-      scheduledVisit.TraversalStrategy = traversalStrategy;
+      scheduledVisit.TraversalStrategy = nodeTraversalStrategy;
 
       var previousVisit = _CurrentLevel[0];
 
-      if (traversalStrategy == TraversalStrategy.SkipNode)
+      if (nodeTraversalStrategy == NodeTraversalStrategy.SkipNode)
       {
         if (MoveToFirstChild(scheduledVisit))
           return true;
@@ -99,7 +99,7 @@ namespace Arborist.Treenumerators
         return true;
       }
 
-      if (traversalStrategy == TraversalStrategy.SkipSubtree)
+      if (nodeTraversalStrategy == NodeTraversalStrategy.SkipSubtree)
       {
         _CurrentLevel[0].VisitCount++;
 
@@ -139,7 +139,7 @@ namespace Arborist.Treenumerators
       }
 
       if (previousVisit.VisitCount == 1
-        && previousVisit.TraversalStrategy != TraversalStrategy.SkipDescendants
+        && previousVisit.TraversalStrategy != NodeTraversalStrategy.SkipDescendants
         && MoveToFirstChild(previousVisit))
       {
         return true;
@@ -182,7 +182,7 @@ namespace Arborist.Treenumerators
           sentinalNode,
           1,
           (0, -1),
-          TraversalStrategy.TraverseSubtree);
+          NodeTraversalStrategy.TraverseSubtree);
 
       _CurrentLevel.AddToFront(sentinal);
 
@@ -193,7 +193,7 @@ namespace Arborist.Treenumerators
           _RootsEnumerator,
           0,
           (0, 0),
-          TraversalStrategy.TraverseSubtree);
+          NodeTraversalStrategy.TraverseSubtree);
 
       _ChildrenStack.Push(children);
 
@@ -225,7 +225,7 @@ namespace Arborist.Treenumerators
       children.Mode = TreenumeratorMode.SchedulingNode;
       children.VisitCount = 0;
       children.Position = (0, visit.Position.Depth + 1);
-      children.TraversalStrategy = TraversalStrategy.TraverseSubtree;
+      children.TraversalStrategy = NodeTraversalStrategy.TraverseSubtree;
 
       _ChildrenStack.Push(children);
 
@@ -248,7 +248,7 @@ namespace Arborist.Treenumerators
       children.Mode = TreenumeratorMode.SchedulingNode;
       children.VisitCount = 0;
       children.Position = children.Position.AddToSiblingIndex(1);
-      children.TraversalStrategy = TraversalStrategy.TraverseSubtree;
+      children.TraversalStrategy = NodeTraversalStrategy.TraverseSubtree;
 
       UpdateStateFromVirtualNodeVisit(GetNodeVisitFromChildEnumeratorVisit(children));
 
@@ -267,7 +267,7 @@ namespace Arborist.Treenumerators
     {
       IEnumerator<TRootNode> childrenEnumerator;
 
-      if (visit.TraversalStrategy == TraversalStrategy.SkipDescendants)
+      if (visit.TraversalStrategy == NodeTraversalStrategy.SkipDescendants)
         childrenEnumerator = Enumerable.Empty<TRootNode>().GetEnumerator();
 
       childrenEnumerator = _ChildrenGetter(nodeMap(visit));
@@ -279,7 +279,7 @@ namespace Arborist.Treenumerators
           childrenEnumerator,
           0,
           (0, visit.Position.Depth + 1),
-          TraversalStrategy.TraverseSubtree);
+          NodeTraversalStrategy.TraverseSubtree);
     }
 
     private VirtualNodeVisit<TRootNode> GetNodeVisitFromChildEnumeratorVisit(VirtualNodeVisit<IEnumerator<TRootNode>> children)
@@ -300,7 +300,6 @@ namespace Arborist.Treenumerators
       Node = _Map(visit.Node);
       VisitCount = visit.VisitCount;
       Position = visit.Position;
-      TraversalStrategy = visit.TraversalStrategy;
     }
 
     public override void Dispose()

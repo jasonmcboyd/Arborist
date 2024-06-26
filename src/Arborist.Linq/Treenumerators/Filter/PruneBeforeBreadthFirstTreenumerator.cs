@@ -27,7 +27,7 @@ namespace Arborist.Linq.Treenumerators
 
     private bool _EnumerationFinished = false;
 
-    protected override bool OnMoveNext(TraversalStrategy traversalStrategy)
+    protected override bool OnMoveNext(NodeTraversalStrategy nodeTraversalStrategy)
     {
       if (_EnumerationFinished)
       {
@@ -36,21 +36,21 @@ namespace Arborist.Linq.Treenumerators
 
       if (Mode == TreenumeratorMode.VisitingNode)
       {
-        traversalStrategy = TraversalStrategy.TraverseSubtree;
+        nodeTraversalStrategy = NodeTraversalStrategy.TraverseSubtree;
       }
 
-      return InnerTreenumeratorMoveNext(traversalStrategy);
+      return InnerTreenumeratorMoveNext(nodeTraversalStrategy);
     }
 
-    private bool InnerTreenumeratorMoveNext(TraversalStrategy traversalStrategy)
+    private bool InnerTreenumeratorMoveNext(NodeTraversalStrategy nodeTraversalStrategy)
     {
       var previousNodeSkipped =
         InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode
-        && traversalStrategy == TraversalStrategy.SkipNode;
+        && nodeTraversalStrategy == NodeTraversalStrategy.SkipNode;
 
       var previousSubtreeSkipped =
         InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode
-        && traversalStrategy == TraversalStrategy.SkipSubtree;
+        && nodeTraversalStrategy == NodeTraversalStrategy.SkipSubtree;
 
       if (previousSubtreeSkipped || previousNodeSkipped)
       {
@@ -60,7 +60,7 @@ namespace Arborist.Linq.Treenumerators
       //var previousDepth = InnerTreenumerator.Position.Depth;
       var previousInnerTreenumeratorVisit = InnerTreenumerator.ToNodeVisit();
 
-      while (InnerTreenumerator.MoveNext(traversalStrategy))
+      while (InnerTreenumerator.MoveNext(nodeTraversalStrategy))
       {
         if (InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode)
         {
@@ -68,7 +68,7 @@ namespace Arborist.Linq.Treenumerators
 
           if (skipped)
           {
-            traversalStrategy = TraversalStrategy.SkipSubtree;
+            nodeTraversalStrategy = NodeTraversalStrategy.SkipSubtree;
 
             continue;
           }

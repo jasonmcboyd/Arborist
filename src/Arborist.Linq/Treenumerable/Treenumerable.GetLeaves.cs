@@ -10,15 +10,15 @@ namespace Arborist.Linq
     {
       using (var treenumerator = source.GetDepthFirstTreenumerator())
       {
-        if (!treenumerator.MoveNext(TraversalStrategy.TraverseSubtree))
+        if (!treenumerator.MoveNext(NodeTraversalStrategy.TraverseSubtree))
           yield break;
 
-        treenumerator.MoveNext(TraversalStrategy.TraverseSubtree);
+        treenumerator.MoveNext(NodeTraversalStrategy.TraverseSubtree);
 
         NodeVisit<T> previousVisit = default;
         NodeVisit<T> currentVisit = treenumerator.ToNodeVisit();
 
-        while (treenumerator.MoveNext(TraversalStrategy.TraverseSubtree))
+        while (treenumerator.MoveNext(NodeTraversalStrategy.TraverseSubtree))
         {
           if (treenumerator.VisitCount == 0)
             continue;

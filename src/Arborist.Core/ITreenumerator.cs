@@ -4,7 +4,7 @@ namespace Arborist.Core
 {
   public interface ITreenumerator<TNode> : IDisposable
   {
-    bool MoveNext(TraversalStrategy traversalStrategy);
+    bool MoveNext(NodeTraversalStrategy nodeTraversalStrategy);
 
     TNode Node { get; }
     int VisitCount { get; }

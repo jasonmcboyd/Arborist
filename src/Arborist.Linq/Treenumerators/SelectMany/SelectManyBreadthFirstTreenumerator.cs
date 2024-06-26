@@ -25,7 +25,7 @@ namespace Arborist.Linq.Treenumerators
 
     private bool _HasCachedVisit = false;
 
-    protected override bool OnMoveNext(TraversalStrategy traversalStrategy)
+    protected override bool OnMoveNext(NodeTraversalStrategy nodeTraversalStrategy)
     {
       if (EnumerationFinished)
         return false;
@@ -44,7 +44,7 @@ namespace Arborist.Linq.Treenumerators
 
       throw new NotImplementedException();
 
-      //if (MoveNextNodeTreenumerator(traversalStrategy))
+      //if (MoveNextNodeTreenumerator(nodeTraversalStrategy))
       //  return true;
 
       //if (MoveNextInnerSubtree())
@@ -82,7 +82,7 @@ namespace Arborist.Linq.Treenumerators
 
       while (true)
       {
-        if (InnerTreenumerator.MoveNext(TraversalStrategy.TraverseSubtree))
+        if (InnerTreenumerator.MoveNext(NodeTraversalStrategy.TraverseSubtree))
         {
           // Ignore the scheduling node visit.
           if (InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode)
@@ -95,7 +95,7 @@ namespace Arborist.Linq.Treenumerators
 
           _NodeTreenumerator = _Selector(InnerTreenumerator.Node).GetDepthFirstTreenumerator();
 
-          if (_NodeTreenumerator.MoveNext(TraversalStrategy.TraverseSubtree))
+          if (_NodeTreenumerator.MoveNext(NodeTraversalStrategy.TraverseSubtree))
             return true;
 
           _NodeTreenumerator.Dispose();

@@ -28,35 +28,35 @@ namespace Arborist.Linq.Treenumerators
 
     private bool _EnumerationFinished = false;
 
-    protected override bool OnMoveNext(TraversalStrategy traversalStrategy)
+    protected override bool OnMoveNext(NodeTraversalStrategy nodeTraversalStrategy)
     {
       if (_EnumerationFinished)
         return false;
 
       if (Mode == TreenumeratorMode.VisitingNode)
-        traversalStrategy = TraversalStrategy.TraverseSubtree;
+        nodeTraversalStrategy = NodeTraversalStrategy.TraverseSubtree;
 
-      return InnerTreenumeratorMoveNext(traversalStrategy);
+      return InnerTreenumeratorMoveNext(nodeTraversalStrategy);
     }
 
-    private bool InnerTreenumeratorMoveNext(TraversalStrategy traversalStrategy)
+    private bool InnerTreenumeratorMoveNext(NodeTraversalStrategy nodeTraversalStrategy)
     {
       // Do not apply any traversal strategies to the sentinel node.
       if (InnerTreenumerator.Position.Depth == -1)
-        traversalStrategy = TraversalStrategy.TraverseSubtree;
+        nodeTraversalStrategy = NodeTraversalStrategy.TraverseSubtree;
 
       // If the node was skipped, move it to the skipped stack.
       if (InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode
-        && traversalStrategy == TraversalStrategy.SkipNode)
+        && nodeTraversalStrategy == NodeTraversalStrategy.SkipNode)
       {
         _SkippedNodeVisits.Push(_NodeVisits.Pop().IncrementVisitCount());
       }
 
       // Enumerate until we yield something or exhaust the inner enumerator.
-      while (InnerTreenumerator.MoveNext(traversalStrategy))
+      while (InnerTreenumerator.MoveNext(nodeTraversalStrategy))
       {
         // Reset the traversal strategy.
-        traversalStrategy = TraversalStrategy.TraverseSubtree;
+        nodeTraversalStrategy = NodeTraversalStrategy.TraverseSubtree;
 
         var currentNodeVisit = InnerTreenumerator.ToNodeVisit();
 
@@ -68,7 +68,7 @@ namespace Arborist.Linq.Treenumerators
           }
           else
           {
-            traversalStrategy = TraversalStrategy.SkipNode;
+            nodeTraversalStrategy = NodeTraversalStrategy.SkipNode;
             continue;
           }
         }

@@ -5,7 +5,7 @@ namespace Arborist.TestUtils
 {
   public class TestScenario
   {
-    public Func<NodeVisit<string>, TraversalStrategy> TraversalStrategySelector { get; set; }
+    public Func<NodeVisit<string>, NodeTraversalStrategy> TraversalStrategySelector { get; set; }
     public Func<ITreenumerable<string>, ITreenumerable<string>> TreenumerableMap { get; set; }
     public string Description { get; set; }
     public NodeVisit<string>[] ExpectedDepthFirstResults { get; set; }

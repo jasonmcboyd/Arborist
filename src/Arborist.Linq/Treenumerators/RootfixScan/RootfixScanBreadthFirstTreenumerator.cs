@@ -30,16 +30,16 @@ namespace Arborist.Linq.Treenumerators
 
     private readonly Deque<NodeVisit<TAccumulate>> _Queue = new Deque<NodeVisit<TAccumulate>>();
 
-    protected override bool OnMoveNext(TraversalStrategy traversalStrategy)
+    protected override bool OnMoveNext(NodeTraversalStrategy nodeTraversalStrategy)
     {
       if (Mode == TreenumeratorMode.SchedulingNode)
       {
-        if (traversalStrategy == TraversalStrategy.SkipNode
-          || traversalStrategy == TraversalStrategy.SkipSubtree)
+        if (nodeTraversalStrategy == NodeTraversalStrategy.SkipNode
+          || nodeTraversalStrategy == NodeTraversalStrategy.SkipSubtree)
           _Queue.RemoveFromBack();
       }
 
-      if (!InnerTreenumerator.MoveNext(traversalStrategy))
+      if (!InnerTreenumerator.MoveNext(nodeTraversalStrategy))
         return false;
 
       if (InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode)

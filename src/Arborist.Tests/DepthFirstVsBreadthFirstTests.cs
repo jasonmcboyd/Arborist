@@ -30,9 +30,9 @@ namespace Arborist.Tests
 
       var filterStrategies = new[]
       {
-        TraversalStrategy.SkipNode,
-        TraversalStrategy.SkipSubtree,
-        TraversalStrategy.SkipDescendants,
+        NodeTraversalStrategy.SkipNode,
+        NodeTraversalStrategy.SkipSubtree,
+        NodeTraversalStrategy.SkipDescendants,
       };
 
       foreach (var treeString in treeStrings)
@@ -47,7 +47,7 @@ namespace Arborist.Tests
 
     [TestMethod]
     [DynamicData(nameof(GetData), DynamicDataSourceType.Method)]
-    public void Test(string treeString, TraversalStrategy? filterStrategy, string filterCharacter)
+    public void Test(string treeString, NodeTraversalStrategy? filterStrategy, string filterCharacter)
     {
       var treenumerable =
         TreeSerializer
@@ -60,24 +60,24 @@ namespace Arborist.Tests
         .OrderBy(nodeVisit => (nodeVisit.Mode, nodeVisit.Position.Depth, nodeVisit.Position.SiblingIndex, nodeVisit.Node))
         .ToArray();
 
-      var traversalStrategySelector =
-        new Func<NodeVisit<string>, TraversalStrategy>(
+      var nodeTraversalStrategySelector =
+        new Func<NodeVisit<string>, NodeTraversalStrategy>(
           nodeVisit =>
             filterCharacter == null || filterCharacter != nodeVisit.Node
-            ? TraversalStrategy.TraverseSubtree
+            ? NodeTraversalStrategy.TraverseSubtree
             : filterStrategy.Value);
 
       Debug.WriteLine("-----Breadth First-----");
       var breadthFirst =
         treenumerable
-        .GetBreadthFirstTraversal(traversalStrategySelector)
+        .GetBreadthFirstTraversal(nodeTraversalStrategySelector)
         .Do(nodeVisit => Debug.WriteLine(nodeVisit))
         .ToArray();
 
       Debug.WriteLine($"{Environment.NewLine}-----Depth First------");
       var depthFirst =
         treenumerable
-        .GetDepthFirstTraversal(traversalStrategySelector)
+        .GetDepthFirstTraversal(nodeTraversalStrategySelector)
         .Do(nodeVisit => Debug.WriteLine(nodeVisit))
         .ToArray();
 

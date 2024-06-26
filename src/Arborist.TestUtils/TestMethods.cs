@@ -16,7 +16,7 @@ namespace Arborist.TestUtils
       string serializedTree,
       string testDescription,
       Func<ITreenumerable<string>, ITreenumerable<string>> operation,
-      Func<NodeVisit<string>, TraversalStrategy> traversalStrategySelector,
+      Func<NodeVisit<string>, NodeTraversalStrategy> nodeTraversalStrategySelector,
       NodeVisit<string>[] expectedTraversal,
       bool isDepthFirstTest,
       bool enumerableTreenumeratorTest)
@@ -49,8 +49,8 @@ namespace Arborist.TestUtils
 
       var traversal =
         isDepthFirstTest
-        ? treenumerable.GetDepthFirstTraversal(traversalStrategySelector)
-        : treenumerable.GetBreadthFirstTraversal(traversalStrategySelector);
+        ? treenumerable.GetDepthFirstTraversal(nodeTraversalStrategySelector)
+        : treenumerable.GetBreadthFirstTraversal(nodeTraversalStrategySelector);
 
       // Act
       Debug.WriteLine($"{Environment.NewLine}----- Actual Values -----");

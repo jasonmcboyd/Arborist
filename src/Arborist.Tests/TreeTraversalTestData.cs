@@ -19,7 +19,7 @@ namespace Arborist.Tests
             // No skipping
             new TestScenario
             {
-              TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => NodeTraversalStrategy.TraverseSubtree,
               Description = "Traverse all",
               ExpectedBreadthFirstResults = Array.Empty<NodeVisit<string>>(),
               ExpectedDepthFirstResults = Array.Empty<NodeVisit<string>>()
@@ -36,7 +36,7 @@ namespace Arborist.Tests
             // No skipping
             new TestScenario
             {
-              TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => NodeTraversalStrategy.TraverseSubtree,
               Description = "Traverse all",
               ExpectedBreadthFirstResults = new[]
               {
@@ -76,7 +76,7 @@ namespace Arborist.Tests
             // Skip nodes
             new TestScenario
             {
-              TraversalStrategySelector = visit => TraversalStrategy.SkipNode,
+              TraversalStrategySelector = visit => NodeTraversalStrategy.SkipNode,
               Description = "Skip all nodes",
               ExpectedBreadthFirstResults = new[]
               {
@@ -97,7 +97,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Position.Depth > 0 && visit.Position.Depth < 4 ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Position.Depth > 0 && visit.Position.Depth < 4 ? NodeTraversalStrategy.SkipNode : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip levels 1, 2, 3 node",
               ExpectedBreadthFirstResults = new[]
               {
@@ -134,7 +134,7 @@ namespace Arborist.Tests
             // No skipping
             new TestScenario
             {
-              TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => NodeTraversalStrategy.TraverseSubtree,
               Description = "Traverse all",
               ExpectedBreadthFirstResults = new[]
               {
@@ -162,7 +162,7 @@ namespace Arborist.Tests
             // Skip nodes
             new TestScenario
             {
-              TraversalStrategySelector = visit => TraversalStrategy.SkipNode,
+              TraversalStrategySelector = visit => NodeTraversalStrategy.SkipNode,
               Description = "Skip all nodes",
               ExpectedBreadthFirstResults = new[]
               {
@@ -179,7 +179,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Position.Depth == 0 ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Position.Depth == 0 ? NodeTraversalStrategy.SkipNode : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 0 node",
               ExpectedBreadthFirstResults = new[]
               {
@@ -202,7 +202,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Position.Depth == 1 ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Position.Depth == 1 ? NodeTraversalStrategy.SkipNode : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 1 node",
               ExpectedBreadthFirstResults = new[]
               {
@@ -225,7 +225,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Position.Depth == 2 ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Position.Depth == 2 ? NodeTraversalStrategy.SkipNode : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 2 node",
               ExpectedBreadthFirstResults = new[]
               {
@@ -250,7 +250,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Position.Depth == 0 || visit.Position.Depth == 2 ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Position.Depth == 0 || visit.Position.Depth == 2 ? NodeTraversalStrategy.SkipNode : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 0 and level 2 nodes",
               ExpectedBreadthFirstResults = new[]
               {
@@ -272,7 +272,7 @@ namespace Arborist.Tests
             // Skip subtree
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Position.Depth == 0 ? TraversalStrategy.SkipSubtree : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Position.Depth == 0 ? NodeTraversalStrategy.SkipSubtree : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 0 subtree",
               ExpectedBreadthFirstResults = new[]
               {
@@ -285,7 +285,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Position.Depth == 1 ? TraversalStrategy.SkipSubtree : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Position.Depth == 1 ? NodeTraversalStrategy.SkipSubtree : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 1 subtree",
               ExpectedBreadthFirstResults = new[]
               {
@@ -304,7 +304,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Position.Depth == 2 ? TraversalStrategy.SkipSubtree : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Position.Depth == 2 ? NodeTraversalStrategy.SkipSubtree : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 2 subtree",
               ExpectedBreadthFirstResults = new[]
               {
@@ -330,7 +330,7 @@ namespace Arborist.Tests
             // Skip descendant subtrees
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Position.Depth == 0 ? TraversalStrategy.SkipDescendants : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Position.Depth == 0 ? NodeTraversalStrategy.SkipDescendants : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 0 descedant subtrees",
               ExpectedBreadthFirstResults = new[]
               {
@@ -345,7 +345,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Position.Depth == 1 ? TraversalStrategy.SkipDescendants : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Position.Depth == 1 ? NodeTraversalStrategy.SkipDescendants : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 1 descedant subtrees",
               ExpectedBreadthFirstResults = new[]
               {
@@ -366,7 +366,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Position.Depth == 2 ? TraversalStrategy.SkipDescendants : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Position.Depth == 2 ? NodeTraversalStrategy.SkipDescendants : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 2 descedant subtrees",
               ExpectedBreadthFirstResults = new[]
               {
@@ -402,7 +402,7 @@ namespace Arborist.Tests
             // No skipping
             new TestScenario
             {
-              TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => NodeTraversalStrategy.TraverseSubtree,
               Description = "Traverse all",
               ExpectedBreadthFirstResults = new[]
               {
@@ -457,10 +457,10 @@ namespace Arborist.Tests
             {
               TraversalStrategySelector = visit =>
                 visit.Position.Depth == 0
-                ? TraversalStrategy.SkipNode
+                ? NodeTraversalStrategy.SkipNode
                 : visit.Position.Depth == 1  
-                ? TraversalStrategy.SkipSubtree
-                : TraversalStrategy.TraverseSubtree,
+                ? NodeTraversalStrategy.SkipSubtree
+                : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 1 subtrees, skip level 0 nodes",
               ExpectedBreadthFirstResults = new[]
               {
@@ -481,10 +481,10 @@ namespace Arborist.Tests
             {
               TraversalStrategySelector = visit =>
                 visit.Position.Depth == 0
-                ? TraversalStrategy.SkipNode
+                ? NodeTraversalStrategy.SkipNode
                 : visit.Position.Depth == 2  
-                ? TraversalStrategy.SkipSubtree
-                : TraversalStrategy.TraverseSubtree,
+                ? NodeTraversalStrategy.SkipSubtree
+                : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 2 subtrees, skip level 0 nodes",
               ExpectedBreadthFirstResults = new[]
               {
@@ -521,7 +521,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Position.Depth > 0 ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Position.Depth > 0 ? NodeTraversalStrategy.SkipNode : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 1 & 2 nodes",
               ExpectedBreadthFirstResults = new[]
               {
@@ -556,10 +556,10 @@ namespace Arborist.Tests
             {
               TraversalStrategySelector = visit =>
                 visit.Position.Depth == 1
-                ? TraversalStrategy.SkipNode
+                ? NodeTraversalStrategy.SkipNode
                 : visit.Position.Depth == 2
-                ? TraversalStrategy.SkipSubtree
-                : TraversalStrategy.TraverseSubtree,
+                ? NodeTraversalStrategy.SkipSubtree
+                : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 2 subtrees, skip level 1 nodes",
               ExpectedBreadthFirstResults = new[]
               {
@@ -594,10 +594,10 @@ namespace Arborist.Tests
             {
               TraversalStrategySelector = visit =>
                 visit.Position.Depth == 1
-                ? TraversalStrategy.SkipNode
+                ? NodeTraversalStrategy.SkipNode
                 : visit.Position.Depth == 2 && visit.Node != "g"
-                ? TraversalStrategy.SkipSubtree
-                : TraversalStrategy.TraverseSubtree,
+                ? NodeTraversalStrategy.SkipSubtree
+                : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 2, siblings 0 & 1 subtrees, skip level 1 nodes",
               ExpectedBreadthFirstResults = new[]
               {
@@ -642,7 +642,7 @@ namespace Arborist.Tests
             // Traverse all
             new TestScenario
             {
-              TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => NodeTraversalStrategy.TraverseSubtree,
               Description = "Traverse all",
               ExpectedBreadthFirstResults = new[]
               {
@@ -676,7 +676,7 @@ namespace Arborist.Tests
             // Skip nodes
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Node == "b" ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Node == "b" ? NodeTraversalStrategy.SkipNode : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 1 node",
               ExpectedBreadthFirstResults = new[]
               {
@@ -705,7 +705,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Position.Depth == 2 ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Position.Depth == 2 ? NodeTraversalStrategy.SkipNode : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 2 nodes",
               ExpectedBreadthFirstResults = new[]
               {
@@ -744,7 +744,7 @@ namespace Arborist.Tests
             // No skipping
             new TestScenario
             {
-              TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => NodeTraversalStrategy.TraverseSubtree,
               Description = "Traverse all",
               ExpectedBreadthFirstResults = new[]
               {
@@ -796,7 +796,7 @@ namespace Arborist.Tests
             // Skip nodes
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Node == "c" ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Node == "c" ? NodeTraversalStrategy.SkipNode : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 1, sibling 1 node",
               ExpectedBreadthFirstResults = new[]
               {
@@ -853,7 +853,7 @@ namespace Arborist.Tests
             // No skipping
             new TestScenario
             {
-              TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => NodeTraversalStrategy.TraverseSubtree,
               Description = "Traverse all",
               ExpectedBreadthFirstResults = new[]
               {
@@ -917,7 +917,7 @@ namespace Arborist.Tests
             // Skip nodes
             new TestScenario
             {
-              TraversalStrategySelector = visit => TraversalStrategy.SkipNode,
+              TraversalStrategySelector = visit => NodeTraversalStrategy.SkipNode,
               Description = "Skip all nodes",
               ExpectedBreadthFirstResults = new[]
               {
@@ -949,8 +949,8 @@ namespace Arborist.Tests
               TraversalStrategySelector =
                 visit =>
                   (visit.Position.Depth == 1 || visit.Position.Depth == 3) && visit.Position.SiblingIndex == 1
-                  ? TraversalStrategy.SkipNode
-                  : TraversalStrategy.TraverseSubtree,
+                  ? NodeTraversalStrategy.SkipNode
+                  : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip levels 1 & 3, sibling 1 node",
               ExpectedBreadthFirstResults = new[]
               {
@@ -1008,8 +1008,8 @@ namespace Arborist.Tests
               TraversalStrategySelector =
                 visit =>
                   visit.Position.Depth == 0 || visit.Position.SiblingIndex == 1
-                  ? TraversalStrategy.SkipNode
-                  : TraversalStrategy.TraverseSubtree,
+                  ? NodeTraversalStrategy.SkipNode
+                  : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip root and all sibling 1 nodes",
               ExpectedBreadthFirstResults = new[]
               {
@@ -1056,7 +1056,7 @@ namespace Arborist.Tests
             // No skipping
             new TestScenario
             {
-              TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => NodeTraversalStrategy.TraverseSubtree,
               Description = "Traverse all",
               ExpectedBreadthFirstResults = new[]
               {
@@ -1108,7 +1108,7 @@ namespace Arborist.Tests
             // Skip nodes
             new TestScenario
             {
-              TraversalStrategySelector = visit => TraversalStrategy.SkipNode,
+              TraversalStrategySelector = visit => NodeTraversalStrategy.SkipNode,
               Description = "Skip all nodes",
               ExpectedBreadthFirstResults = new[]
               {
@@ -1133,7 +1133,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Position.Depth == 1 && visit.Position.SiblingIndex == 1 ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Position.Depth == 1 && visit.Position.SiblingIndex == 1 ? NodeTraversalStrategy.SkipNode : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 1, sibling 1 node",
               ExpectedBreadthFirstResults = new[]
               {
@@ -1181,7 +1181,7 @@ namespace Arborist.Tests
             // Skip subtree
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Position.Depth == 1 && visit.Position.SiblingIndex == 1 ? TraversalStrategy.SkipSubtree : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Position.Depth == 1 && visit.Position.SiblingIndex == 1 ? NodeTraversalStrategy.SkipSubtree : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 1, sibling 1 subtree",
               ExpectedBreadthFirstResults = new[]
               {
@@ -1213,7 +1213,7 @@ namespace Arborist.Tests
             // Skip descendant subtrees
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Position.Depth == 1 && visit.Position.SiblingIndex == 1 ? TraversalStrategy.SkipDescendants : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Position.Depth == 1 && visit.Position.SiblingIndex == 1 ? NodeTraversalStrategy.SkipDescendants : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 1, sibling 1 descendant subtree",
               ExpectedBreadthFirstResults = new[]
               {
@@ -1256,7 +1256,7 @@ namespace Arborist.Tests
             // No skipping
             new TestScenario
             {
-              TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => NodeTraversalStrategy.TraverseSubtree,
               Description = "Traverse all",
               ExpectedBreadthFirstResults = new[]
               {
@@ -1300,7 +1300,7 @@ namespace Arborist.Tests
             // Skip nodes
             new TestScenario
             {
-              TraversalStrategySelector = visit => TraversalStrategy.SkipNode,
+              TraversalStrategySelector = visit => NodeTraversalStrategy.SkipNode,
               Description = "Skip all nodes",
               ExpectedBreadthFirstResults = new[]
               {
@@ -1323,7 +1323,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Node == "d" ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Node == "d" ? NodeTraversalStrategy.SkipNode : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 0, sibling 1 node",
               ExpectedBreadthFirstResults = new[]
               {
@@ -1362,8 +1362,8 @@ namespace Arborist.Tests
             {
               TraversalStrategySelector = visit =>
                 visit.Position.Depth == 1 && visit.Position.SiblingIndex == 1
-                ? TraversalStrategy.SkipNode
-                : TraversalStrategy.TraverseSubtree,
+                ? NodeTraversalStrategy.SkipNode
+                : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 1, sibling 1 node",
               ExpectedBreadthFirstResults = new[]
               {
@@ -1403,7 +1403,7 @@ namespace Arborist.Tests
             // Skip subtree
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Node == "d" ? TraversalStrategy.SkipSubtree : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Node == "d" ? NodeTraversalStrategy.SkipSubtree : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 0, sibling 1 subtree",
               ExpectedBreadthFirstResults = new[]
               {
@@ -1434,8 +1434,8 @@ namespace Arborist.Tests
             {
               TraversalStrategySelector = visit =>
                 visit.Position.Depth == 1 && visit.Position.SiblingIndex == 1
-                ? TraversalStrategy.SkipSubtree
-                : TraversalStrategy.TraverseSubtree,
+                ? NodeTraversalStrategy.SkipSubtree
+                : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 1, sibling 1 subtree",
               ExpectedBreadthFirstResults = new[]
               {
@@ -1475,7 +1475,7 @@ namespace Arborist.Tests
             // Skip descendant subtrees
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Node == "d" ? TraversalStrategy.SkipDescendants : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Node == "d" ? NodeTraversalStrategy.SkipDescendants : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 0, sibling 1 descendant subtrees",
               ExpectedBreadthFirstResults = new[]
               {
@@ -1516,7 +1516,7 @@ namespace Arborist.Tests
             // No skipping
             new TestScenario
             {
-              TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => NodeTraversalStrategy.TraverseSubtree,
               Description = "Traverse all",
               ExpectedBreadthFirstResults = new[]
               {
@@ -1550,7 +1550,7 @@ namespace Arborist.Tests
             // Skip nodes
             new TestScenario
             {
-              TraversalStrategySelector = visit => TraversalStrategy.SkipNode,
+              TraversalStrategySelector = visit => NodeTraversalStrategy.SkipNode,
               Description = "Skip all nodes",
               ExpectedBreadthFirstResults = new[]
               {
@@ -1569,7 +1569,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Position.Depth == 0 ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Position.Depth == 0 ? NodeTraversalStrategy.SkipNode : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 0 nodes",
               ExpectedBreadthFirstResults = new[]
               {
@@ -1594,7 +1594,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Position.Depth == 1 ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Position.Depth == 1 ? NodeTraversalStrategy.SkipNode : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 1 nodes",
               ExpectedBreadthFirstResults = new[]
               {
@@ -1621,7 +1621,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Node == "b" ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Node == "b" ? NodeTraversalStrategy.SkipNode : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 1, sibling 0 node",
               ExpectedBreadthFirstResults = new[]
               {
@@ -1652,7 +1652,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Node == "c" ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Node == "c" ? NodeTraversalStrategy.SkipNode : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 1, sibling 1 node",
               ExpectedBreadthFirstResults = new[]
               {
@@ -1683,7 +1683,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Node == "d" ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Node == "d" ? NodeTraversalStrategy.SkipNode : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 1, sibling 2 node",
               ExpectedBreadthFirstResults = new[]
               {
@@ -1715,7 +1715,7 @@ namespace Arborist.Tests
             // Skip subtree
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Position.Depth == 0 ? TraversalStrategy.SkipSubtree : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Position.Depth == 0 ? NodeTraversalStrategy.SkipSubtree : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 0 subtrees",
               ExpectedBreadthFirstResults = new[]
               {
@@ -1728,7 +1728,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Position.Depth == 1 ? TraversalStrategy.SkipSubtree : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Position.Depth == 1 ? NodeTraversalStrategy.SkipSubtree : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 1 subtree",
               ExpectedBreadthFirstResults = new[]
               {
@@ -1755,7 +1755,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Node == "b" ? TraversalStrategy.SkipSubtree : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Node == "b" ? NodeTraversalStrategy.SkipSubtree : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 1, sibling 0 subtree",
               ExpectedBreadthFirstResults = new[]
               {
@@ -1786,7 +1786,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Node == "c" ? TraversalStrategy.SkipSubtree : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Node == "c" ? NodeTraversalStrategy.SkipSubtree : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 1, sibling 1 subtree",
               ExpectedBreadthFirstResults = new[]
               {
@@ -1817,7 +1817,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Node == "d" ? TraversalStrategy.SkipSubtree : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Node == "d" ? NodeTraversalStrategy.SkipSubtree : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 1, sibling 2 subtree",
               ExpectedBreadthFirstResults = new[]
               {
@@ -1849,7 +1849,7 @@ namespace Arborist.Tests
             // Skip descendant subtree
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Position.Depth == 0 ? TraversalStrategy.SkipDescendants : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Position.Depth == 0 ? NodeTraversalStrategy.SkipDescendants : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 0 descendant subtrees",
               ExpectedBreadthFirstResults = new[]
               {
@@ -1864,7 +1864,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Position.Depth == 1 ? TraversalStrategy.SkipDescendants : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Position.Depth == 1 ? NodeTraversalStrategy.SkipDescendants : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 1 descendant subtrees",
               ExpectedBreadthFirstResults = new[]
               {
@@ -1897,7 +1897,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Node == "b" ? TraversalStrategy.SkipDescendants : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Node == "b" ? NodeTraversalStrategy.SkipDescendants : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 1, sibling 0 descendant subtrees",
               ExpectedBreadthFirstResults = new[]
               {
@@ -1930,7 +1930,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Node == "c" ? TraversalStrategy.SkipDescendants : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Node == "c" ? NodeTraversalStrategy.SkipDescendants : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 1, sibling 1 descendant subtrees",
               ExpectedBreadthFirstResults = new[]
               {
@@ -1963,7 +1963,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Node == "d" ? TraversalStrategy.SkipDescendants : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Node == "d" ? NodeTraversalStrategy.SkipDescendants : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 1, sibling 2 descendant subtrees",
               ExpectedBreadthFirstResults = new[]
               {
@@ -2005,7 +2005,7 @@ namespace Arborist.Tests
             // No skipping
             new TestScenario
             {
-              TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => NodeTraversalStrategy.TraverseSubtree,
               Description = "Traverse all",
               ExpectedBreadthFirstResults = new[]
               {
@@ -2045,7 +2045,7 @@ namespace Arborist.Tests
             // Skip nodes
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Position.Depth == 0 ? TraversalStrategy.TraverseSubtree : TraversalStrategy.SkipNode,
+              TraversalStrategySelector = visit => visit.Position.Depth == 0 ? NodeTraversalStrategy.TraverseSubtree : NodeTraversalStrategy.SkipNode,
               Description = "Skip all but level 0 nodes",
               ExpectedBreadthFirstResults = new[]
               {
@@ -2086,7 +2086,7 @@ namespace Arborist.Tests
             // No skipping
             new TestScenario
             {
-              TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => NodeTraversalStrategy.TraverseSubtree,
               Description = "Traverse all",
               ExpectedBreadthFirstResults = new[]
               {
@@ -2118,7 +2118,7 @@ namespace Arborist.Tests
             // Skip nodes
             new TestScenario
             {
-              TraversalStrategySelector = visit => TraversalStrategy.SkipNode,
+              TraversalStrategySelector = visit => NodeTraversalStrategy.SkipNode,
               Description = "Skip all nodes",
               ExpectedBreadthFirstResults = new[]
               {
@@ -2137,7 +2137,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Position.Depth == 0 ? TraversalStrategy.SkipNode : TraversalStrategy.SkipSubtree,
+              TraversalStrategySelector = visit => visit.Position.Depth == 0 ? NodeTraversalStrategy.SkipNode : NodeTraversalStrategy.SkipSubtree,
               Description = "Skip level 0 nodes, skip level 1 subtrees",
               ExpectedBreadthFirstResults = new[]
               {
@@ -2156,7 +2156,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Node == "a" ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Node == "a" ? NodeTraversalStrategy.SkipNode : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 0, sibling 0 node",
               ExpectedBreadthFirstResults = new[]
               {
@@ -2183,7 +2183,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Position.Depth == 1 ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Position.Depth == 1 ? NodeTraversalStrategy.SkipNode : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 1 nodes",
               ExpectedBreadthFirstResults = new[]
               {
@@ -2210,7 +2210,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Node == "b" ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Node == "b" ? NodeTraversalStrategy.SkipNode : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 0, sibling 1 node",
               ExpectedBreadthFirstResults = new[]
               {
@@ -2237,7 +2237,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Node != "d" ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Node != "d" ? NodeTraversalStrategy.SkipNode : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip all but level 1, sibling 1 node",
               ExpectedBreadthFirstResults = new[]
               {
@@ -2268,7 +2268,7 @@ namespace Arborist.Tests
             // No skipping
             new TestScenario
             {
-              TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => NodeTraversalStrategy.TraverseSubtree,
               Description = "Traverse all",
               ExpectedBreadthFirstResults = new[]
               {
@@ -2300,7 +2300,7 @@ namespace Arborist.Tests
             // Skip nodes
             new TestScenario
             {
-              TraversalStrategySelector = visit => TraversalStrategy.SkipNode,
+              TraversalStrategySelector = visit => NodeTraversalStrategy.SkipNode,
               Description = "Skip all nodes",
               ExpectedBreadthFirstResults = new[]
               {
@@ -2319,7 +2319,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Node == "b" ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Node == "b" ? NodeTraversalStrategy.SkipNode : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 0, sibling 1 node",
               ExpectedBreadthFirstResults = new[]
               {
@@ -2354,7 +2354,7 @@ namespace Arborist.Tests
             // No skipping
             new TestScenario
             {
-              TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => NodeTraversalStrategy.TraverseSubtree,
               Description = "Traverse all",
               ExpectedBreadthFirstResults = new[]
               {
@@ -2390,7 +2390,7 @@ namespace Arborist.Tests
             // Skip nodes
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Node == "b" ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Node == "b" ? NodeTraversalStrategy.SkipNode : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 0, sibling 1 node",
               ExpectedBreadthFirstResults = new[]
               {
@@ -2429,7 +2429,7 @@ namespace Arborist.Tests
             // No skipping
             new TestScenario
             {
-              TraversalStrategySelector = visit => TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => NodeTraversalStrategy.TraverseSubtree,
               Description = "Traverse all",
               ExpectedBreadthFirstResults = new[]
               {
@@ -2453,7 +2453,7 @@ namespace Arborist.Tests
             // Skip nodes
             new TestScenario
             {
-              TraversalStrategySelector = visit => TraversalStrategy.SkipNode,
+              TraversalStrategySelector = visit => NodeTraversalStrategy.SkipNode,
               Description = "Skip all nodes",
               ExpectedBreadthFirstResults = new[]
               {
@@ -2470,7 +2470,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Node == "a" ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Node == "a" ? NodeTraversalStrategy.SkipNode : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 0, sibling 0 node",
               ExpectedBreadthFirstResults = new[]
               {
@@ -2491,7 +2491,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Node == "b" ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Node == "b" ? NodeTraversalStrategy.SkipNode : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 0, sibling 1 node",
               ExpectedBreadthFirstResults = new[]
               {
@@ -2512,7 +2512,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Node == "c" ? TraversalStrategy.SkipNode : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Node == "c" ? NodeTraversalStrategy.SkipNode : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 0, sibling 2 node",
               ExpectedBreadthFirstResults = new[]
               {
@@ -2534,7 +2534,7 @@ namespace Arborist.Tests
             // Skip subtree
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Node == "a" ? TraversalStrategy.SkipSubtree : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Node == "a" ? NodeTraversalStrategy.SkipSubtree : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 0, sibling 0 subtree",
               ExpectedBreadthFirstResults = new[]
               {
@@ -2555,7 +2555,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Node == "b" ? TraversalStrategy.SkipSubtree : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Node == "b" ? NodeTraversalStrategy.SkipSubtree : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 0, sibling 1 subtree",
               ExpectedBreadthFirstResults = new[]
               {
@@ -2576,7 +2576,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Node == "c" ? TraversalStrategy.SkipSubtree : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Node == "c" ? NodeTraversalStrategy.SkipSubtree : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 0, sibling 2 subtree",
               ExpectedBreadthFirstResults = new[]
               {
@@ -2597,7 +2597,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => TraversalStrategy.SkipSubtree,
+              TraversalStrategySelector = visit => NodeTraversalStrategy.SkipSubtree,
               Description = "Skip level 0 subtrees",
               ExpectedBreadthFirstResults = new[]
               {
@@ -2615,7 +2615,7 @@ namespace Arborist.Tests
             // Skip descendant subtrees
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Node == "a" ? TraversalStrategy.SkipDescendants : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Node == "a" ? NodeTraversalStrategy.SkipDescendants : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 0, sibling 0 descendant subtrees",
               ExpectedBreadthFirstResults = new[]
               {
@@ -2638,7 +2638,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Node == "b" ? TraversalStrategy.SkipDescendants : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Node == "b" ? NodeTraversalStrategy.SkipDescendants : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 0, sibling 1 descendant subtrees",
               ExpectedBreadthFirstResults = new[]
               {
@@ -2661,7 +2661,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => visit.Node == "c" ? TraversalStrategy.SkipDescendants : TraversalStrategy.TraverseSubtree,
+              TraversalStrategySelector = visit => visit.Node == "c" ? NodeTraversalStrategy.SkipDescendants : NodeTraversalStrategy.TraverseSubtree,
               Description = "Skip level 0, sibling 2  descendant subtrees",
               ExpectedBreadthFirstResults = new[]
               {
@@ -2684,7 +2684,7 @@ namespace Arborist.Tests
             },
             new TestScenario
             {
-              TraversalStrategySelector = visit => TraversalStrategy.SkipDescendants,
+              TraversalStrategySelector = visit => NodeTraversalStrategy.SkipDescendants,
               Description = "Skip level 0, descendant subtrees",
               ExpectedBreadthFirstResults = new[]
               {

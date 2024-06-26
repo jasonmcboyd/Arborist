@@ -1,6 +1,6 @@
 ﻿namespace Arborist.Core
 {
-  public enum TraversalStrategy
+  public enum NodeTraversalStrategy
   {
                      // | Traverse  |  Traverse   |
                      // |   Node    | Descendants |

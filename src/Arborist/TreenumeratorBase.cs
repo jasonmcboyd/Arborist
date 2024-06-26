@@ -10,20 +10,18 @@ namespace Arborist
 
     public NodePosition Position { get; protected set; } = (0, -1);
 
-    public TraversalStrategy TraversalStrategy { get; protected set; } = default;
-
     public TreenumeratorMode Mode { get; protected set; } = default;
 
     protected bool EnumerationFinished { get; set; } = false;
 
     public abstract void Dispose();
 
-    public bool MoveNext(TraversalStrategy traversalStrategy)
+    public bool MoveNext(NodeTraversalStrategy nodeTraversalStrategy)
     {
       if (EnumerationFinished)
         return false;
 
-      if (OnMoveNext(traversalStrategy))
+      if (OnMoveNext(nodeTraversalStrategy))
         return true;
 
       EnumerationFinished = true;
@@ -31,6 +29,6 @@ namespace Arborist
       return false;
     }
 
-    protected abstract bool OnMoveNext(TraversalStrategy traversalStrategy);
+    protected abstract bool OnMoveNext(NodeTraversalStrategy nodeTraversalStrategy);
   }
 }
