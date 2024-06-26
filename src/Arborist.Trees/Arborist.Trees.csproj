@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Arborist.Core\Arborist.Core.csproj" />
+    <ProjectReference Include="..\Arborist.Linq\Arborist.Linq.csproj" />
+  </ItemGroup>
+
+</Project>

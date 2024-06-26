@@ -1,11 +1,11 @@
 ﻿using Arborist.Nodes;
 using System;
 
-namespace Arborist.Collatz
+namespace Arborist.Trees
 {
-  public struct CollatzNode : INodeWithIndexableChildren<ulong>
+  internal struct CollatzTreeNode : INodeWithIndexableChildren<ulong>
   {
-    public CollatzNode(ulong value)
+    public CollatzTreeNode(ulong value)
     {
       if (value < 2)
         throw new ArgumentOutOfRangeException($"The 'value' must be greater than 1.");
@@ -31,9 +31,9 @@ namespace Arborist.Collatz
       get
       {
         if (index == 0)
-          return new CollatzNode(_FirstChild);
+          return new CollatzTreeNode(_FirstChild);
         else if (index == 1 && ChildCount == 2)
-          return new CollatzNode(_SecondChild);
+          return new CollatzTreeNode(_SecondChild);
         else
           throw new IndexOutOfRangeException();
       }
