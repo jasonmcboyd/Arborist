@@ -1,3 +1,4 @@
+using Arborist.Core;
 using Arborist.SimpleSerializer;
 using Arborist.TestUtils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -12,7 +13,7 @@ namespace Arborist.Linq.Tests
   [TestClass]
   public class SelectManyTests
   {
-    public static IEnumerable<object[]> GetTestData()
+    public static IEnumerable<string[]> GetTestTrees()
     {
       return new[]
       {
@@ -121,17 +122,49 @@ namespace Arborist.Linq.Tests
       };
     }
 
+    public static IEnumerable<object[]> GetTestData()
+    {
+      foreach (var testTrees in GetTestTrees())
+      {
+        yield return new object[] { testTrees[0], testTrees[1], testTrees[2], null, null };
+
+        var expectedTree = TreeSerializer.Deserialize(testTrees[2]);
+
+        foreach (var node in expectedTree.PreOrderTraversal())
+          foreach (var nodeTraversalStrategy in _SkipNodeTraversalStrategies)
+            yield return new object[] { testTrees[0], testTrees[1], testTrees[2], node, nodeTraversalStrategy };
+      }
+    }
+
+    private static NodeTraversalStrategy[] _SkipNodeTraversalStrategies = new[]
+    {
+      NodeTraversalStrategy.SkipNode,
+      NodeTraversalStrategy.SkipSubtree,
+      NodeTraversalStrategy.SkipDescendants,
+    };
+
     public static string GetTestDisplayName(MethodInfo methodInfo, object[] data)
-      => $"{data[0]} | {data[1]}";
+    {
+      var result = $"{data[0]} | {data[1]}";
+
+      if (data[3] != null)
+      {
+        result += $": {data[4]} {data[3]}";
+      }
+
+      return result;
+    }
 
     [TestMethod]
     [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
     public void SelectMany_BreadthFirst(
       string treeString,
       string innerTreeString,
-      string expectedResults)
+      string expectedResults,
+      string nodeToSkip,
+      NodeTraversalStrategy? nodeTraversalStrategy)
     {
-      SelectManyTest(treeString, innerTreeString, expectedResults, false);
+      SelectManyTest(treeString, innerTreeString, expectedResults, false, nodeToSkip, nodeTraversalStrategy);
     }
 
     [TestMethod]
@@ -139,16 +172,20 @@ namespace Arborist.Linq.Tests
     public void SelectMany_DepthFirst(
       string treeString,
       string innerTreeString,
-      string expectedResults)
+      string expectedResults,
+      string nodeToSkip,
+      NodeTraversalStrategy? nodeTraversalStrategy)
     {
-      SelectManyTest(treeString, innerTreeString, expectedResults, true);
+      SelectManyTest(treeString, innerTreeString, expectedResults, true, nodeToSkip, nodeTraversalStrategy);
     }
 
     private void SelectManyTest(
       string treeString,
       string innerTreeString,
       string expectedResults,
-      bool isDepthFirstTest)
+      bool isDepthFirstTest,
+      string nodeToSkip,
+      NodeTraversalStrategy? nodeTraversalStrategy)
     {
       // Arrange
       var treenumerable = TreeSerializer.Deserialize(treeString);
@@ -158,10 +195,17 @@ namespace Arborist.Linq.Tests
         treenumerable
         .SelectMany(x => innerTreenumerable.Select(y => x + y.Node));
 
+      var nodeVisitStrategySelector =
+        new Func<NodeVisit<string>, NodeTraversalStrategy>(
+          nodeVisit =>
+            nodeToSkip == null || nodeToSkip != nodeVisit.Node
+            ? NodeTraversalStrategy.TraverseSubtree
+            : nodeTraversalStrategy.Value);
+
       var expected =
         isDepthFirstTest
-        ? TreeSerializer.Deserialize(expectedResults).GetDepthFirstTraversal().ToArray()
-        : TreeSerializer.Deserialize(expectedResults).GetBreadthFirstTraversal().ToArray();
+        ? TreeSerializer.Deserialize(expectedResults).GetDepthFirstTraversal(nodeVisitStrategySelector).ToArray()
+        : TreeSerializer.Deserialize(expectedResults).GetBreadthFirstTraversal(nodeVisitStrategySelector).ToArray();
 
       Debug.WriteLine("-----Expected Values-----");
       foreach (var value in expected)
@@ -171,8 +215,8 @@ namespace Arborist.Linq.Tests
       Debug.WriteLine($"{Environment.NewLine}-----Actual Values-----");
       var actual =
         (isDepthFirstTest
-        ? sut.GetDepthFirstTraversal()
-        : sut.GetBreadthFirstTraversal())
+        ? sut.GetDepthFirstTraversal(nodeVisitStrategySelector)
+        : sut.GetBreadthFirstTraversal(nodeVisitStrategySelector))
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 
