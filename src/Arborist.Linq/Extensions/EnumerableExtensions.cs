@@ -1,64 +1,49 @@
 ﻿using Arborist.Linq.Newick;
+using Arborist.Nodes;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Arborist.Linq.Extensions
 {
   public static class EnumerableExtensions
   {
-    public static IEnumerable<NewickToken<TNode>> ReverseNewickEnumerable<TNode>(this IEnumerable<NewickToken<TNode>> source)
+    internal static IEnumerable<INodeWithIndexableChildren<TNode>> ToReverseTreeRoots<TNode>(this IEnumerable<NewickToken<TNode>> source)
     {
-      var levelIndex = 0;
+      var stack = new Stack<List<NodeWithIndexableChildren<TNode>>>();
 
-      var levels = new List<Stack<NewickToken<TNode>>>();
-
-      var tokenCount = 0;
-
-      foreach (var token in source)
+      using (var enumerator = source.Reverse().GetEnumerator())
       {
-        tokenCount++;
-
-        var level = levels.GetAtOrAdd(levelIndex);
-
-        switch (token.Type)
+        while (enumerator.MoveNext())
         {
-          case NewickTokenType.StartChildGroup:
-            // Put the StartChildGroup token before the previous token.
-            var previousToken = level.Pop();
-            level.Push(token);
-            level.Push(previousToken);
+          var token = enumerator.Current;
 
-            // Add the EndChildGroup token to the next level.
-            var nextLevel = levels.GetAtOrAdd(levelIndex + 1);
-            nextLevel.Push(new NewickToken<TNode>(NewickTokenType.EndChildGroup));
+          switch (token.Type)
+          {
+            case NewickTokenType.StartChildGroup:
+              var children = stack.Pop();
+              enumerator.MoveNext();
+              token = enumerator.Current;
+              stack.Peek().Add(new NodeWithIndexableChildren<TNode>(token.Value, children));
+              break;
 
-            levelIndex++;
-            break;
+            case NewickTokenType.EndChildGroup:
+              stack.Push(new List<NodeWithIndexableChildren<TNode>>());
+              if (stack.Count == 1)
+                stack.Push(new List<NodeWithIndexableChildren<TNode>>());
+              break;
 
-          case NewickTokenType.EndChildGroup:
-            // Not adding this token because it was added when the StartChildGroup was encountered.
-            levelIndex--;
-            break;
+            default:
+              if (stack.Count == 0)
+                stack.Push(new List<NodeWithIndexableChildren<TNode>>());
 
-          default:
-            level.Push(token);
-            break;
+              stack.Peek().Add(new NodeWithIndexableChildren<TNode>(token.Value));
+              break;
+          }
+
+          if (stack.Count == 1 && stack.Peek().Count > 0)
+            yield return stack.Pop()[0];
         }
-      }
-
-      while (tokenCount > 0)
-      {
-        tokenCount--;
-
-        var level = levels[levelIndex];
-
-        var token = level.Pop();
-
-        if (token.Type == NewickTokenType.StartChildGroup)
-          levelIndex++;
-        else if (token.Type == NewickTokenType.EndChildGroup)
-          levelIndex--;
-
-        yield return token;
       }
     }
   }

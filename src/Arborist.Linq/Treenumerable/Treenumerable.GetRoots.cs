@@ -9,7 +9,7 @@ namespace Arborist.Linq
     {
       using (var treenumerator = source.GetDepthFirstTreenumerator())
       {
-        while(treenumerator.MoveNext(NodeTraversalStrategy.SkipDescendants))
+        while (treenumerator.MoveNext(NodeTraversalStrategy.SkipDescendants))
           if (treenumerator.VisitCount == 1)
             yield return treenumerator.Node;
       }

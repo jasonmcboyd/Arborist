@@ -15,7 +15,7 @@ namespace Arborist.Linq
 
         treenumerator.MoveNext(NodeTraversalStrategy.TraverseSubtree);
 
-        NodeVisit<T> previousVisit = default;
+        NodeVisit<T> previousVisit;
         NodeVisit<T> currentVisit = treenumerator.ToNodeVisit();
 
         while (treenumerator.MoveNext(NodeTraversalStrategy.TraverseSubtree))
