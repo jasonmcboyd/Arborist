@@ -11,75 +11,79 @@ namespace Arborist.Linq
       this ITreenumerable<TNode> source,
       Func<NodeVisit<TNode>, NodeTraversalStrategy> nodeTraversalStrategySelector)
     {
-      using (var treenumerator = source.GetDepthFirstTreenumerator())
-        return GetTraversal(treenumerator, nodeTraversalStrategySelector);
+      return GetTraversal(source, TreeTraversalStrategy.DepthFirst, nodeTraversalStrategySelector);
     }
 
     public static IEnumerable<NodeVisit<TNode>> GetBreadthFirstTraversal<TNode>(
       this ITreenumerable<TNode> source,
       Func<NodeVisit<TNode>, NodeTraversalStrategy> nodeTraversalStrategySelector)
     {
-      using (var treenumerator = source.GetBreadthFirstTreenumerator())
-        return GetTraversal(treenumerator, nodeTraversalStrategySelector);
+      return GetTraversal(source, TreeTraversalStrategy.BreadthFirst, nodeTraversalStrategySelector);
     }
 
     public static IEnumerable<NodeVisit<TNode>> GetDepthFirstTraversal<TNode>(
       this ITreenumerable<TNode> source)
     {
-      using (var treenumerator = source.GetDepthFirstTreenumerator())
-        return GetTraversal(treenumerator);
+      return GetTraversal(source, TreeTraversalStrategy.DepthFirst);
     }
 
     public static IEnumerable<NodeVisit<TNode>> GetBreadthFirstTraversal<TNode>(
       this ITreenumerable<TNode> source)
     {
-      using (var treenumerator = source.GetBreadthFirstTreenumerator())
-        return GetTraversal(treenumerator);
+      return GetTraversal(source, TreeTraversalStrategy.BreadthFirst);
     }
 
     private static IEnumerable<NodeVisit<TNode>> GetTraversal<TNode>(
-      this ITreenumerator<TNode> treenumerator,
+      this ITreenumerable<TNode> source,
+      TreeTraversalStrategy treeTraversalStrategy,
       Func<NodeVisit<TNode>, NodeTraversalStrategy> nodeTraversalStrategySelector)
     {
-      // There is no reason a consumer _should_ ever pass a traversal strategy
-      // before enumeration has begun. But just because they should not does not
-      // mean they will not. If a user were to pass a traversal strategy on the
-      // very first call to MoveNext, ideally, all treenumerators would handle that
-      // correctly.
-      //
-      // So, the "correct" thing to do here might be to simply ignore the
-      // traversal strategy on the first call to MoveNext. In fact, that is
-      // what I did initially. But it turned out there were some treenumerators
-      // that were not handling this initial call to MoveNext correctly. By ignoring
-      // the traversal strategy, I was hiding bugs. So, I decided to change the
-      // behavior here so that those bugs would be exposed
-      var nodeTraversalStrategy = nodeTraversalStrategySelector(treenumerator.ToNodeVisit());
-
-      if (!treenumerator.MoveNext(nodeTraversalStrategy))
-        yield break;
-
-      yield return treenumerator.ToNodeVisit();
-
-      nodeTraversalStrategy = nodeTraversalStrategySelector(treenumerator.ToNodeVisit());
-
-      while (treenumerator.MoveNext(nodeTraversalStrategy))
+      using (var treenumerator = source.GetTreenumerator(treeTraversalStrategy))
       {
+        // There is no reason a consumer _should_ ever pass a traversal strategy
+        // before enumeration has begun. But just because they should not does not
+        // mean they will not. If a user were to pass a traversal strategy on the
+        // very first call to MoveNext, ideally, all treenumerators would handle that
+        // correctly.
+        //
+        // So, the "correct" thing to do here might be to simply ignore the
+        // traversal strategy on the first call to MoveNext. In fact, that is
+        // what I did initially. But it turned out there were some treenumerators
+        // that were not handling this initial call to MoveNext correctly. By ignoring
+        // the traversal strategy, I was hiding bugs. So, I decided to change the
+        // behavior here so that those bugs would be exposed
+        var nodeTraversalStrategy = nodeTraversalStrategySelector(treenumerator.ToNodeVisit());
+
+        if (!treenumerator.MoveNext(nodeTraversalStrategy))
+          yield break;
+
         yield return treenumerator.ToNodeVisit();
 
-        // Should only need to get the traversal strategy if we are scheduling a
-        // node. If we are traversing a node, the treenumerator should ignore
-        // the traversal strategy. I was doing that originally, but then I found
-        // that it was covering up poorly behaved treenumerators. So I changed the
-        // behavior here so that those bugs would get surfaced.
         nodeTraversalStrategy = nodeTraversalStrategySelector(treenumerator.ToNodeVisit());
+
+        while (treenumerator.MoveNext(nodeTraversalStrategy))
+        {
+          yield return treenumerator.ToNodeVisit();
+
+          // Should only need to get the traversal strategy if we are scheduling a
+          // node. If we are traversing a node, the treenumerator should ignore
+          // the traversal strategy. I was doing that originally, but then I found
+          // that it was covering up poorly behaved treenumerators. So I changed the
+          // behavior here so that those bugs would get surfaced.
+          nodeTraversalStrategy = nodeTraversalStrategySelector(treenumerator.ToNodeVisit());
+        }
       }
     }
 
     private static IEnumerable<NodeVisit<TNode>> GetTraversal<TNode>(
-      this ITreenumerator<TNode> treenumerator)
+      this ITreenumerable<TNode> source,
+      TreeTraversalStrategy treeTraversalStrategy)
     {
-      while (treenumerator.MoveNext(NodeTraversalStrategy.TraverseSubtree))
-        yield return treenumerator.ToNodeVisit();
+      using (var treenumerator = source.GetTreenumerator(treeTraversalStrategy))
+      {
+        while (treenumerator.MoveNext(NodeTraversalStrategy.TraverseSubtree))
+          yield return treenumerator.ToNodeVisit();
+      }
     }
   }
 }

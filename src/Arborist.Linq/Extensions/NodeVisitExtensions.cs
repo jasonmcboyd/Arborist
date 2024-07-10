@@ -25,5 +25,13 @@ namespace Arborist.Linq.Extensions
           visit.VisitCount,
           visit.Position);
     }
+
+    public static NodeAndPosition<TNode> ToNodeAndPosition<TNode>(this NodeVisit<TNode> visit)
+    {
+      return
+        new NodeAndPosition<TNode>(
+          visit.Node,
+          visit.Position);
+    }
   }
 }

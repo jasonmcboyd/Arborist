@@ -302,12 +302,39 @@ namespace Arborist.Treenumerators
       Position = visit.Position;
     }
 
+    #region Dispose
+
+    private bool _Disposed = false;
+
     public override void Dispose()
     {
-      _RootsEnumerator?.Dispose();
-
-      while (_ChildrenStack.Count > 0)
-        ReturnChildrenVirtualNodeVisit(_ChildrenStack.Pop());
+      // Call the private Dispose method with disposing = true.
+      Dispose(true);
+      // Suppress finalization to prevent the garbage collector from calling the finalizer.
+      GC.SuppressFinalize(this);
     }
+
+    private void Dispose(bool disposing)
+    {
+      if (_Disposed)
+        return;
+
+      _Disposed = true;
+
+      if (disposing)
+      {
+        _RootsEnumerator?.Dispose();
+
+        while (_ChildrenStack.Count > 0)
+          ReturnChildrenVirtualNodeVisit(_ChildrenStack.Pop());
+      }
+    }
+
+    ~BreadthFirstTreenumerator()
+    {
+        Dispose(false);
+    }
+
+    #endregion Dispose
   }
 }
