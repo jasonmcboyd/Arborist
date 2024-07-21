@@ -1,12 +1,12 @@
 ﻿using Arborist.Core;
-using Arborist.Linq.Newick;
+using Arborist.Linq.PreorderTree;
 using System.Collections.Generic;
 
 namespace Arborist.Linq
 {
   public static partial class Treenumerable
   {
-    public static IEnumerable<NewickToken<TNode>> ToNewickEnumerable<TNode>(
+    public static IEnumerable<PreorderTreeToken<TNode>> ToPreorderTreeEnumerable<TNode>(
       this ITreenumerable<TNode> source)
     {
       using (var treenumerator = source.GetDepthFirstTreenumerator())
@@ -26,7 +26,7 @@ namespace Arborist.Linq
             {
               while (depth > previousDepth)
               {
-                yield return new NewickToken<TNode>(NewickTokenType.StartChildGroup);
+                yield return new PreorderTreeToken<TNode>(PreorderTreeTokenType.StartChildGroup);
                 previousDepth++;
               }
             }
@@ -34,7 +34,7 @@ namespace Arborist.Linq
             {
               while (depth < previousDepth)
               {
-                yield return new NewickToken<TNode>(NewickTokenType.EndChildGroup);
+                yield return new PreorderTreeToken<TNode>(PreorderTreeTokenType.EndChildGroup);
                 previousDepth--;
               }
             }
@@ -42,12 +42,12 @@ namespace Arborist.Linq
             previousDepth = depth;
           }
 
-          yield return new NewickToken<TNode>(treenumerator.Node);
+          yield return new PreorderTreeToken<TNode>(treenumerator.Node);
         }
 
         while (previousDepth > 0)
         {
-          yield return new NewickToken<TNode>(NewickTokenType.EndChildGroup);
+          yield return new PreorderTreeToken<TNode>(PreorderTreeTokenType.EndChildGroup);
           previousDepth--;
         }
       }

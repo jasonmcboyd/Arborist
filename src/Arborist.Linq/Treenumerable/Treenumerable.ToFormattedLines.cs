@@ -1,6 +1,6 @@
 ﻿using Arborist.Core;
 using Arborist.Linq.Extensions;
-using Arborist.Linq.Newick;
+using Arborist.Linq.PreorderTree;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,7 +27,7 @@ namespace Arborist.Linq
       Func<TNode, string> stringFormatter,
       int paddingSize)
     {
-      var reverseNewickEnumerable = source.ToNewickEnumerable().Reverse();
+      var reverseNewickEnumerable = source.ToPreorderTreeEnumerable().Reverse();
 
       const char BAR_NODE = '│';
       const char INTERIOR_BRANCH_NODE = '├';
@@ -50,7 +50,7 @@ namespace Arborist.Linq
       {
         switch (token.Type)
         {
-          case NewickTokenType.EndChildGroup:
+          case PreorderTreeTokenType.EndChildGroup:
             depth++;
 
             if (nodes.Count > 0 && (nodes.Last() == INTERIOR_BRANCH_NODE || nodes.Last() == EXTERIOR_BRANCH_NODE))
@@ -59,7 +59,7 @@ namespace Arborist.Linq
             nodes.Add(WHITESPACE_NODE);
             break;
 
-          case NewickTokenType.StartChildGroup:
+          case PreorderTreeTokenType.StartChildGroup:
             depth--;
 
             builder.Remove(builder.Length - (paddingSize + 1), paddingSize + 1);

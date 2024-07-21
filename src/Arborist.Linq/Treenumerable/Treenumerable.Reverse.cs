@@ -8,6 +8,6 @@ namespace Arborist.Linq
   {
     public static ITreenumerable<TNode> Reverse<TNode>(
       this ITreenumerable<TNode> source)
-      => source.ToNewickEnumerable().ToReverseTreeRoots().ToTreenumerable();
+      => source.ToPreorderTreeEnumerable().ToReverseTreeRoots().ToTreenumerable();
   }
 }

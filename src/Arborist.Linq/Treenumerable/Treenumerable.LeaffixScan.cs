@@ -17,7 +17,7 @@ namespace Arborist.Linq
       var rootNodes =
         source
         .Select(nodeVisit => nodeVisit.ToNodeAndPosition())
-        .ToNewickEnumerable()
+        .ToPreorderTreeEnumerable()
         .ToLeaffixScanTreeRoots(
           seedAccumulator,
           initialAccumulator,
