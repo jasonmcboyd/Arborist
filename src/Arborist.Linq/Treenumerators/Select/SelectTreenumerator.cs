@@ -8,14 +8,14 @@ namespace Arborist.Linq.Treenumerators
   {
     public SelectTreenumerator(
       ITreenumerator<TInner> innerTreenumerator,
-      Func<NodeVisit<TInner>, TNode> selector)
+      Func<NodeContext<TInner>, TNode> selector)
     {
       _InnerTreenumerator = innerTreenumerator;
       _Selector = selector;
     }
 
     private readonly ITreenumerator<TInner> _InnerTreenumerator;
-    private readonly Func<NodeVisit<TInner>, TNode> _Selector;
+    private readonly Func<NodeContext<TInner>, TNode> _Selector;
 
     public TNode Node { get; private set; } = default;
 
@@ -32,9 +32,9 @@ namespace Arborist.Linq.Treenumerators
       if (!hasNext)
         return false;
 
-      var visit = _InnerTreenumerator.ToNodeVisit();
+      var nodeContext = _InnerTreenumerator.ToNodeContext();
 
-      Node = _Selector(visit);
+      Node = _Selector(nodeContext);
 
       return true;
     }

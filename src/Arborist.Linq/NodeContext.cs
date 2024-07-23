@@ -2,9 +2,9 @@
 
 namespace Arborist.Linq
 {
-  public readonly struct NodeAndPosition<TNode>
+  public readonly struct NodeContext<TNode>
   {
-    public NodeAndPosition(
+    public NodeContext(
       TNode node,
       NodePosition position)
     {

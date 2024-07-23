@@ -8,15 +8,17 @@ namespace Arborist.Linq
   {
     public static bool AllNodes<TNode>(
       this ITreenumerable<TNode> source,
-      Func<TNode, bool> predicate,
+      Func<NodeContext<TNode>, bool> predicate,
       TreeTraversalStrategy treeTraversalStrategy = TreeTraversalStrategy.BreadthFirst)
     {
+      var materializedSource = source.Materialize();
+
       var traversal =
         treeTraversalStrategy == TreeTraversalStrategy.BreadthFirst
-        ? source.LevelOrderTraversal()
-        : source.PreOrderTraversal();
+        ? materializedSource.LevelOrderTraversal()
+        : materializedSource.PreOrderTraversal();
 
-      return traversal.All(node => predicate(node));
+      return traversal.All(predicate);
     }
   }
 }

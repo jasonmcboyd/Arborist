@@ -1,5 +1,4 @@
 ﻿using Arborist.Core;
-using Arborist.Linq.Extensions;
 using System;
 using System.Linq;
 
@@ -12,12 +11,12 @@ namespace Arborist.Linq
 
     public static int CountNodes<TNode>(
       this ITreenumerable<TNode> source,
-      Func<NodeAndPosition<TNode>, bool> predicate)
+      Func<NodeContext<TNode>, bool> predicate)
     {
       if (source == null)
         return 0;
 
-      return source.Select(visit => visit.ToNodeAndPosition()).Where(nodeVisit => predicate(nodeVisit.Node)).PreOrderTraversal().Count();
+      return source.Materialize().PreOrderTraversal().Count(predicate);
     }
   }
 }

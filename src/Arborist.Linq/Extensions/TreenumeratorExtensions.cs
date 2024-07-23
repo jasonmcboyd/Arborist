@@ -13,5 +13,13 @@ namespace Arborist.Linq.Extensions
           treenumerator.VisitCount,
           treenumerator.Position);
     }
+
+    public static NodeContext<TNode> ToNodeContext<TNode>(this ITreenumerator<TNode> treenumerator)
+    {
+      return
+        new NodeContext<TNode>(
+          treenumerator.Node,
+          treenumerator.Position);
+    }
   }
 }

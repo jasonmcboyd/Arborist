@@ -9,13 +9,13 @@ namespace Arborist.Linq.Treenumerators
   {
     public PruneAfterTreenumerator(
       ITreenumerator<TNode> innerTreenumerator,
-      Func<NodeVisit<TNode>, bool> predicate)
+      Func<NodeContext<TNode>, bool> predicate)
       : base(innerTreenumerator)
     {
       _Predicate = predicate;
     }
 
-    private readonly Func<NodeVisit<TNode>, bool> _Predicate;
+    private readonly Func<NodeContext<TNode>, bool> _Predicate;
 
     protected override bool OnMoveNext(NodeTraversalStrategy nodeTraversalStrategy)
     {
@@ -39,7 +39,7 @@ namespace Arborist.Linq.Treenumerators
         || nodeTraversalStrategy == NodeTraversalStrategy.SkipNode;
 
       var skippingDescendants =
-        _Predicate(this.ToNodeVisit())
+        _Predicate(this.ToNodeContext())
         || nodeTraversalStrategy == NodeTraversalStrategy.SkipDescendants
         || nodeTraversalStrategy == NodeTraversalStrategy.SkipSubtree;
 

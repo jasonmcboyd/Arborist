@@ -10,7 +10,7 @@ namespace Arborist.Linq.Treenumerators
   {
     public RootfixScanDepthFirstTreenumerator(
       ITreenumerator<TNode> InnerTreenumerator,
-      Func<NodeVisit<TAccumulate>, NodeVisit<TNode>, TAccumulate> accumulator,
+      Func<NodeContext<TAccumulate>, NodeContext<TNode>, TAccumulate> accumulator,
       TAccumulate seed) : base(InnerTreenumerator)
     {
       _Accumulator = accumulator;
@@ -25,7 +25,7 @@ namespace Arborist.Linq.Treenumerators
       _Stack.Push(seedVisit);
     }
 
-    private readonly Func<NodeVisit<TAccumulate>, NodeVisit<TNode>, TAccumulate> _Accumulator;
+    private readonly Func<NodeContext<TAccumulate>, NodeContext<TNode>, TAccumulate> _Accumulator;
 
     private readonly Stack<NodeVisit<TAccumulate>> _Stack = new Stack<NodeVisit<TAccumulate>>();
 
@@ -47,7 +47,7 @@ namespace Arborist.Linq.Treenumerators
 
       var node =
         currentDepth > previousDepth || schedulingNewRootNode
-        ? _Accumulator(_Stack.Peek(), InnerTreenumerator.ToNodeVisit())
+        ? _Accumulator(_Stack.Peek().ToNodeContext(), InnerTreenumerator.ToNodeContext())
         : _Stack.Pop().Node;
 
       var newVisit =

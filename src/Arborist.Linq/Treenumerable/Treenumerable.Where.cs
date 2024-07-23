@@ -6,12 +6,12 @@ namespace Arborist.Linq
 {
   public static partial class Treenumerable
   {
-    public static ITreenumerable<T> Where<T>(
-      this ITreenumerable<T> source,
-      Func<NodeVisit<T>, bool> predicate)
+    public static ITreenumerable<TNode> Where<TNode>(
+      this ITreenumerable<TNode> source,
+      Func<NodeContext<TNode>, bool> predicate)
       => TreenumerableFactory.Create(
         source,
-        breadthFirstTreenumerator => new WhereBreadthFirstTreenumerator<T>(breadthFirstTreenumerator, visit => !predicate(visit), NodeTraversalStrategy.SkipNode),
-        depthFirstTreenumerator => new WhereDepthFirstTreenumerator<T>(depthFirstTreenumerator, predicate));
+        breadthFirstTreenumerator => new WhereBreadthFirstTreenumerator<TNode>(breadthFirstTreenumerator, nodeContext => !predicate(nodeContext), NodeTraversalStrategy.SkipNode),
+        depthFirstTreenumerator => new WhereDepthFirstTreenumerator<TNode>(depthFirstTreenumerator, predicate));
   }
 }

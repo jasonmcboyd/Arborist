@@ -9,14 +9,14 @@ namespace Arborist.Linq
   {
     public static ITreenumerable<TAccumulate> LeaffixScan<TSource, TAccumulate>(
       this ITreenumerable<TSource> source,
-      Func<NodeAndPosition<TAccumulate>, NodeAndPosition<TSource>, TAccumulate> seedAccumulator,
-      Func<NodeAndPosition<TAccumulate>, NodeAndPosition<TSource>, TAccumulate> initialAccumulator,
-      Func<NodeAndPosition<TAccumulate>, NodeAndPosition<TAccumulate>, TAccumulate> accumulator,
-      Func<NodeAndPosition<TSource>, TAccumulate> seedGenerator)
+      Func<NodeContext<TAccumulate>, NodeContext<TSource>, TAccumulate> seedAccumulator,
+      Func<NodeContext<TAccumulate>, NodeContext<TSource>, TAccumulate> initialAccumulator,
+      Func<NodeContext<TAccumulate>, NodeContext<TAccumulate>, TAccumulate> accumulator,
+      Func<NodeContext<TSource>, TAccumulate> seedGenerator)
     {
       var rootNodes =
         source
-        .Select(nodeVisit => nodeVisit.ToNodeAndPosition())
+        .Materialize()
         .ToPreorderTreeEnumerable()
         .ToLeaffixScanTreeRoots(
           seedAccumulator,
@@ -29,9 +29,9 @@ namespace Arborist.Linq
 
     public static ITreenumerable<TAccumulate> LeaffixScan<TSource, TAccumulate>(
       this ITreenumerable<TSource> source,
-      Func<NodeAndPosition<TAccumulate>, NodeAndPosition<TSource>, TAccumulate> initialAccumulator,
-      Func<NodeAndPosition<TAccumulate>, NodeAndPosition<TAccumulate>, TAccumulate> accumulator,
-      Func<NodeAndPosition<TSource>, TAccumulate> seedGenerator)
+      Func<NodeContext<TAccumulate>, NodeContext<TSource>, TAccumulate> initialAccumulator,
+      Func<NodeContext<TAccumulate>, NodeContext<TAccumulate>, TAccumulate> accumulator,
+      Func<NodeContext<TSource>, TAccumulate> seedGenerator)
     {
       return
         source
@@ -44,7 +44,7 @@ namespace Arborist.Linq
 
     public static ITreenumerable<TSource> LeaffixScan<TSource>(
       this ITreenumerable<TSource> source,
-      Func<NodeAndPosition<TSource>, NodeAndPosition<TSource>, TSource> accumulator)
+      Func<NodeContext<TSource>, NodeContext<TSource>, TSource> accumulator)
     {
       return
         source

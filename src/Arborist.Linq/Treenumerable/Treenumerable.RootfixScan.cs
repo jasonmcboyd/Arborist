@@ -8,7 +8,7 @@ namespace Arborist.Linq
   {
     public static ITreenumerable<TAccumulate> RootfixScan<TNode, TAccumulate>(
       this ITreenumerable<TNode> source,
-      Func<NodeVisit<TAccumulate>, NodeVisit<TNode>, TAccumulate> accumulator,
+      Func<NodeContext<TAccumulate>, NodeContext<TNode>, TAccumulate> accumulator,
       TAccumulate seed)
       => TreenumerableFactory.Create(
         source,

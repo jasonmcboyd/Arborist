@@ -8,7 +8,7 @@ namespace Arborist.Linq
   {
     public static ITreenumerable<TResult> Select<TSource, TResult>(
       this ITreenumerable<TSource> source,
-      Func<NodeVisit<TSource>, TResult> selector)
+      Func<NodeContext<TSource>, TResult> selector)
       => TreenumerableFactory.Create(
           source,
           breadthFirstEnumerator => new SelectTreenumerator<TSource, TResult>(breadthFirstEnumerator, selector),

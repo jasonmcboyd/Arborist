@@ -10,7 +10,7 @@ namespace Arborist.Linq.Treenumerators
   {
     public WhereDepthFirstTreenumerator(
       ITreenumerator<TNode> innerTreenumerator,
-      Func<NodeVisit<TNode>, bool> predicate)
+      Func<NodeContext<TNode>, bool> predicate)
       : base(innerTreenumerator)
     {
       _Predicate = predicate;
@@ -19,7 +19,7 @@ namespace Arborist.Linq.Treenumerators
       _NodeVisits.Push(new InternalNodeVisit(InnerTreenumerator).ToFirstVisit());
     }
 
-    private readonly Func<NodeVisit<TNode>, bool> _Predicate;
+    private readonly Func<NodeContext<TNode>, bool> _Predicate;
 
     private readonly Stack<InternalNodeVisit> _NodeVisits = new Stack<InternalNodeVisit>();
     private readonly Stack<InternalNodeVisit> _SkippedNodeVisits = new Stack<InternalNodeVisit>();
@@ -106,7 +106,7 @@ namespace Arborist.Linq.Treenumerators
       }
 
       // Check if the current node visit should be skipped.
-      if (!_Predicate(currentNodeVisit))
+      if (!_Predicate(currentNodeVisit.ToNodeContext()))
         return false;
 
       var siblingIndex = stackWithDeepestNodeVisit.Peek().VisitCount - 1;

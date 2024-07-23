@@ -8,13 +8,13 @@ namespace Arborist.Linq
   {
     public static ITreenumerable<T> PruneBefore<T>(
       this ITreenumerable<T> source,
-      Func<NodeVisit<T>, bool> predicate)
+      Func<NodeContext<T>, bool> predicate)
     {
       var result =
         TreenumerableFactory.Create(
           source,
           breadthFirstEnumerator => new WhereBreadthFirstTreenumerator<T>(breadthFirstEnumerator, predicate, NodeTraversalStrategy.SkipSubtree),
-          depthFirstEnumerator => new PruneBeforeDepthFirstTreenumerator<T>(depthFirstEnumerator, visit => predicate(visit)));
+          depthFirstEnumerator => new PruneBeforeDepthFirstTreenumerator<T>(depthFirstEnumerator, predicate));
 
       return result;
     }

@@ -11,7 +11,7 @@ namespace Arborist.Linq.Treenumerators
   {
     public WhereBreadthFirstTreenumerator(
       ITreenumerator<TNode> innerTreenumerator,
-      Func<NodeVisit<TNode>, bool> predicate,
+      Func<NodeContext<TNode>, bool> predicate,
       NodeTraversalStrategy nodeTraversalStrategy)
       : base(innerTreenumerator)
     {
@@ -20,7 +20,7 @@ namespace Arborist.Linq.Treenumerators
       _NodePositionAndVisitCounts.AddToBack(new NodeTraversalStatus(innerTreenumerator.Position, 0));
     }
 
-    private readonly Func<NodeVisit<TNode>, bool> _Predicate;
+    private readonly Func<NodeContext<TNode>, bool> _Predicate;
     private readonly NodeTraversalStrategy _TraversalStrategy;
 
     private readonly Deque<NodeTraversalStatus> _NodePositionAndVisitCounts = new Deque<NodeTraversalStatus>();
@@ -70,7 +70,7 @@ namespace Arborist.Linq.Treenumerators
 
         if (InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode)
         {
-          var skipped = _Predicate(InnerTreenumerator.ToNodeVisit());
+          var skipped = _Predicate(InnerTreenumerator.ToNodeContext());
 
           if (skipped)
           {

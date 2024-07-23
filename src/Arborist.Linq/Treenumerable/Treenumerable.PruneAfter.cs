@@ -8,13 +8,13 @@ namespace Arborist.Linq
   {
     public static ITreenumerable<T> PruneAfter<T>(
       this ITreenumerable<T> source,
-      Func<NodeVisit<T>, bool> predicate)
+      Func<NodeContext<T>, bool> predicate)
     {
       var result =
         TreenumerableFactory.Create(
           source,
-          breadthFirstEnumerator => new PruneAfterTreenumerator<T>(breadthFirstEnumerator, visit => predicate(visit)),
-          depthFirstEnumerator => new PruneAfterTreenumerator<T>(depthFirstEnumerator, visit => predicate(visit)));
+          breadthFirstEnumerator => new PruneAfterTreenumerator<T>(breadthFirstEnumerator, predicate),
+          depthFirstEnumerator => new PruneAfterTreenumerator<T>(depthFirstEnumerator, predicate));
 
       return result;
     }

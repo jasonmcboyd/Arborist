@@ -10,13 +10,13 @@ namespace Arborist.Linq.Treenumerators
   {
     public PruneBeforeDepthFirstTreenumerator(
       ITreenumerator<TNode> innerTreenumerator,
-      Func<NodeVisit<TNode>, bool> predicate)
+      Func<NodeContext<TNode>, bool> predicate)
       : base(innerTreenumerator)
     {
       _Predicate = predicate;
     }
 
-    private readonly Func<NodeVisit<TNode>, bool> _Predicate;
+    private readonly Func<NodeContext<TNode>, bool> _Predicate;
 
     private readonly List<int> _SkippedSiblingsCounts = new List<int>();
 
@@ -70,7 +70,7 @@ namespace Arborist.Linq.Treenumerators
         }
 
         if (InnerTreenumerator.Mode == TreenumeratorMode.VisitingNode
-          || !_Predicate(InnerTreenumerator.ToNodeVisit()))
+          || !_Predicate(InnerTreenumerator.ToNodeContext()))
         {
           UpdateState();
 

@@ -8,7 +8,7 @@ namespace Arborist.Linq
   {
     public static ITreenumerable<TResult> WithLevelIndex<TSource, TResult>(
       this ITreenumerable<TSource> source,
-      Func<NodeVisit<TSource>, int, TResult> selector)
+      Func<NodeContext<TSource>, int, TResult> selector)
     {
       var levelIndexes = new List<int>();
 
@@ -24,7 +24,7 @@ namespace Arborist.Linq
           else
             levelIndexes[visit.Position.Depth]++;
         })
-        .Select(visit => selector(visit, levelIndexes[visit.Position.Depth]));
+        .Select(nodeContext => selector(nodeContext, levelIndexes[nodeContext.Position.Depth]));
     }
   }
 }
