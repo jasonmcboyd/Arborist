@@ -30,7 +30,7 @@ namespace Arborist.Linq.Treenumerators
       if (!_InnerTreenumerator.MoveNext(nodeTraversalStrategy))
         return false;
 
-      _OnNext(_InnerTreenumerator.ToNodeVisit());
+      _OnNext?.Invoke(_InnerTreenumerator.ToNodeVisit());
 
       return true;
     }

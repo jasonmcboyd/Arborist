@@ -9,9 +9,16 @@ namespace Arborist.Linq
     public static ITreenumerable<TNode> Do<TNode>(
       this ITreenumerable<TNode> source,
       Action<NodeVisit<TNode>> onNext)
-      => TreenumerableFactory.Create(
+    {
+      if (onNext == null)
+        return source;
+
+      return
+        TreenumerableFactory
+        .Create(
           source,
           breadthFirstEnumerator => new DoTreenumerator<TNode>(breadthFirstEnumerator, onNext),
           depthFirstEnumerator => new DoTreenumerator<TNode>(depthFirstEnumerator, onNext));
+    }
   }
 }
