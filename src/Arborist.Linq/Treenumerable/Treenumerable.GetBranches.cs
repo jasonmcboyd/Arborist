@@ -9,48 +9,37 @@ namespace Arborist.Linq
   {
     public static IEnumerable<T[]> GetBranches<T>(this ITreenumerable<T> source)
     {
-      var branch = new List<NodeVisit<T>>();
+      var branch = new List<NodeContext<T>>();
 
       using (var treenumerator = source.GetDepthFirstTreenumerator())
       {
+        if (!treenumerator.MoveNext(NodeTraversalStrategy.TraverseSubtree))
+          yield break;
+
+        branch.Add(treenumerator.ToNodeContext());
+
         while (treenumerator.MoveNext(NodeTraversalStrategy.TraverseSubtree))
         {
-          if (treenumerator.VisitCount == 0)
+          if (treenumerator.Mode != TreenumeratorMode.SchedulingNode)
             continue;
-
-          if (branch.Count == 0)
-          {
-            branch.Add(treenumerator.ToNodeVisit());
-            continue;
-          }
 
           var depth = treenumerator.Position.Depth;
 
           if (depth > branch.Count - 1)
           {
-            branch.Add(treenumerator.ToNodeVisit());
-          }
-          else if (depth < branch.Count - 1)
-          {
-            if (branch.Last().VisitCount == 1)
-              yield return branch.Select(visit => visit.Node).ToArray();
-
-            branch.RemoveLast();
-            branch.RemoveLast();
-            branch.Add(treenumerator.ToNodeVisit());
+            branch.Add(treenumerator.ToNodeContext());
           }
           else
           {
-            if (branch.Last().VisitCount == 1)
-              yield return branch.Select(visit => visit.Node).ToArray();
+            yield return branch.Select(nodeContext => nodeContext.Node).ToArray();
 
-            branch.Clear();
-            branch.Add(treenumerator.ToNodeVisit());
+            branch.RemoveRange(depth, branch.Count - depth);
+            branch.Add(treenumerator.ToNodeContext());
           }
         }
 
-        if (branch.Last().VisitCount == 1)
-          yield return branch.Select(visit => visit.Node).ToArray();
+        if (branch.Count > 0)
+          yield return branch.Select(nodeContext => nodeContext.Node).ToArray();
       }
     }
   }
