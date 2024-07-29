@@ -12,7 +12,7 @@ namespace Arborist.Linq
 
       using (var treenumerator = source.GetDepthFirstTreenumerator())
         while (treenumerator.MoveNext(NodeTraversalStrategy.TraverseSubtree))
-          if (treenumerator.VisitCount == 1)
+          if (treenumerator.Mode == TreenumeratorMode.SchedulingNode)
             yield return treenumerator.Node;
     }
   }
