@@ -1,4 +1,5 @@
-﻿using Arborist.Linq.PreorderTree;
+﻿using Arborist.Linq.LevelOrderTree;
+using Arborist.Linq.PreorderTree;
 using Arborist.Nodes;
 using System;
 using System.Collections.Generic;
@@ -121,6 +122,32 @@ namespace Arborist.Linq.Extensions
       }
 
       return tree.Pop().Select(x => x.Node);
+    }
+
+    public static IEnumerable<LevelOrderTreeToken<TNode>> ToReverseLevelOrderTreeEnumerable<TNode>(this IEnumerable<LevelOrderTreeToken<TNode>> source)
+    {
+      if (source == null)
+        yield break;
+
+      var nodes = new Stack<LevelOrderTreeToken<TNode>>();
+
+      foreach (var token in source)
+      {
+        if (token.Type == LevelOrderTreeTokenType.GenerationSeparator)
+        {
+          while (nodes.Count > 0)
+            yield return nodes.Pop();
+
+          yield return token;
+        }
+        else
+        {
+          nodes.Push(token);
+        }
+      }
+
+      while (nodes.Count > 0)
+        yield return nodes.Pop();
     }
   }
 }

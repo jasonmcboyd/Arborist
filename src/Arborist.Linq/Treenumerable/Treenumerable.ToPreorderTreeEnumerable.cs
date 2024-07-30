@@ -15,7 +15,7 @@ namespace Arborist.Linq
 
         while (treenumerator.MoveNext(NodeTraversalStrategy.TraverseSubtree))
         {
-          if (treenumerator.VisitCount != 1)
+          if (treenumerator.Mode != TreenumeratorMode.SchedulingNode)
             continue;
 
           var depth = treenumerator.Position.Depth;
