@@ -25,12 +25,12 @@ namespace Arborist.Linq.Treenumerators
     protected override bool OnMoveNext(NodeTraversalStrategy nodeTraversalStrategy)
     {
       if (_EnumerationFinished)
-        {
+      {
         return false;
       }
 
       if (Mode == TreenumeratorMode.VisitingNode)
-        {
+      {
         nodeTraversalStrategy = NodeTraversalStrategy.TraverseSubtree;
       }
 
@@ -65,7 +65,7 @@ namespace Arborist.Linq.Treenumerators
         if (InnerTreenumerator.Mode == TreenumeratorMode.VisitingNode
           && InnerTreenumerator.VisitCount > 1
           && InnerTreenumerator.Position.Depth == Position.Depth)
-          {
+        {
           continue;
         }
 

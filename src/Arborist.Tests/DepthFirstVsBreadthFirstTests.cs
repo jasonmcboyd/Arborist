@@ -61,7 +61,7 @@ namespace Arborist.Tests
         .ToArray();
 
       var nodeTraversalStrategySelector =
-        new Func<NodeVisit<string>, NodeTraversalStrategy>(
+        new Func<NodeContext<string>, NodeTraversalStrategy>(
           nodeVisit =>
             filterCharacter == null || filterCharacter != nodeVisit.Node
             ? NodeTraversalStrategy.TraverseSubtree

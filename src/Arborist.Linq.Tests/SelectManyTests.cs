@@ -164,7 +164,7 @@ namespace Arborist.Linq.Tests
       string nodeToSkip,
       NodeTraversalStrategy? nodeTraversalStrategy)
     {
-      SelectManyTest(treeString, innerTreeString, expectedResults, false, nodeToSkip, nodeTraversalStrategy);
+      SelectManyTest(treeString, innerTreeString, expectedResults, TreeTraversalStrategy.BreadthFirst, nodeToSkip, nodeTraversalStrategy);
     }
 
     [TestMethod]
@@ -176,14 +176,14 @@ namespace Arborist.Linq.Tests
       string nodeToSkip,
       NodeTraversalStrategy? nodeTraversalStrategy)
     {
-      SelectManyTest(treeString, innerTreeString, expectedResults, true, nodeToSkip, nodeTraversalStrategy);
+      SelectManyTest(treeString, innerTreeString, expectedResults, TreeTraversalStrategy.DepthFirst, nodeToSkip, nodeTraversalStrategy);
     }
 
     private void SelectManyTest(
       string treeString,
       string innerTreeString,
       string expectedResults,
-      bool isDepthFirstTest,
+      TreeTraversalStrategy treeTraversalStrategy,
       string nodeToSkip,
       NodeTraversalStrategy? nodeTraversalStrategy)
     {
@@ -196,16 +196,17 @@ namespace Arborist.Linq.Tests
         .SelectMany(x => innerTreenumerable.Select(y => x + y.Node));
 
       var nodeVisitStrategySelector =
-        new Func<NodeVisit<string>, NodeTraversalStrategy>(
+        new Func<NodeContext<string>, NodeTraversalStrategy>(
           nodeVisit =>
             nodeToSkip == null || nodeToSkip != nodeVisit.Node
             ? NodeTraversalStrategy.TraverseSubtree
             : nodeTraversalStrategy.Value);
 
       var expected =
-        isDepthFirstTest
-        ? TreeSerializer.Deserialize(expectedResults).GetDepthFirstTraversal(nodeVisitStrategySelector).ToArray()
-        : TreeSerializer.Deserialize(expectedResults).GetBreadthFirstTraversal(nodeVisitStrategySelector).ToArray();
+        TreeSerializer
+        .Deserialize(expectedResults)
+        .GetTraversal(treeTraversalStrategy, nodeVisitStrategySelector)
+        .ToArray();
 
       Debug.WriteLine("-----Expected Values-----");
       foreach (var value in expected)
@@ -214,9 +215,8 @@ namespace Arborist.Linq.Tests
       // Act
       Debug.WriteLine($"{Environment.NewLine}-----Actual Values-----");
       var actual =
-        (isDepthFirstTest
-        ? sut.GetDepthFirstTraversal(nodeVisitStrategySelector)
-        : sut.GetBreadthFirstTraversal(nodeVisitStrategySelector))
+        sut
+        .GetTraversal(treeTraversalStrategy, nodeVisitStrategySelector)
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 

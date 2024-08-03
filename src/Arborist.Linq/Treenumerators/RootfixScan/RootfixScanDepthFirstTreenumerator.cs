@@ -28,26 +28,50 @@ namespace Arborist.Linq.Treenumerators
     private readonly Func<NodeContext<TAccumulate>, NodeContext<TNode>, TAccumulate> _Accumulator;
 
     private readonly Stack<NodeVisit<TAccumulate>> _Stack = new Stack<NodeVisit<TAccumulate>>();
+    private readonly Stack<NodeVisit<TAccumulate>> _SkippedStack = new Stack<NodeVisit<TAccumulate>>();
+
+    private Stack<NodeVisit<TAccumulate>> GetStackWithDeepestNodeVisit()
+    {
+      if (_SkippedStack.Count > 0
+        && _SkippedStack.Peek().Position.Depth > _Stack.Peek().Position.Depth)
+      {
+        return _SkippedStack;
+      }
+
+      return _Stack;
+    }
+
+    private int GetDeepestSeenDepth() => GetStackWithDeepestNodeVisit().Peek().Position.Depth;
+
+    private NodeVisit<TAccumulate> PopStackWithDeepestNodeVisit() => GetStackWithDeepestNodeVisit().Pop();
 
     protected override bool OnMoveNext(NodeTraversalStrategy nodeTraversalStrategy)
     {
+      if (InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode
+        && nodeTraversalStrategy == NodeTraversalStrategy.SkipNode)
+      {
+        _SkippedStack.Push(_Stack.Pop());
+      }
+
       if (!InnerTreenumerator.MoveNext(nodeTraversalStrategy))
         return false;
 
-      var previousDepth = _Stack.Peek().Position.Depth;
       var currentDepth = InnerTreenumerator.Position.Depth;
 
-      var schedulingNewRootNode =
-        currentDepth == 0
-        && InnerTreenumerator.VisitCount == 0
-        && InnerTreenumerator.Position.SiblingIndex > 0;
-
-      if (currentDepth < previousDepth || schedulingNewRootNode)
-        _Stack.Pop();
+      if (InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode)
+      {
+        while (GetDeepestSeenDepth() >= currentDepth)
+          PopStackWithDeepestNodeVisit();
+      }
+      else
+      {
+        while (_Stack.Peek().Position.Depth > currentDepth)
+          PopStackWithDeepestNodeVisit();
+      }
 
       var node =
-        currentDepth > previousDepth || schedulingNewRootNode
-        ? _Accumulator(_Stack.Peek().ToNodeContext(), InnerTreenumerator.ToNodeContext())
+        InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode
+        ? _Accumulator(GetStackWithDeepestNodeVisit().Peek().ToNodeContext(), InnerTreenumerator.ToNodeContext())
         : _Stack.Pop().Node;
 
       var newVisit =

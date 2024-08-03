@@ -98,14 +98,14 @@ namespace Arborist.Tests
       Debug.WriteLine("-----Breadth First-----");
       var breadthFirst =
         treenumerable
-        .GetBreadthFirstTraversal(testScenario.TraversalStrategySelector)
+        .GetBreadthFirstTraversal(testScenario.NodeTraversalStrategySelector)
         .Do(x => Debug.WriteLine(x))
         .ToArray();
 
       Debug.WriteLine($"{Environment.NewLine}-----Depth First------");
       var depthFirst =
         treenumerable
-        .GetDepthFirstTraversal(testScenario.TraversalStrategySelector)
+        .GetDepthFirstTraversal(testScenario.NodeTraversalStrategySelector)
         .Do(x => Debug.WriteLine(x))
         .ToArray();
 
@@ -151,8 +151,8 @@ namespace Arborist.Tests
 
       var moveNextEnumerable =
         depthFirstTest
-        ? treenumerable.GetDepthFirstTraversal(testScenario.TraversalStrategySelector)
-        : treenumerable.GetBreadthFirstTraversal(testScenario.TraversalStrategySelector);
+        ? treenumerable.GetDepthFirstTraversal(testScenario.NodeTraversalStrategySelector)
+        : treenumerable.GetBreadthFirstTraversal(testScenario.NodeTraversalStrategySelector);
 
       // Act
       Debug.WriteLine($"{Environment.NewLine}----- Actual Values -----");

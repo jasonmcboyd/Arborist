@@ -2,7 +2,7 @@
 using Arborist.Linq.Extensions;
 using Nito.Collections;
 using System;
-using System.Linq;
+using System.Collections.Generic;
 
 namespace Arborist.Linq.Treenumerators
 {
@@ -23,36 +23,70 @@ namespace Arborist.Linq.Treenumerators
           1,
           (0, -1));
 
-      _Queue.AddToBack(seedVisit);
+      _CurrentLevel.AddToBack(seedVisit);
     }
 
     private readonly Func<NodeContext<TAccumulate>, NodeContext<TNode>, TAccumulate> _Accumulator;
 
-    private readonly Deque<NodeVisit<TAccumulate>> _Queue = new Deque<NodeVisit<TAccumulate>>();
+    private Deque<NodeVisit<TAccumulate>> _CurrentLevel = new Deque<NodeVisit<TAccumulate>>();
+    private Deque<NodeVisit<TAccumulate>> _NextLevel = new Deque<NodeVisit<TAccumulate>>();
+
+    private Stack<NodeVisit<TAccumulate>> _SkippedStack = new Stack<NodeVisit<TAccumulate>>();
 
     protected override bool OnMoveNext(NodeTraversalStrategy nodeTraversalStrategy)
     {
       if (Mode == TreenumeratorMode.SchedulingNode)
       {
-        if (nodeTraversalStrategy == NodeTraversalStrategy.SkipNode
-          || nodeTraversalStrategy == NodeTraversalStrategy.SkipSubtree)
-          _Queue.RemoveFromBack();
+        if (nodeTraversalStrategy == NodeTraversalStrategy.SkipNode)
+          _SkippedStack.Push(_NextLevel.RemoveFromBack());
+        else if (nodeTraversalStrategy == NodeTraversalStrategy.SkipSubtree)
+          _NextLevel.RemoveFromBack();
       }
 
       if (!InnerTreenumerator.MoveNext(nodeTraversalStrategy))
         return false;
 
       if (InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode)
-      {
         OnSchedulingNode();
+      else
+        OnVisitingNode();
 
-        return true;
+      return true;
+    }
+
+    private void OnSchedulingNode()
+    {
+      while (_SkippedStack.Count > 0
+        && InnerTreenumerator.Position.Depth <= _SkippedStack.Peek().Position.Depth)
+      {
+        _SkippedStack.Pop();
       }
 
-      if (InnerTreenumerator.VisitCount == 1)
-        _Queue.RemoveFromFront();
+      var accumulateNodeVisit = _SkippedStack.Count > 0
+        ? _SkippedStack.Peek()
+        : _CurrentLevel[0];
 
-      var visit = _Queue[0];
+      var node = _Accumulator(accumulateNodeVisit.ToNodeContext(), InnerTreenumerator.ToNodeContext());
+
+      var visit = InnerTreenumerator.ToNodeVisit().WithNode(node);
+
+      _NextLevel.AddToBack(visit);
+
+      UpdateStateFromNodeVisit(visit);
+    }
+
+    private void OnVisitingNode()
+    {
+      if (InnerTreenumerator.VisitCount == 1)
+      {
+        _SkippedStack.Clear();
+        _CurrentLevel.RemoveFromFront();
+
+        if (_CurrentLevel.Count == 0)
+          (_CurrentLevel, _NextLevel) = (_NextLevel, _CurrentLevel);
+      }
+
+      var visit = _CurrentLevel[0];
 
       var newVisit =
         new NodeVisit<TAccumulate>(
@@ -61,22 +95,9 @@ namespace Arborist.Linq.Treenumerators
           InnerTreenumerator.VisitCount,
           InnerTreenumerator.Position);
 
-      _Queue[0] = newVisit;
+      _CurrentLevel[0] = newVisit;
 
       UpdateStateFromNodeVisit(newVisit);
-
-      return true;
-    }
-
-    private void OnSchedulingNode()
-    {
-      var visit = InnerTreenumerator.ToNodeVisit();
-
-      var node = _Accumulator(_Queue[0].ToNodeContext(), visit.ToNodeContext());
-
-      _Queue.AddToBack(visit.WithNode(node));
-
-      UpdateStateFromNodeVisit(_Queue.Last());
     }
 
     private void UpdateStateFromNodeVisit(NodeVisit<TAccumulate> nodeVisit)

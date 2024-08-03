@@ -1,11 +1,12 @@
 ﻿using Arborist.Core;
+using Arborist.Linq;
 using System;
 
 namespace Arborist.TestUtils
 {
   public class TestScenario
   {
-    public Func<NodeVisit<string>, NodeTraversalStrategy> TraversalStrategySelector { get; set; }
+    public Func<NodeContext<string>, NodeTraversalStrategy> NodeTraversalStrategySelector { get; set; }
     public Func<ITreenumerable<string>, ITreenumerable<string>> TreenumerableMap { get; set; }
     public string Description { get; set; }
     public NodeVisit<string>[] ExpectedDepthFirstResults { get; set; }
