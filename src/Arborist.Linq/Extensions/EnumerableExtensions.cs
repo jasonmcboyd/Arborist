@@ -1,5 +1,4 @@
-﻿using Arborist.Linq.LevelOrderTree;
-using Arborist.Linq.PreorderTree;
+﻿using Arborist.Linq.TreeEnumerable.DepthFirstTree;
 using Arborist.Nodes;
 using System;
 using System.Collections.Generic;
@@ -9,7 +8,7 @@ namespace Arborist.Linq.Extensions
 {
   public static class EnumerableExtensions
   {
-    internal static IEnumerable<INodeWithIndexableChildren<TNode>> ToReverseTreeRoots<TNode>(this IEnumerable<PreorderTreeToken<TNode>> source)
+    internal static IEnumerable<INodeWithIndexableChildren<TNode>> ToReverseTreeRoots<TNode>(this IEnumerable<DepthFirstTreeEnumerableToken<TNode>> source)
     {
       var stack = new Stack<List<NodeWithIndexableChildren<TNode>>>();
 
@@ -21,14 +20,14 @@ namespace Arborist.Linq.Extensions
 
           switch (token.Type)
           {
-            case PreorderTreeTokenType.StartChildGroup:
+            case DepthFirstTreeEnumerableTokenType.StartChildGroup:
               var children = stack.Pop();
               enumerator.MoveNext();
               token = enumerator.Current;
-              stack.Peek().Add(new NodeWithIndexableChildren<TNode>(token.Value, children));
+              stack.Peek().Add(new NodeWithIndexableChildren<TNode>(token.Node, children));
               break;
 
-            case PreorderTreeTokenType.EndChildGroup:
+            case DepthFirstTreeEnumerableTokenType.EndChildGroup:
               stack.Push(new List<NodeWithIndexableChildren<TNode>>());
               if (stack.Count == 1)
                 stack.Push(new List<NodeWithIndexableChildren<TNode>>());
@@ -38,7 +37,7 @@ namespace Arborist.Linq.Extensions
               if (stack.Count == 0)
                 stack.Push(new List<NodeWithIndexableChildren<TNode>>());
 
-              stack.Peek().Add(new NodeWithIndexableChildren<TNode>(token.Value));
+              stack.Peek().Add(new NodeWithIndexableChildren<TNode>(token.Node));
               break;
           }
 
@@ -49,7 +48,7 @@ namespace Arborist.Linq.Extensions
     }
  
     internal static IEnumerable<INodeWithIndexableChildren<TAccumulate>> ToLeaffixScanTreeRoots<TSource, TAccumulate>(
-      this IEnumerable<PreorderTreeToken<NodeContext<TSource>>> source,
+      this IEnumerable<DepthFirstTreeEnumerableToken<NodeContext<TSource>>> source,
       Func<NodeContext<TAccumulate>, NodeContext<TSource>, TAccumulate> seedAccumulator,
       Func<NodeContext<TAccumulate>, NodeContext<TSource>, TAccumulate> initialAccumulator,
       Func<NodeContext<TAccumulate>, NodeContext<TAccumulate>, TAccumulate> accumulator,
@@ -66,12 +65,12 @@ namespace Arborist.Linq.Extensions
 
         switch (token.Type)
         {
-          case PreorderTreeTokenType.StartChildGroup:
+          case DepthFirstTreeEnumerableTokenType.StartChildGroup:
             {
               var children = tree.Pop();
               i--;
               token = tokens[i];
-              var parent = token.Value;
+              var parent = token.Node;
 
               var childArray = new NodeWithIndexableChildren<TAccumulate>[children.Count];
 
@@ -96,7 +95,7 @@ namespace Arborist.Linq.Extensions
               break;
             }
 
-          case PreorderTreeTokenType.EndChildGroup:
+          case DepthFirstTreeEnumerableTokenType.EndChildGroup:
             {
               tree.Push(new Stack<(NodeWithIndexableChildren<TAccumulate>, NodeContext<TAccumulate>)>());
               if (tree.Count == 1)
@@ -106,11 +105,11 @@ namespace Arborist.Linq.Extensions
 
           default:
             {
-              var seed = seedGenerator(token.Value);
-              var seedNodeAndPosition = new NodeContext<TAccumulate>(seed, token.Value.Position);
-              var accumulate = seedAccumulator(seedNodeAndPosition, token.Value);
+              var seed = seedGenerator(token.Node);
+              var seedNodeAndPosition = new NodeContext<TAccumulate>(seed, token.Node.Position);
+              var accumulate = seedAccumulator(seedNodeAndPosition, token.Node);
               var node = new NodeWithIndexableChildren<TAccumulate>(accumulate);
-              var nodeAndPosition = new NodeContext<TAccumulate>(accumulate, token.Value.Position);
+              var nodeAndPosition = new NodeContext<TAccumulate>(accumulate, token.Node.Position);
 
               if (tree.Count == 0)
                 tree.Push(new Stack<(NodeWithIndexableChildren<TAccumulate>, NodeContext<TAccumulate>)>());
@@ -122,32 +121,6 @@ namespace Arborist.Linq.Extensions
       }
 
       return tree.Pop().Select(x => x.Node);
-    }
-
-    public static IEnumerable<LevelOrderTreeToken<TNode>> ToReverseLevelOrderTreeEnumerable<TNode>(this IEnumerable<LevelOrderTreeToken<TNode>> source)
-    {
-      if (source == null)
-        yield break;
-
-      var nodes = new Stack<LevelOrderTreeToken<TNode>>();
-
-      foreach (var token in source)
-      {
-        if (token.Type == LevelOrderTreeTokenType.GenerationSeparator)
-        {
-          while (nodes.Count > 0)
-            yield return nodes.Pop();
-
-          yield return token;
-        }
-        else
-        {
-          nodes.Push(token);
-        }
-      }
-
-      while (nodes.Count > 0)
-        yield return nodes.Pop();
     }
   }
 }

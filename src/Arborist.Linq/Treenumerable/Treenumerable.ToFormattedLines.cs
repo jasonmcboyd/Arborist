@@ -1,6 +1,6 @@
 ﻿using Arborist.Core;
 using Arborist.Linq.Extensions;
-using Arborist.Linq.PreorderTree;
+using Arborist.Linq.TreeEnumerable.DepthFirstTree;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,7 +27,7 @@ namespace Arborist.Linq
       Func<TNode, string> stringFormatter,
       int paddingSize)
     {
-      var reverseNewickEnumerable = source.ToPreorderTreeEnumerable().Reverse();
+      var reverseTreeEnumerable = source.ToDepthFirstTreeEnumerable().Reverse();
 
       const char BAR_NODE = '│';
       const char INTERIOR_BRANCH_NODE = '├';
@@ -46,11 +46,11 @@ namespace Arborist.Linq
       var builder = new StringBuilder();
 
       // TODO: I think I can process one tree at a time, instead of all trees at once.
-      foreach (var token in reverseNewickEnumerable)
+      foreach (var token in reverseTreeEnumerable)
       {
         switch (token.Type)
         {
-          case PreorderTreeTokenType.EndChildGroup:
+          case DepthFirstTreeEnumerableTokenType.EndChildGroup:
             depth++;
 
             if (nodes.Count > 0 && (nodes.Last() == INTERIOR_BRANCH_NODE || nodes.Last() == EXTERIOR_BRANCH_NODE))
@@ -59,7 +59,7 @@ namespace Arborist.Linq
             nodes.Add(WHITESPACE_NODE);
             break;
 
-          case PreorderTreeTokenType.StartChildGroup:
+          case DepthFirstTreeEnumerableTokenType.StartChildGroup:
             depth--;
 
             builder.Remove(builder.Length - (paddingSize + 1), paddingSize + 1);
@@ -70,7 +70,7 @@ namespace Arborist.Linq
           default:
             if (nodes.Count == 0)
             {
-              results.Push(stringFormatter(token.Value));
+              results.Push(stringFormatter(token.Node));
               continue;
             }
             var node = nodes.Last();
@@ -94,7 +94,7 @@ namespace Arborist.Linq
                 builder.Append(branchPadding);
             }
 
-            builder.Append(stringFormatter(token.Value));
+            builder.Append(stringFormatter(token.Node));
 
             results.Push(builder.ToString());
 

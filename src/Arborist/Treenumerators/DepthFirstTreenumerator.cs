@@ -453,7 +453,7 @@ namespace Arborist.Treenumerators
 
     ~DepthFirstTreenumerator()
     {
-        Dispose(false);
+      Dispose(false);
     }
 
     #endregion Dispose

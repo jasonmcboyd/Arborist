@@ -1,6 +1,7 @@
 ﻿using Arborist.Core;
 using Arborist.Linq.Extensions;
 using Arborist.Nodes;
+using System;
 
 namespace Arborist.Linq
 {
@@ -8,6 +9,9 @@ namespace Arborist.Linq
   {
     public static ITreenumerable<TNode> Reverse<TNode>(
       this ITreenumerable<TNode> source)
-      => source.ToPreorderTreeEnumerable().ToReverseTreeRoots().ToTreenumerable();
+    {
+      //return source.ToPreorderTreeEnumerable().ToReverseTreeRoots().ToTreenumerable();
+      throw new NotImplementedException();
+    }
   }
 }

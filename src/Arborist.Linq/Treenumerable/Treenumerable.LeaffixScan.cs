@@ -14,17 +14,18 @@ namespace Arborist.Linq
       Func<NodeContext<TAccumulate>, NodeContext<TAccumulate>, TAccumulate> accumulator,
       Func<NodeContext<TSource>, TAccumulate> seedGenerator)
     {
-      var rootNodes =
-        source
-        .Materialize()
-        .ToPreorderTreeEnumerable()
-        .ToLeaffixScanTreeRoots(
-          seedAccumulator,
-          initialAccumulator,
-          accumulator,
-          seedGenerator);
+      //var rootNodes =
+      //  source
+      //  .Materialize()
+      //  .ToPreorderTreeEnumerable()
+      //  .ToLeaffixScanTreeRoots(
+      //    seedAccumulator,
+      //    initialAccumulator,
+      //    accumulator,
+      //    seedGenerator);
 
-      return new IndexableTreenumerable<TAccumulate>(rootNodes);
+      //return new IndexableTreenumerable<TAccumulate>(rootNodes);
+      throw new NotImplementedException();
     }
 
     public static ITreenumerable<TAccumulate> LeaffixScan<TSource, TAccumulate>(

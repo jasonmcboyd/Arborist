@@ -236,8 +236,7 @@ namespace Arborist.Treenumerators
 
     private bool MoveToNextChild()
     {
-      while (_ChildrenStack.Count > 0
-        && !_ChildrenStack.Peek().Node.MoveNext())
+      while (_ChildrenStack.Count > 0 && !_ChildrenStack.Peek().Node.MoveNext())
         ReturnChildrenVirtualNodeVisit(_ChildrenStack.Pop());
 
       if (_ChildrenStack.Count == 0)
