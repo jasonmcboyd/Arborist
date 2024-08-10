@@ -19,10 +19,15 @@ namespace Arborist.Linq.TreeEnumerable.BreadthFirstTree
 
     object IEnumerator.Current => Current;
 
-    private bool _HasCachedGenerationSeparator = false;
+    private bool _HasCachedGenerationSeparatorBeforeCachedFamilySeparators = false;
+    private bool _HasCachedGenerationSeparatorAfterCachedFamilySeparators = false;
     private int _CachedFamilySeparatorCount = 0;
     private bool _HasCachedNode = false;
     private BreadthFirstTreeEnumerableToken<TNode> _CachedNode;
+
+    private bool HasCachedGenerationSeparator =>
+      _HasCachedGenerationSeparatorBeforeCachedFamilySeparators
+      || _HasCachedGenerationSeparatorAfterCachedFamilySeparators;
 
     public bool MoveNext()
     {
@@ -57,10 +62,21 @@ namespace Arborist.Linq.TreeEnumerable.BreadthFirstTree
         OnVisitingNode();
       }
 
-      if (_CachedFamilySeparatorCount > 0 || _HasCachedGenerationSeparator)
+      if (_HasCachedGenerationSeparatorAfterCachedFamilySeparators && _CachedFamilySeparatorCount > 0)
       {
-        _HasCachedGenerationSeparator = false;
         _CachedFamilySeparatorCount--;
+        Current = new BreadthFirstTreeEnumerableToken<TNode>(BreadthFirstTreeEnumerableTokenType.FamilySeparator);
+        return true;
+      }
+      else
+      {
+        _HasCachedGenerationSeparatorAfterCachedFamilySeparators = false;
+        _HasCachedGenerationSeparatorBeforeCachedFamilySeparators = false;
+        _CachedFamilySeparatorCount = 0;
+      }
+
+      if (_EnumerationStarted && Current.Type != BreadthFirstTreeEnumerableTokenType.FamilySeparator)
+      {
         Current = new BreadthFirstTreeEnumerableToken<TNode>(BreadthFirstTreeEnumerableTokenType.FamilySeparator);
         return true;
       }
@@ -76,9 +92,11 @@ namespace Arborist.Linq.TreeEnumerable.BreadthFirstTree
 
     private void OnSchedulingNode()
     {
-      if (_HasCachedGenerationSeparator)
+      if (HasCachedGenerationSeparator)
       {
-        _HasCachedGenerationSeparator = false;
+        _HasCachedGenerationSeparatorAfterCachedFamilySeparators = false;
+        _HasCachedGenerationSeparatorBeforeCachedFamilySeparators = false;
+
         Current = new BreadthFirstTreeEnumerableToken<TNode>(BreadthFirstTreeEnumerableTokenType.GenerationSeparator);
         _HasCachedNode = true;
         _CachedNode = new BreadthFirstTreeEnumerableToken<TNode>(_Treenumerator.Node);
@@ -111,7 +129,11 @@ namespace Arborist.Linq.TreeEnumerable.BreadthFirstTree
       }
       else
       {
-        _HasCachedGenerationSeparator = true;
+        if (_CachedFamilySeparatorCount == 0)
+          _HasCachedGenerationSeparatorBeforeCachedFamilySeparators = true;
+        else
+          _HasCachedGenerationSeparatorAfterCachedFamilySeparators = true;
+
         _CurrentLevelDepth++;
       }
     }
