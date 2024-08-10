@@ -57,6 +57,14 @@ namespace Arborist.Linq.TreeEnumerable.BreadthFirstTree
         OnVisitingNode();
       }
 
+      if (_CachedFamilySeparatorCount > 0 || _HasCachedGenerationSeparator)
+      {
+        _HasCachedGenerationSeparator = false;
+        _CachedFamilySeparatorCount--;
+        Current = new BreadthFirstTreeEnumerableToken<TNode>(BreadthFirstTreeEnumerableTokenType.FamilySeparator);
+        return true;
+      }
+
       return false;
     }
 
@@ -74,7 +82,6 @@ namespace Arborist.Linq.TreeEnumerable.BreadthFirstTree
         Current = new BreadthFirstTreeEnumerableToken<TNode>(BreadthFirstTreeEnumerableTokenType.GenerationSeparator);
         _HasCachedNode = true;
         _CachedNode = new BreadthFirstTreeEnumerableToken<TNode>(_Treenumerator.Node);
-        _CachedFamilySeparatorCount = 0;
         return;
       }
 

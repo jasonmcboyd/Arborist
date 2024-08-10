@@ -12,6 +12,11 @@ namespace Arborist.Linq.Extensions
     {
       var rootNodes = new List<NodeWithIndexableChildren<TNode>>();
 
+      var stack = new Stack<BreadthFirstTreeEnumerableToken<TNode>>();
+
+      foreach (var token in source)
+        stack.Push(token);
+
       throw new NotImplementedException();
     }
 
