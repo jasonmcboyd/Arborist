@@ -12,29 +12,25 @@ namespace Arborist.Linq.TreeEnumerable.BreadthFirstTree
     }
 
     private readonly ITreenumerator<TNode> _Treenumerator;
+    private readonly Queue<BreadthFirstTreeEnumerableToken<TNode>> _CachedSeparators = new Queue<BreadthFirstTreeEnumerableToken<TNode>>();
+    private bool _HasCachedNode = false;
+    private BreadthFirstTreeEnumerableToken<TNode> _CachedNode;
     private int _CurrentLevelDepth = -1;
     private bool _EnumerationStarted = false;
+    private bool _TreenumeratorEnumerationFinished = false;
 
     public BreadthFirstTreeEnumerableToken<TNode> Current { get; private set; }
 
     object IEnumerator.Current => Current;
 
-    private bool _HasCachedGenerationSeparatorBeforeCachedFamilySeparators = false;
-    private bool _HasCachedGenerationSeparatorAfterCachedFamilySeparators = false;
-    private int _CachedFamilySeparatorCount = 0;
-    private bool _HasCachedNode = false;
-    private BreadthFirstTreeEnumerableToken<TNode> _CachedNode;
-
-    private bool HasCachedGenerationSeparator =>
-      _HasCachedGenerationSeparatorBeforeCachedFamilySeparators
-      || _HasCachedGenerationSeparatorAfterCachedFamilySeparators;
-
     public bool MoveNext()
     {
-      if (_CachedFamilySeparatorCount > 0)
+      if (_TreenumeratorEnumerationFinished)
+        return OnTreenumeratorEnumerationFinished();
+
+      if (_CachedSeparators.Count > 0)
       {
-        _CachedFamilySeparatorCount--;
-        Current = new BreadthFirstTreeEnumerableToken<TNode>(BreadthFirstTreeEnumerableTokenType.FamilySeparator);
+        Current = _CachedSeparators.Dequeue();
         return true;
       }
 
@@ -62,26 +58,9 @@ namespace Arborist.Linq.TreeEnumerable.BreadthFirstTree
         OnVisitingNode();
       }
 
-      if (_HasCachedGenerationSeparatorAfterCachedFamilySeparators && _CachedFamilySeparatorCount > 0)
-      {
-        _CachedFamilySeparatorCount--;
-        Current = new BreadthFirstTreeEnumerableToken<TNode>(BreadthFirstTreeEnumerableTokenType.FamilySeparator);
-        return true;
-      }
-      else
-      {
-        _HasCachedGenerationSeparatorAfterCachedFamilySeparators = false;
-        _HasCachedGenerationSeparatorBeforeCachedFamilySeparators = false;
-        _CachedFamilySeparatorCount = 0;
-      }
+      _TreenumeratorEnumerationFinished = true;
 
-      if (_EnumerationStarted && Current.Type != BreadthFirstTreeEnumerableTokenType.FamilySeparator)
-      {
-        Current = new BreadthFirstTreeEnumerableToken<TNode>(BreadthFirstTreeEnumerableTokenType.FamilySeparator);
-        return true;
-      }
-
-      return false;
+      return OnTreenumeratorEnumerationFinished();
     }
 
     private void OnEnumerationStarting()
@@ -92,30 +71,17 @@ namespace Arborist.Linq.TreeEnumerable.BreadthFirstTree
 
     private void OnSchedulingNode()
     {
-      if (HasCachedGenerationSeparator)
-      {
-        _HasCachedGenerationSeparatorAfterCachedFamilySeparators = false;
-        _HasCachedGenerationSeparatorBeforeCachedFamilySeparators = false;
+      var node = new BreadthFirstTreeEnumerableToken<TNode>(_Treenumerator.Node);
 
-        Current = new BreadthFirstTreeEnumerableToken<TNode>(BreadthFirstTreeEnumerableTokenType.GenerationSeparator);
+      if (_CachedSeparators.Count > 0)
+      {
+        Current = _CachedSeparators.Dequeue();
         _HasCachedNode = true;
-        _CachedNode = new BreadthFirstTreeEnumerableToken<TNode>(_Treenumerator.Node);
+        _CachedNode = node;
         return;
       }
 
-      if (_CachedFamilySeparatorCount > 0)
-      {
-        _CachedFamilySeparatorCount--;
-        Current = new BreadthFirstTreeEnumerableToken<TNode>(BreadthFirstTreeEnumerableTokenType.FamilySeparator);
-        if (!_HasCachedNode)
-        {
-          _HasCachedNode = true;
-          _CachedNode = new BreadthFirstTreeEnumerableToken<TNode>(_Treenumerator.Node);
-        }
-        return;
-      }
-
-      Current = new BreadthFirstTreeEnumerableToken<TNode>(_Treenumerator.Node);
+      Current = node;
     }
 
     private void OnVisitingNode()
@@ -125,17 +91,29 @@ namespace Arborist.Linq.TreeEnumerable.BreadthFirstTree
 
       if (_Treenumerator.Position.Depth == _CurrentLevelDepth)
       {
-        _CachedFamilySeparatorCount++;
+        _CachedSeparators.Enqueue(new BreadthFirstTreeEnumerableToken<TNode>(BreadthFirstTreeEnumerableTokenType.FamilySeparator));
       }
       else
       {
-        if (_CachedFamilySeparatorCount == 0)
-          _HasCachedGenerationSeparatorBeforeCachedFamilySeparators = true;
-        else
-          _HasCachedGenerationSeparatorAfterCachedFamilySeparators = true;
+        _CachedSeparators.Enqueue(new BreadthFirstTreeEnumerableToken<TNode>(BreadthFirstTreeEnumerableTokenType.GenerationSeparator));
 
         _CurrentLevelDepth++;
       }
+    }
+
+    private bool OnTreenumeratorEnumerationFinished()
+    {
+      if (_CachedSeparators.Count > 0)
+      {
+        Current = _CachedSeparators.Dequeue();
+
+        if (Current.Type == BreadthFirstTreeEnumerableTokenType.GenerationSeparator)
+          _CachedSeparators.Clear();
+
+        return true;
+      }
+
+      return false;
     }
 
     public void Reset()

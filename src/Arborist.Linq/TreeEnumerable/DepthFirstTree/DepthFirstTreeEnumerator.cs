@@ -47,19 +47,7 @@ namespace Arborist.Linq.TreeEnumerable.DepthFirstTree
 
         if (depth != _PreviousDepth)
         {
-          if (depth > _PreviousDepth)
-          {
-            Current = new DepthFirstTreeEnumerableToken<TNode>(DepthFirstTreeEnumerableTokenType.StartChildGroup);
-          }
-          else
-          {
-            _CachedEndChildGroupTokenCount = _PreviousDepth - _Treenumerator.Position.Depth - 1;
-            Current = new DepthFirstTreeEnumerableToken<TNode>(DepthFirstTreeEnumerableTokenType.EndChildGroup);
-          }
-
-          _HasCachedNode = true;
-          _CachedNode = new DepthFirstTreeEnumerableToken<TNode>(_Treenumerator.Node);
-          _PreviousDepth = depth;
+          OnDepthChanged(depth);
           return true;
         }
 
@@ -67,15 +55,35 @@ namespace Arborist.Linq.TreeEnumerable.DepthFirstTree
         return true;
       }
 
-      if (_PreviousDepth > 0)
+      return OnTreenumeratorFinished();
+    }
+
+    private void OnDepthChanged(int newDepth)
+    {
+      if (newDepth > _PreviousDepth)
       {
-        _CachedEndChildGroupTokenCount = _PreviousDepth - 1;
+        Current = new DepthFirstTreeEnumerableToken<TNode>(DepthFirstTreeEnumerableTokenType.StartChildGroup);
+      }
+      else
+      {
+        _CachedEndChildGroupTokenCount = _PreviousDepth - _Treenumerator.Position.Depth - 1;
         Current = new DepthFirstTreeEnumerableToken<TNode>(DepthFirstTreeEnumerableTokenType.EndChildGroup);
-        _PreviousDepth = 0;
-        return true;
       }
 
-      return false;
+      _HasCachedNode = true;
+      _CachedNode = new DepthFirstTreeEnumerableToken<TNode>(_Treenumerator.Node);
+      _PreviousDepth = newDepth;
+    }
+
+    private bool OnTreenumeratorFinished()
+    {
+      if (_PreviousDepth <= 0)
+        return false;
+
+      _CachedEndChildGroupTokenCount = _PreviousDepth - 1;
+      Current = new DepthFirstTreeEnumerableToken<TNode>(DepthFirstTreeEnumerableTokenType.EndChildGroup);
+      _PreviousDepth = 0;
+      return true;
     }
 
     public void Reset()

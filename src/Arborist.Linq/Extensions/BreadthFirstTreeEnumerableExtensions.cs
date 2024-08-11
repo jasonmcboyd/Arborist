@@ -16,10 +16,18 @@ namespace Arborist.Linq.Extensions
       foreach (var token in source)
         stack.Push(token);
 
+      // If the stack is empty, return an empty Treenumerable.
+      if (stack.Count == 0)
+        return Treenumerable.Empty<TNode>();
+
       var deque = new Deque<Stack<NodeWithIndexableChildren<TNode>>>();
 
-      var levelCount = 0;
       var bottomLevelFilled = false;
+
+      // First level must be a generation separator. Pop it and add a null stack to
+      // deque to avoid setting bottomLevelFilled to true on the first iteration.
+      stack.Pop();
+      deque.AddToFront(null);
 
       while (stack.Count > 0)
       {
@@ -27,7 +35,6 @@ namespace Arborist.Linq.Extensions
 
         if (token.Type == BreadthFirstTreeEnumerableTokenType.GenerationSeparator)
         {
-          levelCount = deque.Count;
           bottomLevelFilled = true;
           deque.AddToFront(null);
           continue;
