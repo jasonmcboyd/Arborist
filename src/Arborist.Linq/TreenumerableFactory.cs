@@ -4,7 +4,7 @@ using System;
 
 namespace Arborist.Linq
 {
-  internal static class TreenumerableFactory
+  public static class TreenumerableFactory
   {
     public static ITreenumerable<TNode> Create<TInner, TNode>(
       ITreenumerable<TInner> innerTreenumerable,
