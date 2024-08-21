@@ -246,7 +246,7 @@ namespace Arborist.Treenumerators
 
       children.Mode = TreenumeratorMode.SchedulingNode;
       children.VisitCount = 0;
-      children.Position = children.Position.AddToSiblingIndex(1);
+      children.Position += (1, 0);
       children.TraversalStrategy = NodeTraversalStrategy.TraverseSubtree;
 
       UpdateStateFromVirtualNodeVisit(GetNodeVisitFromChildEnumeratorVisit(children));

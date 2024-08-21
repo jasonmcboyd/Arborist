@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Arborist.Core
 {
-  public readonly struct NodePosition : IEqualityComparer<NodePosition>
+  public readonly struct NodePosition : IEqualityComparer<NodePosition>, IComparable<NodePosition>
   {
     public NodePosition(int siblingIndex, int depth)
     {
@@ -13,18 +14,16 @@ namespace Arborist.Core
     public int SiblingIndex { get; }
     public int Depth { get; }
 
-
     public static implicit operator NodePosition((int, int) tuple)
       => new NodePosition(tuple.Item1, tuple.Item2);
 
     public static implicit operator (int, int)(NodePosition nodePosition)
       => (nodePosition.SiblingIndex, nodePosition.Depth);
 
-    public static bool operator ==(NodePosition left, NodePosition right)
-      => left.Equals(left, right);
+    public override string ToString()
+      => $"({SiblingIndex}, {Depth})";
 
-    public static bool operator !=(NodePosition left, NodePosition right)
-      => !left.Equals(left, right);
+    #region Arithmetic
 
     public static NodePosition operator +(NodePosition left, NodePosition right)
       => new NodePosition(left.SiblingIndex + right.SiblingIndex, left.Depth + right.Depth);
@@ -38,14 +37,9 @@ namespace Arborist.Core
     public static NodePosition operator -(NodePosition left, (int, int) right)
       => left - (NodePosition)right;
 
-    public NodePosition AddToDepth(int value) => new NodePosition(SiblingIndex, Depth + value);
-    public NodePosition AddToSiblingIndex(int value) => new NodePosition(SiblingIndex + value, Depth);
+    #endregion Arithmetic
 
-    public bool Equals(NodePosition left, NodePosition right)
-      => left.SiblingIndex == right.SiblingIndex && left.Depth == right.Depth;
-
-    public int GetHashCode(NodePosition nodePosition)
-      => (nodePosition.SiblingIndex, nodePosition.Depth).GetHashCode();
+    #region Equality Comparison
 
     public override bool Equals(object obj)
     {
@@ -58,7 +52,51 @@ namespace Arborist.Core
     public override int GetHashCode()
       => GetHashCode(this);
 
-    public override string ToString()
-      => $"({SiblingIndex}, {Depth})";
+    public bool Equals(NodePosition left, NodePosition right)
+      => left.SiblingIndex == right.SiblingIndex && left.Depth == right.Depth;
+
+    public static bool operator ==(NodePosition left, NodePosition right)
+      => left.Equals(left, right);
+
+    public static bool operator !=(NodePosition left, NodePosition right)
+      => !left.Equals(left, right);
+
+    public int GetHashCode(NodePosition nodePosition)
+      => (nodePosition.SiblingIndex, nodePosition.Depth).GetHashCode();
+
+    #endregion Equality Comparison
+
+    #region Order Comparison
+
+    public int CompareTo(NodePosition other)
+    {
+      if (other.Depth < Depth)
+        return 1;
+
+      if (other.Depth > Depth)
+        return -1;
+
+      if (other.SiblingIndex < SiblingIndex)
+        return 1;
+
+      if (other.SiblingIndex > SiblingIndex)
+        return -1;
+
+      return 0;
+    }
+
+    public static bool operator <(NodePosition left, NodePosition right)
+      => left.CompareTo(right) < 0;
+
+    public static bool operator >(NodePosition left, NodePosition right)
+      => left.CompareTo(right) > 0;
+
+    public static bool operator <=(NodePosition left, NodePosition right)
+      => left.CompareTo(right) <= 0;
+
+    public static bool operator >=(NodePosition left, NodePosition right)
+      => left.CompareTo(right) >= 0;
+
+    #endregion Order Comparison
   }
 }

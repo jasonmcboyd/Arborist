@@ -2,7 +2,6 @@
 using Arborist.Linq.Extensions;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Arborist.Linq
 {

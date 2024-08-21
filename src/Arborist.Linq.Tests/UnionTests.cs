@@ -11,21 +11,26 @@ using System.Reflection;
 namespace Arborist.Linq.Tests
 {
   [TestClass]
-  public class RootfixScanTests
+  public class UnionTests
   {
     public static IEnumerable<object[]> GetTestData()
     {
       var testData = new[]
       {
-        new[] { "",                     ""                                   },
-        new[] { "a",                    "a"                                  },
-        new[] { "a,b,c",                "a,b,c"                              },
-        new[] { "a(b,c)",               "a(ab,ac)"                           },
-        new[] { "a,b(c)",               "a,b(bc)"                            },
-        new[] { "a(b(e,f,g),c(h,i,j))", "a(ab(abe,abf,abg),ac(ach,aci,acj))" },
-        new[] { "a(b(c))",              "a(ab(abc))"                         },
-        new[] { "a(b,c),d(e,f)",        "a(ab,ac),d(de,df)"                  },
-        new[] { "a,b(c),d(e(f))",       "a,b(bc),d(de(def))"                 },
+        new[] { "",            "",            ""                     },
+        new[] { "a",           "0",           "a0"                   },
+        new[] { "a",           "0,1",         "a0,1"                 },
+        new[] { "a,b",         "0",           "a0,b"                 },
+        new[] { "a",           "0(1)",        "a0(1)"                },
+        new[] { "a(b)",        "0",           "a0(b)"                },
+        new[] { "a(b)",        "0,1",         "a0(b),1"              },
+        new[] { "a,b",         "0(1)",        "a0(1),b"              },
+        new[] { "a,b(c)",      "0(1)",        "a0(1),b(c)"           },
+        new[] { "a(b,c),d",    "0,1(2,3)",    "a0(b,c),d1(2,3)"      },
+        new[] { "a,b(c,d)",    "0(2,3),1",    "a0(2,3),b1(c,d)"      },
+        new[] { "a(b(c(d)))",  "0(1(2(3)))",  "a0(b1(c2(d3)))"       },
+        new[] { "a,b,c,d",     "0,1,2,3",     "a0,b1,c2,d3"          },
+        new[] { "a(d(e)),b,c", "0,1,2(3(4))", "a0(d(e)),b1,c2(3(4))" },
       };
 
       var nodeTraversalStrategies =
@@ -36,20 +41,22 @@ namespace Arborist.Linq.Tests
 
       foreach (var data in testData)
       {
-        var treeData = data[0];
-        var expectedTreeData = data[1];
+        var leftTreeData = data[0];
+        var rightTreeData = data[1];
+        var joinedTreeData = data[2];
 
         yield return new object[]
         {
-          treeData,
-          expectedTreeData,
+          leftTreeData,
+          rightTreeData,
+          joinedTreeData,
           "",
           ""
         };
 
         var expectedTreeNodes =
           TreeSerializer
-          .Deserialize(expectedTreeData)
+          .Deserialize(joinedTreeData)
           .PreOrderTraversal()
           .ToArray();
 
@@ -64,10 +71,11 @@ namespace Arborist.Linq.Tests
 
           yield return new object[]
           {
-              treeData,
-              expectedTreeData,
-              firstPair.node,
-              firstPair.nodeTraversalStrategy.ToString()
+            leftTreeData,
+            rightTreeData,
+            joinedTreeData,
+            firstPair.node,
+            firstPair.nodeTraversalStrategy.ToString()
           };
 
           for (int j = i + 1; j < cross.Length; j++)
@@ -79,8 +87,9 @@ namespace Arborist.Linq.Tests
 
             yield return new object[]
             {
-              treeData,
-              expectedTreeData,
+              leftTreeData,
+              rightTreeData,
+              joinedTreeData,
               SerializeTestNodes(firstPair.node, secondPair.node),
               SerializeNodeTraversalStrategies(firstPair.nodeTraversalStrategy, secondPair.nodeTraversalStrategy)
             };
@@ -123,17 +132,17 @@ namespace Arborist.Linq.Tests
     public static string GetTestDisplayName(MethodInfo methodInfo, object[] data)
     {
       var result =
-        data[0].ToString() == ""
+        data[2].ToString() == ""
         ? "<empty-string>"
-        : data[0].ToString();
+        : data[2].ToString();
 
       if (data[2].ToString() == "")
         return result;
 
       result += " -> ";
 
-      var testNodes = DeserializeTestNodes(data[2].ToString());
-      var nodeTraversalStrategies = DeserializeNodeTraversalStrategies(data[3].ToString());
+      var testNodes = DeserializeTestNodes(data[3].ToString());
+      var nodeTraversalStrategies = DeserializeNodeTraversalStrategies(data[4].ToString());
 
       for (int i = 0; i < testNodes.Length; i++)
       {
@@ -148,8 +157,9 @@ namespace Arborist.Linq.Tests
 
     [TestMethod]
     [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
-    public void RootfixScanTest_BreadthFirst(
-      string treeString,
+    public void UnionTest_BreadthFirst(
+      string leftTreeString,
+      string rightTreeString,
       string expectedTreeString,
       string testNodesString,
       string nodeTraversalStrategiesString)
@@ -157,13 +167,14 @@ namespace Arborist.Linq.Tests
       var testNodes = DeserializeTestNodes(testNodesString);
       var nodeTraversalStrategies = DeserializeNodeTraversalStrategies(nodeTraversalStrategiesString);
 
-      RootfixScanTest(treeString, expectedTreeString, testNodes, nodeTraversalStrategies, TreeTraversalStrategy.BreadthFirst);
+      UnionTest(leftTreeString, rightTreeString, expectedTreeString, testNodes, nodeTraversalStrategies, TreeTraversalStrategy.BreadthFirst);
     }
 
     [TestMethod]
     [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
-    public void RootfixScanTest_DepthFirst(
-      string treeString,
+    public void UnionTest_DepthFirst(
+      string leftTreeString,
+      string rightTreeString,
       string expectedTreeString,
       string testNodesString,
       string nodeTraversalStrategiesString)
@@ -171,22 +182,22 @@ namespace Arborist.Linq.Tests
       var testNodes = DeserializeTestNodes(testNodesString);
       var nodeTraversalStrategies = DeserializeNodeTraversalStrategies(nodeTraversalStrategiesString);
 
-      RootfixScanTest(treeString, expectedTreeString, testNodes, nodeTraversalStrategies, TreeTraversalStrategy.DepthFirst);
+      UnionTest(leftTreeString, rightTreeString, expectedTreeString, testNodes, nodeTraversalStrategies, TreeTraversalStrategy.DepthFirst);
     }
 
-    public void RootfixScanTest(
-      string treeString,
+    public void UnionTest(
+      string leftTreeString,
+      string rightTreeString,
       string expectedTreeString,
       string[] testNodes,
       NodeTraversalStrategy[] nodeTraversalStrategies,
       TreeTraversalStrategy treeTraversalStrategy)
     {
       // Arrange
-      var treenumerable = TreeSerializer.Deserialize(treeString);
+      var leftTreenumerable = TreeSerializer.Deserialize(leftTreeString);
+      var rightTreenumerable = TreeSerializer.Deserialize(rightTreeString);
 
-      var sut =
-        treenumerable
-        .RootfixScan((accumulate, visit) => accumulate.Node + visit.Node, "");
+      var sut = leftTreenumerable.Union(rightTreenumerable);
 
       Func<NodeContext<string>, NodeTraversalStrategy> nodeTraversalStrategySelector =
         nodeContext =>
@@ -202,8 +213,13 @@ namespace Arborist.Linq.Tests
       var expected =
         TreeSerializer
         .Deserialize(expectedTreeString)
-        .GetTraversal(treeTraversalStrategy, nodeTraversalStrategySelector)
+        .GetTraversal(
+          treeTraversalStrategy,
+          nodeTraversalStrategySelector)
         .ToArray();
+
+      Debug.WriteLine($"Left Tree: {leftTreeString}\r\n");
+      Debug.WriteLine($"Right Tree: {rightTreeString}\r\n");
 
       Debug.WriteLine("-----Expected Values-----");
       foreach (var value in expected)
@@ -213,6 +229,7 @@ namespace Arborist.Linq.Tests
       Debug.WriteLine($"{Environment.NewLine}-----Actual Values-----");
       var actual =
         sut
+        .Select(nodeContext => $"{nodeContext.Node.Left}{nodeContext.Node.Right}")
         .GetTraversal(
           treeTraversalStrategy,
           nodeTraversalStrategySelector)

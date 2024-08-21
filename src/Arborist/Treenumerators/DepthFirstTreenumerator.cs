@@ -153,7 +153,7 @@ namespace Arborist.Treenumerators
               TreenumeratorMode.SchedulingNode,
               previousVisit.Node,
               0,
-              previousVisit.Position.AddToSiblingIndex(1),
+              previousVisit.Position + (1, 0),
               NodeTraversalStrategy.TraverseSubtree);
 
           if (parentVisit.Position.Depth == -1)
@@ -222,7 +222,7 @@ namespace Arborist.Treenumerators
               TreenumeratorMode.SchedulingNode,
               previousVisit.Node,
               0,
-              previousVisit.Position.AddToSiblingIndex(1),
+              previousVisit.Position + (1, 0),
               NodeTraversalStrategy.TraverseSubtree);
 
           _Stack.Push(previousVisit);
@@ -284,7 +284,7 @@ namespace Arborist.Treenumerators
               TreenumeratorMode.SchedulingNode,
               previousVisit.Node,
               0,
-              previousVisit.Position.AddToSiblingIndex(1),
+              previousVisit.Position + (1, 0),
               NodeTraversalStrategy.TraverseSubtree);
 
           var parentVisit = _Stack.Peek();
