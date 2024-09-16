@@ -1,9 +1,8 @@
 ﻿using Arborist.Nodes;
-using System;
 
 namespace Arborist.Trees
 {
-  internal struct CollatzTreeNode : INodeWithIndexableChildren<ulong>
+  struct CollatzTreeNode : INodeWithIndexableChildren<ulong>
   {
     public CollatzTreeNode(ulong value)
     {
@@ -12,18 +11,9 @@ namespace Arborist.Trees
 
       Value = value;
 
-      _FirstChild = checked(value * 2);
-
-      if (value != 4 && (value - 1) % 3 == 0)
-      {
-        _SecondChild = (value - 1) / 3;
-        ChildCount = 2;
-      }
-      else
-      {
-        _SecondChild = 0;
-        ChildCount = 1;
-      }
+      var hasSecondChild = value != 4 && (value - 1) % 3 == 0;
+        
+      ChildCount = hasSecondChild ? 2 : 1;
     }
 
     public INodeWithIndexableChildren<ulong> this[int index]
@@ -31,19 +21,19 @@ namespace Arborist.Trees
       get
       {
         if (index == 0)
-          return new CollatzTreeNode(_FirstChild);
+          return new CollatzTreeNode(GetFirstChild());
         else if (index == 1 && ChildCount == 2)
-          return new CollatzTreeNode(_SecondChild);
+          return new CollatzTreeNode(GetSecondChild());
         else
           throw new IndexOutOfRangeException();
       }
     }
 
     public int ChildCount { get; private set; }
-
-    private ulong _FirstChild;
-    private ulong _SecondChild;
-
     public ulong Value { get; }
+
+    private ulong GetFirstChild() => checked(Value * 2);
+
+    private ulong GetSecondChild() => (Value - 1) / 3;
   }
 }
