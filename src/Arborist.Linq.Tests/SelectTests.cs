@@ -13,7 +13,7 @@ namespace Arborist.Linq.Tests
       // Arrange
       var root = Node.CreateNodeWithIndexableChildren(1, 2, 3);
 
-      var treenumerable = root.ToTreenumerable();
+      var treenumerable = root.ToTreenumerable<int, NodeWithIndexableChildren<int>>();
 
       // Act
       var actual =
@@ -34,7 +34,7 @@ namespace Arborist.Linq.Tests
       // Arrange
       var root = Node.CreateNodeWithIndexableChildren(1, 2, 3);
 
-      var treenumerable = root.ToTreenumerable();
+      var treenumerable = root.ToTreenumerable<int, NodeWithIndexableChildren<int>>();
 
       // Act
       var actual =

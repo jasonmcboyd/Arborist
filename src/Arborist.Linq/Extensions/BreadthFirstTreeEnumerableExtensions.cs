@@ -9,18 +9,19 @@ namespace Arborist.Linq.Extensions
 {
   public static class BreadthFirstTreeEnumerableExtensions
   {
-    public static ITreenumerable<TNode> ToTreenumerable<TNode>(this IBreadthFirstTreeEnumerable<TNode> source)
+    public static ITreenumerable<TValue> ToTreenumerable<TValue>(
+      this IBreadthFirstTreeEnumerable<TValue> source)
     {
-      var stack = new Stack<BreadthFirstTreeEnumerableToken<TNode>>();
+      var stack = new Stack<BreadthFirstTreeEnumerableToken<TValue>>();
 
       foreach (var token in source)
         stack.Push(token);
 
       // If the stack is empty, return an empty Treenumerable.
       if (stack.Count == 0)
-        return Treenumerable.Empty<TNode>();
+        return Treenumerable.Empty<TValue>();
 
-      var deque = new Deque<Stack<NodeWithIndexableChildren<TNode>>>();
+      var deque = new Deque<Stack<NodeWithIndexableChildren<TValue>>>();
 
       var bottomLevelFilled = false;
 
@@ -47,17 +48,17 @@ namespace Arborist.Linq.Extensions
         }
 
         if (deque[0] == null)
-          deque[0] = new Stack<NodeWithIndexableChildren<TNode>>();
+          deque[0] = new Stack<NodeWithIndexableChildren<TValue>>();
 
         var children =
           bottomLevelFilled
             ? deque.RemoveFromBack()
             : null;
 
-        deque[0].Push(new NodeWithIndexableChildren<TNode>(token.Node, children));
+        deque[0].Push(new NodeWithIndexableChildren<TValue>(token.Node, children));
       }
 
-      return new IndexableTreenumerable<TNode>(deque[0]);
+      return new IndexableTreenumerable<TValue, NodeWithIndexableChildren<TValue>>(deque[0]);
     }
 
     public static IBreadthFirstTreeEnumerable<TNode> ToReverseLevelOrderTreeEnumerable<TNode>(this IBreadthFirstTreeEnumerable<TNode> source)

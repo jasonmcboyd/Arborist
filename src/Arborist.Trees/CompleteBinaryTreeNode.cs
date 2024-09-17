@@ -2,7 +2,7 @@
 
 namespace Arborist.Trees
 {
-  public struct CompleteBinaryTreeNode : INodeWithIndexableChildren<ulong>
+  public struct CompleteBinaryTreeNode : INodeWithIndexableChildren<ulong, CompleteBinaryTreeNode>
   {
     public CompleteBinaryTreeNode(ulong index)
     {
@@ -14,7 +14,7 @@ namespace Arborist.Trees
       Value = 0;
     }
 
-    public INodeWithIndexableChildren<ulong> this[int index]
+    public CompleteBinaryTreeNode this[int index]
     {
       get
       {
@@ -29,7 +29,6 @@ namespace Arborist.Trees
     }
 
     public int ChildCount { get; } = 2;
-
     public ulong Value { get; }
   }
 }

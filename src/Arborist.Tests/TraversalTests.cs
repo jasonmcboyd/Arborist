@@ -84,7 +84,7 @@ namespace Arborist.Tests
       var treenumerable =
         TreeSerializer
         .DeserializeRoots(treeString)
-        .ToTreenumerable()
+        .ToTreenumerable<string, NodeWithIndexableChildren<string>>()
         .Select(visit => visit.Node);
 
       var testScenario = TreeTraversalTestData.TestTrees[testTreeIndex].TestScenarios[testScenarioIndex];
@@ -127,13 +127,24 @@ namespace Arborist.Tests
 
       if (enumerableTreenumeratorTest)
       {
-        var rootNodes = TreeSerializer.DeserializeRoots(treeString).CreateNodeWithEnumerableChildren();
-        treenumerable = rootNodes.ToTreenumerable().Select(visit => visit.Node);
+        var rootNodes =
+          TreeSerializer
+          .DeserializeRoots(treeString)
+          .CreateNodeWithEnumerableChildren<string, NodeWithIndexableChildren<string>>();
+
+        treenumerable =
+          rootNodes
+          .ToTreenumerable()
+          .Select(visit => visit.Node);
       }
       else
       {
-        IEnumerable<INodeWithIndexableChildren<string>> roots = TreeSerializer.DeserializeRoots(treeString);
-        treenumerable = roots.ToTreenumerable().Select(visit => visit.Node);
+        var roots = TreeSerializer.DeserializeRoots(treeString);
+
+        treenumerable =
+          roots
+          .ToTreenumerable<string, NodeWithIndexableChildren<string>>()
+          .Select(visit => visit.Node);
       }
 
       var expected =

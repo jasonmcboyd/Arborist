@@ -10,17 +10,17 @@ namespace Arborist.Linq.Extensions
 {
   public static class DepthFirstTreeEnumerableExtensions
   {
-    public static ITreenumerable<TNode> ToTreenumerable<TNode>(this IDepthFirstTreeEnumerable<TNode> source)
+    public static ITreenumerable<TValue> ToTreenumerable<TValue>(this IDepthFirstTreeEnumerable<TValue> source)
     {
-      var nodes = new Stack<List<NodeWithIndexableChildren<TNode>>>();
+      var nodes = new Stack<List<NodeWithIndexableChildren<TValue>>>();
 
-      nodes.Push(new List<NodeWithIndexableChildren<TNode>>());
+      nodes.Push(new List<NodeWithIndexableChildren<TValue>>());
 
-      var tokens = new Stack<DepthFirstTreeEnumerableToken<TNode>>();
+      var tokens = new Stack<DepthFirstTreeEnumerableToken<TValue>>();
 
       using (var enumerator = source.GetEnumerator())
       {
-        DepthFirstTreeEnumerableToken<TNode> previousToken = default;
+        DepthFirstTreeEnumerableToken<TValue> previousToken = default;
 
         while (enumerator.MoveNext())
         {
@@ -29,26 +29,26 @@ namespace Arborist.Linq.Extensions
           switch (token.Type)
           {
             case DepthFirstTreeEnumerableTokenType.StartChildGroup:
-              nodes.Push(new List<NodeWithIndexableChildren<TNode>>());
+              nodes.Push(new List<NodeWithIndexableChildren<TValue>>());
               break;
 
             case DepthFirstTreeEnumerableTokenType.EndChildGroup:
               if (previousToken.Type == DepthFirstTreeEnumerableTokenType.EndChildGroup)
               {
-                var node = new NodeWithIndexableChildren<TNode>(tokens.Pop().Node, nodes.Pop());
+                var node = new NodeWithIndexableChildren<TValue>(tokens.Pop().Node, nodes.Pop());
                 nodes.Peek().Add(node);
               }
               else
               {
-                nodes.Peek().Add(new NodeWithIndexableChildren<TNode>(tokens.Pop().Node));
-                var node = new NodeWithIndexableChildren<TNode>(tokens.Pop().Node, nodes.Pop());
+                nodes.Peek().Add(new NodeWithIndexableChildren<TValue>(tokens.Pop().Node));
+                var node = new NodeWithIndexableChildren<TValue>(tokens.Pop().Node, nodes.Pop());
                 nodes.Peek().Add(node);
               }
               break;
 
             default:
               if (tokens.Count == nodes.Count)
-                nodes.Peek().Add(new NodeWithIndexableChildren<TNode>(tokens.Pop().Node));
+                nodes.Peek().Add(new NodeWithIndexableChildren<TValue>(tokens.Pop().Node));
 
               tokens.Push(token);
 
@@ -59,9 +59,9 @@ namespace Arborist.Linq.Extensions
         }
 
         if (tokens.Count > 0)
-          nodes.Peek().Add(new NodeWithIndexableChildren<TNode>(tokens.Pop().Node));
+          nodes.Peek().Add(new NodeWithIndexableChildren<TValue>(tokens.Pop().Node));
 
-        return new IndexableTreenumerable<TNode>(nodes.Pop());
+        return new IndexableTreenumerable<TValue, NodeWithIndexableChildren<TValue>>(nodes.Pop());
       }
     }
 

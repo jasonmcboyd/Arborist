@@ -8,9 +8,10 @@ namespace Arborist.Linq.Extensions
 {
   public static class EnumerableExtensions
   {
-    internal static IEnumerable<INodeWithIndexableChildren<TNode>> ToReverseTreeRoots<TNode>(this IEnumerable<DepthFirstTreeEnumerableToken<TNode>> source)
+    internal static IEnumerable<NodeWithIndexableChildren<TValue>> ToReverseTreeRoots<TValue>(
+      this IEnumerable<DepthFirstTreeEnumerableToken<TValue>> source)
     {
-      var stack = new Stack<List<NodeWithIndexableChildren<TNode>>>();
+      var stack = new Stack<List<NodeWithIndexableChildren<TValue>>>();
 
       using (var enumerator = source.Reverse().GetEnumerator())
       {
@@ -24,20 +25,20 @@ namespace Arborist.Linq.Extensions
               var children = stack.Pop();
               enumerator.MoveNext();
               token = enumerator.Current;
-              stack.Peek().Add(new NodeWithIndexableChildren<TNode>(token.Node, children));
+              stack.Peek().Add(new NodeWithIndexableChildren<TValue>(token.Node, children));
               break;
 
             case DepthFirstTreeEnumerableTokenType.EndChildGroup:
-              stack.Push(new List<NodeWithIndexableChildren<TNode>>());
+              stack.Push(new List<NodeWithIndexableChildren<TValue>>());
               if (stack.Count == 1)
-                stack.Push(new List<NodeWithIndexableChildren<TNode>>());
+                stack.Push(new List<NodeWithIndexableChildren<TValue>>());
               break;
 
             default:
               if (stack.Count == 0)
-                stack.Push(new List<NodeWithIndexableChildren<TNode>>());
+                stack.Push(new List<NodeWithIndexableChildren<TValue>>());
 
-              stack.Peek().Add(new NodeWithIndexableChildren<TNode>(token.Node));
+              stack.Peek().Add(new NodeWithIndexableChildren<TValue>(token.Node));
               break;
           }
 
@@ -47,7 +48,7 @@ namespace Arborist.Linq.Extensions
       }
     }
  
-    internal static IEnumerable<INodeWithIndexableChildren<TAccumulate>> ToLeaffixScanTreeRoots<TSource, TAccumulate>(
+    internal static IEnumerable<NodeWithIndexableChildren<TAccumulate>> ToLeaffixScanTreeRoots<TSource, TAccumulate>(
       this IEnumerable<DepthFirstTreeEnumerableToken<NodeContext<TSource>>> source,
       Func<NodeContext<TAccumulate>, NodeContext<TSource>, TAccumulate> seedAccumulator,
       Func<NodeContext<TAccumulate>, NodeContext<TSource>, TAccumulate> initialAccumulator,

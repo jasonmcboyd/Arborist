@@ -5,24 +5,25 @@ using System.Collections.Generic;
 
 namespace Arborist.Virtualization
 {
-  internal class VirtualEnumerator<TNode>
-    : IEnumerator<INodeWithIndexableChildren<TNode>>
+  internal class VirtualEnumerator<TValue, TNode>
+    : IEnumerator<TNode>
+    where TNode : INodeWithIndexableChildren<TValue, TNode>
   {
-    public VirtualEnumerator(VirtualEnumeratorPool<TNode> pool)
+    public VirtualEnumerator(VirtualEnumeratorPool<TValue, TNode> pool)
     {
       _Pool = pool;
     }
 
-    private readonly VirtualEnumeratorPool<TNode> _Pool;
+    private readonly VirtualEnumeratorPool<TValue, TNode> _Pool;
 
-    public void SetInnerNode(INodeWithIndexableChildren<TNode> innerNode) => _InnerNode = innerNode;
+    public void SetInnerNode(TNode innerNode) => _InnerNode = innerNode;
 
-    private INodeWithIndexableChildren<TNode> _InnerNode;
+    private TNode _InnerNode;
 
     private int _ChildIndex = -1;
 
-    private INodeWithIndexableChildren<TNode> _Current;
-    public INodeWithIndexableChildren<TNode> Current
+    private TNode _Current;
+    public TNode Current
     {
       get
       {

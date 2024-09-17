@@ -3,10 +3,11 @@ using System.Collections.Generic;
 
 namespace Arborist.Virtualization
 {
-  internal class VirtualEnumeratorPool<TNode>
+  internal class VirtualEnumeratorPool<TValue, TNode>
+    where TNode : INodeWithIndexableChildren<TValue, TNode>
   {
-    private readonly Stack<VirtualEnumerator<TNode>> _Stack =
-      new Stack<VirtualEnumerator<TNode>>();
+    private readonly Stack<VirtualEnumerator<TValue, TNode>> _Stack =
+      new Stack<VirtualEnumerator<TValue, TNode>>();
 
     private readonly object _Lock = new object();
 
@@ -32,16 +33,16 @@ namespace Arborist.Virtualization
       }
     }
 
-    public IEnumerator<INodeWithIndexableChildren<TNode>> Lease(INodeWithIndexableChildren<TNode> node)
+    public IEnumerator<TNode> Lease(TNode node)
     {
-      VirtualEnumerator<TNode> result;
+      VirtualEnumerator<TValue, TNode> result;
 
       lock (_Lock)
       {
         result =
           _Stack.Count > 0
           ? _Stack.Pop()
-          : new VirtualEnumerator<TNode>(this);
+          : new VirtualEnumerator<TValue, TNode>(this);
 
         Leased++;
       }
@@ -51,7 +52,7 @@ namespace Arborist.Virtualization
       return result;
     }
 
-    public void Return(VirtualEnumerator<TNode> wrapper)
+    public void Return(VirtualEnumerator<TValue, TNode> wrapper)
     {
       lock (_Lock)
       {

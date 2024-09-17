@@ -4,41 +4,41 @@ using System.Linq;
 
 namespace Arborist.Nodes
 {
-  public sealed class NodeWithIndexableChildren<TNode> : INodeWithIndexableChildren<TNode>
+  public sealed class NodeWithIndexableChildren<TValue> : INodeWithIndexableChildren<TValue, NodeWithIndexableChildren<TValue>>
   {
-    public NodeWithIndexableChildren(TNode value)
-      : this(value, Array.Empty<NodeWithIndexableChildren<TNode>>())
+    public NodeWithIndexableChildren(TValue value)
+      : this(value, Array.Empty<NodeWithIndexableChildren<TValue>>())
     {
     }
 
     public NodeWithIndexableChildren(
-      TNode value,
-      IEnumerable<NodeWithIndexableChildren<TNode>> children)
+      TValue value,
+      IEnumerable<NodeWithIndexableChildren<TValue>> children)
       : this(value, children?.ToArray())
     {
     }
 
     public NodeWithIndexableChildren(
-      TNode value,
-      params TNode[] children)
+      TValue value,
+      params TValue[] children)
       : this(value, children?.Select(Node.CreateNodeWithIndexableChildren))
     {
     }
 
     public NodeWithIndexableChildren(
-      TNode value,
-      params NodeWithIndexableChildren<TNode>[] children)
+      TValue value,
+      params NodeWithIndexableChildren<TValue>[] children)
     {
       Value = value;
-      _Children = children ?? Array.Empty<NodeWithIndexableChildren<TNode>>();
+      _Children = children ?? Array.Empty<NodeWithIndexableChildren<TValue>>();
     }
 
-    private readonly NodeWithIndexableChildren<TNode>[] _Children;
+    private readonly NodeWithIndexableChildren<TValue>[] _Children;
 
-    public INodeWithIndexableChildren<TNode> this[int index] => _Children[index];
+    public NodeWithIndexableChildren<TValue> this[int index] => _Children[index];
 
     public int ChildCount => _Children.Length;
 
-    public TNode Value { get; }
+    public TValue Value { get; }
   }
 }

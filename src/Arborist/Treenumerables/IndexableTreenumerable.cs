@@ -6,37 +6,38 @@ using System.Collections.Generic;
 
 namespace Arborist.Treenumerables
 {
-  public class IndexableTreenumerable<TNode> : ITreenumerable<TNode>
+  public class IndexableTreenumerable<TValue, TNode> : ITreenumerable<TValue>
+    where TNode : INodeWithIndexableChildren<TValue, TNode>
   {
-    public IndexableTreenumerable(params INodeWithIndexableChildren<TNode>[] roots)
+    public IndexableTreenumerable(params TNode[] roots)
     {
       _Roots = roots;
     }
 
-    public IndexableTreenumerable(IEnumerable<INodeWithIndexableChildren<TNode>> roots)
+    public IndexableTreenumerable(IEnumerable<TNode> roots)
     {
       _Roots = roots;
     }
 
-    private readonly IEnumerable<INodeWithIndexableChildren<TNode>> _Roots;
+    private readonly IEnumerable<TNode> _Roots;
 
-    public ITreenumerator<TNode> GetBreadthFirstTreenumerator()
+    public ITreenumerator<TValue> GetBreadthFirstTreenumerator()
     {
-      var pool = new VirtualEnumeratorPool<TNode>();
+      var pool = new VirtualEnumeratorPool<TValue, TNode>();
 
       return
-        new BreadthFirstTreenumerator<INodeWithIndexableChildren<TNode>, TNode>(
+        new BreadthFirstTreenumerator<TNode, TValue>(
           _Roots,
           node => node.Value,
           node => pool.Lease(node));
     }
 
-    public ITreenumerator<TNode> GetDepthFirstTreenumerator()
+    public ITreenumerator<TValue> GetDepthFirstTreenumerator()
     {
-      var pool = new VirtualEnumeratorPool<TNode>();
+      var pool = new VirtualEnumeratorPool<TValue, TNode>();
 
       return
-        new DepthFirstTreenumerator<INodeWithIndexableChildren<TNode>, TNode>(
+        new DepthFirstTreenumerator<TNode, TValue>(
           _Roots,
           node => node.Value,
           node => pool.Lease(node));

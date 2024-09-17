@@ -1,9 +1,10 @@
 ﻿namespace Arborist.Nodes
 {
-  public interface INodeWithIndexableChildren<out TValue>
+  public interface INodeWithIndexableChildren<TValue, out TNode>
     : INode<TValue>
+    where TNode : INodeWithIndexableChildren<TValue, TNode>
   {
     int ChildCount { get; }
-    INodeWithIndexableChildren<TValue> this[int index] { get; }
+    TNode this[int index] { get; }
   }
 }

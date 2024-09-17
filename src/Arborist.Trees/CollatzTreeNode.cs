@@ -2,7 +2,7 @@
 
 namespace Arborist.Trees
 {
-  struct CollatzTreeNode : INodeWithIndexableChildren<ulong>
+  public struct CollatzTreeNode : INodeWithIndexableChildren<ulong, CollatzTreeNode>
   {
     public CollatzTreeNode(ulong value)
     {
@@ -16,7 +16,7 @@ namespace Arborist.Trees
       ChildCount = hasSecondChild ? 2 : 1;
     }
 
-    public INodeWithIndexableChildren<ulong> this[int index]
+    public CollatzTreeNode this[int index]
     {
       get
       {
@@ -29,11 +29,10 @@ namespace Arborist.Trees
       }
     }
 
-    public int ChildCount { get; private set; }
     public ulong Value { get; }
+    public int ChildCount { get; private set; }
 
     private ulong GetFirstChild() => checked(Value * 2);
-
     private ulong GetSecondChild() => (Value - 1) / 3;
   }
 }

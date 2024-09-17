@@ -1,15 +1,14 @@
-﻿using Arborist.Nodes;
-using Arborist.Treenumerables;
+﻿using Arborist.Treenumerables;
 
 namespace Arborist.Trees
 {
-  public class CompleteBinaryTree : IndexableTreenumerable<ulong>
+  public class CompleteBinaryTree : IndexableTreenumerable<ulong, CompleteBinaryTreeNode>
   {
     public CompleteBinaryTree() : base(_Roots)
     {
     }
 
-    private static IEnumerable<INodeWithIndexableChildren<ulong>> _Roots =
-      new INodeWithIndexableChildren<ulong>[] { new CompleteBinaryTreeNode() };
+    private static IEnumerable<CompleteBinaryTreeNode> _Roots =
+      new CompleteBinaryTreeNode[] { new CompleteBinaryTreeNode() };
   }
 }

@@ -1,7 +1,7 @@
 ﻿namespace Arborist.Nodes
 {
-  public interface INode<out TNode>
+  public interface INode<out TValue>
   {
-    TNode Value { get; }
+    TValue Value { get; }
   }
 }

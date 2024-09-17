@@ -1,5 +1,6 @@
 ﻿using Arborist.Core;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Arborist.Virtualization
 {
@@ -7,25 +8,41 @@ namespace Arborist.Virtualization
   {
     private readonly Stack<VirtualNodeVisit<TNode>> _Stack = new Stack<VirtualNodeVisit<TNode>>();
 
-    private readonly object _Lock = new object();
+    private SpinLock _Lock = new SpinLock();
 
     private int _Leased;
     public int Leased
     {
       get
       {
-        lock (_Lock)
+        bool lockTaken = false;
+
+        _Lock.Enter(ref lockTaken);
+
+        try
         {
           return _Leased;
+        }
+        finally
+        {
+          if (lockTaken)
+            _Lock.Exit();
         }
       }
       set
       {
-        lock (_Lock)
+        bool lockTaken = false;
+
+        _Lock.Enter(ref lockTaken);
+
+        try
         {
-          {
-            _Leased = value;
-          }
+          _Leased = value;
+        }
+        finally
+        {
+          if (lockTaken)
+            _Lock.Exit();
         }
       }
     }
@@ -34,9 +51,18 @@ namespace Arborist.Virtualization
     {
       get
       {
-        lock (_Lock)
+        bool lockTaken = false;
+
+        _Lock.Enter(ref lockTaken);
+
+        try
         {
           return _Stack.Count;
+        }
+        finally
+        {
+          if (lockTaken)
+            _Lock.Exit();
         }
       }
     }
@@ -45,9 +71,18 @@ namespace Arborist.Virtualization
     {
       get
       {
-        lock (_Lock)
+        bool lockTaken = false;
+
+        _Lock.Enter(ref lockTaken);
+
+        try
         {
-          return _Stack.Count + Leased;
+          return _Stack.Count + _Leased;
+        }
+        finally
+        {
+          if (lockTaken)
+            _Lock.Exit();
         }
       }
     }
@@ -61,7 +96,10 @@ namespace Arborist.Virtualization
     {
       VirtualNodeVisit<TNode> result;
 
-      lock (_Lock)
+      bool lockTaken = false;
+
+      _Lock.Enter(ref lockTaken);
+      try
       {
         result =
           _Stack.Count > 0
@@ -69,6 +107,11 @@ namespace Arborist.Virtualization
           : new VirtualNodeVisit<TNode>();
 
         _Leased++;
+      }
+      finally
+      {
+        if (lockTaken)
+          _Lock.Exit();
       }
 
       result.Mode = mode;
@@ -84,10 +127,19 @@ namespace Arborist.Virtualization
     {
       virtualNodeVisit.Node = default;
 
-      lock (_Lock)
+      bool lockTaken = false;
+
+      _Lock.Enter(ref lockTaken);
+      
+      try
       {
         _Stack.Push(virtualNodeVisit);
         _Leased--;
+      }
+      finally
+      {
+        if (lockTaken)
+          _Lock.Exit();
       }
     }
   }
