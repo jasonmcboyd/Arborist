@@ -2,7 +2,7 @@
 
 namespace Arborist.Linq
 {
-  public class EmptyTreenumerable<TNode> : ITreenumerable<TNode>
+  internal class EmptyTreenumerable<TNode> : ITreenumerable<TNode>
   {
     private EmptyTreenumerable()
     {
