@@ -1,7 +1,9 @@
 ﻿using Arborist.Benchmarks;
 using BenchmarkDotNet.Running;
 
-//var summary = BenchmarkRunner.Run<TreenumerableBenchmarks>();
+BenchmarkRunner.Run<TraversalBenchmarks>();
 
-var benchmark = new TreenumerableBenchmarks().BreadthFirstTraversalDepth20();
+//var benchmark = new TreenumerableBenchmarks().DepthFirstTraversalDepthBig();
+//var count = new TreenumerableBenchmarks().BreadthFirstTraversalDepthBig();
+//Console.WriteLine($"Count: {count}");
 
