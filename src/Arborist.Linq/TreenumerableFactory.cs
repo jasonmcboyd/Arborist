@@ -14,5 +14,12 @@ namespace Arborist.Linq
         innerTreenumerable,
         breadthFirstTreenumeratorFactory,
         depthFirstTreenumeratorFactory);
+
+    public static ITreenumerable<TNode> Create<TNode>(
+      Func<ITreenumerator<TNode>> breadthFirstTreenumeratorFactory,
+      Func<ITreenumerator<TNode>> depthFirstTreenumeratorFactory)
+      => new DelegatingTreenumerable<TNode>(
+        breadthFirstTreenumeratorFactory,
+        depthFirstTreenumeratorFactory);
   }
 }
