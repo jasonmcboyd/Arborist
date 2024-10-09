@@ -50,21 +50,33 @@ namespace Arborist.Benchmarks
     //public int BreadthFirstWhereDepth19() => GetTreeWithDepthWhere(19).GetBreadthFirstTraversal().Count();
 
 
-    [Benchmark]
-    public int PruneBeforeBFT() =>
-      Enumerable
-      .Range(0, 1_000_000)
-      .ToForest()
-      .PruneBefore(_ => true)
-      .GetBreadthFirstTraversal()
-      .Count();
+    //[Benchmark]
+    //public int PruneBeforeBFT() =>
+    //  Enumerable
+    //  .Range(0, 1_000_000)
+    //  .ToForest()
+    //  .PruneBefore(_ => true)
+    //  .GetBreadthFirstTraversal()
+    //  .Count();
+
+    //[Benchmark]
+    //public int PruneBeforeDFT() =>
+    //  Enumerable
+    //  .Range(0, 1_000_000)
+    //  .ToForest()
+    //  .PruneBefore(_ => true)
+    //  .GetDepthFirstTraversal()
+    //  .Count();
 
     [Benchmark]
-    public int PruneBeforeDFT() =>
+    public int SelectComposition() =>
       Enumerable
       .Range(0, 1_000_000)
       .ToForest()
-      .PruneBefore(_ => true)
+      .Select(x => x.Node * 2)
+      .Select(x => x.Node + 'a')
+      .Select(x => x.Node + 1)
+      .Select(x => (char)x.Node)
       .GetDepthFirstTraversal()
       .Count();
   }

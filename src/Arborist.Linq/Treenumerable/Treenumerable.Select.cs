@@ -1,5 +1,5 @@
 ﻿using Arborist.Core;
-using Arborist.Linq.Treenumerators;
+using Arborist.Linq.Treenumerables;
 using System;
 
 namespace Arborist.Linq
@@ -9,8 +9,11 @@ namespace Arborist.Linq
     public static ITreenumerable<TResult> Select<TSource, TResult>(
       this ITreenumerable<TSource> source,
       Func<NodeContext<TSource>, TResult> selector)
-      => TreenumerableFactory.Create(
-        () => new SelectTreenumerator<TSource, TResult>(source.GetBreadthFirstTreenumerator, selector),
-        () => new SelectTreenumerator<TSource, TResult>(source.GetDepthFirstTreenumerator, selector));
+    {
+      if (source is ISelectTreenumerable<TSource> innerSelectTreenumerable)
+        return innerSelectTreenumerable.Compose(selector);
+      else
+        return new SelectTreenumerable<TSource, TResult>(source, selector);
+    }
   }
 }
