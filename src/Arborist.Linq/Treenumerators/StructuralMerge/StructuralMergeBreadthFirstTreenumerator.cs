@@ -1,5 +1,6 @@
 ﻿using Arborist.Core;
 using Nito.Collections;
+using System;
 
 namespace Arborist.Linq.Treenumerators
 {
@@ -7,11 +8,11 @@ namespace Arborist.Linq.Treenumerators
     : TreenumeratorBase<MergeNode<TLeft, TRight>>
   {
     public StructuralMergeBreadthFirstTreenumerator(
-      ITreenumerator<TLeft> leftTreenumerator,
-      ITreenumerator<TRight> rightTreenumerator)
+      Func<ITreenumerator<TLeft>> leftTreenumeratorFactory,
+      Func<ITreenumerator<TRight>> rightTreenumeratorFactory)
     {
-      _LeftTreenumerator = leftTreenumerator;
-      _RightTreenumerator = rightTreenumerator;
+      _LeftTreenumerator = leftTreenumeratorFactory();
+      _RightTreenumerator = rightTreenumeratorFactory();
     }
 
     private readonly ITreenumerator<TLeft> _LeftTreenumerator;

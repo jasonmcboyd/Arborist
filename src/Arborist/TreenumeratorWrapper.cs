@@ -1,13 +1,15 @@
 ﻿using Arborist.Core;
+using System;
 
 namespace Arborist
 {
   public abstract class TreenumeratorWrapper<TInner, TNode>
     : TreenumeratorBase<TNode>
   {
-    public TreenumeratorWrapper(ITreenumerator<TInner> innerTreenumerator)
+    public TreenumeratorWrapper(
+      Func<ITreenumerator<TInner>> innerTreenumeratorFactory)
     {
-      InnerTreenumerator = innerTreenumerator;
+      InnerTreenumerator = innerTreenumeratorFactory();
     }
 
     protected ITreenumerator<TInner> InnerTreenumerator { get; }
@@ -20,8 +22,9 @@ namespace Arborist
 
   public abstract class TreenumeratorWrapper<TNode> : TreenumeratorWrapper<TNode, TNode>
   {
-    protected TreenumeratorWrapper(ITreenumerator<TNode> InnerTreenumerator)
-      : base(InnerTreenumerator)
+    protected TreenumeratorWrapper(
+      Func<ITreenumerator<TNode>> innerTreenumeratorFactory)
+      : base(innerTreenumeratorFactory)
     {
     }
   }

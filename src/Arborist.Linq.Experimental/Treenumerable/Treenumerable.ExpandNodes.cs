@@ -34,8 +34,7 @@ namespace Arborist.Linq.Experimental
       Func<NodeContext<TSource>, ITreenumerable<TExpandedNode>> nodeExpander,
       Func<NodeContext<TSource>, NodeContext<TExpandedNode>, TResult> selector)
       => TreenumerableFactory.Create(
-        source,
-        breadthFirstTreenumerator => throw new NotImplementedException(),
-        depthFirstTreenumerator => new ExpandNodesDepthFirstTreenumerator<TSource, TExpandedNode, TResult>(depthFirstTreenumerator, predicate, nodeExpander, selector));
+        () => throw new NotImplementedException(),
+        () => new ExpandNodesDepthFirstTreenumerator<TSource, TExpandedNode, TResult>(() => source.GetDepthFirstTreenumerator(), predicate, nodeExpander, selector));
   }
 }

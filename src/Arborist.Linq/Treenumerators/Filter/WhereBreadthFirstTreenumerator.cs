@@ -10,14 +10,14 @@ namespace Arborist.Linq.Treenumerators
     : TreenumeratorWrapper<TNode>
   {
     public WhereBreadthFirstTreenumerator(
-      ITreenumerator<TNode> innerTreenumerator,
+      Func<ITreenumerator<TNode>> innerTreenumeratorFactory,
       Func<NodeContext<TNode>, bool> predicate,
       NodeTraversalStrategy nodeTraversalStrategy)
-      : base(innerTreenumerator)
+      : base(innerTreenumeratorFactory)
     {
       _Predicate = predicate;
       _TraversalStrategy = nodeTraversalStrategy;
-      _NodePositionAndVisitCounts.AddToBack(new NodeTraversalStatus(innerTreenumerator.Position, 0));
+      _NodePositionAndVisitCounts.AddToBack(new NodeTraversalStatus(InnerTreenumerator.Position, 0));
     }
 
     private readonly Func<NodeContext<TNode>, bool> _Predicate;

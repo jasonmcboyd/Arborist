@@ -12,9 +12,13 @@ namespace Arborist.Linq
     {
       var result =
         TreenumerableFactory.Create(
-          source,
-          breadthFirstEnumerator => new WhereBreadthFirstTreenumerator<T>(breadthFirstEnumerator, predicate, NodeTraversalStrategy.SkipSubtree),
-          depthFirstEnumerator => new PruneBeforeDepthFirstTreenumerator<T>(depthFirstEnumerator, predicate));
+          () => new WhereBreadthFirstTreenumerator<T>(
+            source.GetBreadthFirstTreenumerator,
+            predicate,
+            NodeTraversalStrategy.SkipSubtree),
+          () => new PruneBeforeDepthFirstTreenumerator<T>(
+            source.GetDepthFirstTreenumerator,
+            predicate));
 
       return result;
     }

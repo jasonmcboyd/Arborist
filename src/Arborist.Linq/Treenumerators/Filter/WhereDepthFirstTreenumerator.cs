@@ -9,9 +9,9 @@ namespace Arborist.Linq.Treenumerators
     : TreenumeratorWrapper<TNode>
   {
     public WhereDepthFirstTreenumerator(
-      ITreenumerator<TNode> innerTreenumerator,
+      Func<ITreenumerator<TNode>> innerTreenumeratorFactory,
       Func<NodeContext<TNode>, bool> predicate)
-      : base(innerTreenumerator)
+      : base(innerTreenumeratorFactory)
     {
       _Predicate = predicate;
 

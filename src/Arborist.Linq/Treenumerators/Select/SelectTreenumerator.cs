@@ -7,10 +7,10 @@ namespace Arborist.Linq.Treenumerators
   internal class SelectTreenumerator<TInner, TNode> : ITreenumerator<TNode>
   {
     public SelectTreenumerator(
-      ITreenumerator<TInner> innerTreenumerator,
+      Func<ITreenumerator<TInner>> innerTreenumeratorFactory,
       Func<NodeContext<TInner>, TNode> selector)
     {
-      _InnerTreenumerator = innerTreenumerator;
+      _InnerTreenumerator = innerTreenumeratorFactory();
       _Selector = selector;
     }
 

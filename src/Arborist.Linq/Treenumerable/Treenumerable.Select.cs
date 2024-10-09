@@ -10,8 +10,7 @@ namespace Arborist.Linq
       this ITreenumerable<TSource> source,
       Func<NodeContext<TSource>, TResult> selector)
       => TreenumerableFactory.Create(
-        source,
-        breadthFirstEnumerator => new SelectTreenumerator<TSource, TResult>(breadthFirstEnumerator, selector),
-        depthFirstEnumerator => new SelectTreenumerator<TSource, TResult>(depthFirstEnumerator, selector));
+        () => new SelectTreenumerator<TSource, TResult>(source.GetBreadthFirstTreenumerator, selector),
+        () => new SelectTreenumerator<TSource, TResult>(source.GetDepthFirstTreenumerator, selector));
   }
 }

@@ -1,12 +1,14 @@
 ﻿using Arborist.Core;
+using System;
 
 namespace Arborist.Linq.Treenumerators
 {
   internal class HideTreenumerator<TNode> : ITreenumerator<TNode>
   {
-    public HideTreenumerator(ITreenumerator<TNode> innerTreenumerator)
+    public HideTreenumerator(
+      Func<ITreenumerator<TNode>> innerTreenumeratorFactory)
     {
-      _InnerTreenumerator = innerTreenumerator;
+      _InnerTreenumerator = innerTreenumeratorFactory();
     }
 
     private readonly ITreenumerator<TNode> _InnerTreenumerator;

@@ -18,9 +18,8 @@ namespace Arborist.Linq
       return
         TreenumerableFactory
         .Create(
-          source,
-          breadthFirstEnumerator => new DoTreenumerator<TNode>(breadthFirstEnumerator, onNext),
-          depthFirstEnumerator => new DoTreenumerator<TNode>(depthFirstEnumerator, onNext));
+          () => new DoTreenumerator<TNode>(source.GetBreadthFirstTreenumerator, onNext),
+          () => new DoTreenumerator<TNode>(source.GetDepthFirstTreenumerator, onNext));
     }
   }
 }

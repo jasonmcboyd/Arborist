@@ -9,9 +9,9 @@ namespace Arborist.Linq.Treenumerators
     : TreenumeratorWrapper<TNode, TAccumulate>
   {
     public RootfixScanDepthFirstTreenumerator(
-      ITreenumerator<TNode> InnerTreenumerator,
+      Func<ITreenumerator<TNode>> innerTreenumeratorFactory,
       Func<NodeContext<TAccumulate>, NodeContext<TNode>, TAccumulate> accumulator,
-      TAccumulate seed) : base(InnerTreenumerator)
+      TAccumulate seed) : base(innerTreenumeratorFactory)
     {
       _Accumulator = accumulator;
 

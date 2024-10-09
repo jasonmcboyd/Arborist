@@ -8,11 +8,11 @@ namespace Arborist.Linq.Experimental.Treenumerators
     : TreenumeratorWrapper<TInner, TNode>
   {
     public GraftDepthFirstTreenumerator(
-      ITreenumerator<TInner> innerTreenumerator,
+      Func<ITreenumerator<TInner>> innerTreenumeratorFactory,
       Func<NodeVisit<TInner>, TNode> selector,
       Func<NodeVisit<TInner>, ITreenumerable<TNode>> scionGenerator,
       Func<NodeVisit<TInner>, bool> predicate)
-      : base(innerTreenumerator)
+      : base(innerTreenumeratorFactory)
     {
       _ScionGenerator = scionGenerator;
       _Selector = selector;

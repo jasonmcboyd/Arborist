@@ -11,12 +11,12 @@ namespace Arborist.Linq.Treenumerators
     : TreenumeratorWrapper<TNode>
   {
     public PruneBeforeBreadthFirstTreenumerator(
-      ITreenumerator<TNode> innerTreenumerator,
+      Func<ITreenumerator<TNode>> innerTreenumeratorFactory,
       Func<NodeVisit<TNode>, bool> predicate)
-      : base(innerTreenumerator)
+      : base(innerTreenumeratorFactory)
     {
       _Predicate = predicate;
-      _Positions.AddToBack(new NodeTraversalStatus(innerTreenumerator.Position, 0));
+      _Positions.AddToBack(new NodeTraversalStatus(InnerTreenumerator.Position, 0));
     }
 
     private readonly Func<NodeVisit<TNode>, bool> _Predicate;

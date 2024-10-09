@@ -9,8 +9,11 @@ namespace Arborist.Linq
       this ITreenumerable<TLeft> leftTreenumerable,
       ITreenumerable<TRight> rightTreenumerable)
       => TreenumerableFactory.Create(
-        leftTreenumerable,
-        breadthFirstTreenumerator => new StructuralMergeBreadthFirstTreenumerator<TLeft, TRight>(breadthFirstTreenumerator, rightTreenumerable.GetBreadthFirstTreenumerator()),
-        depthFirstTreenumerator => new StructuralMergeDepthFirstTreenumerator<TLeft, TRight>(depthFirstTreenumerator, rightTreenumerable.GetDepthFirstTreenumerator()));
+        () => new StructuralMergeBreadthFirstTreenumerator<TLeft, TRight>(
+          leftTreenumerable.GetBreadthFirstTreenumerator,
+          rightTreenumerable.GetBreadthFirstTreenumerator),
+        () => new StructuralMergeDepthFirstTreenumerator<TLeft, TRight>(
+          leftTreenumerable.GetDepthFirstTreenumerator,
+          rightTreenumerable.GetDepthFirstTreenumerator));
   }
 }

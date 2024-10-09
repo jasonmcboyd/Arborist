@@ -10,8 +10,12 @@ namespace Arborist.Linq
       this ITreenumerable<TNode> source,
       Func<NodeContext<TNode>, bool> predicate)
       => TreenumerableFactory.Create(
-        source,
-        breadthFirstTreenumerator => new WhereBreadthFirstTreenumerator<TNode>(breadthFirstTreenumerator, nodeContext => !predicate(nodeContext), NodeTraversalStrategy.SkipNode),
-        depthFirstTreenumerator => new WhereDepthFirstTreenumerator<TNode>(depthFirstTreenumerator, predicate));
+        () => new WhereBreadthFirstTreenumerator<TNode>(
+          source.GetBreadthFirstTreenumerator,
+          nodeContext => !predicate(nodeContext),
+          NodeTraversalStrategy.SkipNode),
+        () => new WhereDepthFirstTreenumerator<TNode>(
+          source.GetDepthFirstTreenumerator,
+          predicate));
   }
 }

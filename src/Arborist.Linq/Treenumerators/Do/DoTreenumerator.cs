@@ -7,10 +7,10 @@ namespace Arborist.Linq.Treenumerators
   internal class DoTreenumerator<TNode> : ITreenumerator<TNode>
   {
     public DoTreenumerator(
-      ITreenumerator<TNode> innerTreenumerator,
+      Func<ITreenumerator<TNode>> innerTreenumeratorFactory,
       Action<NodeVisit<TNode>> onNext)
     {
-      _InnerTreenumerator = innerTreenumerator;
+      _InnerTreenumerator = innerTreenumeratorFactory();
       _OnNext = onNext;
     }
 

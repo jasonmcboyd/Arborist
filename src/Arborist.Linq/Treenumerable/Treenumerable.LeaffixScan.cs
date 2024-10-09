@@ -1,6 +1,4 @@
 ﻿using Arborist.Core;
-using Arborist.Linq.Extensions;
-using Arborist.Treenumerables;
 using System;
 
 namespace Arborist.Linq
@@ -14,6 +12,7 @@ namespace Arborist.Linq
       Func<NodeContext<TAccumulate>, NodeContext<TAccumulate>, TAccumulate> accumulator,
       Func<NodeContext<TSource>, TAccumulate> seedGenerator)
     {
+      // TODO:
       //var rootNodes =
       //  source
       //  .Materialize()

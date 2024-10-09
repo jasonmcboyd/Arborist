@@ -11,8 +11,13 @@ namespace Arborist.Linq
       Func<NodeContext<TAccumulate>, NodeContext<TNode>, TAccumulate> accumulator,
       TAccumulate seed)
       => TreenumerableFactory.Create(
-        source,
-        breadthFirstTreenumerator => new RootfixScanBreadthFirstTreenumerator<TNode, TAccumulate>(breadthFirstTreenumerator, accumulator, seed),
-        depthFirstTreenumerator => new RootfixScanDepthFirstTreenumerator<TNode, TAccumulate>(depthFirstTreenumerator, accumulator, seed));
+        () => new RootfixScanBreadthFirstTreenumerator<TNode, TAccumulate>(
+          source.GetBreadthFirstTreenumerator,
+          accumulator,
+          seed),
+        () => new RootfixScanDepthFirstTreenumerator<TNode, TAccumulate>(
+          source.GetDepthFirstTreenumerator,
+          accumulator,
+          seed));
   }
 }

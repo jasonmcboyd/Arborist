@@ -9,9 +9,9 @@ namespace Arborist.Linq.Treenumerators
     : TreenumeratorWrapper<TSource, TResult>
   {
     public SelectManyDepthFirstTreenumerator(
-      ITreenumerator<TSource> source,
+      Func<ITreenumerator<TSource>> sourceTreenumeratorFactory,
       Func<TSource, ITreenumerable<TResult>> selector)
-      : base(source)
+      : base(sourceTreenumeratorFactory)
     {
       _Selector = selector;
 

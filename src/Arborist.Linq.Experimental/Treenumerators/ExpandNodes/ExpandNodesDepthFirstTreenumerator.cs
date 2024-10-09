@@ -6,12 +6,12 @@ namespace Arborist.Linq.Experimental.Treenumerators.ExpandNodes
   internal class ExpandNodesDepthFirstTreenumerator<TSource, TExpandedNode, TResult> : TreenumeratorBase<TResult>
   {
     public ExpandNodesDepthFirstTreenumerator(
-      ITreenumerator<TSource> innerTreenumerator,
+      Func<ITreenumerator<TSource>> innerTreenumeratorFactory,
       Func<NodeContext<TSource>, bool> predicate,
       Func<NodeContext<TSource>, ITreenumerable<TExpandedNode>> nodeExpander,
       Func<NodeContext<TSource>, NodeContext<TExpandedNode>, TResult> selector)
     {
-      _InnerTreenumerator = innerTreenumerator;
+      _InnerTreenumerator = innerTreenumeratorFactory();
       _Predicate = predicate;
       _NodeExpander = nodeExpander;
       _Selector = selector;

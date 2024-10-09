@@ -34,9 +34,12 @@ namespace Arborist.Linq.Experimental
       Func<NodeVisit<TSource>, TResult> selector,
       Func<NodeVisit<TSource>, ITreenumerable<TResult>> scionGenerator,
       Func<NodeVisit<TSource>, bool> predicate)
-      => new DelegatingTreenumerable<TSource, TResult>(
-        source,
-        breadthFirstTreenumerator => throw new NotImplementedException(),
-        depthFirstTreenumerator => new GraftDepthFirstTreenumerator<TSource, TResult>(depthFirstTreenumerator, selector, scionGenerator, predicate));
+      => new DelegatingTreenumerable<TResult>(
+        () => throw new NotImplementedException(),
+        () => new GraftDepthFirstTreenumerator<TSource, TResult>(
+          source.GetDepthFirstTreenumerator,
+          selector,
+          scionGenerator,
+          predicate));
   }
 }

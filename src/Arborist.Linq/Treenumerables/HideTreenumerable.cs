@@ -13,9 +13,9 @@ namespace Arborist.Linq
     private readonly ITreenumerable<TNode> _InnerTreenumerable;
 
     public ITreenumerator<TNode> GetBreadthFirstTreenumerator()
-      => new HideTreenumerator<TNode>(_InnerTreenumerable.GetBreadthFirstTreenumerator());
+      => new HideTreenumerator<TNode>(() => _InnerTreenumerable.GetBreadthFirstTreenumerator());
 
     public ITreenumerator<TNode> GetDepthFirstTreenumerator()
-      => new HideTreenumerator<TNode>(_InnerTreenumerable.GetDepthFirstTreenumerator());
+      => new HideTreenumerator<TNode>(() => _InnerTreenumerable.GetDepthFirstTreenumerator());
   }
 }
