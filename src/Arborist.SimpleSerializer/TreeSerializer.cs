@@ -15,7 +15,7 @@ namespace Arborist.SimpleSerializer
     public static ITreenumerable<TResult> Deserialize<TResult>(
       string tree,
       Func<string, TResult> map)
-      => DeserializeRoots(tree, map).ToTreenumerable<TResult, NodeWithIndexableChildren<TResult>>();
+      => DeserializeRoots(tree, map).ToTreenumerable();
 
     public static IEnumerable<NodeWithIndexableChildren<string>> DeserializeRoots(string tree)
       => DeserializeRoots(tree, value => value);

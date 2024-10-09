@@ -61,7 +61,7 @@ namespace Arborist.Linq.Extensions
         if (tokens.Count > 0)
           nodes.Peek().Add(new NodeWithIndexableChildren<TValue>(tokens.Pop().Node));
 
-        return new IndexableTreenumerable<TValue, NodeWithIndexableChildren<TValue>>(nodes.Pop());
+        return nodes.Pop().ToTreenumerable();
       }
     }
 

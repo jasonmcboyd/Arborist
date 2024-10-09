@@ -2,7 +2,7 @@
 
 namespace Arborist.Linq.Extensions
 {
-  internal static class TreenumeratorExtensions
+  public static class TreenumeratorExtensions
   {
     public static NodeVisit<TNode> ToNodeVisit<TNode>(this ITreenumerator<TNode> treenumerator)
     {

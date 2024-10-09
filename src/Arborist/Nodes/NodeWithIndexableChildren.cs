@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Arborist.Nodes
 {
-  public sealed class NodeWithIndexableChildren<TValue> : INodeWithIndexableChildren<TValue, NodeWithIndexableChildren<TValue>>
+  public sealed class NodeWithIndexableChildren<TValue> : INode<TValue, NodeWithIndexableChildrenChildEnumerator<TValue>>
   {
     public NodeWithIndexableChildren(TValue value)
       : this(value, Array.Empty<NodeWithIndexableChildren<TValue>>())
@@ -35,10 +35,13 @@ namespace Arborist.Nodes
 
     private readonly NodeWithIndexableChildren<TValue>[] _Children;
 
-    public NodeWithIndexableChildren<TValue> this[int index] => _Children[index];
-
-    public int ChildCount => _Children.Length;
+    public IList<NodeWithIndexableChildren<TValue>> CopyChildren() => _Children.ToList();
 
     public TValue Value { get; }
+
+    public NodeWithIndexableChildrenChildEnumerator<TValue> GetChildEnumerator()
+    {
+      return new NodeWithIndexableChildrenChildEnumerator<TValue>(_Children);
+    }
   }
 }

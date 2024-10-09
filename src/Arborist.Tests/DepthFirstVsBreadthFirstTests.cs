@@ -52,7 +52,7 @@ namespace Arborist.Tests
       var treenumerable =
         TreeSerializer
         .DeserializeRoots(treeString)
-        .ToTreenumerable<string, NodeWithIndexableChildren<string>>()
+        .ToTreenumerable()
         .Select(visit => visit.Node);
 
       NodeVisit<string>[] Sort(IEnumerable<NodeVisit<string>> nodes) =>

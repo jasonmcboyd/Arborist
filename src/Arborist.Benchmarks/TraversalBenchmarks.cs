@@ -1,7 +1,5 @@
 ﻿using Arborist.Core;
 using Arborist.Linq;
-using Arborist.Linq.Extensions;
-using Arborist.Nodes;
 using Arborist.Trees;
 using BenchmarkDotNet.Attributes;
 

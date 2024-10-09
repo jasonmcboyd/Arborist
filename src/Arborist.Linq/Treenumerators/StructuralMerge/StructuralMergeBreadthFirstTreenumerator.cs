@@ -56,8 +56,13 @@ namespace Arborist.Linq.Treenumerators
       var callMoveNextOnLeftTreenumerator = false;
       var callMoveNextOnRightTreenumerator = false;
 
-      var leftTreenumeratorModeIsScheduling = _LeftTreenumerator.Mode == TreenumeratorMode.SchedulingNode;
-      var rightTreenumeratorModeIsScheduling = _RightTreenumerator.Mode == TreenumeratorMode.SchedulingNode;
+      var leftTreenumeratorModeIsScheduling =
+        !_LeftTreenumeratorFinished
+        && _LeftTreenumerator.Mode == TreenumeratorMode.SchedulingNode;
+
+      var rightTreenumeratorModeIsScheduling =
+        !_RightTreenumeratorFinished
+        && _RightTreenumerator.Mode == TreenumeratorMode.SchedulingNode;
 
       if (leftTreenumeratorModeIsScheduling && rightTreenumeratorModeIsScheduling)
       {

@@ -58,11 +58,7 @@ namespace Arborist.Linq.Treenumerators
     private bool OnStarting()
     {
       if (!MoveNextInnerTreenumerator())
-      {
-        EnumerationFinished = true;
-
         return false;
-      }
 
       _Stack.Push(
         new NodeVisit<TResult>(

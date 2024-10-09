@@ -2,9 +2,24 @@
 
 namespace Arborist.Trees
 {
-  public class CompleteBinaryTree : IndexableTreenumerable<ulong, CompleteBinaryTreeNode>
+  public class CompleteBinaryTree : Treenumerable<ulong, CompleteBinaryTreeNode, CompleteBinaryTreeNodeChildEnumerator>
   {
-    public CompleteBinaryTree() : base(_Roots)
+    public CompleteBinaryTree()
+      : base(
+          node => node.GetChildEnumerator(),
+          ChildEnumeratorMoveNextDelegate,
+          DisposeChildEnumeratorDelegate,
+          node => node.Value,
+          _Roots)
+    {
+    }
+
+    private static TryMoveNextChildResult<CompleteBinaryTreeNode> ChildEnumeratorMoveNextDelegate(
+      ref CompleteBinaryTreeNodeChildEnumerator childEnumerator)
+      => childEnumerator.TryMoveNext();
+
+    private static void DisposeChildEnumeratorDelegate(
+      ref CompleteBinaryTreeNodeChildEnumerator childEnumerator)
     {
     }
 
