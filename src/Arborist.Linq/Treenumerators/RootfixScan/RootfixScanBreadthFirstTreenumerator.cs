@@ -1,4 +1,5 @@
-﻿using Arborist.Core;
+﻿using Arborist.Common;
+using Arborist.Core;
 using Arborist.Linq.Extensions;
 using Nito.Collections;
 using System;

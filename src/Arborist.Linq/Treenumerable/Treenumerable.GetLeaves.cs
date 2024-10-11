@@ -30,7 +30,9 @@ namespace Arborist.Linq
           {
             if (previousVisit.Position.Depth > currentVisit.Position.Depth
               || previousVisit.Position.Depth == currentVisit.Position.Depth)
+            {
               yield return previousVisit.Node;
+            }
           }
         }
 

@@ -1,7 +1,6 @@
 ﻿using Arborist.Core;
 using Arborist.Linq.TreeEnumerable.BreadthFirstTree;
 using Arborist.Nodes;
-using Arborist.Treenumerables;
 using Nito.Collections;
 using System.Collections.Generic;
 
@@ -58,7 +57,7 @@ namespace Arborist.Linq.Extensions
         deque[0].Push(new NodeWithIndexableChildren<TValue>(token.Node, children));
       }
 
-      return new IndexableTreenumerable<TValue, NodeWithIndexableChildren<TValue>>(deque[0]);
+      return deque[0].ToTreenumerable();
     }
 
     public static IBreadthFirstTreeEnumerable<TNode> ToReverseLevelOrderTreeEnumerable<TNode>(this IBreadthFirstTreeEnumerable<TNode> source)

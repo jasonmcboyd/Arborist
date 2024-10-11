@@ -1,8 +1,7 @@
-﻿using Arborist.Core;
+﻿using Arborist.Common;
+using Arborist.Core;
 using Arborist.Linq.Extensions;
-using Nito.Collections;
 using System;
-using System.Collections.Generic;
 
 namespace Arborist.Linq.Treenumerators
 {
@@ -17,14 +16,14 @@ namespace Arborist.Linq.Treenumerators
     {
       _Predicate = predicate;
       _TraversalStrategy = nodeTraversalStrategy;
-      _NodePositionAndVisitCounts.AddToBack(new NodeTraversalStatus(InnerTreenumerator.Position, 0));
+      _NodePositionAndVisitCounts.AddLast(new NodeTraversalStatus(InnerTreenumerator.Position, 0));
     }
 
     private readonly Func<NodeContext<TNode>, bool> _Predicate;
     private readonly NodeTraversalStrategy _TraversalStrategy;
 
-    private readonly Deque<NodeTraversalStatus> _NodePositionAndVisitCounts = new Deque<NodeTraversalStatus>();
-    private readonly Stack<NodeVisit<TNode>> _SkippedStack = new Stack<NodeVisit<TNode>>();
+    private readonly RefSemiDeque<NodeTraversalStatus> _NodePositionAndVisitCounts = new RefSemiDeque<NodeTraversalStatus>();
+    private readonly RefSemiDeque<NodeVisit<TNode>> _SkippedStack = new RefSemiDeque<NodeVisit<TNode>>();
 
     private int _SeenRootNodesCount = 0;
 
@@ -33,14 +32,10 @@ namespace Arborist.Linq.Treenumerators
     protected override bool OnMoveNext(NodeTraversalStrategy nodeTraversalStrategy)
     {
       if (_EnumerationFinished)
-      {
         return false;
-      }
 
       if (Mode == TreenumeratorMode.VisitingNode)
-      {
         nodeTraversalStrategy = NodeTraversalStrategy.TraverseSubtree;
-      }
 
       return InnerTreenumeratorMoveNext(nodeTraversalStrategy);
     }
@@ -54,16 +49,16 @@ namespace Arborist.Linq.Treenumerators
 
       if (previouslySeenNodeWasScheduledAndSkipped)
       {
-        _NodePositionAndVisitCounts[_NodePositionAndVisitCounts.Count - 1] = _NodePositionAndVisitCounts[_NodePositionAndVisitCounts.Count - 1].Skip(nodeTraversalStrategy);
+        _NodePositionAndVisitCounts.GetLast().TraversalStrategy = nodeTraversalStrategy;
       }
 
       var previousModeWasVisitingNode = Mode == TreenumeratorMode.VisitingNode;
 
       while (InnerTreenumerator.MoveNext(nodeTraversalStrategy))
       {
-        while (_SkippedStack.Count > 0 && _SkippedStack.Peek().Position.Depth >= InnerTreenumerator.Position.Depth)
+        while (_SkippedStack.Count > 0 && _SkippedStack.GetLast().Position.Depth >= InnerTreenumerator.Position.Depth)
         {
-          _SkippedStack.Pop();
+          _SkippedStack.RemoveLast();
         }
 
         var effectiveDepth = InnerTreenumerator.Position.Depth - _SkippedStack.Count;
@@ -74,7 +69,7 @@ namespace Arborist.Linq.Treenumerators
 
           if (skipped)
           {
-            _SkippedStack.Push(InnerTreenumerator.ToNodeVisit());
+            _SkippedStack.AddLast(InnerTreenumerator.ToNodeVisit());
 
             nodeTraversalStrategy = _TraversalStrategy;
 
@@ -84,28 +79,28 @@ namespace Arborist.Linq.Treenumerators
           {
             var effectivePosition = GetEffectivePosition();
 
-            var lastScheduleNodeVisitWasSkipped = _NodePositionAndVisitCounts[_NodePositionAndVisitCounts.Count - 1].Skipped;
+            var lastScheduleNodeVisitWasSkipped = _NodePositionAndVisitCounts.GetLast().Skipped;
 
             if (lastScheduleNodeVisitWasSkipped)
             {
-              _NodePositionAndVisitCounts.RemoveFromBack();
+              _NodePositionAndVisitCounts.RemoveLast();
             }
 
-            _NodePositionAndVisitCounts.AddToBack(new NodeTraversalStatus(effectivePosition, 0));
+            _NodePositionAndVisitCounts.AddLast(new NodeTraversalStatus(effectivePosition, 0));
           }
         }
         else
         {
           if (InnerTreenumerator.VisitCount == 1)
           {
-            _NodePositionAndVisitCounts.RemoveFromFront();
+            _NodePositionAndVisitCounts.RemoveFirst();
           }
           else if (previousModeWasVisitingNode)
           {
             continue;
           }
 
-          _NodePositionAndVisitCounts[0] = _NodePositionAndVisitCounts[0].IncrementVisitCount();
+          _NodePositionAndVisitCounts.GetFirst().VisitCount++;
         }
 
         UpdateState();
@@ -132,13 +127,13 @@ namespace Arborist.Linq.Treenumerators
       }
       else if (Mode == TreenumeratorMode.VisitingNode)
       {
-        effectiveSiblingIndex = _NodePositionAndVisitCounts[0].VisitCount - 1;
+        effectiveSiblingIndex = _NodePositionAndVisitCounts.GetFirst().VisitCount - 1;
       }
       else
       {
         // TODO: I am not sure this block is 100% correct. I would like to add
         // more tests to try and uncover more edge cases here.
-        var previousNodePosition = _NodePositionAndVisitCounts[_NodePositionAndVisitCounts.Count - 1].Position;
+        var previousNodePosition = _NodePositionAndVisitCounts.GetLast().Position;
 
         effectiveSiblingIndex =
           previousNodePosition.Depth == effectiveDepth
@@ -149,18 +144,21 @@ namespace Arborist.Linq.Treenumerators
       return (effectiveSiblingIndex, effectiveDepth);
     }
 
+    private ref NodeTraversalStatus GetNodeTraversalStatusToUpdateState()
+    {
+      if (InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode)
+        return ref _NodePositionAndVisitCounts.GetLast();
+
+      return ref _NodePositionAndVisitCounts.GetFirst();
+    }
+
     private void UpdateState()
     {
       Mode = InnerTreenumerator.Mode;
 
       if (!_EnumerationFinished)
       {
-        var nodePositionAndVisitCountIndex =
-          InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode
-          ? _NodePositionAndVisitCounts.Count - 1
-          : 0;
-
-        var nodePositionAndVisitCount = _NodePositionAndVisitCounts[nodePositionAndVisitCountIndex];
+        ref var nodePositionAndVisitCount = ref GetNodeTraversalStatusToUpdateState();
 
         if (nodePositionAndVisitCount.Position.Depth == 0
           && InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode)
@@ -174,7 +172,7 @@ namespace Arborist.Linq.Treenumerators
       }
     }
 
-    private readonly struct NodeTraversalStatus
+    private struct NodeTraversalStatus
     {
       public NodeTraversalStatus(
         NodePosition position,
@@ -186,16 +184,10 @@ namespace Arborist.Linq.Treenumerators
         TraversalStrategy = nodeTraversalStrategy;
       }
 
-      public NodePosition Position { get; }
-      public int VisitCount { get; }
-      public NodeTraversalStrategy TraversalStrategy { get; }
+      public NodePosition Position { get; set; }
+      public int VisitCount { get; set; }
+      public NodeTraversalStrategy TraversalStrategy { get; set; }
       public bool Skipped => TraversalStrategy != NodeTraversalStrategy.TraverseSubtree;
-
-      public NodeTraversalStatus IncrementVisitCount() =>
-        new NodeTraversalStatus(Position, VisitCount + 1, TraversalStrategy);
-
-      public NodeTraversalStatus Skip(NodeTraversalStrategy nodeTraversalStrategy) =>
-        new NodeTraversalStatus(Position, VisitCount, nodeTraversalStrategy);
 
       public override string ToString() => $"({Position}), {VisitCount}, {TraversalStrategy}";
     }

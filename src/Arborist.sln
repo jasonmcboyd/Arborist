@@ -28,6 +28,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arborist.Tests", "Arborist.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arborist.Benchmarks", "Arborist.Benchmarks\Arborist.Benchmarks.csproj", "{47224640-FAE5-4CC2-AFD3-571CACE8F75F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arborist.Common", "Arborist.Common\Arborist.Common.csproj", "{1FEE9809-A136-41EC-85EA-7E52EF8027DA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,6 +75,10 @@ Global
 		{47224640-FAE5-4CC2-AFD3-571CACE8F75F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{47224640-FAE5-4CC2-AFD3-571CACE8F75F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{47224640-FAE5-4CC2-AFD3-571CACE8F75F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1FEE9809-A136-41EC-85EA-7E52EF8027DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FEE9809-A136-41EC-85EA-7E52EF8027DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1FEE9809-A136-41EC-85EA-7E52EF8027DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1FEE9809-A136-41EC-85EA-7E52EF8027DA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

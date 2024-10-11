@@ -2,11 +2,24 @@
 using System;
 using System.Collections;
 
-namespace Arborist.Virtualization
+namespace Arborist.Treenumerators
 {
-  // TODO: I am not sure how much value this provides.
-  internal class VirtualNodeVisit<TNode>
+  internal struct TestNodeVisit<TNode>
   {
+    public TestNodeVisit(
+      TreenumeratorMode mode,
+      TNode node,
+      int visitCount,
+      NodePosition position,
+      NodeTraversalStrategy traversalStrategy)
+    {
+      Mode = mode;
+      Node = node;
+      VisitCount = visitCount;
+      Position = position;
+      TraversalStrategy = traversalStrategy;
+    }
+
     public TreenumeratorMode Mode { get; set; }
     public TNode Node { get; set; }
     public int VisitCount { get; set; }

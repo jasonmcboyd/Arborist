@@ -1,9 +1,11 @@
-﻿using Arborist.Core;
+﻿using Arborist.Common;
+using Arborist.Core;
 using System;
 
 namespace Arborist.Linq.Experimental.Treenumerators.ExpandNodes
 {
-  internal class ExpandNodesDepthFirstTreenumerator<TSource, TExpandedNode, TResult> : TreenumeratorBase<TResult>
+  internal class ExpandNodesDepthFirstTreenumerator<TSource, TExpandedNode, TResult>
+    : TreenumeratorBase<TResult>
   {
     public ExpandNodesDepthFirstTreenumerator(
       Func<ITreenumerator<TSource>> innerTreenumeratorFactory,

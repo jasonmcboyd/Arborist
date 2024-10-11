@@ -10,24 +10,19 @@ namespace Arborist.Nodes
     #region Node With Enumerable Children Factory Methods
 
     // TODO: I don't like this. It is recursive.
-    private static NodeWithEnumerableChildren<TValue> CreateNodeWithEnumerableChildren<TValue, TNode>(
-      this TNode node)
-      where TNode : INodeWithIndexableChildren<TValue, TNode>
+    private static NodeWithEnumerableChildren<TValue> CreateNodeWithEnumerableChildren<TValue>(
+      this NodeWithIndexableChildren<TValue> node)
     {
-      var children = new TNode[node.ChildCount];
+      var children = node.CopyChildren();
 
-      for (int i = 0; i < node.ChildCount; i++)
-        children[i] = node[i];
-
-      return new NodeWithEnumerableChildren<TValue>(node.Value, children.Select(CreateNodeWithEnumerableChildren<TValue, TNode>));
+      return new NodeWithEnumerableChildren<TValue>(node.Value, children.Select(CreateNodeWithEnumerableChildren));
     }
 
-    public static IEnumerable<NodeWithEnumerableChildren<TValue>> CreateNodeWithEnumerableChildren<TValue, TNode>(
-      this IEnumerable<TNode> roots)
-      where TNode : INodeWithIndexableChildren<TValue, TNode>
+    public static IEnumerable<NodeWithEnumerableChildren<TValue>> CreateNodeWithEnumerableChildren<TValue>(
+      this IEnumerable<NodeWithIndexableChildren<TValue>> roots)
     {
       foreach (var root in roots)
-        yield return CreateNodeWithEnumerableChildren<TValue, TNode>(root);
+        yield return CreateNodeWithEnumerableChildren(root);
     }
 
     #endregion Node With Enumerable Children Factory Methods
@@ -44,23 +39,58 @@ namespace Arborist.Nodes
 
     #region Treenumerable Factory Methods
 
-    public static ITreenumerable<TNode> ToTreenumerable<TNode>(
-      this IEnumerable<INodeWithEnumerableChildren<TNode>> rootNodes)
-      => new EnumerableTreenumerable<TNode>(rootNodes);
+    private static TryMoveNextChildResult<NodeWithEnumerableChildren<TValue>> NodeWithEnumerableChildrenMoveNext<TValue>(
+      ref NodeWithEnumerableChildrenChildEnumerator<TValue> childEnumerator)
+      => childEnumerator.TryMoveNext();
 
-    public static ITreenumerable<TNode> ToTreenumerable<TNode>(
-      this INodeWithEnumerableChildren<TNode> rootNodes)
-      => new EnumerableTreenumerable<TNode>(rootNodes);
+    private static void NodeWithEnumerableChildrenDispose<TValue>(
+      ref NodeWithEnumerableChildrenChildEnumerator<TValue> childEnumerator)
+      => childEnumerator.Dispose();
 
-    public static ITreenumerable<TValue> ToTreenumerable<TValue, TNode>(
-      this IEnumerable<TNode> rootNode)
-      where TNode : INodeWithIndexableChildren<TValue, TNode>
-      => new IndexableTreenumerable<TValue, TNode>(rootNode);
+    private static TryMoveNextChildResult<NodeWithIndexableChildren<TValue>> NodeWithIndexableChildrenMoveNext<TValue>(
+      ref NodeWithIndexableChildrenChildEnumerator<TValue> childEnumerator)
+      => childEnumerator.TryMoveNext();
 
-    public static ITreenumerable<TValue> ToTreenumerable<TValue, TNode>(
-      this TNode rootNode)
-      where TNode : INodeWithIndexableChildren<TValue, TNode>
-      => new IndexableTreenumerable<TValue, TNode>(rootNode);
+    private static void NodeWithIndexableChildrenDispose<TValue>(
+      ref NodeWithIndexableChildrenChildEnumerator<TValue> childEnumerator)
+    {
+    }
+
+    public static ITreenumerable<TValue> ToTreenumerable<TValue>(
+      this IEnumerable<NodeWithEnumerableChildren<TValue>> rootNodes)
+      => new Treenumerable<TValue, NodeWithEnumerableChildren<TValue>, NodeWithEnumerableChildrenChildEnumerator<TValue>>(
+        node => node.GetChildEnumerator(),
+        NodeWithEnumerableChildrenMoveNext,
+        NodeWithEnumerableChildrenDispose,
+        node => node.Value,
+        rootNodes);
+
+    public static ITreenumerable<TValue> ToTreenumerable<TValue>(
+      this NodeWithEnumerableChildren<TValue> rootNode)
+      => new Treenumerable<TValue, NodeWithEnumerableChildren<TValue>, NodeWithEnumerableChildrenChildEnumerator<TValue>>(
+        node => node.GetChildEnumerator(),
+        NodeWithEnumerableChildrenMoveNext,
+        NodeWithEnumerableChildrenDispose,
+        node => node.Value,
+        rootNode);
+
+    public static ITreenumerable<TValue> ToTreenumerable<TValue>(
+      this IEnumerable<NodeWithIndexableChildren<TValue>> rootNodes)
+      => new Treenumerable<TValue, NodeWithIndexableChildren<TValue>, NodeWithIndexableChildrenChildEnumerator<TValue>>(
+        node => node.GetChildEnumerator(),
+        NodeWithIndexableChildrenMoveNext,
+        NodeWithIndexableChildrenDispose,
+        node => node.Value,
+        rootNodes);
+
+    public static ITreenumerable<TValue> ToTreenumerable<TValue>(
+      this NodeWithIndexableChildren<TValue> rootNode)
+      => new Treenumerable<TValue, NodeWithIndexableChildren<TValue>, NodeWithIndexableChildrenChildEnumerator<TValue>>(
+        node => node.GetChildEnumerator(),
+        NodeWithIndexableChildrenMoveNext,
+        NodeWithIndexableChildrenDispose,
+        node => node.Value,
+        rootNode);
 
     #endregion Treenumerable Factory Methods
   }

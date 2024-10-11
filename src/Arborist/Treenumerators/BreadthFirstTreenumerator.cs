@@ -1,59 +1,62 @@
-﻿using Arborist.Core;
-using Arborist.Virtualization;
-using Nito.Collections;
+﻿using Arborist.Common;
+using Arborist.Core;
+using Arborist.Treenumerables;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Arborist.Treenumerators
 {
-  internal sealed class BreadthFirstTreenumerator<TRootNode, TNode>
-    : TreenumeratorBase<TNode>
+  internal sealed class BreadthFirstTreenumerator<TValue, TNode, TChildEnumerator>
+    : TreenumeratorBase<TValue>
   {
     public BreadthFirstTreenumerator(
-      IEnumerable<TRootNode> rootNodes,
-      Func<TRootNode, TNode> map,
-      Func<TRootNode, IEnumerator<TRootNode>> childrenGetter)
+      IEnumerable<TNode> rootNodes,
+      Func<TNode, TChildEnumerator> childEnumeratorFactory,
+      TryMoveNextChildDelegate<TChildEnumerator, TNode> tryMoveNextChildDelegate,
+      DisposeChildEnumeratorDelegate<TChildEnumerator> disposeChildEnumeratorDelegate,
+      Func<TNode, TValue> map)
     {
       _RootsEnumerator = rootNodes.GetEnumerator();
+      _ChildEnumeratorFactory = childEnumeratorFactory;
+      _TryMoveNextChildDelegate = tryMoveNextChildDelegate;
+      _DisposeChildEnumeratorDelegate = disposeChildEnumeratorDelegate;
       _Map = map;
-      _ChildrenGetter = childrenGetter;
     }
 
-    private readonly IEnumerator<TRootNode> _RootsEnumerator;
-    private readonly Func<TRootNode, TNode> _Map;
-    private readonly Func<TRootNode, IEnumerator<TRootNode>> _ChildrenGetter;
+    private readonly IEnumerator<TNode> _RootsEnumerator;
+    private readonly Func<TNode, TChildEnumerator> _ChildEnumeratorFactory;
+    private readonly TryMoveNextChildDelegate<TChildEnumerator, TNode> _TryMoveNextChildDelegate;
+    private readonly DisposeChildEnumeratorDelegate<TChildEnumerator> _DisposeChildEnumeratorDelegate;
+    private readonly Func<TNode, TValue> _Map;
 
-    private readonly VirtualNodeVisitPool<TRootNode> _NodeVisitPool =
-      new VirtualNodeVisitPool<TRootNode>();
+    private RefSemiDeque<TestNodeVisit<TNode>> _CurrentLevel = new RefSemiDeque<TestNodeVisit<TNode>>();
+    private RefSemiDeque<TChildEnumerator> _CurrentLevelChildEnumerators = new RefSemiDeque<TChildEnumerator>();
 
-    private readonly VirtualNodeVisitPool<IEnumerator<TRootNode>> _ChildrenVisitPool =
-      new VirtualNodeVisitPool<IEnumerator<TRootNode>>();
+    private RefSemiDeque<TestNodeVisit<TNode>> _NextLevel = new RefSemiDeque<TestNodeVisit<TNode>>();
+    private RefSemiDeque<TChildEnumerator> _NextLevelChildEnumerators = new RefSemiDeque<TChildEnumerator>();
 
-    private Deque<VirtualNodeVisit<TRootNode>> _CurrentLevel =
-      new Deque<VirtualNodeVisit<TRootNode>>();
+    private RefSemiDeque<TestNodeVisit<TNode>> _ChildrenStack = new RefSemiDeque<TestNodeVisit<TNode>>();
+    private RefSemiDeque<TChildEnumerator> _ChildrenStackChildEnumerators = new RefSemiDeque<TChildEnumerator>();
 
-    private Deque<VirtualNodeVisit<TRootNode>> _NextLevel =
-      new Deque<VirtualNodeVisit<TRootNode>>();
-
-    private Stack<VirtualNodeVisit<IEnumerator<TRootNode>>> _ChildrenStack =
-      new Stack<VirtualNodeVisit<IEnumerator<TRootNode>>>();
+    private int _RootNodesSeen = 0;
+    private bool _HasCachedChild = false;
 
     protected override bool OnMoveNext(NodeTraversalStrategy nodeTraversalStrategy)
     {
-      if (Position.Depth == -1)
-        return OnStarting();
-
       while (true)
       {
-        if (_CurrentLevel.Count == 0)
-          (_CurrentLevel, _NextLevel) = (_NextLevel, _CurrentLevel);
-
-        if (_CurrentLevel.Count == 0)
+        if (_HasCachedChild)
         {
-          EnumerationFinished = true;
+          OnHasCachedChild();
+          return true;
+        }
 
-          return false;
+        if (_CurrentLevel.Count == 0 && _ChildrenStack.Count == 0)
+        {
+          var onCurrentLevelEmpty = OnCurrentLevelEmpty();
+
+          if (onCurrentLevelEmpty.HasValue)
+            return onCurrentLevelEmpty.Value;
         }
 
         if (Mode == TreenumeratorMode.SchedulingNode)
@@ -64,8 +67,13 @@ namespace Arborist.Treenumerators
             return onScheduling.Value;
         }
 
-        if (_CurrentLevel.Count == 0)
-          continue;
+        if (_CurrentLevel.Count == 0 && _ChildrenStack.Count == 0)
+        {
+          var onCurrentLevelEmpty = OnCurrentLevelEmpty();
+
+          if (onCurrentLevelEmpty.HasValue)
+            return onCurrentLevelEmpty.Value;
+        }
 
         var onVisiting = OnVisiting();
 
@@ -74,234 +82,254 @@ namespace Arborist.Treenumerators
       }
     }
 
+    private void OnHasCachedChild()
+    {
+      _HasCachedChild = false;
+
+      UpdateStateFromVirtualNodeVisit(ref _ChildrenStack.GetLast());
+    }
+
+    private bool? OnCurrentLevelEmpty()
+    {
+      if (MoveToNextRootNode())
+        return true;
+
+      SwapCurrentLevelAndNextLevel();
+
+      if (_CurrentLevel.Count == 0)
+        return false;
+
+      Mode = TreenumeratorMode.VisitingNode;
+
+      return null;
+    }
+
     private bool? OnScheduling(NodeTraversalStrategy nodeTraversalStrategy)
     {
-      var scheduledVisit = _ChildrenStack.Peek();
-
-      scheduledVisit.TraversalStrategy = nodeTraversalStrategy;
-
-      var previousVisit = _CurrentLevel[0];
-
       if (nodeTraversalStrategy == NodeTraversalStrategy.SkipNode)
-      {
-        if (MoveToFirstChild(scheduledVisit))
-          return true;
-
-        previousVisit.VisitCount++;
-
-        if (previousVisit.Position.Depth == -1)
-          return null;
-
-        scheduledVisit.Mode = TreenumeratorMode.VisitingNode;
-
-        UpdateStateFromVirtualNodeVisit(previousVisit);
-
-        return true;
-      }
+        return SkipNode();
 
       if (nodeTraversalStrategy == NodeTraversalStrategy.SkipSubtree)
-      {
-        previousVisit.VisitCount++;
+        return SkipSubtree();
 
-        if (previousVisit.Position.Depth == -1)
-          return null;
+      ref var scheduledVisit = ref _ChildrenStack.GetLast();
+      ref var scheduledVisitChildEnumerator = ref _ChildrenStackChildEnumerators.GetLast();
 
-        scheduledVisit.Mode = TreenumeratorMode.VisitingNode;
-
-        UpdateStateFromVirtualNodeVisit(previousVisit);
-
-        return true;
-      }
-
+      scheduledVisit.TraversalStrategy = nodeTraversalStrategy;
       scheduledVisit.Mode = TreenumeratorMode.VisitingNode;
 
-      _NextLevel.AddToBack(GetNodeVisitFromChildEnumeratorVisit(scheduledVisit));
+      PopChildrenStackOntoNextLevel();
 
-      previousVisit.VisitCount++;
+      if (MoveUpTheChildrenStack())
+        return true;
 
-      if (previousVisit.Position.Depth == -1)
+      if (_CurrentLevel.Count == 0)
         return null;
 
-      UpdateStateFromVirtualNodeVisit(previousVisit);
+      ref var previousVisit = ref _CurrentLevel.GetFirst();
+      previousVisit.VisitCount++;
+
+      UpdateStateFromVirtualNodeVisit(ref previousVisit);
 
       return true;
     }
 
     private bool? OnVisiting()
     {
-      var previousVisit = _CurrentLevel[0];
+      ref var previousVisit = ref _CurrentLevel.GetFirst();
+      ref var previousVisitChildEnumerator = ref _CurrentLevelChildEnumerators.GetFirst();
 
       if (previousVisit.VisitCount == 0)
       {
         previousVisit.VisitCount++;
-        UpdateStateFromVirtualNodeVisit(previousVisit);
+        UpdateStateFromVirtualNodeVisit(ref previousVisit);
         return true;
       }
 
-      if (previousVisit.VisitCount == 1
-        && previousVisit.TraversalStrategy != NodeTraversalStrategy.SkipDescendants
-        && MoveToFirstChild(previousVisit))
+      if (previousVisit.TraversalStrategy != NodeTraversalStrategy.SkipDescendants
+        && TryPushNextChild(ref previousVisit, ref previousVisitChildEnumerator))
       {
         return true;
       }
 
-      if (MoveToNextChild())
-        return true;
-
-      _NodeVisitPool.Return(_CurrentLevel[0]);
-      _CurrentLevel.RemoveAt(0);
+      DisposeFirstItemInCurrentLevel();
 
       if (_CurrentLevel.Count == 0)
-      {
-        Mode = TreenumeratorMode.VisitingNode;
         return null;
-      }
 
-      _CurrentLevel[0].VisitCount++;
-      UpdateStateFromVirtualNodeVisit(_CurrentLevel[0]);
+      previousVisit = ref _CurrentLevel.GetFirst();
+      previousVisit.VisitCount++;
+      UpdateStateFromVirtualNodeVisit(ref previousVisit);
 
       return true;
     }
 
-    private bool OnStarting()
+    private bool MoveToNextRootNode()
     {
       if (!_RootsEnumerator.MoveNext())
-      {
-        EnumerationFinished = true;
-
         return false;
-      }
 
-      var sentinelNode = default(TRootNode);
-
-      var sentinel =
-        _NodeVisitPool
-        .Lease(
-          TreenumeratorMode.VisitingNode,
-          sentinelNode,
-          1,
-          (0, -1),
-          NodeTraversalStrategy.TraverseSubtree);
-
-      _CurrentLevel.AddToFront(sentinel);
-
-      var children =
-        _ChildrenVisitPool
-        .Lease(
+      var nodeVisit =
+        new TestNodeVisit<TNode>(
           TreenumeratorMode.SchedulingNode,
-          _RootsEnumerator,
+          _RootsEnumerator.Current,
           0,
-          (0, 0),
+          (_RootNodesSeen, 0),
           NodeTraversalStrategy.TraverseSubtree);
 
-      _ChildrenStack.Push(children);
+      _RootNodesSeen++;
 
-      var childVisit = GetNodeVisitFromChildEnumeratorVisit(children);
+      _ChildrenStack.AddLast(nodeVisit);
+      _ChildrenStackChildEnumerators.AddLast(_ChildEnumeratorFactory(nodeVisit.Node));
 
-      UpdateStateFromVirtualNodeVisit(childVisit);
+      UpdateStateFromVirtualNodeVisit(ref _ChildrenStack.GetLast());
 
       return true;
     }
 
-    private bool MoveToFirstChild(VirtualNodeVisit<TRootNode> visit) =>
-      MoveToFirstChild(visit, x => x.Node);
-
-    private bool MoveToFirstChild(VirtualNodeVisit<IEnumerator<TRootNode>> visit) =>
-      MoveToFirstChild(visit, x => x.Node.Current);
-
-    private bool MoveToFirstChild<T>(
-      VirtualNodeVisit<T> visit,
-      Func<VirtualNodeVisit<T>, TRootNode> map)
+    private bool? SkipNode()
     {
-      var children = GetChildren(visit, map);
+      ref var scheduledVisit = ref _ChildrenStack.GetLast();
+      ref var scheduledVisitChildEnumerator = ref _ChildrenStackChildEnumerators.GetLast();
 
-      if (children?.Node.MoveNext() != true)
+      if (TryPushNextChild(ref scheduledVisit, ref scheduledVisitChildEnumerator))
+        return true;
+
+      DisposeLastItemInChildrenStack();
+
+      if (MoveUpTheChildrenStack())
+        return true;
+
+      if (_CurrentLevel.Count == 0)
+        return null;
+
+      ref var previousVisit = ref _CurrentLevel.GetFirst();
+
+      previousVisit.VisitCount++;
+
+      UpdateStateFromVirtualNodeVisit(ref previousVisit);
+
+      return true;
+
+    }
+
+    private bool? SkipSubtree()
+    {
+      DisposeLastItemInChildrenStack();
+
+      if (MoveUpTheChildrenStack())
+        return true;
+
+      if (_CurrentLevel.Count == 0)
+        return null;
+
+      ref var previousVisit = ref _CurrentLevel.GetFirst();
+
+      previousVisit.VisitCount++;
+
+      UpdateStateFromVirtualNodeVisit(ref previousVisit);
+
+      return true;
+    }
+
+    private bool MoveUpTheChildrenStack()
+    {
+      while (_ChildrenStack.Count > 0)
       {
-        ReturnChildrenVirtualNodeVisit(children);
-        return false;
+        ref var nodeVisit = ref _ChildrenStack.GetLast();
+        ref var nodeVisitChildEnumerator = ref _ChildrenStackChildEnumerators.GetLast();
+
+        if (TryPushNextChild(ref nodeVisit, ref nodeVisitChildEnumerator, true))
+          return true;
+
+        DisposeLastItemInChildrenStack();
       }
 
-      children.Mode = TreenumeratorMode.SchedulingNode;
-      children.VisitCount = 0;
-      children.Position = (0, visit.Position.Depth + 1);
-      children.TraversalStrategy = NodeTraversalStrategy.TraverseSubtree;
-
-      _ChildrenStack.Push(children);
-
-      var childVisit = GetNodeVisitFromChildEnumeratorVisit(children);
-      UpdateStateFromVirtualNodeVisit(childVisit);
-      _NodeVisitPool.Return(childVisit);
-
-      return true;
+      // TODO: Should I return false here?
+      return false;
     }
 
-    private bool MoveToNextChild()
+    private void PopChildrenStackOntoNextLevel()
     {
-      while (_ChildrenStack.Count > 0 && !_ChildrenStack.Peek().Node.MoveNext())
-        ReturnChildrenVirtualNodeVisit(_ChildrenStack.Pop());
+      _NextLevel.AddLast(_ChildrenStack.RemoveLast());
+      _NextLevelChildEnumerators.AddLast(_ChildrenStackChildEnumerators.RemoveLast());
+    }
 
-      if (_ChildrenStack.Count == 0)
+    private void SwapCurrentLevelAndNextLevel()
+    {
+      (_CurrentLevel, _NextLevel) = (_NextLevel, _CurrentLevel);
+      (_CurrentLevelChildEnumerators, _NextLevelChildEnumerators) = (_NextLevelChildEnumerators, _CurrentLevelChildEnumerators);
+    }
+
+    private bool TryPushNextChild(
+      ref TestNodeVisit<TNode> nodeVisit,
+      ref TChildEnumerator childEnumerator,
+      bool cacheChild = false)
+    {
+      var moveNextChildResult = _TryMoveNextChildDelegate(ref childEnumerator);
+
+      if (!moveNextChildResult.HadNextChild)
         return false;
 
-      var children = _ChildrenStack.Peek();
+      var childNodeVisit =
+        new TestNodeVisit<TNode>(
+          TreenumeratorMode.SchedulingNode,
+          moveNextChildResult.NextChild,
+          0,
+          (moveNextChildResult.ChildIndex, nodeVisit.Position.Depth + 1),
+          NodeTraversalStrategy.TraverseSubtree);
 
-      children.Mode = TreenumeratorMode.SchedulingNode;
-      children.VisitCount = 0;
-      children.Position += (1, 0);
-      children.TraversalStrategy = NodeTraversalStrategy.TraverseSubtree;
+      _ChildrenStack.AddLast(childNodeVisit);
+      _ChildrenStackChildEnumerators.AddLast( _ChildEnumeratorFactory(moveNextChildResult.NextChild));
 
-      var childVisit = GetNodeVisitFromChildEnumeratorVisit(children);
-      UpdateStateFromVirtualNodeVisit(childVisit);
-      _NodeVisitPool.Return(childVisit);
+      if (cacheChild && _CurrentLevel.Count > 0)
+      {
+        _HasCachedChild = true;
+        _CurrentLevel.GetFirst().VisitCount++;
+        UpdateStateFromVirtualNodeVisit(ref _CurrentLevel.GetFirst());
+      }
+      else
+      {
+        UpdateStateFromVirtualNodeVisit(ref _ChildrenStack.GetLast());
+      }
 
       return true;
     }
 
-    private void ReturnChildrenVirtualNodeVisit(VirtualNodeVisit<IEnumerator<TRootNode>> visit)
+    private void DisposeFirstItemInCurrentLevel()
     {
-      visit.Node.Dispose();
-      _ChildrenVisitPool.Return(visit);
+      DisposeFirstItemInDeques(_CurrentLevel, _CurrentLevelChildEnumerators);
     }
 
-    private VirtualNodeVisit<IEnumerator<TRootNode>> GetChildren<T>(
-      VirtualNodeVisit<T> visit,
-      Func<VirtualNodeVisit<T>, TRootNode> nodeMap)
+    private void DisposeLastItemInChildrenStack()
     {
-      IEnumerator<TRootNode> childrenEnumerator;
-
-      if (visit.TraversalStrategy == NodeTraversalStrategy.SkipDescendants)
-        childrenEnumerator = Enumerable.Empty<TRootNode>().GetEnumerator();
-
-      childrenEnumerator = _ChildrenGetter(nodeMap(visit));
-
-      return
-        _ChildrenVisitPool
-        .Lease(
-          TreenumeratorMode.VisitingNode,
-          childrenEnumerator,
-          0,
-          (0, visit.Position.Depth + 1),
-          NodeTraversalStrategy.TraverseSubtree);
+      DisposeLastItemsInDeques(_ChildrenStack, _ChildrenStackChildEnumerators);
     }
 
-    private VirtualNodeVisit<TRootNode> GetNodeVisitFromChildEnumeratorVisit(VirtualNodeVisit<IEnumerator<TRootNode>> children)
+    private void DisposeFirstItemInDeques(
+      RefSemiDeque<TestNodeVisit<TNode>> deque,
+      RefSemiDeque<TChildEnumerator> dequeChildEnumerator)
     {
-      return
-        _NodeVisitPool
-        .Lease(
-          children.Mode,
-          children.Node.Current,
-          children.VisitCount,
-          children.Position,
-          children.TraversalStrategy);
+      deque.RemoveFirst();
+      _DisposeChildEnumeratorDelegate(ref dequeChildEnumerator.GetFirst());
+      dequeChildEnumerator.RemoveFirst();
     }
 
-    private void UpdateStateFromVirtualNodeVisit(VirtualNodeVisit<TRootNode> visit)
+    private void DisposeLastItemsInDeques(
+      RefSemiDeque<TestNodeVisit<TNode>> deque,
+      RefSemiDeque<TChildEnumerator> dequeChildEnumerator)
     {
-      Mode = visit.Mode;
-      Node = _Map(visit.Node);
-      VisitCount = visit.VisitCount;
-      Position = visit.Position;
+      deque.RemoveLast();
+      _DisposeChildEnumeratorDelegate(ref dequeChildEnumerator.GetLast());
+      dequeChildEnumerator.RemoveLast();
+    }
+
+    private void UpdateStateFromVirtualNodeVisit(ref TestNodeVisit<TNode> nodeVisit)
+    {
+      Mode = nodeVisit.Mode;
+      Node = _Map(nodeVisit.Node);
+      VisitCount = nodeVisit.VisitCount;
+      Position = nodeVisit.Position;
     }
 
     #region Dispose
@@ -327,14 +355,27 @@ namespace Arborist.Treenumerators
       {
         _RootsEnumerator?.Dispose();
 
-        while (_ChildrenStack.Count > 0)
-          ReturnChildrenVirtualNodeVisit(_ChildrenStack.Pop());
+        DisposeStack(_CurrentLevelChildEnumerators);
+        DisposeStack(_NextLevelChildEnumerators);
+        DisposeStack(_ChildrenStackChildEnumerators);
       }
     }
 
+    private void DisposeStack(RefSemiDeque<TChildEnumerator> stackChildEnumerators)
+    {
+      if (stackChildEnumerators == null)
+        return;
+
+      while (stackChildEnumerators.Count > 0)
+      {
+        _DisposeChildEnumeratorDelegate(ref stackChildEnumerators.GetLast());
+        stackChildEnumerators.RemoveLast();
+      }
+    }
+    
     ~BreadthFirstTreenumerator()
     {
-        Dispose(false);
+      Dispose(false);
     }
 
     #endregion Dispose

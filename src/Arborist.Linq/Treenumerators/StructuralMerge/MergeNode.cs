@@ -1,6 +1,6 @@
 ﻿namespace Arborist.Linq.Treenumerators
 {
-  public struct MergeNode<TLeft, TRight>
+  public readonly struct MergeNode<TLeft, TRight>
   {
     public MergeNode(
       TLeft left,

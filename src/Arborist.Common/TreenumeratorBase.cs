@@ -1,6 +1,6 @@
 ﻿using Arborist.Core;
 
-namespace Arborist
+namespace Arborist.Common
 {
   public abstract class TreenumeratorBase<TNode> : ITreenumerator<TNode>
   {
@@ -12,7 +12,7 @@ namespace Arborist
 
     public TreenumeratorMode Mode { get; protected set; } = default;
 
-    protected bool EnumerationFinished { get; set; } = false;
+    protected bool EnumerationFinished { get; private set; }
 
     public abstract void Dispose();
 

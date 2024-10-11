@@ -1,4 +1,5 @@
-﻿using Arborist.Core;
+﻿using Arborist.Common;
+using Arborist.Core;
 using Arborist.Linq.Extensions;
 using System;
 using System.Collections.Generic;
@@ -51,18 +52,13 @@ namespace Arborist.Linq.Treenumerators
       if (MoveNextInnerSubtree())
         return true;
 
-      EnumerationFinished = true;
-
       return false;
     }
 
     private bool OnStarting()
     {
       if (!MoveNextInnerTreenumerator())
-      {
-        EnumerationFinished = true;
         return false;
-      }
 
       _Stack.Push(
         new NodeVisit<TResult>(

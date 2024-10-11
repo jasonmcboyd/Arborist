@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Arborist.Common\Arborist.Common.csproj" />
     <ProjectReference Include="..\Arborist.Core\Arborist.Core.csproj" />
   </ItemGroup>
 </Project>

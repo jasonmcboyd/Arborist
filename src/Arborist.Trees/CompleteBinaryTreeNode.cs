@@ -2,11 +2,11 @@
 
 namespace Arborist.Trees
 {
-  public struct CompleteBinaryTreeNode : INodeWithIndexableChildren<ulong, CompleteBinaryTreeNode>
+  public struct CompleteBinaryTreeNode
   {
-    public CompleteBinaryTreeNode(ulong index)
+    public CompleteBinaryTreeNode(ulong value)
     {
-      Value = index;
+      Value = value;
     }
 
     public CompleteBinaryTreeNode()
@@ -14,21 +14,9 @@ namespace Arborist.Trees
       Value = 0;
     }
 
-    public CompleteBinaryTreeNode this[int index]
-    {
-      get
-      {
-        if (index > 1)
-          throw new IndexOutOfRangeException();
-
-        return
-          index == 0
-            ? new CompleteBinaryTreeNode(checked(Value * 2))
-            : new CompleteBinaryTreeNode(checked(Value * 2 + 1));
-      }
-    }
-
-    public int ChildCount { get; } = 2;
     public ulong Value { get; }
+
+    public CompleteBinaryTreeNodeChildEnumerator GetChildEnumerator()
+      => new CompleteBinaryTreeNodeChildEnumerator(Value);
   }
 }

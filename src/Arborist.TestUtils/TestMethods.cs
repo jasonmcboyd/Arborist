@@ -29,7 +29,7 @@ namespace Arborist.TestUtils
         var rootNodes =
           TreeSerializer
           .DeserializeRoots(serializedTree)
-          .CreateNodeWithEnumerableChildren<string, NodeWithIndexableChildren<string>>();
+          .CreateNodeWithEnumerableChildren();
 
         treenumerable = rootNodes.ToTreenumerable().Select(visit => visit.Node);
       }
@@ -39,7 +39,7 @@ namespace Arborist.TestUtils
 
         treenumerable =
           roots
-          .ToTreenumerable<string, NodeWithIndexableChildren<string>>()
+          .ToTreenumerable()
           .Select(visit => visit.Node);
       }
 

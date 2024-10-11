@@ -27,9 +27,7 @@ namespace Arborist.Linq.Treenumerators
 
     public bool MoveNext(NodeTraversalStrategy nodeTraversalStrategy)
     {
-      var hasNext = _InnerTreenumerator.MoveNext(nodeTraversalStrategy);
-
-      if (!hasNext)
+      if (!_InnerTreenumerator.MoveNext(nodeTraversalStrategy))
         return false;
 
       var nodeContext = _InnerTreenumerator.ToNodeContext();
