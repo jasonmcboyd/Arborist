@@ -398,7 +398,7 @@ namespace Arborist.Linq.Tests
               }.ToNodeVisitArray()
             },
             // Skip nodes
-                        new TestScenario
+            new TestScenario
             {
               NodeTraversalStrategySelector = visit => visit.Node == "a" ? NodeTraversalStrategy.SkipNode : NodeTraversalStrategy.TraverseSubtree,
               TreenumerableMap = treenumerable => treenumerable.PruneAfter(visit => visit.Node == "b"),

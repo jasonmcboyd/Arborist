@@ -1,4 +1,5 @@
-﻿using Arborist.Treenumerables;
+﻿using Arborist.Common;
+using Arborist.Treenumerables;
 
 namespace Arborist.Trees
 {
@@ -7,16 +8,17 @@ namespace Arborist.Trees
     public CompleteBinaryTree()
       : base(
           node => node.GetChildEnumerator(),
-          ChildEnumeratorMoveNextDelegate,
+          MoveNextChild,
           DisposeChildEnumeratorDelegate,
           node => node.Value,
           _Roots)
     {
     }
 
-    private static TryMoveNextChildResult<CompleteBinaryTreeNode> ChildEnumeratorMoveNextDelegate(
-      ref CompleteBinaryTreeNodeChildEnumerator childEnumerator)
-      => childEnumerator.TryMoveNext();
+    private static bool MoveNextChild(
+      ref CompleteBinaryTreeNodeChildEnumerator childEnumerator,
+      out NodeAndSiblingIndex<CompleteBinaryTreeNode> childNodeAndSiblingIndex)
+      => childEnumerator.TryMoveNext(out childNodeAndSiblingIndex);
 
     private static void DisposeChildEnumeratorDelegate(
       ref CompleteBinaryTreeNodeChildEnumerator childEnumerator)

@@ -1,4 +1,4 @@
-﻿using Arborist.Treenumerables;
+﻿using Arborist.Common;
 using System.Collections.Generic;
 
 namespace Arborist.Nodes
@@ -14,12 +14,16 @@ namespace Arborist.Nodes
     private readonly IEnumerator<NodeWithEnumerableChildren<TValue>> _ChildEnumerator;
     private int _ChildIndex;
 
-    public TryMoveNextChildResult<NodeWithEnumerableChildren<TValue>> TryMoveNext()
+    public bool TryMoveNext(out NodeAndSiblingIndex<NodeWithEnumerableChildren<TValue>> childNodeAndSiblingIndex)
     {
       if (_ChildEnumerator.MoveNext())
-        return TryMoveNextChildResult.NextChild(_ChildEnumerator.Current, _ChildIndex++);
+      {
+        childNodeAndSiblingIndex = (_ChildEnumerator.Current, _ChildIndex++);
+        return true;
+      }
 
-      return TryMoveNextChildResult.NoNextChild<NodeWithEnumerableChildren<TValue>>();
+      childNodeAndSiblingIndex = default;
+      return false;
     }
 
     public void Dispose()

@@ -1,6 +1,6 @@
 ﻿using Arborist.Core;
 
-namespace Arborist.Linq
+namespace Arborist.Common
 {
   public readonly struct NodeContext<TNode>
   {

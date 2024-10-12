@@ -1,4 +1,4 @@
-﻿using Arborist.Treenumerables;
+﻿using Arborist.Common;
 using System.Collections.Generic;
 
 namespace Arborist.Nodes
@@ -14,15 +14,19 @@ namespace Arborist.Nodes
     private IList<NodeWithIndexableChildren<TValue>> _Children;
     public int _CurrentChildIndex;
 
-    public TryMoveNextChildResult<NodeWithIndexableChildren<TValue>> TryMoveNext()
+    public bool TryMoveNext(out NodeAndSiblingIndex<NodeWithIndexableChildren<TValue>> childNodeAndSiblingIndex)
     {
       if (_CurrentChildIndex < _Children.Count - 1)
       {
         _CurrentChildIndex++;
-        return TryMoveNextChildResult.NextChild(_Children[_CurrentChildIndex], _CurrentChildIndex);
+        
+        childNodeAndSiblingIndex = (_Children[_CurrentChildIndex], _CurrentChildIndex);
+
+        return true;
       }
 
-      return TryMoveNextChildResult.NoNextChild<NodeWithIndexableChildren<TValue>>();
+      childNodeAndSiblingIndex = default;
+      return false;
     }
   }
 }

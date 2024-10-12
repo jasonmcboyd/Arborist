@@ -12,20 +12,20 @@ namespace Arborist.Treenumerators
     public BreadthFirstTreenumerator(
       IEnumerable<TNode> rootNodes,
       Func<TNode, TChildEnumerator> childEnumeratorFactory,
-      TryMoveNextChildDelegate<TChildEnumerator, TNode> tryMoveNextChildDelegate,
+      MoveNextChildDelegate<TChildEnumerator, TNode> tryMoveNextChildDelegate,
       DisposeChildEnumeratorDelegate<TChildEnumerator> disposeChildEnumeratorDelegate,
       Func<TNode, TValue> map)
     {
       _RootsEnumerator = rootNodes.GetEnumerator();
       _ChildEnumeratorFactory = childEnumeratorFactory;
-      _TryMoveNextChildDelegate = tryMoveNextChildDelegate;
+      _MoveNextChildDelegate = tryMoveNextChildDelegate;
       _DisposeChildEnumeratorDelegate = disposeChildEnumeratorDelegate;
       _Map = map;
     }
 
     private readonly IEnumerator<TNode> _RootsEnumerator;
     private readonly Func<TNode, TChildEnumerator> _ChildEnumeratorFactory;
-    private readonly TryMoveNextChildDelegate<TChildEnumerator, TNode> _TryMoveNextChildDelegate;
+    private readonly MoveNextChildDelegate<TChildEnumerator, TNode> _MoveNextChildDelegate;
     private readonly DisposeChildEnumeratorDelegate<TChildEnumerator> _DisposeChildEnumeratorDelegate;
     private readonly Func<TNode, TValue> _Map;
 
@@ -266,21 +266,19 @@ namespace Arborist.Treenumerators
       ref TChildEnumerator childEnumerator,
       bool cacheChild = false)
     {
-      var moveNextChildResult = _TryMoveNextChildDelegate(ref childEnumerator);
-
-      if (!moveNextChildResult.HadNextChild)
+      if (!_MoveNextChildDelegate(ref childEnumerator, out var childNodeSiblingContext))
         return false;
 
       var childNodeVisit =
         new TestNodeVisit<TNode>(
           TreenumeratorMode.SchedulingNode,
-          moveNextChildResult.NextChild,
+          childNodeSiblingContext.Node,
           0,
-          (moveNextChildResult.ChildIndex, nodeVisit.Position.Depth + 1),
+          (childNodeSiblingContext.SiblingIndex, nodeVisit.Position.Depth + 1),
           NodeTraversalStrategy.TraverseSubtree);
 
       _ChildrenStack.AddLast(childNodeVisit);
-      _ChildrenStackChildEnumerators.AddLast( _ChildEnumeratorFactory(moveNextChildResult.NextChild));
+      _ChildrenStackChildEnumerators.AddLast(_ChildEnumeratorFactory(childNodeSiblingContext.Node));
 
       if (cacheChild && _CurrentLevel.Count > 0)
       {

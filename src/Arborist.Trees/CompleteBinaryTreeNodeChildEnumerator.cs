@@ -1,4 +1,4 @@
-﻿using Arborist.Treenumerables;
+﻿using Arborist.Common;
 
 namespace Arborist.Trees
 {
@@ -44,16 +44,19 @@ namespace Arborist.Trees
 
     private ulong _ChildValue;
 
-    public TryMoveNextChildResult<CompleteBinaryTreeNode> TryMoveNext()
+    public bool TryMoveNext(out NodeAndSiblingIndex<CompleteBinaryTreeNode> childNodeAndSiblingIndex)
     {
-      var result =
-        _ChildValue == ulong.MaxValue
-        ? TryMoveNextChildResult.NoNextChild<CompleteBinaryTreeNode>()
-        : TryMoveNextChildResult.NextChild(new CompleteBinaryTreeNode(_ChildValue), (int)(_ChildValue % 2));
+      if (_ChildValue == ulong.MaxValue)
+      {
+        childNodeAndSiblingIndex = default;
+        return false;
+      }
+
+      childNodeAndSiblingIndex = (new CompleteBinaryTreeNode(_ChildValue), (int)(_ChildValue % 2));
 
       TryIncrementChildValue();
 
-      return result;
+      return true;
     }
   }
 }

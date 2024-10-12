@@ -1,4 +1,5 @@
-﻿using Arborist.Core;
+﻿using Arborist.Common;
+using Arborist.Core;
 using Arborist.Linq.Extensions;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,9 +8,9 @@ namespace Arborist.Linq
 {
   public static partial class Treenumerable
   {
-    public static IEnumerable<T[]> GetBranches<T>(this ITreenumerable<T> source)
+    public static IEnumerable<TNode[]> GetBranches<TNode>(this ITreenumerable<TNode> source)
     {
-      var branch = new List<NodeContext<T>>();
+      var branch = new List<NodeContext<TNode>>();
 
       using (var treenumerator = source.GetDepthFirstTreenumerator())
       {

@@ -1,4 +1,5 @@
-﻿using Arborist.Core;
+﻿using Arborist.Common;
+using Arborist.Core;
 using Arborist.Treenumerables;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,17 +40,19 @@ namespace Arborist.Nodes
 
     #region Treenumerable Factory Methods
 
-    private static TryMoveNextChildResult<NodeWithEnumerableChildren<TValue>> NodeWithEnumerableChildrenMoveNext<TValue>(
-      ref NodeWithEnumerableChildrenChildEnumerator<TValue> childEnumerator)
-      => childEnumerator.TryMoveNext();
+    private static bool NodeWithEnumerableChildrenMoveNext<TValue>(
+      ref NodeWithEnumerableChildrenChildEnumerator<TValue> childEnumerator,
+      out NodeAndSiblingIndex<NodeWithEnumerableChildren<TValue>> childNodeAndSiblingIndex)
+      => childEnumerator.TryMoveNext(out childNodeAndSiblingIndex);
 
     private static void NodeWithEnumerableChildrenDispose<TValue>(
       ref NodeWithEnumerableChildrenChildEnumerator<TValue> childEnumerator)
       => childEnumerator.Dispose();
 
-    private static TryMoveNextChildResult<NodeWithIndexableChildren<TValue>> NodeWithIndexableChildrenMoveNext<TValue>(
-      ref NodeWithIndexableChildrenChildEnumerator<TValue> childEnumerator)
-      => childEnumerator.TryMoveNext();
+    private static bool NodeWithIndexableChildrenMoveNext<TValue>(
+      ref NodeWithIndexableChildrenChildEnumerator<TValue> childEnumerator,
+      out NodeAndSiblingIndex<NodeWithIndexableChildren<TValue>> childNodeAndSiblingIndex)
+      => childEnumerator.TryMoveNext(out childNodeAndSiblingIndex);
 
     private static void NodeWithIndexableChildrenDispose<TValue>(
       ref NodeWithIndexableChildrenChildEnumerator<TValue> childEnumerator)

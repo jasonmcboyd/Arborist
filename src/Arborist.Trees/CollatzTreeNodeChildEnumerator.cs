@@ -1,4 +1,4 @@
-﻿using Arborist.Treenumerables;
+﻿using Arborist.Common;
 
 namespace Arborist.Trees
 {
@@ -19,14 +19,19 @@ namespace Arborist.Trees
     private CollatzTreeNode GetFirstChild() => new CollatzTreeNode(checked(Value * 2));
     private CollatzTreeNode GetSecondChild() => new CollatzTreeNode((Value - 1) / 3);
 
-    public TryMoveNextChildResult<CollatzTreeNode> TryMoveNext()
+    public bool TryMoveNext(out NodeAndSiblingIndex<CollatzTreeNode> childNodeAndSiblingIndex)
     {
       if (CurrentIndex == ChildCount)
-        return TryMoveNextChildResult.NoNextChild<CollatzTreeNode>();
+      {
+        childNodeAndSiblingIndex = default;
+        return false;
+      }
 
       _CurrentIndexByte++;
 
-      return TryMoveNextChildResult.NextChild(CurrentIndex == 0 ? GetFirstChild() : GetSecondChild(), CurrentIndex);
+      childNodeAndSiblingIndex = (CurrentIndex == 0 ? GetFirstChild() : GetSecondChild(), CurrentIndex);
+
+      return true;
     }
   }
 }

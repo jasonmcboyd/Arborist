@@ -12,20 +12,20 @@ namespace Arborist.Treenumerators
     public DepthFirstTreenumerator(
       IEnumerable<TNode> rootNodes,
       Func<TNode, TChildEnumerator> childEnumeratorFactory,
-      TryMoveNextChildDelegate<TChildEnumerator, TNode> tryMoveNextChildDelegate,
+      MoveNextChildDelegate<TChildEnumerator, TNode> tryMoveNextChildDelegate,
       DisposeChildEnumeratorDelegate<TChildEnumerator> disposeChildEnumeratorDelegate,
       Func<TNode, TValue> map)
     {
       _RootsEnumerator = rootNodes.GetEnumerator();
       _ChildEnumeratorFactory = childEnumeratorFactory;
-      _TryMoveNextChildDelegate = tryMoveNextChildDelegate;
+      _MoveNextChildDelegate = tryMoveNextChildDelegate;
       _DisposeChildEnumeratorDelegate = disposeChildEnumeratorDelegate;
       _Map = map;
     }
 
     private readonly IEnumerator<TNode> _RootsEnumerator;
     private readonly Func<TNode, TChildEnumerator> _ChildEnumeratorFactory;
-    private readonly TryMoveNextChildDelegate<TChildEnumerator, TNode> _TryMoveNextChildDelegate;
+    private readonly MoveNextChildDelegate<TChildEnumerator, TNode> _MoveNextChildDelegate;
     private readonly DisposeChildEnumeratorDelegate<TChildEnumerator> _DisposeChildEnumeratorDelegate;
     private readonly Func<TNode, TValue> _Map;
 
@@ -155,15 +155,13 @@ namespace Arborist.Treenumerators
       bool cacheChild = false,
       bool popMainStacksOntoSkippedStacks = false)
     {
-      var moveNextChildResult = _TryMoveNextChildDelegate(ref nodeVisitChildEnumerator);
-
-      if (!moveNextChildResult.HadNextChild)
+      if (!_MoveNextChildDelegate(ref nodeVisitChildEnumerator, out var childNodeContext))
         return false;
 
       if (popMainStacksOntoSkippedStacks)
         PopMainStacksOntoSkippedStacks();
 
-      PushNewNodeVisit(moveNextChildResult.NextChild, moveNextChildResult.ChildIndex);
+      PushNewNodeVisit(childNodeContext.Node, childNodeContext.SiblingIndex);
 
       if (cacheChild && _Stack.Count > 1)
       {

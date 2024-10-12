@@ -9,7 +9,7 @@ namespace Arborist.Treenumerables
   {
     public Treenumerable(
       Func<TNode, TChildEnumerator> childEnumeratorFactory,
-      TryMoveNextChildDelegate<TChildEnumerator, TNode> tryMoveNextChildDelegate,
+      MoveNextChildDelegate<TChildEnumerator, TNode> tryMoveNextChildDelegate,
       DisposeChildEnumeratorDelegate<TChildEnumerator> disposeChildEnumeratorDelegate,
       Func<TNode, TValue> nodeToValueMap,
       params TNode[] roots)
@@ -24,13 +24,13 @@ namespace Arborist.Treenumerables
 
     public Treenumerable(
       Func<TNode, TChildEnumerator> childEnumeratorFactory,
-      TryMoveNextChildDelegate<TChildEnumerator, TNode> tryMoveNextChildDelegate,
+      MoveNextChildDelegate<TChildEnumerator, TNode> tryMoveNextChildDelegate,
       DisposeChildEnumeratorDelegate<TChildEnumerator> disposeChildEnumeratorDelegate,
       Func<TNode, TValue> nodeToValueMap,
       IEnumerable<TNode> roots)
     {
       _ChildEnumeratorFactory = childEnumeratorFactory;
-      _TryMoveNextChildDelegate = tryMoveNextChildDelegate;
+      _MoveNextChildDelegate = tryMoveNextChildDelegate;
       _DisposeChildEnumeratorDelegate = disposeChildEnumeratorDelegate;
       _NodeToValueMap = nodeToValueMap;
       _Roots = roots;
@@ -38,7 +38,7 @@ namespace Arborist.Treenumerables
 
     private readonly IEnumerable<TNode> _Roots;
     private readonly Func<TNode, TChildEnumerator> _ChildEnumeratorFactory;
-    private readonly TryMoveNextChildDelegate<TChildEnumerator, TNode> _TryMoveNextChildDelegate;
+    private readonly MoveNextChildDelegate<TChildEnumerator, TNode> _MoveNextChildDelegate;
     private readonly DisposeChildEnumeratorDelegate<TChildEnumerator> _DisposeChildEnumeratorDelegate;
     private readonly Func<TNode, TValue> _NodeToValueMap;
 
@@ -48,7 +48,7 @@ namespace Arborist.Treenumerables
         new BreadthFirstTreenumerator<TValue, TNode, TChildEnumerator>(
           _Roots,
           _ChildEnumeratorFactory,
-          _TryMoveNextChildDelegate,
+          _MoveNextChildDelegate,
           _DisposeChildEnumeratorDelegate,
           _NodeToValueMap);
     }
@@ -59,7 +59,7 @@ namespace Arborist.Treenumerables
         new DepthFirstTreenumerator<TValue, TNode, TChildEnumerator>(
           _Roots,
           _ChildEnumeratorFactory,
-          _TryMoveNextChildDelegate,
+          _MoveNextChildDelegate,
           _DisposeChildEnumeratorDelegate,
           _NodeToValueMap);
     }

@@ -1,7 +1,6 @@
-﻿using Arborist.Core;
+﻿using Arborist.Common;
 using Arborist.Linq;
 using Arborist.Linq.TreeEnumerable.DepthFirstTree;
-using Arborist.Linq.Treenumerators.Enumerator;
 using Arborist.Nodes;
 using System;
 using System.Collections.Generic;

@@ -1,4 +1,5 @@
-﻿using Arborist.Treenumerables;
+﻿using Arborist.Common;
+using Arborist.Treenumerables;
 
 namespace Arborist.Trees
 {
@@ -14,9 +15,10 @@ namespace Arborist.Trees
     {
     }
 
-    private static TryMoveNextChildResult<CollatzTreeNode> ChildEnumeratorMoveNextDelegate(
-      ref CollatzTreeNodeChildEnumerator childEnumerator)
-      => childEnumerator.TryMoveNext();
+    private static bool ChildEnumeratorMoveNextDelegate(
+      ref CollatzTreeNodeChildEnumerator childEnumerator,
+      out NodeAndSiblingIndex<CollatzTreeNode> childNodeAndSiblingIndex)
+      => childEnumerator.TryMoveNext(out childNodeAndSiblingIndex);
 
     private static void DisposeChildEnumeratorDelegate(
       ref CollatzTreeNodeChildEnumerator childEnumerator)
