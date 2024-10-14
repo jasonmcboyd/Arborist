@@ -52,7 +52,7 @@ namespace Arborist.Trees
         return false;
       }
 
-      childNodeAndSiblingIndex = (_ChildValue, (int)(_ChildValue % 2));
+      childNodeAndSiblingIndex = new NodeAndSiblingIndex<ulong>(_ChildValue, (int)(_ChildValue % 2));
 
       TryIncrementChildValue();
 

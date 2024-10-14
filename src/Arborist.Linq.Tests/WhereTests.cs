@@ -872,7 +872,7 @@ namespace Arborist.Linq.Tests
             new TestScenario
             {
               NodeTraversalStrategySelector = visit => visit.Position.Depth == 1 ? NodeTraversalStrategy.SkipNode : NodeTraversalStrategy.TraverseSubtree,
-              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.Position != (1, 1)),
+              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.Position != new NodePosition(1, 1)),
               Description = "Where not level 1 sibling 1, skip level 1 nodes",
               ExpectedBreadthFirstResults = new[]
               {

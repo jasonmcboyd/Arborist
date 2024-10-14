@@ -43,7 +43,7 @@ namespace Arborist.Linq.Treenumerators
     private bool InnerTreenumeratorMoveNext(NodeTraversalStrategy nodeTraversalStrategy)
     {
       var previouslySeenNodeWasScheduledAndSkipped =
-        Position != (0, -1)
+        Position != new NodePosition(0, -1)
         && InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode
         && (nodeTraversalStrategy == NodeTraversalStrategy.SkipNode || nodeTraversalStrategy == NodeTraversalStrategy.SkipSubtree);
 
@@ -141,7 +141,7 @@ namespace Arborist.Linq.Treenumerators
           : 0;
       }
 
-      return (effectiveSiblingIndex, effectiveDepth);
+      return new NodePosition(effectiveSiblingIndex, effectiveDepth);
     }
 
     private ref NodeTraversalStatus GetNodeTraversalStatusToUpdateState()

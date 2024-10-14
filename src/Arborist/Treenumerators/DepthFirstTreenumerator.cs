@@ -155,13 +155,13 @@ namespace Arborist.Treenumerators
       bool cacheChild = false,
       bool popMainStacksOntoSkippedStacks = false)
     {
-      if (!_MoveNextChildDelegate(ref nodeVisitChildEnumerator, out var childNodeContext))
+      if (!_MoveNextChildDelegate(ref nodeVisitChildEnumerator, out var childNodeAndSiblingIndex))
         return false;
 
       if (popMainStacksOntoSkippedStacks)
         PopMainStacksOntoSkippedStacks();
 
-      PushNewNodeVisit(childNodeContext.Node, childNodeContext.SiblingIndex);
+      PushNewNodeVisit(childNodeAndSiblingIndex.Node, childNodeAndSiblingIndex.SiblingIndex);
 
       if (cacheChild && _Stack.Count > 1)
       {
@@ -192,7 +192,7 @@ namespace Arborist.Treenumerators
           TreenumeratorMode.SchedulingNode,
           node,
           0,
-          (childIndex, CurrentDepth),
+          new NodePosition(childIndex, CurrentDepth),
           NodeTraversalStrategy.TraverseSubtree);
       var nodeChildEnumerator = _ChildEnumeratorFactory(node);
 

@@ -22,7 +22,7 @@ namespace Arborist.Linq.Treenumerators
           TreenumeratorMode.VisitingNode,
           seed,
           1,
-          (0, -1));
+          new NodePosition(0, -1));
 
       _CurrentLevel.AddToBack(seedVisit);
     }

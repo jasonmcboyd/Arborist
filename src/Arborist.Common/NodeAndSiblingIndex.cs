@@ -17,8 +17,5 @@
     {
       return $"{SiblingIndex}  {Node}";
     }
-
-    public static implicit operator NodeAndSiblingIndex<TNode>((TNode, int) tuple)
-      => new NodeAndSiblingIndex<TNode>(tuple.Item1, tuple.Item2);
   }
 }

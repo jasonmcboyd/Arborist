@@ -16,7 +16,7 @@ namespace Arborist.Linq.Treenumerators
     {
       _Selector = selector;
 
-      _Stack.Push(new NodeVisit<TResult>(TreenumeratorMode.VisitingNode, default, 1, (0, -1)));
+      _Stack.Push(new NodeVisit<TResult>(TreenumeratorMode.VisitingNode, default, 1, new NodePosition(0, -1)));
     }
 
     public readonly Func<TSource, ITreenumerable<TResult>> _Selector;
@@ -65,7 +65,7 @@ namespace Arborist.Linq.Treenumerators
           _NodeTreenumerator.Mode,
           _NodeTreenumerator.Node,
           _NodeTreenumerator.VisitCount,
-          (_Stack.Peek().VisitCount - 1, InnerTreenumerator.Position.Depth)));
+          new NodePosition(_Stack.Peek().VisitCount - 1, InnerTreenumerator.Position.Depth)));
 
       UpdateStateFromNodeVisit(_Stack.Peek());
 
@@ -118,7 +118,7 @@ namespace Arborist.Linq.Treenumerators
             _NodeTreenumerator.Mode,
             _NodeTreenumerator.Node,
             _NodeTreenumerator.VisitCount,
-            (_Stack.Peek().VisitCount - 1, InnerTreenumerator.Position.Depth)));
+            new NodePosition(_Stack.Peek().VisitCount - 1, InnerTreenumerator.Position.Depth)));
       }
       else if (newDepth < previousDepth)
       {
@@ -139,7 +139,7 @@ namespace Arborist.Linq.Treenumerators
             _NodeTreenumerator.Mode,
             _NodeTreenumerator.Node,
             _NodeTreenumerator.VisitCount,
-            (_Stack.Peek().VisitCount - 1, InnerTreenumerator.Position.Depth)));
+            new NodePosition(_Stack.Peek().VisitCount - 1, InnerTreenumerator.Position.Depth)));
       }
 
       UpdateStateFromNodeVisit(_Stack.Peek());
@@ -176,7 +176,7 @@ namespace Arborist.Linq.Treenumerators
               _NodeTreenumerator.Mode,
               _NodeTreenumerator.Node,
               _NodeTreenumerator.VisitCount,
-              (_Stack.Peek().VisitCount - 1, _Stack.Peek().Position.Depth + 1)));
+              new NodePosition(_Stack.Peek().VisitCount - 1, _Stack.Peek().Position.Depth + 1)));
 
           UpdateStateFromNodeVisit(_Stack.Peek());
 
@@ -214,7 +214,7 @@ namespace Arborist.Linq.Treenumerators
                   _NodeTreenumerator.Mode,
                   _NodeTreenumerator.Node,
                   _NodeTreenumerator.VisitCount,
-                  (_Stack.Peek().VisitCount - 1, InnerTreenumerator.Position.Depth)));
+                  new NodePosition(_Stack.Peek().VisitCount - 1, InnerTreenumerator.Position.Depth)));
 
               UpdateStateFromNodeVisit(_Stack.Peek());
             }
@@ -227,7 +227,7 @@ namespace Arborist.Linq.Treenumerators
                   _NodeTreenumerator.Mode,
                   _NodeTreenumerator.Node,
                   _NodeTreenumerator.VisitCount,
-                  (_Stack.Peek().VisitCount - 1, InnerTreenumerator.Position.Depth)));
+                  new NodePosition(_Stack.Peek().VisitCount - 1, InnerTreenumerator.Position.Depth)));
 
               _HasCachedVisit = true;
             }

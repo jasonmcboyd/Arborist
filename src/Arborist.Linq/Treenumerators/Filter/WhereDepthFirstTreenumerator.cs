@@ -177,7 +177,7 @@ namespace Arborist.Linq.Treenumerators
       {
         Node = nodeVisit.Node;
         VisitCount = nodeVisit.VisitCount;
-        Position = (nodeVisit.SiblingIndex, nodeVisit.Depth);
+        Position = new NodePosition(nodeVisit.SiblingIndex, nodeVisit.Depth);
       }
     }
 

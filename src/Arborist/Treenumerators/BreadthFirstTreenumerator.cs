@@ -174,7 +174,7 @@ namespace Arborist.Treenumerators
           TreenumeratorMode.SchedulingNode,
           _RootsEnumerator.Current,
           0,
-          (_RootNodesSeen, 0),
+          new NodePosition(_RootNodesSeen, 0),
           NodeTraversalStrategy.TraverseSubtree);
 
       _RootNodesSeen++;
@@ -274,7 +274,7 @@ namespace Arborist.Treenumerators
           TreenumeratorMode.SchedulingNode,
           childNodeSiblingContext.Node,
           0,
-          (childNodeSiblingContext.SiblingIndex, nodeVisit.Position.Depth + 1),
+          new NodePosition(childNodeSiblingContext.SiblingIndex, nodeVisit.Position.Depth + 1),
           NodeTraversalStrategy.TraverseSubtree);
 
       _ChildrenStack.AddLast(childNodeVisit);

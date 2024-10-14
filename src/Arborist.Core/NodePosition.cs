@@ -14,11 +14,11 @@ namespace Arborist.Core
     public int SiblingIndex { get; }
     public int Depth { get; }
 
-    public static implicit operator NodePosition((int, int) tuple)
-      => new NodePosition(tuple.Item1, tuple.Item2);
+    //public static implicit operator NodePosition((int, int) tuple)
+    //  => new NodePosition(tuple.Item1, tuple.Item2);
 
-    public static implicit operator (int, int)(NodePosition nodePosition)
-      => (nodePosition.SiblingIndex, nodePosition.Depth);
+    //public static implicit operator (int, int)(NodePosition nodePosition)
+    //  => (nodePosition.SiblingIndex, nodePosition.Depth);
 
     public override string ToString()
       => $"({SiblingIndex}, {Depth})";
@@ -28,14 +28,8 @@ namespace Arborist.Core
     public static NodePosition operator +(NodePosition left, NodePosition right)
       => new NodePosition(left.SiblingIndex + right.SiblingIndex, left.Depth + right.Depth);
 
-    public static NodePosition operator +(NodePosition left, (int, int) right)
-      => left + (NodePosition)right;
-
     public static NodePosition operator -(NodePosition left, NodePosition right)
       => new NodePosition(left.SiblingIndex - right.SiblingIndex, left.Depth - right.Depth);
-
-    public static NodePosition operator -(NodePosition left, (int, int) right)
-      => left - (NodePosition)right;
 
     #endregion Arithmetic
 

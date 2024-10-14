@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace Arborist.Linq.Treenumerators.Enumerator
 {
-  internal class EnumerableTreenumerator<TNode> : ITreenumerator<TNode>
+  internal class EnumerableAsTreeTreenumerator<TNode> : ITreenumerator<TNode>
   {
-    public EnumerableTreenumerator(
+    public EnumerableAsTreeTreenumerator(
       IEnumerable<TNode> enumerable)
     {
       _Enumerator = enumerable.GetEnumerator();
@@ -16,13 +16,13 @@ namespace Arborist.Linq.Treenumerators.Enumerator
 
     public TNode Node { get; private set; } = default;
     public int VisitCount { get; private set; } = 0;
-    public NodePosition Position { get; private set; } = (0, -1);
+    public NodePosition Position { get; private set; } = new NodePosition(0, -1);
     public TreenumeratorMode Mode { get; private set; } = default;
 
     public bool MoveNext(NodeTraversalStrategy nodeTraversalStrategy)
     {
       if (Mode == TreenumeratorMode.VisitingNode
-        || Position == (0, -1))
+        || Position == new NodePosition(0, -1))
       {
         return TryMoveNext();
       }

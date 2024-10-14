@@ -96,8 +96,8 @@ namespace Arborist.Linq.Treenumerators
 
       var positionDelta =
         _SkippedSiblingsCounts.Count > 0
-        ? (-_SkippedSiblingsCounts[InnerTreenumerator.Position.Depth], 0)
-        : (0, 0);
+        ? new NodePosition(-_SkippedSiblingsCounts[InnerTreenumerator.Position.Depth], 0)
+        : new NodePosition(0, 0);
 
       var visitCountDelta =
         _SkippedSiblingsCounts.Count - 2 == InnerTreenumerator.Position.Depth

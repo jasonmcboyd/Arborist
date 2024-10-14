@@ -13,7 +13,10 @@ namespace Arborist.Common
     private int _ChildIndex;
     private SimpleNode<TValue>[] _Children;
 
-    public NodeAndSiblingIndex<SimpleNode<TValue>> CurrentChild => _ChildIndex == -1 ? default : (_Children[_ChildIndex], _ChildIndex);
+    public NodeAndSiblingIndex<SimpleNode<TValue>> CurrentChild =>
+      _ChildIndex == -1
+      ? default
+      : new NodeAndSiblingIndex<SimpleNode<TValue>>(_Children[_ChildIndex], _ChildIndex);
 
     public bool MoveNext()
     {

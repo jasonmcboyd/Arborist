@@ -25,7 +25,7 @@ namespace Arborist.TestUtils
             nodeVisit.Item1,
             nodeVisit.Item2,
             nodeVisit.Item3,
-            nodeVisit.Item4))
+            new NodePosition(nodeVisit.Item4.Item1, nodeVisit.Item4.Item2)))
         .ToArray();
     }
   }

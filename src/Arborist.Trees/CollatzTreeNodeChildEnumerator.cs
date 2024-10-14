@@ -29,7 +29,10 @@ namespace Arborist.Trees
 
       _CurrentIndexByte++;
 
-      childNodeAndSiblingIndex = (CurrentIndex == 0 ? GetFirstChild() : GetSecondChild(), CurrentIndex);
+      childNodeAndSiblingIndex =
+        new NodeAndSiblingIndex<ulong>(
+          CurrentIndex == 0 ? GetFirstChild() : GetSecondChild(),
+          CurrentIndex);
 
       return true;
     }
