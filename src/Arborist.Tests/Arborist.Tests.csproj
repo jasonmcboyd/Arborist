@@ -19,6 +19,7 @@
     <ProjectReference Include="..\Arborist.Linq\Arborist.Linq.csproj" />
     <ProjectReference Include="..\Arborist.TestUtils\Arborist.TestUtils.csproj" />
     <ProjectReference Include="..\Arborist.SimpleSerializer\Arborist.SimpleSerializer.csproj" />
+    <ProjectReference Include="..\Arborist\Arborist.csproj" />
   </ItemGroup>
 
 </Project>

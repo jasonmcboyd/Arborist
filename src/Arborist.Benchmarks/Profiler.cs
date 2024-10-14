@@ -7,9 +7,15 @@ namespace Arborist.Benchmarks
   public class Profiler
   {
     private readonly ITreenumerable<ulong> _Tree = new CompleteBinaryTree();
-    private ITreenumerable<ulong> GetTreeWithDepth(int depth) => _Tree.PruneAfter(nodeContext => nodeContext.Position.Depth == depth);
+    private ITreenumerable<ulong> GetTreeWithDepth(int depth) =>
+      _Tree
+      .PruneAfter(nodeContext => nodeContext.Position.Depth == depth);
 
-    public int DepthFirstTraversalDepthBig() => GetTreeWithDepth(21).GetDepthFirstTraversal().Count();
-    public int BreadthFirstTraversalDepthBig() => GetTreeWithDepth(21).GetBreadthFirstTraversal().Count();
+    public int DepthFirstTraversalBig() =>
+      GetTreeWithDepth(19)
+      .PreOrderTraversal()
+      .Count();
+
+    //public int BreadthFirstTraversalBig() => GetTreeWithDepth(21).GetBreadthFirstTraversal().Count();
   }
 }

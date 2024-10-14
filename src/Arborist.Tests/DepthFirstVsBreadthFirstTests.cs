@@ -1,7 +1,6 @@
 ﻿using Arborist.Common;
 using Arborist.Core;
 using Arborist.Linq;
-using Arborist.Nodes;
 using Arborist.SimpleSerializer;
 using Arborist.TestUtils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -52,8 +51,7 @@ namespace Arborist.Tests
     {
       var treenumerable =
         TreeSerializer
-        .DeserializeRoots(treeString)
-        .ToTreenumerable()
+        .Deserialize(treeString)
         .Select(visit => visit.Node);
 
       NodeVisit<string>[] Sort(IEnumerable<NodeVisit<string>> nodes) =>

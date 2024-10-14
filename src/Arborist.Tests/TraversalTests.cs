@@ -1,6 +1,5 @@
 using Arborist.Core;
 using Arborist.Linq;
-using Arborist.Nodes;
 using Arborist.SimpleSerializer;
 using Arborist.TestUtils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -30,46 +29,24 @@ namespace Arborist.Tests
 
     [TestMethod]
     [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
-    public void DepthFirst_IndexableTreenumerable(
+    public void DepthFirstTraversal(
       string treeString,
       string testDescription,
       int testTreeIndex,
       int testScenarioIndex)
     {
-      TraversalTest(treeString, testTreeIndex, testScenarioIndex, true, false);
+      TraversalTest(treeString, testTreeIndex, testScenarioIndex, true);
     }
 
     [TestMethod]
     [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
-    public void DepthFirst_EnumerableTreenumerable(
+    public void BreadthFirstTraversal(
       string treeString,
       string testDescription,
       int testTreeIndex,
       int testScenarioIndex)
     {
-      TraversalTest(treeString, testTreeIndex, testScenarioIndex, true, true);
-    }
-
-    [TestMethod]
-    [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
-    public void BreadthFirst_IndexableTreenumerable(
-      string treeString,
-      string testDescription,
-      int testTreeIndex,
-      int testScenarioIndex)
-    {
-      TraversalTest(treeString, testTreeIndex, testScenarioIndex, false, false);
-    }
-
-    [TestMethod]
-    [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
-    public void BreadthFirst_EnumerableTreenumerable(
-      string treeString,
-      string testDescription,
-      int testTreeIndex,
-      int testScenarioIndex)
-    {
-      TraversalTest(treeString, testTreeIndex, testScenarioIndex, false, true);
+      TraversalTest(treeString, testTreeIndex, testScenarioIndex, false);
     }
 
     [TestMethod]
@@ -83,8 +60,7 @@ namespace Arborist.Tests
       // Arrange
       var treenumerable =
         TreeSerializer
-        .DeserializeRoots(treeString)
-        .ToTreenumerable()
+        .Deserialize(treeString)
         .Select(visit => visit.Node);
 
       var testScenario = TreeTraversalTestData.TestTrees[testTreeIndex].TestScenarios[testScenarioIndex];
@@ -117,35 +93,17 @@ namespace Arborist.Tests
       string treeString,
       int testTreeIndex,
       int testScenarioIndex,
-      bool depthFirstTest,
-      bool enumerableTreenumeratorTest)
+      bool depthFirstTest)
     {
       // Arrange
       var testScenario = TreeTraversalTestData.TestTrees[testTreeIndex].TestScenarios[testScenarioIndex];
 
       ITreenumerable<string> treenumerable;
 
-      if (enumerableTreenumeratorTest)
-      {
-        var rootNodes =
-          TreeSerializer
-          .DeserializeRoots(treeString)
-          .CreateNodeWithEnumerableChildren();
-
-        treenumerable =
-          rootNodes
-          .ToTreenumerable()
-          .Select(visit => visit.Node);
-      }
-      else
-      {
-        var roots = TreeSerializer.DeserializeRoots(treeString);
-
-        treenumerable =
-          roots
-          .ToTreenumerable()
-          .Select(visit => visit.Node);
-      }
+      treenumerable =
+        TreeSerializer
+        .Deserialize(treeString)
+        .Select(visit => visit.Node);
 
       var expected =
         depthFirstTest

@@ -1,6 +1,6 @@
-﻿using Arborist.Linq;
+﻿using Arborist.Common;
+using Arborist.Linq;
 using Arborist.Linq.TreeEnumerable.DepthFirstTree;
-using Arborist.Nodes;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,10 +8,10 @@ namespace Arborist.Linq
 {
   public static partial class EnumerableExtensions
   {
-    internal static IEnumerable<NodeWithIndexableChildren<TValue>> ToReverseTreeRoots<TValue>(
+    internal static IEnumerable<SimpleNode<TValue>> ToReverseTreeRoots<TValue>(
       this IEnumerable<DepthFirstTreeEnumerableToken<TValue>> source)
     {
-      var stack = new Stack<List<NodeWithIndexableChildren<TValue>>>();
+      var stack = new Stack<List<SimpleNode<TValue>>>();
 
       using (var enumerator = source.Reverse().GetEnumerator())
       {
@@ -25,20 +25,20 @@ namespace Arborist.Linq
               var children = stack.Pop();
               enumerator.MoveNext();
               token = enumerator.Current;
-              stack.Peek().Add(new NodeWithIndexableChildren<TValue>(token.Node, children));
+              stack.Peek().Add(new SimpleNode<TValue>(token.Node, children));
               break;
 
             case DepthFirstTreeEnumerableTokenType.EndChildGroup:
-              stack.Push(new List<NodeWithIndexableChildren<TValue>>());
+              stack.Push(new List<SimpleNode<TValue>>());
               if (stack.Count == 1)
-                stack.Push(new List<NodeWithIndexableChildren<TValue>>());
+                stack.Push(new List<SimpleNode<TValue>>());
               break;
 
             default:
               if (stack.Count == 0)
-                stack.Push(new List<NodeWithIndexableChildren<TValue>>());
+                stack.Push(new List<SimpleNode<TValue>>());
 
-              stack.Peek().Add(new NodeWithIndexableChildren<TValue>(token.Node));
+              stack.Peek().Add(new SimpleNode<TValue>(token.Node));
               break;
           }
 

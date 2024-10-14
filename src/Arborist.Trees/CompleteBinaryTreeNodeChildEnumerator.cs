@@ -44,7 +44,7 @@ namespace Arborist.Trees
 
     private ulong _ChildValue;
 
-    public bool TryMoveNext(out NodeAndSiblingIndex<CompleteBinaryTreeNode> childNodeAndSiblingIndex)
+    public bool TryMoveNext(out NodeAndSiblingIndex<ulong> childNodeAndSiblingIndex)
     {
       if (_ChildValue == ulong.MaxValue)
       {
@@ -52,7 +52,7 @@ namespace Arborist.Trees
         return false;
       }
 
-      childNodeAndSiblingIndex = (new CompleteBinaryTreeNode(_ChildValue), (int)(_ChildValue % 2));
+      childNodeAndSiblingIndex = (_ChildValue, (int)(_ChildValue % 2));
 
       TryIncrementChildValue();
 

@@ -3,21 +3,21 @@ using Arborist.Treenumerables;
 
 namespace Arborist.Trees
 {
-  public class CollatzTree : Treenumerable<ulong, CollatzTreeNode, CollatzTreeNodeChildEnumerator>
+  public class CollatzTree : Treenumerable<ulong, ulong, CollatzTreeNodeChildEnumerator>
   {
     public CollatzTree()
       : base(
-          node => node.GetChildEnumerator(),
+          node => new CollatzTreeNodeChildEnumerator(node),
           ChildEnumeratorMoveNextDelegate,
           DisposeChildEnumeratorDelegate,
-          node => node.Value,
+          node => node,
           _Roots)
     {
     }
 
     private static bool ChildEnumeratorMoveNextDelegate(
       ref CollatzTreeNodeChildEnumerator childEnumerator,
-      out NodeAndSiblingIndex<CollatzTreeNode> childNodeAndSiblingIndex)
+      out NodeAndSiblingIndex<ulong> childNodeAndSiblingIndex)
       => childEnumerator.TryMoveNext(out childNodeAndSiblingIndex);
 
     private static void DisposeChildEnumeratorDelegate(
@@ -25,7 +25,7 @@ namespace Arborist.Trees
     {
     }
 
-    private static IEnumerable<CollatzTreeNode> _Roots =
-      new CollatzTreeNode[] { new CollatzTreeNode(2) };
+    private static IEnumerable<ulong> _Roots =
+      new ulong[] { 2 };
   }
 }

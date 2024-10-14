@@ -16,10 +16,10 @@ namespace Arborist.Trees
     private int ChildCount => _HasSecondChild ? 2 : 1;
     private int CurrentIndex => _CurrentIndexByte - 1;
 
-    private CollatzTreeNode GetFirstChild() => new CollatzTreeNode(checked(Value * 2));
-    private CollatzTreeNode GetSecondChild() => new CollatzTreeNode((Value - 1) / 3);
+    private ulong GetFirstChild() => checked(Value * 2);
+    private ulong GetSecondChild() => (Value - 1) / 3;
 
-    public bool TryMoveNext(out NodeAndSiblingIndex<CollatzTreeNode> childNodeAndSiblingIndex)
+    public bool TryMoveNext(out NodeAndSiblingIndex<ulong> childNodeAndSiblingIndex)
     {
       if (CurrentIndex == ChildCount)
       {

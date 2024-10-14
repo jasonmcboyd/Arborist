@@ -29,10 +29,10 @@ namespace Arborist.Treenumerators
     private readonly DisposeChildEnumeratorDelegate<TChildEnumerator> _DisposeChildEnumeratorDelegate;
     private readonly Func<TNode, TValue> _Map;
 
-    private readonly RefSemiDeque<TestNodeVisit<TNode>> _Stack = new RefSemiDeque<TestNodeVisit<TNode>>();
+    private readonly RefSemiDeque<NodeVisit<TNode>> _Stack = new RefSemiDeque<NodeVisit<TNode>>();
     private readonly RefSemiDeque<TChildEnumerator> _StackChildEnumerators = new RefSemiDeque<TChildEnumerator>();
 
-    private readonly RefSemiDeque<TestNodeVisit<TNode>> _SkippedStack = new RefSemiDeque<TestNodeVisit<TNode>>();
+    private readonly RefSemiDeque<NodeVisit<TNode>> _SkippedStack = new RefSemiDeque<NodeVisit<TNode>>();
     private readonly RefSemiDeque<TChildEnumerator> _SkippedStackChildEnumerators = new RefSemiDeque<TChildEnumerator>();
 
     private int CurrentDepth => _Stack.Count + _SkippedStack.Count;
@@ -121,7 +121,7 @@ namespace Arborist.Treenumerators
     {
       PopMainStacks();
 
-      RefSemiDeque<TestNodeVisit<TNode>> stack;
+      RefSemiDeque<NodeVisit<TNode>> stack;
       RefSemiDeque<TChildEnumerator> stackChildEnumerator;
 
       while (true)
@@ -188,7 +188,7 @@ namespace Arborist.Treenumerators
       int childIndex)
     {
       var nodeVisit =
-        new TestNodeVisit<TNode>(
+        new NodeVisit<TNode>(
           TreenumeratorMode.SchedulingNode,
           node,
           0,
@@ -202,7 +202,7 @@ namespace Arborist.Treenumerators
 
     private void PopMainStacks() => PopStacks(_Stack, _StackChildEnumerators);
 
-    private void PopStacks(RefSemiDeque<TestNodeVisit<TNode>> stack, RefSemiDeque<TChildEnumerator> stackChildEnumerator)
+    private void PopStacks(RefSemiDeque<NodeVisit<TNode>> stack, RefSemiDeque<TChildEnumerator> stackChildEnumerator)
     {
       stack.RemoveLast();
       _DisposeChildEnumeratorDelegate(ref stackChildEnumerator.GetLast());
@@ -210,7 +210,7 @@ namespace Arborist.Treenumerators
     }
 
     private bool GetStacksWithDeepestSeenNode(
-      out RefSemiDeque<TestNodeVisit<TNode>> stack,
+      out RefSemiDeque<NodeVisit<TNode>> stack,
       out RefSemiDeque<TChildEnumerator> stackChildEnumerators)
     {
       if (_Stack.Count == 0 && _SkippedStack.Count == 0)
@@ -226,7 +226,7 @@ namespace Arborist.Treenumerators
       return true;
     }
 
-    private void UpdateStateFromVirtualNodeVisit(ref TestNodeVisit<TNode> nodeVisit)
+    private void UpdateStateFromVirtualNodeVisit(ref NodeVisit<TNode> nodeVisit)
     {
       Mode = nodeVisit.Mode;
       Node = _Map(nodeVisit.Node);

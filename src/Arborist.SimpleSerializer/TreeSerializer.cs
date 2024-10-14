@@ -1,5 +1,6 @@
-﻿using Arborist.Core;
-using Arborist.Nodes;
+﻿using Arborist.Common;
+using Arborist.Core;
+using Arborist.Treenumerables;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,74 +13,61 @@ namespace Arborist.SimpleSerializer
     public static ITreenumerable<string> Deserialize(string tree)
       => Deserialize(tree, value => value);
 
-    public static ITreenumerable<TResult> Deserialize<TResult>(
+    public static ITreenumerable<TValue> Deserialize<TValue>(
       string tree,
-      Func<string, TResult> map)
-      => DeserializeRoots(tree, map).ToTreenumerable();
+      Func<string, TValue> map)
+    {
+      return new Treenumerable<TValue, SimpleNode<TValue>, SimpleNodeChildEnumerator<TValue>>(
+        node => node.GetChildEnumerator(),
+        SimpleNodeDelegates.MoveNextChild,
+        SimpleNodeDelegates.DisposeChildEnumerator,
+        node => node.Value,
+        DeserializeRoots(tree, map));
+    }
 
-    public static IEnumerable<NodeWithIndexableChildren<string>> DeserializeRoots(string tree)
+    private static IEnumerable<SimpleNode<string>> DeserializeRoots(string tree)
       => DeserializeRoots(tree, value => value);
 
-    public static IEnumerable<NodeWithIndexableChildren<TResult>> DeserializeRoots<TResult>(
+    private static IEnumerable<SimpleNode<TValue>> DeserializeRoots<TValue>(
       string tree,
-      Func<string, TResult> map)
+      Func<string, TValue> map)
     {
-      // TODO:
-      // I am reversing because for some reason my lizard brain
-      // finds this more intuitive. I want to change this in the future
-      // to avoid the performance penalty of reversing two times, but I
-      // am not that worried about performance right now so this is
-      // good enough.
-      var tokens = Tokenizer.Tokenize(tree).Reverse();
+      var tokens = Tokenizer.Tokenize(tree);
 
-      var stack = new Stack<List<NodeWithIndexableChildren<TResult>>>();
+      var stack = new Stack<List<SimpleNode<TValue>>>();
 
-      stack.Push(new List<NodeWithIndexableChildren<TResult>>());
-
-      List<NodeWithIndexableChildren<TResult>> children = null;
-
-      var rootNodes = new List<NodeWithIndexableChildren<TResult>>();
+      stack.Push(new List<SimpleNode<TValue>>());
 
       foreach (var token in tokens)
       {
-        TResult value;
-        NodeWithIndexableChildren<TResult> node;
+        TValue value;
 
         switch (token.TokenType)
         {
           case TokenType.Comma:
-            if (stack.Count == 1)
-            {
-              var list = stack.Peek();
-              rootNodes.Add(list.Last());
-              list.RemoveAt(list.Count - 1);
-            }
+            // Do nothing
             break;
 
           case TokenType.LeftParentheses:
-            children = stack.Pop();
-            children.Reverse();
+            stack.Push(new List<SimpleNode<TValue>>());
             break;
 
           case TokenType.RightParentheses:
-            stack.Push(new List<NodeWithIndexableChildren<TResult>>());
+            var children = stack.Pop();
+            var nodes = stack.Peek();
+            var node = nodes.Last();
+            nodes[nodes.Count - 1] = new SimpleNode<TValue>(node.Value, children);
             break;
 
           default:
             value = map(token.Symbol);
-            node = new NodeWithIndexableChildren<TResult>(value, children);
+            node = new SimpleNode<TValue>(value);
             stack.Peek().Add(node);
-            children = null;
             break;
         }
       }
 
-      if (stack.Peek().Count > 0)
-        rootNodes.Add(stack.Peek().Last());
-
-      rootNodes.Reverse();
-
-      return rootNodes;
+      return stack.Pop();
     }
 
     public static string Serialize(this ITreenumerable<string> treenumerable)

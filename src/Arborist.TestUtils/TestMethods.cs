@@ -1,7 +1,6 @@
 ﻿using Arborist.Common;
 using Arborist.Core;
 using Arborist.Linq;
-using Arborist.Nodes;
 using Arborist.SimpleSerializer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -18,30 +17,15 @@ namespace Arborist.TestUtils
       Func<ITreenumerable<string>, ITreenumerable<string>> operation,
       Func<NodeContext<string>, NodeTraversalStrategy> nodeTraversalStrategySelector,
       NodeVisit<string>[] expectedTraversal,
-      TreeTraversalStrategy treeTraversalStrategy,
-      bool enumerableTreenumeratorTest)
+      TreeTraversalStrategy treeTraversalStrategy)
     {
       // Arrange
       ITreenumerable<string> treenumerable;
 
-      if (enumerableTreenumeratorTest)
-      {
-        var rootNodes =
-          TreeSerializer
-          .DeserializeRoots(serializedTree)
-          .CreateNodeWithEnumerableChildren();
-
-        treenumerable = rootNodes.ToTreenumerable().Select(visit => visit.Node);
-      }
-      else
-      {
-        var roots = TreeSerializer.DeserializeRoots(serializedTree);
-
-        treenumerable =
-          roots
-          .ToTreenumerable()
-          .Select(visit => visit.Node);
-      }
+      treenumerable =
+        TreeSerializer
+        .Deserialize(serializedTree)
+        .Select(visit => visit.Node);
 
       Debug.WriteLine("--------- Test Name ---------");
       Debug.WriteLine(serializedTree);

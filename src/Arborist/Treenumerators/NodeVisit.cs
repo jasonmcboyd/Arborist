@@ -4,9 +4,9 @@ using System.Collections;
 
 namespace Arborist.Treenumerators
 {
-  internal struct TestNodeVisit<TNode>
+  internal struct NodeVisit<TNode>
   {
-    public TestNodeVisit(
+    public NodeVisit(
       TreenumeratorMode mode,
       TNode node,
       int visitCount,

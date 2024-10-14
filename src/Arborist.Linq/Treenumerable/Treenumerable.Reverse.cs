@@ -1,6 +1,4 @@
 ﻿using Arborist.Core;
-using Arborist.Linq.Extensions;
-using Arborist.Nodes;
 using System;
 
 namespace Arborist.Linq

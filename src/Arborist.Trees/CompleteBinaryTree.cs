@@ -3,21 +3,21 @@ using Arborist.Treenumerables;
 
 namespace Arborist.Trees
 {
-  public class CompleteBinaryTree : Treenumerable<ulong, CompleteBinaryTreeNode, CompleteBinaryTreeNodeChildEnumerator>
+  public class CompleteBinaryTree : Treenumerable<ulong, ulong, CompleteBinaryTreeNodeChildEnumerator>
   {
     public CompleteBinaryTree()
       : base(
-          node => node.GetChildEnumerator(),
+          node => new CompleteBinaryTreeNodeChildEnumerator(node),
           MoveNextChild,
           DisposeChildEnumeratorDelegate,
-          node => node.Value,
+          node => node,
           _Roots)
     {
     }
 
     private static bool MoveNextChild(
       ref CompleteBinaryTreeNodeChildEnumerator childEnumerator,
-      out NodeAndSiblingIndex<CompleteBinaryTreeNode> childNodeAndSiblingIndex)
+      out NodeAndSiblingIndex<ulong> childNodeAndSiblingIndex)
       => childEnumerator.TryMoveNext(out childNodeAndSiblingIndex);
 
     private static void DisposeChildEnumeratorDelegate(
@@ -25,7 +25,7 @@ namespace Arborist.Trees
     {
     }
 
-    private static IEnumerable<CompleteBinaryTreeNode> _Roots =
-      new CompleteBinaryTreeNode[] { new CompleteBinaryTreeNode() };
+    private static IEnumerable<ulong> _Roots =
+      new ulong[] { 0 };
   }
 }

@@ -1004,7 +1004,7 @@ namespace Arborist.Linq.Tests
 
     [TestMethod]
     [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
-    public void PruneBefore_BreadthFirst_EnumerableNodes(
+    public void PruneBefore_BreadthFirst(
       string treeString,
       string testDescription,
       int testIndex,
@@ -1019,13 +1019,12 @@ namespace Arborist.Linq.Tests
         testScenario.TreenumerableMap,
         testScenario.NodeTraversalStrategySelector,
         testScenario.ExpectedBreadthFirstResults,
-        TreeTraversalStrategy.BreadthFirst,
-        true);
+        TreeTraversalStrategy.BreadthFirst);
     }
 
     [TestMethod]
     [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
-    public void PruneBefore_DepthFirst_EnumerableNodes(
+    public void PruneBefore_DepthFirst(
       string treeString,
       string testDescription,
       int testIndex,
@@ -1040,50 +1039,7 @@ namespace Arborist.Linq.Tests
         testScenario.TreenumerableMap,
         testScenario.NodeTraversalStrategySelector,
         testScenario.ExpectedDepthFirstResults,
-        TreeTraversalStrategy.DepthFirst,
-        true);
-    }
-
-    [TestMethod]
-    [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
-    public void PruneBefore_BreadthFirst_IndexableNodes(
-      string treeString,
-      string testDescription,
-      int testIndex,
-      int testScenarioIndex)
-    {
-      var testScenario = _TreenumerableTestDataFactory.GetTestScenario(testIndex, testScenarioIndex);
-
-      TestMethods
-      .TraversalTest(
-        treeString,
-        testDescription,
-        testScenario.TreenumerableMap,
-        testScenario.NodeTraversalStrategySelector,
-        testScenario.ExpectedBreadthFirstResults,
-        TreeTraversalStrategy.BreadthFirst,
-        false);
-    }
-
-    [TestMethod]
-    [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
-    public void PruneBefore_DepthFirst_IndexableNodes(
-      string treeString,
-      string testDescription,
-      int testIndex,
-      int testScenarioIndex)
-    {
-      var testScenario = _TreenumerableTestDataFactory.GetTestScenario(testIndex, testScenarioIndex);
-
-      TestMethods
-      .TraversalTest(
-        treeString,
-        testDescription,
-        testScenario.TreenumerableMap,
-        testScenario.NodeTraversalStrategySelector,
-        testScenario.ExpectedDepthFirstResults,
-        TreeTraversalStrategy.DepthFirst,
-        false);
+        TreeTraversalStrategy.DepthFirst);
     }
   }
 }

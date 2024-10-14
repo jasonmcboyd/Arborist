@@ -1,4 +1,4 @@
-using Arborist.Nodes;
+using Arborist.SimpleSerializer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 
@@ -11,9 +11,9 @@ namespace Arborist.Linq.Tests
     public void PreOrderTraversal_TwoLevels()
     {
       // Arrange
-      var root = Node.CreateNodeWithIndexableChildren(1, 2, 3);
-
-      var treenumerable = root.ToTreenumerable();
+      var treenumerable =
+        TreeSerializer
+        .Deserialize("1,2,3", int.Parse);
 
       // Act
       var actual =
@@ -32,9 +32,9 @@ namespace Arborist.Linq.Tests
     public void LevelOrderTraversal_TwoLevels()
     {
       // Arrange
-      var root = Node.CreateNodeWithIndexableChildren(1, 2, 3);
-
-      var treenumerable = root.ToTreenumerable();
+      var treenumerable =
+        TreeSerializer
+        .Deserialize("1,2,3", int.Parse);
 
       // Act
       var actual =

@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace Arborist.Common
 {
-  public class RefSemiDeque<T>
+  public class RefSemiDeque<T> : IEnumerable<T>
   {
     public RefSemiDeque() : this(8) { }
 
@@ -131,6 +132,28 @@ namespace Arborist.Common
 
       return new PartitionAndOffset(arrayIndex, array.Length - 1 - index);
     }
+
+    #region IEnumerable
+
+    public IEnumerator<T> GetEnumerator()
+    {
+      if (Count == 0)
+        yield break;
+
+      for (var offset = _HeadOffset; offset < _Partitions[0].Length; offset++)
+        yield return _Partitions[0][offset];
+
+      for (var partition = 1; partition < _CurrentPartitionIndex - 2; partition++)
+        for (var offset = 0; offset < _Partitions[partition].Length; offset++)
+          yield return _Partitions[partition][offset];
+
+      for (var offset = 0; offset < _TailOffset; offset++)
+        yield return _Partitions[_CurrentPartitionIndex][offset];
+    }
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+    #endregion IEnumerable
 
     private struct PartitionAndOffset
     {
