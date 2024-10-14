@@ -1,6 +1,6 @@
 ﻿using Arborist.Common;
 
-namespace Arborist.Treenumerables
+namespace Arborist.SimpleSerializer
 {
   public static class SimpleNodeDelegates
   {
