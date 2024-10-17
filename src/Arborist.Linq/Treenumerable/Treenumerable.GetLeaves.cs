@@ -6,7 +6,7 @@ namespace Arborist.Linq
 {
   public static partial class Treenumerable
   {
-    public static IEnumerable<T> GetLeaves<T>(this ITreenumerable<T> source)
+    public static IEnumerable<TNode> GetLeaves<TNode>(this ITreenumerable<TNode> source)
     {
       using (var treenumerator = source.GetDepthFirstTreenumerator())
       {
@@ -15,8 +15,8 @@ namespace Arborist.Linq
 
         treenumerator.MoveNext(NodeTraversalStrategy.TraverseSubtree);
 
-        NodeVisit<T> previousVisit;
-        NodeVisit<T> currentVisit = treenumerator.ToNodeVisit();
+        NodeVisit<TNode> previousVisit;
+        NodeVisit<TNode> currentVisit = treenumerator.ToNodeVisit();
 
         while (treenumerator.MoveNext(NodeTraversalStrategy.TraverseSubtree))
         {

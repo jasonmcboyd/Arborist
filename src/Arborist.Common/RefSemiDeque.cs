@@ -34,10 +34,12 @@ namespace Arborist.Common
       return ref _Partitions[0][_HeadOffset];
     }
 
-    public void RemoveFirst()
+    public T RemoveFirst()
     {
       if (Count == 0)
         throw new InvalidOperationException("The stack is empty.");
+
+      var result = _Partitions[0][_HeadOffset];
 
       _Partitions[0][_HeadOffset] = default;
 
@@ -56,6 +58,8 @@ namespace Arborist.Common
         _Partitions.RemoveAt(0);
         _HeadOffset = 0;
       }
+
+      return result;
     }
 
     public void AddLast(T item)

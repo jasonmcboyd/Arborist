@@ -5,7 +5,7 @@ namespace Arborist.Linq
 {
   public static partial class Treenumerable
   {
-    public static IEnumerable<T> GetRoots<T>(this ITreenumerable<T> source)
+    public static IEnumerable<TNode> GetRoots<TNode>(this ITreenumerable<TNode> source)
     {
       using (var treenumerator = source.GetDepthFirstTreenumerator())
       {
