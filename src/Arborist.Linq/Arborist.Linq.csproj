@@ -5,8 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Arborist.Common\Arborist.Common.csproj" />
     <ProjectReference Include="..\Arborist.Core\Arborist.Core.csproj" />
+    <ProjectReference Include="..\Arborist\Arborist.csproj" />
   </ItemGroup>
 
 </Project>

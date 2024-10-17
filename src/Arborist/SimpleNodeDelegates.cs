@@ -1,6 +1,4 @@
-﻿using Arborist.Common;
-
-namespace Arborist.SimpleSerializer
+﻿namespace Arborist
 {
   public static class SimpleNodeDelegates
   {

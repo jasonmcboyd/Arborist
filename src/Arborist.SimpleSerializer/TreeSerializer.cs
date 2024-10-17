@@ -1,5 +1,4 @@
-﻿using Arborist.Common;
-using Arborist.Core;
+﻿using Arborist.Core;
 using Arborist.Treenumerables;
 using System;
 using System.Collections.Generic;
@@ -16,14 +15,7 @@ namespace Arborist.SimpleSerializer
     public static ITreenumerable<TValue> Deserialize<TValue>(
       string tree,
       Func<string, TValue> map)
-    {
-      return new Treenumerable<TValue, SimpleNode<TValue>, SimpleNodeChildEnumerator<TValue>>(
-        node => node.GetChildEnumerator(),
-        SimpleNodeDelegates.MoveNextChild,
-        SimpleNodeDelegates.DisposeChildEnumerator,
-        node => node.Value,
-        DeserializeRoots(tree, map));
-    }
+      => new SimpleNodeTreenumerable<TValue>(DeserializeRoots(tree, map));
 
     private static IEnumerable<SimpleNode<string>> DeserializeRoots(string tree)
       => DeserializeRoots(tree, value => value);

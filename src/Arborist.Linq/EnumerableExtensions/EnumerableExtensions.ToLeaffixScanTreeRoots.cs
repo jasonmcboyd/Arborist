@@ -1,5 +1,4 @@
-﻿using Arborist.Common;
-using Arborist.Linq;
+﻿using Arborist.Linq;
 using Arborist.Linq.TreeEnumerable.DepthFirstTree;
 using System;
 using System.Collections.Generic;

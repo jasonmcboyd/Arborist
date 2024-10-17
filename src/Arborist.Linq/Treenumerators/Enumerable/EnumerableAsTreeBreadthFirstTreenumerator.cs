@@ -1,5 +1,4 @@
-﻿using Arborist.Common;
-using Arborist.Core;
+﻿using Arborist.Core;
 using System.Collections.Generic;
 
 namespace Arborist.Linq.Treenumerators.Enumerator

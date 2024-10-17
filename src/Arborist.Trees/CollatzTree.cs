@@ -1,5 +1,4 @@
-﻿using Arborist.Common;
-using Arborist.Treenumerables;
+﻿using Arborist.Treenumerables;
 
 namespace Arborist.Trees
 {

@@ -1,6 +1,4 @@
-﻿using Arborist.Common;
-
-namespace Arborist.Trees
+﻿namespace Arborist.Trees
 {
   public struct CompleteBinaryTreeNodeChildEnumerator
   {
