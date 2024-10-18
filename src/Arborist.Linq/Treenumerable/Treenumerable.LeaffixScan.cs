@@ -1,7 +1,6 @@
 ﻿using Arborist.Core;
 using Arborist.Treenumerables;
 using System;
-using System.Collections.Generic;
 
 namespace Arborist.Linq
 {

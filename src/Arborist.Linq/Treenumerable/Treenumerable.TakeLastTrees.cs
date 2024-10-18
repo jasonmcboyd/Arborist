@@ -6,8 +6,8 @@ namespace Arborist.Linq
 {
   public static partial class Treenumerable
   {
-    public static ITreenumerable<T> TakeLastTrees<T>(
-      this ITreenumerable<T> source,
+    public static ITreenumerable<TNode> TakeLastTrees<TNode>(
+      this ITreenumerable<TNode> source,
       int count)
     {
       var treeCount = source.GetRoots().Count();

@@ -9,8 +9,8 @@ namespace Arborist.Linq
     // It is entirely possible for the list to be algorithmically generated and be infinite;
     // That would prevent this from ever completing. I Need to think of a solution for
     // this.
-    public static ITreenumerable<T> TakeTrees<T>(
-      this ITreenumerable<T> source,
+    public static ITreenumerable<TNode> TakeTrees<TNode>(
+      this ITreenumerable<TNode> source,
       int count)
       => source.PruneBefore(visit => visit.Position.Depth == 0 && visit.Position.SiblingIndex >= count);
   }
