@@ -11,27 +11,26 @@ using System.Reflection;
 namespace Arborist.Linq.Tests
 {
   [TestClass]
-  public class InvertTests
+  public class LeaffixScanTests
   {
     public static IEnumerable<object[]> GetTestData()
     {
       return new[]
         {
-          new [] { ""                , ""                 },
-          new [] { "a"               , "a"                },
-          new [] { "a(b(c,d))"       , "a(b(d,c))"        },
-          new [] { "a(b(d),c(e))"    , "a(c(e),b(d))"     },
-          new [] { "a(b(d),c)"       , "a(c,b(d))"        },
-          new [] { "a(b(d,e),c(f,g))", "a(c(g,f),b(e,d))" },
-          new [] { "a(b)"            , "a(b)"             },
-          new [] { "a(b,c)"          , "a(c,b)"           },
-          new [] { "a(c),b"          , "b,a(c)"           },
-          new [] { "a(c),b(d)"       , "b(d),a(c)"        },
-          new [] { "a(c,d),b(e,f)"   , "b(f,e),a(d,c)"    },
-          new [] { "a(d),b,c(e)"     , "c(e),b,a(d)"      },
-          new [] { "a,b(c)"          , "b(c),a"           },
-          new [] { "a,b(c,d)"        , "b(d,c),a"         },
-          new [] { "a,b,c"           , "c,b,a"            },
+          new [] { ""                , ""                   },
+          new [] { "a"               , "a"                  },
+          new [] { "a(b(c,d))"       , "abcd(bcd(c,d))"     },
+          new [] { "a(b(d),c(e))"    , "abdce(bd(d),ce(e))" },
+          new [] { "a(b(d),c)"       , "abdc(bd(d),c)"      },
+          new [] { "a(b)"            , "ab(b)"              },
+          new [] { "a(b,c)"          , "abc(b,c)"           },
+          new [] { "a(c),b"          , "ac(c),b"           },
+          new [] { "a(c),b(d)"       , "ac(c),bd(d)"        },
+          new [] { "a(c,d),b(e,f)"   , "acd(c,d),bef(e,f)"  },
+          new [] { "a(d),b,c(e)"     , "ad(d),b,ce(e)"      },
+          new [] { "a,b(c)"          , "a,bc(c)"            },
+          new [] { "a,b(c,d)"        , "a,bcd(c,d)"         },
+          new [] { "a,b,c"           , "a,b,c"              },
         };
     }
 
@@ -83,7 +82,9 @@ namespace Arborist.Linq.Tests
       Debug.WriteLine($"{Environment.NewLine}-----Actual Values-----");
       var actual =
         sut
-        .Invert()
+        .LeaffixScan(
+          nodeContext => nodeContext.Node,
+          (nodeContext, children) => $"{nodeContext.Node}{string.Join("", children)}")
         .GetTraversal(treeTraversalStrategy)
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();

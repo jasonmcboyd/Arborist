@@ -1,5 +1,7 @@
 ﻿using Arborist.Core;
+using Arborist.Treenumerables;
 using System;
+using System.Collections.Generic;
 
 namespace Arborist.Linq
 {
@@ -7,52 +9,29 @@ namespace Arborist.Linq
   {
     public static ITreenumerable<TAccumulate> LeaffixScan<TSource, TAccumulate>(
       this ITreenumerable<TSource> source,
-      Func<NodeContext<TAccumulate>, NodeContext<TSource>, TAccumulate> seedAccumulator,
-      Func<NodeContext<TAccumulate>, NodeContext<TSource>, TAccumulate> initialAccumulator,
-      Func<NodeContext<TAccumulate>, NodeContext<TAccumulate>, TAccumulate> accumulator,
-      Func<NodeContext<TSource>, TAccumulate> seedGenerator)
+      Func<NodeContext<TSource>, TAccumulate> leafNodeSelector,
+      Func<NodeContext<TSource>, TAccumulate[], TAccumulate> accumulator)
     {
-      // TODO:
-      //var rootNodes =
-      //  source
-      //  .Materialize()
-      //  .ToPreorderTreeEnumerable()
-      //  .ToLeaffixScanTreeRoots(
-      //    seedAccumulator,
-      //    initialAccumulator,
-      //    accumulator,
-      //    seedGenerator);
+      var rootNodes =
+        LeaffixAggregator
+        .Aggregate(
+          source,
+          nodeContext => new SimpleNode<TAccumulate>(leafNodeSelector(nodeContext)),
+          (nodeContext, children) =>
+          {
+            var temp = new TAccumulate[children.Length];
 
-      //return new IndexableTreenumerable<TAccumulate>(rootNodes);
-      throw new NotImplementedException();
-    }
+            // TODO: I don't like that I have to copy the array here. I would like to be able to pass the array directly to the accumulator.
+            for (int i = 0; i < children.Length; i++)
+              temp[i] = children[i].Value;
 
-    public static ITreenumerable<TAccumulate> LeaffixScan<TSource, TAccumulate>(
-      this ITreenumerable<TSource> source,
-      Func<NodeContext<TAccumulate>, NodeContext<TSource>, TAccumulate> initialAccumulator,
-      Func<NodeContext<TAccumulate>, NodeContext<TAccumulate>, TAccumulate> accumulator,
-      Func<NodeContext<TSource>, TAccumulate> seedGenerator)
-    {
-      return
-        source
-        .LeaffixScan(
-          initialAccumulator,
-          initialAccumulator,
-          accumulator,
-          seedGenerator);
-    }
+            return
+              new SimpleNode<TAccumulate>(
+                accumulator(nodeContext, temp),
+                children);
+          });
 
-    public static ITreenumerable<TSource> LeaffixScan<TSource>(
-      this ITreenumerable<TSource> source,
-      Func<NodeContext<TSource>, NodeContext<TSource>, TSource> accumulator)
-    {
-      return
-        source
-        .LeaffixScan(
-          (_, leaf) => leaf.Node,
-          accumulator,
-          accumulator,
-          _ => default);
+      return new SimpleNodeTreenumerable<TAccumulate>(rootNodes);
     }
   }
 }
