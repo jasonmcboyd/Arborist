@@ -1,21 +1,19 @@
 ﻿using Arborist.Core;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Arborist.Linq
 {
   public static partial class Treenumerable
   {
-    public static IEnumerable<T> LevelOrderTraversal<T>(this ITreenumerable<T> source)
+    public static IEnumerable<TNode> LevelOrderTraversal<TNode>(this ITreenumerable<TNode> source)
     {
       if (source == null)
-        return Enumerable.Empty<T>();
+        yield break;
 
-      return
-        source
-        .GetBreadthFirstTraversal()
-        .Where(visit => visit.VisitCount == 1)
-        .Select(visit => visit.Node);
+      using (var treenumerator = source.GetBreadthFirstTreenumerator())
+        while (treenumerator.MoveNext(NodeTraversalStrategy.TraverseSubtree))
+          if (treenumerator.VisitCount == 0)
+            yield return treenumerator.Node;
     }
   }
 }
