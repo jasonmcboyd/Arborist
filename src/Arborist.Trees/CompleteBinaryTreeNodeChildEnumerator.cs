@@ -2,12 +2,12 @@
 {
   public struct CompleteBinaryTreeNodeChildEnumerator
   {
-    public CompleteBinaryTreeNodeChildEnumerator(ulong parentValue)
+    public CompleteBinaryTreeNodeChildEnumerator(int parentValue)
     {
       TrySetFirstChildValue(parentValue);
     }
 
-    private void TrySetFirstChildValue(ulong parentValue)
+    private void TrySetFirstChildValue(int parentValue)
     {
       try
       {
@@ -15,18 +15,18 @@
       }
       catch
       {
-        _ChildValue = ulong.MaxValue;
+        _ChildValue = int.MaxValue;
       }
     }
 
     private void TryIncrementChildValue()
     {
-      if (_ChildValue == ulong.MaxValue)
+      if (_ChildValue == int.MaxValue)
         return;
 
       if ((_ChildValue & 1) == 1)
       {
-        _ChildValue = ulong.MaxValue;
+        _ChildValue = int.MaxValue;
         return;
       }
 
@@ -36,21 +36,21 @@
       }
       catch
       {
-        _ChildValue = ulong.MaxValue;
+        _ChildValue = int.MaxValue;
       }
     }
 
-    private ulong _ChildValue;
+    private int _ChildValue;
 
-    public bool TryMoveNext(out NodeAndSiblingIndex<ulong> childNodeAndSiblingIndex)
+    public bool TryMoveNext(out NodeAndSiblingIndex<int> childNodeAndSiblingIndex)
     {
-      if (_ChildValue == ulong.MaxValue)
+      if (_ChildValue == int.MaxValue)
       {
         childNodeAndSiblingIndex = default;
         return false;
       }
 
-      childNodeAndSiblingIndex = new NodeAndSiblingIndex<ulong>(_ChildValue, (int)(_ChildValue % 2));
+      childNodeAndSiblingIndex = new NodeAndSiblingIndex<int>(_ChildValue, (int)(_ChildValue % 2));
 
       TryIncrementChildValue();
 

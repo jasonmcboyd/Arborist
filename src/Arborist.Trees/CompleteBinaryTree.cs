@@ -2,7 +2,7 @@
 
 namespace Arborist.Trees
 {
-  public class CompleteBinaryTree : Treenumerable<ulong, ulong, CompleteBinaryTreeNodeChildEnumerator>
+  public class CompleteBinaryTree : Treenumerable<int, int, CompleteBinaryTreeNodeChildEnumerator>
   {
     public CompleteBinaryTree()
       : base(
@@ -16,7 +16,7 @@ namespace Arborist.Trees
 
     private static bool MoveNextChild(
       ref CompleteBinaryTreeNodeChildEnumerator childEnumerator,
-      out NodeAndSiblingIndex<ulong> childNodeAndSiblingIndex)
+      out NodeAndSiblingIndex<int> childNodeAndSiblingIndex)
       => childEnumerator.TryMoveNext(out childNodeAndSiblingIndex);
 
     private static void DisposeChildEnumeratorDelegate(
@@ -24,7 +24,7 @@ namespace Arborist.Trees
     {
     }
 
-    private static IEnumerable<ulong> _Roots =
-      new ulong[] { 0 };
+    private static IEnumerable<int> _Roots =
+      new int[] { 0 };
   }
 }

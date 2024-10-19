@@ -6,8 +6,8 @@ namespace Arborist.Benchmarks
 {
   public class Profiler
   {
-    private readonly ITreenumerable<ulong> _Tree = new CompleteBinaryTree();
-    private ITreenumerable<ulong> GetTreeWithDepth(int depth) =>
+    private readonly ITreenumerable<int> _Tree = new CompleteBinaryTree();
+    private ITreenumerable<int> GetTreeWithDepth(int depth) =>
       _Tree
       .PruneAfter(nodeContext => nodeContext.Position.Depth == depth);
 

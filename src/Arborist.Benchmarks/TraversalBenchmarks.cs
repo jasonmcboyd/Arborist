@@ -8,13 +8,13 @@ namespace Arborist.Benchmarks
   [MemoryDiagnoser]
   public class TraversalBenchmarks
   {
-    private readonly ITreenumerable<ulong> _Tree = new CompleteBinaryTree();
+    private readonly ITreenumerable<int> _Tree = new CompleteBinaryTree();
 
-    private ITreenumerable<ulong> GetTreeWithDepth(int depth) =>
+    private ITreenumerable<int> GetTreeWithDepth(int depth) =>
       _Tree
       .PruneAfter(nodeContext => nodeContext.Position.Depth == depth);
 
-    private ITreenumerable<ulong> GetTreeWithDepthWhere(int depth) =>
+    private ITreenumerable<int> GetTreeWithDepthWhere(int depth) =>
       _Tree
       .PruneAfter(nodeContext => nodeContext.Position.Depth == depth)
       .Where(nodeContext => nodeContext.Position.Depth % 2 == 1);
