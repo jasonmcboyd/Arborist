@@ -10,7 +10,10 @@ namespace Arborist.Linq
       this ITreenumerable<T> source,
       Func<NodeContext<T>, bool> predicate)
     {
-      var result =
+      if (predicate == null)
+        return source;
+
+      return
         TreenumerableFactory.Create(
           () => new WhereBreadthFirstTreenumerator<T>(
             source.GetBreadthFirstTreenumerator,
@@ -19,8 +22,6 @@ namespace Arborist.Linq
           () => new PruneBeforeDepthFirstTreenumerator<T>(
             source.GetDepthFirstTreenumerator,
             predicate));
-
-      return result;
     }
   }
 }

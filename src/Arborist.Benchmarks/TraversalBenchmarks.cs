@@ -40,6 +40,10 @@ namespace Arborist.Benchmarks
     public int BreadthFirstWhereDepth19() => GetTreeWithDepthWhere(19).LevelOrderTraversal().Count();
 
     [Benchmark]
+    public int CountLeaves() => GetTreeWithDepthWhere(19).GetLeaves().Count();
+
+
+    [Benchmark]
     public int PruneBeforeBFT() =>
       Enumerable
       .Range(0, 1_000_000)

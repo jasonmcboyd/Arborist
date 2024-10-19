@@ -1,5 +1,4 @@
 ﻿using Arborist.Core;
-using Arborist.Linq.Extensions;
 using System.Collections.Generic;
 
 namespace Arborist.Linq
@@ -13,31 +12,19 @@ namespace Arborist.Linq
         if (!treenumerator.MoveNext(NodeTraversalStrategy.TraverseSubtree))
           yield break;
 
-        treenumerator.MoveNext(NodeTraversalStrategy.TraverseSubtree);
+        TNode previousNode = treenumerator.Node;
+        int previousDepth = treenumerator.Position.Depth;
 
-        NodeVisit<TNode> previousVisit;
-        NodeVisit<TNode> currentVisit = treenumerator.ToNodeVisit();
-
-        while (treenumerator.MoveNext(NodeTraversalStrategy.TraverseSubtree))
+        while (treenumerator.MoveNext(NodeTraversalStrategy.SkipNode))
         {
-          if (treenumerator.VisitCount == 0)
-            continue;
+          if (previousDepth >= treenumerator.Position.Depth)
+            yield return previousNode;
 
-          previousVisit = currentVisit;
-          currentVisit = treenumerator.ToNodeVisit();
-
-          if (previousVisit.VisitCount == 1)
-          {
-            if (previousVisit.Position.Depth > currentVisit.Position.Depth
-              || previousVisit.Position.Depth == currentVisit.Position.Depth)
-            {
-              yield return previousVisit.Node;
-            }
-          }
+          previousNode = treenumerator.Node;
+          previousDepth = treenumerator.Position.Depth;
         }
 
-        if (currentVisit.VisitCount == 1)
-          yield return currentVisit.Node;
+        yield return previousNode;
       }
     }
   }
