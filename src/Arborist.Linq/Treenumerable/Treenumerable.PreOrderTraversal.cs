@@ -5,7 +5,7 @@ namespace Arborist.Linq
 {
   public static partial class Treenumerable
   {
-    public static IEnumerable<T> PreOrderTraversal<T>(this ITreenumerable<T> source)
+    public static IEnumerable<TNode> PreOrderTraversal<TNode>(this ITreenumerable<TNode> source)
     {
       if (source == null)
         yield break;

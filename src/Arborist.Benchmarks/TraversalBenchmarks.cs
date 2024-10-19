@@ -1,6 +1,5 @@
 ﻿using Arborist.Core;
 using Arborist.Linq;
-using Arborist.Trees;
 using BenchmarkDotNet.Attributes;
 
 namespace Arborist.Benchmarks
@@ -8,78 +7,145 @@ namespace Arborist.Benchmarks
   [MemoryDiagnoser]
   public class TraversalBenchmarks
   {
-    private readonly ITreenumerable<int> _Tree = new CompleteBinaryTree();
 
-    private ITreenumerable<int> GetTreeWithDepth(int depth) =>
-      _Tree
-      .PruneAfter(nodeContext => nodeContext.Position.Depth == depth);
+    #region PreOrderTraversal
+
+    [Benchmark]
+    public void PreOrderTraversalDepth18() =>
+      Trees
+      .GetWideTree(18)
+      .PreOrderTraversal()
+      .Consume();
+
+    [Benchmark]
+    public void PreOrderTraversalDepth19() =>
+      Trees
+      .GetWideTree(19)
+      .PreOrderTraversal()
+      .Consume();
+
+    #endregion PreOrderTraversal
+
+    #region LevelOrderTraversal
+
+    [Benchmark]
+    public void LevelOrderTraversalDepth18() =>
+      Trees
+      .GetWideTree(18)
+      .LevelOrderTraversal()
+      .Consume();
+
+    [Benchmark]
+    public void LevelOrderTraversalDepth19() =>
+      Trees
+      .GetWideTree(19)
+      .LevelOrderTraversal()
+      .Consume();
+
+    #endregion LevelOrderTraversal
+
+    #region Where
 
     private ITreenumerable<int> GetTreeWithDepthWhere(int depth) =>
-      _Tree
+      Trees
+      .GetWideTree(depth)
       .PruneAfter(nodeContext => nodeContext.Position.Depth == depth)
       .Where(nodeContext => nodeContext.Position.Depth % 2 == 1);
 
     [Benchmark]
-    public int DepthFirstTraversalDepth18() => GetTreeWithDepth(18).PreOrderTraversal().Count();
-    [Benchmark]
-    public int DepthFirstTraversalDepth19() => GetTreeWithDepth(19).PreOrderTraversal().Count();
+    public void WhereBftDepth18() =>
+      GetTreeWithDepthWhere(18)
+      .Consume(TreeTraversalStrategy.BreadthFirst);
 
     [Benchmark]
-    public int BreadthFirstTraversalDepth18() => GetTreeWithDepth(18).LevelOrderTraversal().Count();
-    [Benchmark]
-    public int BreadthFirstTraversalDepth19() => GetTreeWithDepth(19).LevelOrderTraversal().Count();
+    public void WhereBftDepth19() =>
+      GetTreeWithDepthWhere(19)
+      .Consume(TreeTraversalStrategy.BreadthFirst);
 
     [Benchmark]
-    public int DepthFirstWhereDepth18() => GetTreeWithDepthWhere(18).PreOrderTraversal().Count();
-    [Benchmark]
-    public int DepthFirstWhereDepth19() => GetTreeWithDepthWhere(19).PreOrderTraversal().Count();
+    public void WhereDftDepth18() =>
+      GetTreeWithDepthWhere(18)
+      .Consume(TreeTraversalStrategy.DepthFirst);
 
     [Benchmark]
-    public int BreadthFirstWhereDepth18() => GetTreeWithDepthWhere(18).LevelOrderTraversal().Count();
-    [Benchmark]
-    public int BreadthFirstWhereDepth19() => GetTreeWithDepthWhere(19).LevelOrderTraversal().Count();
+    public void WhereDftDepth19() =>
+      GetTreeWithDepthWhere(19)
+      .Consume(TreeTraversalStrategy.DepthFirst);
+
+    #endregion Where
+
+    #region GetLeaves
 
     [Benchmark]
-    public int CountLeaves() => GetTreeWithDepthWhere(19).GetLeaves().Count();
+    public void GetLeaves() =>
+      Trees
+      .GetWideTree(19)
+      .GetLeaves()
+      .Consume();
 
+    #endregion GetLeaves
 
-    [Benchmark]
-    public bool AnyNodeBFT() =>
-      GetTreeWithDepth(19)
-      .AnyNode(nodeContext => nodeContext.Node == -1, TreeTraversalStrategy.BreadthFirst);
-
-    [Benchmark]
-    public bool AnyNodeDFT() =>
-      GetTreeWithDepth(19).
-      AnyNode(nodeContext => nodeContext.Node == -1, TreeTraversalStrategy.DepthFirst);
-
+    #region AnyNode
 
     [Benchmark]
-    public int PruneBeforeBFT() =>
+    public bool AnyNodeBft() =>
+      Trees
+      .GetWideTree(19)
+      .AnyNode(
+        nodeContext => nodeContext.Node == -1,
+        TreeTraversalStrategy.BreadthFirst);
+
+    [Benchmark]
+    public bool AnyNodeDft() =>
+      Trees
+      .GetWideTree(19).
+      AnyNode(
+        nodeContext => nodeContext.Node == -1,
+        TreeTraversalStrategy.DepthFirst);
+
+    #endregion AnyNode
+
+    #region PruneBefore
+
+    [Benchmark]
+    public void PruneBeforeBft() =>
       Enumerable
       .Range(0, 1_000_000)
       .ToForest()
       .PruneBefore(_ => true)
-      .LevelOrderTraversal()
-      .Count();
+      .Consume(TreeTraversalStrategy.BreadthFirst);
 
     [Benchmark]
-    public int PruneBeforeDFT() =>
+    public void PruneBeforeDft() =>
       Enumerable
       .Range(0, 1_000_000)
       .ToForest()
       .PruneBefore(_ => true)
-      .PreOrderTraversal()
-      .Count();
+      .Consume(TreeTraversalStrategy.DepthFirst);
+
+    #endregion PruneBefore
+
+    #region PruneAfter
 
     [Benchmark]
-    public int PruneAfterDFT() =>
+    public void PruneAfterBft() =>
       Enumerable
-      .Range(0, 2_000_000)
+      .Range(0, 1_000_000)
       .ToForest()
       .PruneAfter(_ => true)
-      .PreOrderTraversal()
-      .Count();
+      .Consume(TreeTraversalStrategy.BreadthFirst);
+
+    [Benchmark]
+    public void PruneAfterDft() =>
+      Enumerable
+      .Range(0, 1_000_000)
+      .ToForest()
+      .PruneAfter(_ => true)
+      .Consume(TreeTraversalStrategy.DepthFirst);
+
+    #endregion PruneAfter
+
+    #region Select
 
     [Benchmark]
     public int SelectComposition() =>
@@ -92,5 +158,7 @@ namespace Arborist.Benchmarks
       .Select(x => (char)x.Node)
       .PreOrderTraversal()
       .Count();
+
+    #endregion Select
   }
 }
