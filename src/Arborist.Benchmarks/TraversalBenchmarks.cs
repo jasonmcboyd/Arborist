@@ -7,6 +7,23 @@ namespace Arborist.Benchmarks
   [MemoryDiagnoser]
   public class TraversalBenchmarks
   {
+    #region LevelOrderTraversal
+
+    [Benchmark]
+    public void LevelOrderTraversalDepth18() =>
+      Trees
+      .GetWideTree(18)
+      .LevelOrderTraversal()
+      .Consume();
+
+    [Benchmark]
+    public void LevelOrderTraversalDepth19() =>
+      Trees
+      .GetWideTree(19)
+      .LevelOrderTraversal()
+      .Consume();
+
+    #endregion LevelOrderTraversal
 
     #region PreOrderTraversal
 
@@ -25,24 +42,6 @@ namespace Arborist.Benchmarks
       .Consume();
 
     #endregion PreOrderTraversal
-
-    #region LevelOrderTraversal
-
-    [Benchmark]
-    public void LevelOrderTraversalDepth18() =>
-      Trees
-      .GetWideTree(18)
-      .LevelOrderTraversal()
-      .Consume();
-
-    [Benchmark]
-    public void LevelOrderTraversalDepth19() =>
-      Trees
-      .GetWideTree(19)
-      .LevelOrderTraversal()
-      .Consume();
-
-    #endregion LevelOrderTraversal
 
     #region Where
 
@@ -85,25 +84,45 @@ namespace Arborist.Benchmarks
 
     #endregion GetLeaves
 
-    #region AnyNode
+    #region AnyNodes
 
     [Benchmark]
-    public bool AnyNodeBft() =>
+    public bool AnyNodesBft() =>
       Trees
       .GetWideTree(19)
-      .AnyNode(
+      .AnyNodes(
         nodeContext => nodeContext.Node == -1,
         TreeTraversalStrategy.BreadthFirst);
 
     [Benchmark]
-    public bool AnyNodeDft() =>
+    public bool AnyNodesDft() =>
       Trees
-      .GetWideTree(19).
-      AnyNode(
+      .GetWideTree(19)
+      .AnyNodes(
         nodeContext => nodeContext.Node == -1,
         TreeTraversalStrategy.DepthFirst);
 
-    #endregion AnyNode
+    #endregion AnyNodes
+
+    #region AllNodes
+
+    [Benchmark]
+    public bool AllNodesBft() =>
+      Trees
+      .GetWideTree(19)
+      .AllNodes(
+        nodeContext => nodeContext.Node > -1,
+        TreeTraversalStrategy.BreadthFirst);
+
+    [Benchmark]
+    public bool AllNodesDft() =>
+      Trees
+      .GetWideTree(19)
+      .AllNodes(
+        nodeContext => nodeContext.Node > -1,
+        TreeTraversalStrategy.DepthFirst);
+
+    #endregion AllNodes
 
     #region PruneBefore
 
