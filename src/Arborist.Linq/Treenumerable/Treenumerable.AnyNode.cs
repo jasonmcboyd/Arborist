@@ -1,4 +1,5 @@
 ﻿using Arborist.Core;
+using Arborist.Linq.Extensions;
 using System;
 using System.Linq;
 
@@ -11,14 +12,17 @@ namespace Arborist.Linq
       Func<NodeContext<TNode>, bool> predicate,
       TreeTraversalStrategy treeTraversalStrategy = TreeTraversalStrategy.BreadthFirst)
     {
-      var materializedSource = source.Materialize();
-
-      var traversal =
+      var nodeTraversalStrategy =
         treeTraversalStrategy == TreeTraversalStrategy.BreadthFirst
-        ? materializedSource.LevelOrderTraversal()
-        : materializedSource.PreOrderTraversal();
+        ? NodeTraversalStrategy.TraverseSubtree
+        : NodeTraversalStrategy.SkipNode;
 
-      return traversal.Any(predicate);
+      using (var treenumerator = source.GetTreenumerator(treeTraversalStrategy))
+        while (treenumerator.MoveNext(nodeTraversalStrategy))
+          if (treenumerator.Mode == TreenumeratorMode.SchedulingNode && predicate(treenumerator.ToNodeContext()))
+            return true;
+
+      return false;
     }
   }
 }

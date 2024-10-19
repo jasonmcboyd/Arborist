@@ -44,6 +44,17 @@ namespace Arborist.Benchmarks
 
 
     [Benchmark]
+    public bool AnyNodeBFT() =>
+      GetTreeWithDepth(19)
+      .AnyNode(nodeContext => nodeContext.Node == -1, TreeTraversalStrategy.BreadthFirst);
+
+    [Benchmark]
+    public bool AnyNodeDFT() =>
+      GetTreeWithDepth(19).
+      AnyNode(nodeContext => nodeContext.Node == -1, TreeTraversalStrategy.DepthFirst);
+
+
+    [Benchmark]
     public int PruneBeforeBFT() =>
       Enumerable
       .Range(0, 1_000_000)
