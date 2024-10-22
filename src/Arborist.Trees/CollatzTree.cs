@@ -6,7 +6,7 @@ namespace Arborist.Trees
   {
     public CollatzTree()
       : base(
-          node => new CollatzTreeNodeChildEnumerator(node),
+          nodeContext => new CollatzTreeNodeChildEnumerator(nodeContext.Node),
           ChildEnumeratorMoveNextDelegate,
           DisposeChildEnumeratorDelegate,
           node => node,

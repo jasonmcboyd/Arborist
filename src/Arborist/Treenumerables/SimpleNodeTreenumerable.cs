@@ -8,7 +8,7 @@ namespace Arborist.Treenumerables
 
     public SimpleNodeTreenumerable(IEnumerable<SimpleNode<TNode>> roots)
       : base(
-        node => node.GetChildEnumerator(),
+        nodeContext => nodeContext.Node.GetChildEnumerator(),
         SimpleNodeDelegates.MoveNextChild,
         SimpleNodeDelegates.DisposeChildEnumerator,
         node => node.Value,

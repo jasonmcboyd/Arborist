@@ -57,7 +57,6 @@ namespace Arborist.Linq.Treenumerators
         _Positions[_Positions.Count - 1] = _Positions.Last().Skip();
       }
 
-      //var previousDepth = InnerTreenumerator.Position.Depth;
       var previousInnerTreenumeratorVisit = InnerTreenumerator.ToNodeVisit();
 
       while (InnerTreenumerator.MoveNext(nodeTraversalStrategy))

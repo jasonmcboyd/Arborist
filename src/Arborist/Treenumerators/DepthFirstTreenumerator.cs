@@ -10,7 +10,7 @@ namespace Arborist.Treenumerators
   {
     public DepthFirstTreenumerator(
       IEnumerable<TNode> rootNodes,
-      Func<TNode, TChildEnumerator> childEnumeratorFactory,
+      Func<NodeContext<TNode>, TChildEnumerator> childEnumeratorFactory,
       MoveNextChildDelegate<TChildEnumerator, TNode> tryMoveNextChildDelegate,
       DisposeChildEnumeratorDelegate<TChildEnumerator> disposeChildEnumeratorDelegate,
       Func<TNode, TValue> map)
@@ -23,7 +23,7 @@ namespace Arborist.Treenumerators
     }
 
     private readonly IEnumerator<TNode> _RootsEnumerator;
-    private readonly Func<TNode, TChildEnumerator> _ChildEnumeratorFactory;
+    private readonly Func<NodeContext<TNode>, TChildEnumerator> _ChildEnumeratorFactory;
     private readonly MoveNextChildDelegate<TChildEnumerator, TNode> _MoveNextChildDelegate;
     private readonly DisposeChildEnumeratorDelegate<TChildEnumerator> _DisposeChildEnumeratorDelegate;
     private readonly Func<TNode, TValue> _Map;
@@ -193,7 +193,7 @@ namespace Arborist.Treenumerators
           0,
           new NodePosition(childIndex, CurrentDepth),
           NodeTraversalStrategy.TraverseSubtree);
-      var nodeChildEnumerator = _ChildEnumeratorFactory(node);
+      var nodeChildEnumerator = _ChildEnumeratorFactory(new NodeContext<TNode>(nodeVisit.Node, nodeVisit.Position));
 
       _Stack.AddLast(nodeVisit);
       _StackChildEnumerators.AddLast(nodeChildEnumerator);

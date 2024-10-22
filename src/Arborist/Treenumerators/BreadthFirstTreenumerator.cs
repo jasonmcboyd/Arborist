@@ -10,7 +10,7 @@ namespace Arborist.Treenumerators
   {
     public BreadthFirstTreenumerator(
       IEnumerable<TNode> rootNodes,
-      Func<TNode, TChildEnumerator> childEnumeratorFactory,
+      Func<NodeContext<TNode>, TChildEnumerator> childEnumeratorFactory,
       MoveNextChildDelegate<TChildEnumerator, TNode> tryMoveNextChildDelegate,
       DisposeChildEnumeratorDelegate<TChildEnumerator> disposeChildEnumeratorDelegate,
       Func<TNode, TValue> map)
@@ -23,7 +23,7 @@ namespace Arborist.Treenumerators
     }
 
     private readonly IEnumerator<TNode> _RootsEnumerator;
-    private readonly Func<TNode, TChildEnumerator> _ChildEnumeratorFactory;
+    private readonly Func<NodeContext<TNode>, TChildEnumerator> _ChildEnumeratorFactory;
     private readonly MoveNextChildDelegate<TChildEnumerator, TNode> _MoveNextChildDelegate;
     private readonly DisposeChildEnumeratorDelegate<TChildEnumerator> _DisposeChildEnumeratorDelegate;
     private readonly Func<TNode, TValue> _Map;
@@ -179,7 +179,7 @@ namespace Arborist.Treenumerators
       _RootNodesSeen++;
 
       _ChildrenStack.AddLast(nodeVisit);
-      _ChildrenStackChildEnumerators.AddLast(_ChildEnumeratorFactory(nodeVisit.Node));
+      _ChildrenStackChildEnumerators.AddLast(_ChildEnumeratorFactory(new NodeContext<TNode>(nodeVisit.Node, nodeVisit.Position)));
 
       UpdateStateFromVirtualNodeVisit(ref _ChildrenStack.GetLast());
 
@@ -277,7 +277,7 @@ namespace Arborist.Treenumerators
           NodeTraversalStrategy.TraverseSubtree);
 
       _ChildrenStack.AddLast(childNodeVisit);
-      _ChildrenStackChildEnumerators.AddLast(_ChildEnumeratorFactory(childNodeSiblingContext.Node));
+      _ChildrenStackChildEnumerators.AddLast(_ChildEnumeratorFactory(new NodeContext<TNode>(childNodeVisit.Node, childNodeVisit.Position)));
 
       if (cacheChild && _CurrentLevel.Count > 0)
       {

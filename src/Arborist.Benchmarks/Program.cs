@@ -1,19 +1,27 @@
 ﻿using Arborist.Benchmarks;
+using Arborist.Benchmarks.Trees;
+using Arborist.Linq;
+using Arborist.Trees;
 using BenchmarkDotNet.Running;
 
 BenchmarkRunner.Run<TraversalBenchmarks>();
 
-//var benchmark = new TreenumerableBenchmarks().DepthFirstTraversalDepthBig();
-//var count = new TreenumerableBenchmarks().BreadthFirstTraversalDepthBig();
-//Console.WriteLine($"Count: {count}");
-//Console.WriteLine($"Count: {new TraversalBenchmarks().PruneBeforeBFT()}");
-//Console.WriteLine($"Count: {new TraversalBenchmarks().PruneBeforeDFT()}");
-
 //var profiler = new Profiler();
 
-//var dftCount = profiler.DepthFirstTraversalBig();
-//var bftCount = profiler.BreadthFirstTraversalBig();
+//Console.WriteLine($"Count: {profiler.LevelOrderTraversal_DeepTree()}");
 
-//Console.WriteLine($"Depth First Traversal Count: {dftCount}");
-//Console.WriteLine($"Breadth First Traversal Count: {bftCount}");
+//var tree =
+//  new DeepTree()
+//  .TakeTrees(20)
+//  .CountNodes();
+
+//Console.WriteLine(tree);
+
+//benchmark.LevelOrderTraversal_DeepTree();
+//benchmark.LevelOrderTraversal_TriangleTree();
+//benchmark.LevelOrderTraversal_WideTree();
+//benchmark.PreOrderTraversal_DeepTree();
+//benchmark.PreOrderTraversal_TriangleTree();
+//benchmark.PreOrderTraversal_WideTree();
+
 

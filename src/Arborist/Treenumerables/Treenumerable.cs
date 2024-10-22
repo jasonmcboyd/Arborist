@@ -8,7 +8,7 @@ namespace Arborist.Treenumerables
   public class Treenumerable<TValue, TNode, TChildEnumerator> : ITreenumerable<TValue>
   {
     public Treenumerable(
-      Func<TNode, TChildEnumerator> childEnumeratorFactory,
+      Func<NodeContext<TNode>, TChildEnumerator> childEnumeratorFactory,
       MoveNextChildDelegate<TChildEnumerator, TNode> tryMoveNextChildDelegate,
       DisposeChildEnumeratorDelegate<TChildEnumerator> disposeChildEnumeratorDelegate,
       Func<TNode, TValue> nodeToValueMap,
@@ -23,7 +23,7 @@ namespace Arborist.Treenumerables
     }
 
     public Treenumerable(
-      Func<TNode, TChildEnumerator> childEnumeratorFactory,
+      Func<NodeContext<TNode>, TChildEnumerator> childEnumeratorFactory,
       MoveNextChildDelegate<TChildEnumerator, TNode> tryMoveNextChildDelegate,
       DisposeChildEnumeratorDelegate<TChildEnumerator> disposeChildEnumeratorDelegate,
       Func<TNode, TValue> nodeToValueMap,
@@ -37,7 +37,7 @@ namespace Arborist.Treenumerables
     }
 
     private readonly IEnumerable<TNode> _Roots;
-    private readonly Func<TNode, TChildEnumerator> _ChildEnumeratorFactory;
+    private readonly Func<NodeContext<TNode>, TChildEnumerator> _ChildEnumeratorFactory;
     private readonly MoveNextChildDelegate<TChildEnumerator, TNode> _MoveNextChildDelegate;
     private readonly DisposeChildEnumeratorDelegate<TChildEnumerator> _DisposeChildEnumeratorDelegate;
     private readonly Func<TNode, TValue> _NodeToValueMap;

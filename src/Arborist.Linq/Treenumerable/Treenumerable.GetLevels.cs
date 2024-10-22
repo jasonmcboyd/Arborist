@@ -5,6 +5,7 @@ namespace Arborist.Linq
 {
   public static partial class Treenumerable
   {
+    // TODO: I can probably make this an IEnumerable<IEnumerable<TNode>> and lazy evaluate the entire tree.
     public static IEnumerable<TNode[]> GetLevels<TNode>(this ITreenumerable<TNode> source)
     {
       var depth = 0;

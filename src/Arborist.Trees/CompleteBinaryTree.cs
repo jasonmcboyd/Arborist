@@ -6,7 +6,7 @@ namespace Arborist.Trees
   {
     public CompleteBinaryTree()
       : base(
-          node => new CompleteBinaryTreeNodeChildEnumerator(node),
+          nodeContext => new CompleteBinaryTreeNodeChildEnumerator(nodeContext.Node),
           MoveNextChild,
           DisposeChildEnumeratorDelegate,
           node => node,

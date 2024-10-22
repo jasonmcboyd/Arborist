@@ -1,35 +1,40 @@
 using Arborist.SimpleSerializer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace Arborist.Linq.Tests
 {
   [TestClass]
   public class LevelOrderTraversalTests
   {
-    [TestMethod]
-    public void LevelOrderTraversal_TwoLevels()
+    public static IEnumerable<object[]> GetTestData()
     {
-      // Arrange
-      var treenumerable = TreeSerializer.Deserialize("a(b,c)");
+      yield return new object[] { "a",              new[] { "a" } };
+      yield return new object[] { "a(c),b",         new[] { "a", "b", "c" } };
+      yield return new object[] { "a(b(c))",        new[] { "a", "b", "c" } };
+      yield return new object[] { "a(b,c)",         new[] { "a", "b", "c" } };
+      yield return new object[] { "a(c,d),b(e,f)",  new[] { "a", "b", "c", "d", "e", "f" } };
+      yield return new object[] { "a,b(c)",         new[] { "a", "b", "c" } };
+      yield return new object[] { "a(d(f)),b(e),c", new[] { "a", "b", "c", "d", "e", "f" } };
+      yield return new object[] { "a,b(d),c(e(f))", new[] { "a", "b", "c", "d", "e", "f" } };
+      yield return new object[] { "a,b,c",          new[] { "a", "b", "c" } };
+    }
 
-      // Act
-      var actual =
-        treenumerable
-        .LevelOrderTraversal()
-        .ToArray();
-
-      // Assert
-      var expected = new[] { "a", "b", "c" };
-
-      CollectionAssert.AreEqual(expected, actual);
+    public static string GetTestDisplayName(MethodInfo methodInfo, object[] data)
+    {
+      return data[0].ToString();
     }
 
     [TestMethod]
-    public void LevelOrderTraversal_MultipleLevels()
+    [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
+    public void LevelOrderTraversal_TwoLevels(
+      string treeString,
+      string[] expectedResults)
     {
       // Arrange
-      var treenumerable = TreeSerializer.Deserialize("a(b(c,d),e(f,g,h))");
+      var treenumerable = TreeSerializer.Deserialize(treeString);
 
       // Act
       var actual =
@@ -38,27 +43,7 @@ namespace Arborist.Linq.Tests
         .ToArray();
 
       // Assert
-      var expected = new[] { "a", "b", "e", "c", "d", "f", "g", "h" };
-
-      CollectionAssert.AreEqual(expected, actual);
-    }
-
-    [TestMethod]
-    public void LevelOrderTraversal_MultipleRoots_MultipleLevels()
-    {
-      // Arrange
-      var treenumerable = TreeSerializer.Deserialize("a(b(c,d),e(f,g,h)),i(j,k)");
-
-      // Act
-      var actual =
-        treenumerable
-        .LevelOrderTraversal()
-        .ToArray();
-
-      // Assert
-      var expected = new[] { "a", "i", "b", "e", "j", "k", "c", "d", "f", "g", "h" };
-
-      CollectionAssert.AreEqual(expected, actual);
+      CollectionAssert.AreEqual(expectedResults, actual);
     }
   }
 }
