@@ -1,57 +1,42 @@
 using Arborist.SimpleSerializer;
-using Arborist.TestUtils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Diagnostics;
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace Arborist.Linq.Tests
 {
   [TestClass]
   public class PostOrderTraversalTests
   {
-    [TestMethod]
-    public void PostOrderTraversal_TwoLevels()
+    public static IEnumerable<object[]> GetTestData()
     {
-      // Arrange
-      var treenumerable = TreeSerializer.Deserialize("a(b,c)");
+      yield return new object[] { "",               Array.Empty<string>() };
+      yield return new object[] { "a",              new[] { "a" } };
+      yield return new object[] { "a(c),b",         new[] { "c", "a", "b" } };
+      yield return new object[] { "a(b(c))",        new[] { "c", "b", "a" } };
+      yield return new object[] { "a(b,c)",         new[] { "b", "c", "a" } };
+      yield return new object[] { "a(c,d),b(e,f)",  new[] { "c", "d", "a", "e", "f", "b" } };
+      yield return new object[] { "a,b(c)",         new[] { "a", "c", "b" } };
+      yield return new object[] { "a(d(f)),b(e),c", new[] { "f", "d", "a", "e", "b", "c" } };
+      yield return new object[] { "a,b(d),c(e(f))", new[] { "a", "d", "b", "f", "e", "c" } };
+      yield return new object[] { "a,b,c",          new[] { "a", "b", "c" } };
+    }
 
-      // Act
-      var actual =
-        treenumerable
-        .PostOrderTraversal()
-        .Do(x => Debug.WriteLine(x))
-        .ToArray();
-
-      // Assert
-      var expected = new[] { "b", "c", "a" };
-
-      CollectionAssert.AreEqual(expected, actual);
+    public static string GetTestDisplayName(MethodInfo methodInfo, object[] data)
+    {
+      return data[0].ToString();
     }
 
     [TestMethod]
-    public void PostOrderTraversal_MultipleLevels()
+    [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
+    public void PostOrderTraversal(
+      string treeString,
+      string[] expectedResults)
     {
       // Arrange
-      var treenumerable = TreeSerializer.Deserialize("a(b(c,d),e(f,g,h))");
-
-      // Act
-      var actual =
-        treenumerable
-        .PostOrderTraversal()
-        .Do(x => Debug.WriteLine(x))
-        .ToArray();
-
-      // Assert
-      var expected = new[] { "c", "d", "b", "f", "g", "h", "e", "a" };
-
-      CollectionAssert.AreEqual(expected, actual);
-    }
-
-    [TestMethod]
-    public void PostOrderTraversal_MultipleRoots_MultipleLevels()
-    {
-      // Arrange
-      var treenumerable = TreeSerializer.Deserialize("a(b(c,d),e(f,g,h)),i(j,k)");
+      var treenumerable = TreeSerializer.Deserialize(treeString);
 
       // Act
       var actual =
@@ -60,9 +45,7 @@ namespace Arborist.Linq.Tests
         .ToArray();
 
       // Assert
-      var expected = new[] { "c", "d", "b", "f", "g", "h", "e", "a", "j", "k", "i" };
-
-      CollectionAssert.AreEqual(expected, actual);
+      CollectionAssert.AreEqual(expectedResults, actual);
     }
   }
 }

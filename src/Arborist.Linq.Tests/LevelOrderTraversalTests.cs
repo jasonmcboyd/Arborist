@@ -1,5 +1,6 @@
 using Arborist.SimpleSerializer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -11,6 +12,7 @@ namespace Arborist.Linq.Tests
   {
     public static IEnumerable<object[]> GetTestData()
     {
+      yield return new object[] { "",               Array.Empty<string>() };
       yield return new object[] { "a",              new[] { "a" } };
       yield return new object[] { "a(c),b",         new[] { "a", "b", "c" } };
       yield return new object[] { "a(b(c))",        new[] { "a", "b", "c" } };
@@ -29,7 +31,7 @@ namespace Arborist.Linq.Tests
 
     [TestMethod]
     [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
-    public void LevelOrderTraversal_TwoLevels(
+    public void LevelOrderTraversal(
       string treeString,
       string[] expectedResults)
     {

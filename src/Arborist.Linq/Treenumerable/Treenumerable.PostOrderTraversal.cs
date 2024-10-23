@@ -5,32 +5,26 @@ namespace Arborist.Linq
 {
   public static partial class Treenumerable
   {
-    public static IEnumerable<T> PostOrderTraversal<T>(this ITreenumerable<T> source)
+    public static IEnumerable<TNode> PostOrderTraversal<TNode>(this ITreenumerable<TNode> source)
     {
       if (source == null)
         yield break;
 
-      NodeVisit<T>? previousVisit = null;
+      var nodes = new RefSemiDeque<TNode>();
 
-      foreach (var visit in source.GetDepthFirstTraversal())
+      using (var treenumerator = source.GetDepthFirstTreenumerator())
       {
-        if (visit.VisitCount == 1)
-          continue;
+        while (treenumerator.MoveNext(NodeTraversalStrategy.SkipNode))
+        {
+          while (nodes.Count - 1 >= treenumerator.Position.Depth)
+            yield return nodes.RemoveLast();
 
-        var canYield =
-          previousVisit != null
-          && (visit.Position.Depth < previousVisit.Value.Position.Depth
-            || (previousVisit.Value.Position.Depth == 0
-              && visit.Position.Depth == 0));
-
-        if (canYield)
-          yield return previousVisit.Value.Node;
-
-        previousVisit = visit;
+          nodes.AddLast(treenumerator.Node);
+        }
       }
 
-      if (previousVisit != null)
-        yield return previousVisit.Value.Node;
+      while (nodes.Count > 0)
+        yield return nodes.RemoveLast();
     }
   }
 }
