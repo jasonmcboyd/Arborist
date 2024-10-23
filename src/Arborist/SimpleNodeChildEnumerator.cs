@@ -2,7 +2,7 @@
 
 namespace Arborist
 {
-  public struct SimpleNodeChildEnumerator<TValue>
+  public struct SimpleNodeChildEnumerator<TValue> : IChildEnumerator<SimpleNode<TValue>>
   {
     public SimpleNodeChildEnumerator(SimpleNode<TValue>[] children)
     {
@@ -18,14 +18,21 @@ namespace Arborist
       ? default
       : new NodeAndSiblingIndex<SimpleNode<TValue>>(_Children[_ChildIndex], _ChildIndex);
 
-    public bool MoveNext()
+    public bool MoveNext(out NodeAndSiblingIndex<SimpleNode<TValue>> childNodeAndSiblingIndex)
     {
       if (_ChildIndex + 1 >= _Children.Length)
+      {
+        childNodeAndSiblingIndex = default;
         return false;
+      }
 
       _ChildIndex++;
-
+      childNodeAndSiblingIndex = new NodeAndSiblingIndex<SimpleNode<TValue>>(_Children[_ChildIndex], _ChildIndex);
       return true;
+    }
+
+    public void Dispose()
+    {
     }
   }
 }

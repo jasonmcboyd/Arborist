@@ -12,20 +12,8 @@ namespace Arborist.Benchmarks.Trees
     public NDecrementTree(int depth)
       : base(
           nodeContext => new NDecrementTreeNodeChildEnumerator(nodeContext.Node),
-          MoveNextChild,
-          DisposeChildEnumeratorDelegate,
           node => node,
           new[] { depth - 1 })
-    {
-    }
-
-    private static bool MoveNextChild(
-      ref NDecrementTreeNodeChildEnumerator childEnumerator,
-      out NodeAndSiblingIndex<int> childNodeAndSiblingIndex)
-      => childEnumerator.TryMoveNext(out childNodeAndSiblingIndex);
-
-    private static void DisposeChildEnumeratorDelegate(
-      ref NDecrementTreeNodeChildEnumerator childEnumerator)
     {
     }
   }

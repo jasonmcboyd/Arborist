@@ -7,25 +7,20 @@ namespace Arborist.Treenumerators
 {
   internal sealed class DepthFirstTreenumerator<TValue, TNode, TChildEnumerator>
     : TreenumeratorBase<TValue>
+    where TChildEnumerator : IChildEnumerator<TNode>
   {
     public DepthFirstTreenumerator(
       IEnumerable<TNode> rootNodes,
       Func<NodeContext<TNode>, TChildEnumerator> childEnumeratorFactory,
-      MoveNextChildDelegate<TChildEnumerator, TNode> tryMoveNextChildDelegate,
-      DisposeChildEnumeratorDelegate<TChildEnumerator> disposeChildEnumeratorDelegate,
       Func<TNode, TValue> map)
     {
       _RootsEnumerator = rootNodes.GetEnumerator();
       _ChildEnumeratorFactory = childEnumeratorFactory;
-      _MoveNextChildDelegate = tryMoveNextChildDelegate;
-      _DisposeChildEnumeratorDelegate = disposeChildEnumeratorDelegate;
       _Map = map;
     }
 
     private readonly IEnumerator<TNode> _RootsEnumerator;
     private readonly Func<NodeContext<TNode>, TChildEnumerator> _ChildEnumeratorFactory;
-    private readonly MoveNextChildDelegate<TChildEnumerator, TNode> _MoveNextChildDelegate;
-    private readonly DisposeChildEnumeratorDelegate<TChildEnumerator> _DisposeChildEnumeratorDelegate;
     private readonly Func<TNode, TValue> _Map;
 
     private readonly RefSemiDeque<NodeVisit<TNode>> _Stack = new RefSemiDeque<NodeVisit<TNode>>();
@@ -154,7 +149,7 @@ namespace Arborist.Treenumerators
       bool cacheChild = false,
       bool popMainStacksOntoSkippedStacks = false)
     {
-      if (!_MoveNextChildDelegate(ref nodeVisitChildEnumerator, out var childNodeAndSiblingIndex))
+      if (!nodeVisitChildEnumerator.MoveNext(out var childNodeAndSiblingIndex))
         return false;
 
       if (popMainStacksOntoSkippedStacks)
@@ -204,7 +199,7 @@ namespace Arborist.Treenumerators
     private void PopStacks(RefSemiDeque<NodeVisit<TNode>> stack, RefSemiDeque<TChildEnumerator> stackChildEnumerator)
     {
       stack.RemoveLast();
-      _DisposeChildEnumeratorDelegate(ref stackChildEnumerator.GetLast());
+      stackChildEnumerator.GetLast().Dispose();
       stackChildEnumerator.RemoveLast();
     }
 
@@ -268,7 +263,7 @@ namespace Arborist.Treenumerators
 
       while (stackChildEnumerators.Count > 0)
       {
-        _DisposeChildEnumeratorDelegate(ref stackChildEnumerators.GetLast());
+        stackChildEnumerators.GetLast().Dispose();
         stackChildEnumerators.RemoveLast();
       }
     }

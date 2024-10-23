@@ -6,16 +6,11 @@
       ref SimpleNodeChildEnumerator<TValue> childEnumerator,
       out NodeAndSiblingIndex<SimpleNode<TValue>> childNodeAndSiblingIndex)
     {
-      if (childEnumerator.MoveNext())
-      {
-        childNodeAndSiblingIndex = childEnumerator.CurrentChild;
+      if (childEnumerator.MoveNext(out childNodeAndSiblingIndex))
         return true;
-      }
-      else
-      {
-        childNodeAndSiblingIndex = default;
-        return false;
-      }
+
+      childNodeAndSiblingIndex = default;
+      return false;
     }
 
     public static void DisposeChildEnumerator<TValue>(ref SimpleNodeChildEnumerator<TValue> childEnumerator)

@@ -1,5 +1,4 @@
 ﻿using Arborist.Treenumerables;
-using System.Collections.Generic;
 
 namespace Arborist.Trees
 {
@@ -8,24 +7,9 @@ namespace Arborist.Trees
     public CollatzTree()
       : base(
           nodeContext => new CollatzTreeNodeChildEnumerator(nodeContext.Node),
-          ChildEnumeratorMoveNextDelegate,
-          DisposeChildEnumeratorDelegate,
           node => node,
-          _Roots)
+          new ulong[] { 2 })
     {
     }
-
-    private static bool ChildEnumeratorMoveNextDelegate(
-      ref CollatzTreeNodeChildEnumerator childEnumerator,
-      out NodeAndSiblingIndex<ulong> childNodeAndSiblingIndex)
-      => childEnumerator.TryMoveNext(out childNodeAndSiblingIndex);
-
-    private static void DisposeChildEnumeratorDelegate(
-      ref CollatzTreeNodeChildEnumerator childEnumerator)
-    {
-    }
-
-    private static IEnumerable<ulong> _Roots =
-      new ulong[] { 2 };
   }
 }

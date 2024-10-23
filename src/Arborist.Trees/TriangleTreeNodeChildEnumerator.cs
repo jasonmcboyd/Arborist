@@ -1,6 +1,7 @@
 ﻿namespace Arborist.Trees
 {
   public struct TriangleTreeNodeChildEnumerator
+    : IChildEnumerator<int>
   {
     public TriangleTreeNodeChildEnumerator(int childCount)
     {
@@ -11,7 +12,7 @@
     private readonly int _ChildCount;
     private int _ChildIndex;
 
-    public bool TryMoveNext(out NodeAndSiblingIndex<int> childNodeAndSiblingIndex)
+    public bool MoveNext(out NodeAndSiblingIndex<int> childNodeAndSiblingIndex)
     {
       if (_ChildIndex == _ChildCount)
       {
@@ -22,6 +23,11 @@
       childNodeAndSiblingIndex = new NodeAndSiblingIndex<int>(_ChildIndex, 0);
       _ChildIndex++;
       return true;
+    }
+
+    public void Dispose()
+    {
+      // Do nothing.
     }
   }
 }

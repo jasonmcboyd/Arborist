@@ -1,6 +1,7 @@
 ﻿namespace Arborist.Trees
 {
   public struct CollatzTreeNodeChildEnumerator
+    : IChildEnumerator<ulong>
   {
     public CollatzTreeNodeChildEnumerator(ulong value)
     {
@@ -18,7 +19,7 @@
     private ulong GetFirstChild() => checked(Value * 2);
     private ulong GetSecondChild() => (Value - 1) / 3;
 
-    public bool TryMoveNext(out NodeAndSiblingIndex<ulong> childNodeAndSiblingIndex)
+    public bool MoveNext(out NodeAndSiblingIndex<ulong> childNodeAndSiblingIndex)
     {
       if (CurrentIndex == ChildCount)
       {
@@ -34,6 +35,11 @@
           CurrentIndex);
 
       return true;
+    }
+
+    public void Dispose()
+    {
+      // Do nothing.
     }
   }
 }

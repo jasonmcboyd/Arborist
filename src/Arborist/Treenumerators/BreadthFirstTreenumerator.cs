@@ -1,5 +1,4 @@
 ﻿using Arborist.Core;
-using Arborist.Treenumerables;
 using System;
 using System.Collections.Generic;
 
@@ -7,25 +6,20 @@ namespace Arborist.Treenumerators
 {
   internal sealed class BreadthFirstTreenumerator<TValue, TNode, TChildEnumerator>
     : TreenumeratorBase<TValue>
+    where TChildEnumerator : IChildEnumerator<TNode>
   {
     public BreadthFirstTreenumerator(
       IEnumerable<TNode> rootNodes,
       Func<NodeContext<TNode>, TChildEnumerator> childEnumeratorFactory,
-      MoveNextChildDelegate<TChildEnumerator, TNode> tryMoveNextChildDelegate,
-      DisposeChildEnumeratorDelegate<TChildEnumerator> disposeChildEnumeratorDelegate,
       Func<TNode, TValue> map)
     {
       _RootsEnumerator = rootNodes.GetEnumerator();
       _ChildEnumeratorFactory = childEnumeratorFactory;
-      _MoveNextChildDelegate = tryMoveNextChildDelegate;
-      _DisposeChildEnumeratorDelegate = disposeChildEnumeratorDelegate;
       _Map = map;
     }
 
     private readonly IEnumerator<TNode> _RootsEnumerator;
     private readonly Func<NodeContext<TNode>, TChildEnumerator> _ChildEnumeratorFactory;
-    private readonly MoveNextChildDelegate<TChildEnumerator, TNode> _MoveNextChildDelegate;
-    private readonly DisposeChildEnumeratorDelegate<TChildEnumerator> _DisposeChildEnumeratorDelegate;
     private readonly Func<TNode, TValue> _Map;
 
     private RefSemiDeque<NodeVisit<TNode>> _CurrentLevel = new RefSemiDeque<NodeVisit<TNode>>();
@@ -265,7 +259,7 @@ namespace Arborist.Treenumerators
       ref TChildEnumerator childEnumerator,
       bool cacheChild = false)
     {
-      if (!_MoveNextChildDelegate(ref childEnumerator, out var childNodeSiblingContext))
+      if (!childEnumerator.MoveNext(out var childNodeSiblingContext))
         return false;
 
       var childNodeVisit =
@@ -308,8 +302,7 @@ namespace Arborist.Treenumerators
       RefSemiDeque<TChildEnumerator> dequeChildEnumerator)
     {
       deque.RemoveFirst();
-      _DisposeChildEnumeratorDelegate(ref dequeChildEnumerator.GetFirst());
-      dequeChildEnumerator.RemoveFirst();
+      dequeChildEnumerator.RemoveFirst().Dispose();
     }
 
     private void DisposeLastItemsInDeques(
@@ -317,8 +310,7 @@ namespace Arborist.Treenumerators
       RefSemiDeque<TChildEnumerator> dequeChildEnumerator)
     {
       deque.RemoveLast();
-      _DisposeChildEnumeratorDelegate(ref dequeChildEnumerator.GetLast());
-      dequeChildEnumerator.RemoveLast();
+      dequeChildEnumerator.RemoveLast().Dispose();
     }
 
     private void UpdateStateFromVirtualNodeVisit(ref NodeVisit<TNode> nodeVisit)
@@ -365,8 +357,7 @@ namespace Arborist.Treenumerators
 
       while (stackChildEnumerators.Count > 0)
       {
-        _DisposeChildEnumeratorDelegate(ref stackChildEnumerators.GetLast());
-        stackChildEnumerators.RemoveLast();
+        stackChildEnumerators.RemoveLast().Dispose();
       }
     }
     

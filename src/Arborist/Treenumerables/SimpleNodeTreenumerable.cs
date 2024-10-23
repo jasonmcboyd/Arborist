@@ -2,15 +2,14 @@
 
 namespace Arborist.Treenumerables
 {
-  public class SimpleNodeTreenumerable<TNode> : Treenumerable<TNode, SimpleNode<TNode>, SimpleNodeChildEnumerator<TNode>>
+  public class SimpleNodeTreenumerable<TNode>
+    : Treenumerable<TNode, SimpleNode<TNode>, SimpleNodeChildEnumerator<TNode>>
   {
     private IEnumerable<SimpleNode<object>> _Enumerable;
 
     public SimpleNodeTreenumerable(IEnumerable<SimpleNode<TNode>> roots)
       : base(
         nodeContext => nodeContext.Node.GetChildEnumerator(),
-        SimpleNodeDelegates.MoveNextChild,
-        SimpleNodeDelegates.DisposeChildEnumerator,
         node => node.Value,
         roots)
     {

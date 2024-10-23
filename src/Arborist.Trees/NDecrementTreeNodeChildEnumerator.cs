@@ -1,6 +1,7 @@
 ﻿namespace Arborist.Trees
 {
   public struct NDecrementTreeNodeChildEnumerator
+    : IChildEnumerator<int>
   {
     public NDecrementTreeNodeChildEnumerator(int depth)
     {
@@ -9,7 +10,7 @@
 
     private int _Depth;
 
-    public bool TryMoveNext(out NodeAndSiblingIndex<int> childNodeAndSiblingIndex)
+    public bool MoveNext(out NodeAndSiblingIndex<int> childNodeAndSiblingIndex)
     {
       if (_Depth == 0)
       {
@@ -20,6 +21,11 @@
       _Depth--;
       childNodeAndSiblingIndex = new NodeAndSiblingIndex<int>(_Depth, 0);
       return true;
+    }
+
+    public void Dispose()
+    {
+      // Do nothing.
     }
   }
 }

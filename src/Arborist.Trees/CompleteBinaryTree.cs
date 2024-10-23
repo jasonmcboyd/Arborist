@@ -8,24 +8,9 @@ namespace Arborist.Trees
     public CompleteBinaryTree()
       : base(
           nodeContext => new CompleteBinaryTreeNodeChildEnumerator(nodeContext.Node),
-          MoveNextChild,
-          DisposeChildEnumeratorDelegate,
           node => node,
-          _Roots)
+          new int[] { 0 })
     {
     }
-
-    private static bool MoveNextChild(
-      ref CompleteBinaryTreeNodeChildEnumerator childEnumerator,
-      out NodeAndSiblingIndex<int> childNodeAndSiblingIndex)
-      => childEnumerator.TryMoveNext(out childNodeAndSiblingIndex);
-
-    private static void DisposeChildEnumeratorDelegate(
-      ref CompleteBinaryTreeNodeChildEnumerator childEnumerator)
-    {
-    }
-
-    private static IEnumerable<int> _Roots =
-      new int[] { 0 };
   }
 }

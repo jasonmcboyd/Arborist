@@ -1,6 +1,7 @@
 ﻿namespace Arborist.Trees
 {
   public struct CompleteBinaryTreeNodeChildEnumerator
+    : IChildEnumerator<int>
   {
     public CompleteBinaryTreeNodeChildEnumerator(int parentValue)
     {
@@ -37,7 +38,7 @@
 
     private int _ChildValue;
 
-    public bool TryMoveNext(out NodeAndSiblingIndex<int> childNodeAndSiblingIndex)
+    public bool MoveNext(out NodeAndSiblingIndex<int> childNodeAndSiblingIndex)
     {
       if (_ChildValue == int.MaxValue)
       {
@@ -50,6 +51,11 @@
       TryIncrementChildValue();
 
       return true;
+    }
+
+    public void Dispose()
+    {
+      // Do nothing.
     }
   }
 }

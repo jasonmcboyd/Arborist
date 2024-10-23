@@ -12,20 +12,8 @@ namespace Arborist.Benchmarks.Trees
     public TriangleTree()
       : base(
           nodeContext => new TriangleTreeNodeChildEnumerator(nodeContext.Node == 0 ? nodeContext.Position.Depth + 2 : 0),
-          MoveNextChild,
-          DisposeChildEnumeratorDelegate,
           node => node,
           new[] { 0 })
-    {
-    }
-
-    private static bool MoveNextChild(
-      ref TriangleTreeNodeChildEnumerator childEnumerator,
-      out NodeAndSiblingIndex<int> childNodeAndSiblingIndex)
-      => childEnumerator.TryMoveNext(out childNodeAndSiblingIndex);
-
-    private static void DisposeChildEnumeratorDelegate(
-      ref TriangleTreeNodeChildEnumerator childEnumerator)
     {
     }
   }
