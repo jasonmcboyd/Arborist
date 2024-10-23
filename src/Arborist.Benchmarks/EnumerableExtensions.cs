@@ -1,6 +1,8 @@
-﻿namespace Arborist.Benchmarks
+﻿using System.Collections.Generic;
+
+namespace Arborist.Benchmarks
 {
-  internal static class Enumerable
+  internal static class EnumerableExtensions
   {
     public static IEnumerable<int> Geometric(int initialValue = 1, int ratio = 2)
     {

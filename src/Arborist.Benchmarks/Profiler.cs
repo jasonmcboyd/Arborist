@@ -1,4 +1,5 @@
 ﻿using Arborist.Linq;
+using System.Linq;
 
 namespace Arborist.Benchmarks
 {

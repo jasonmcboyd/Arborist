@@ -1,4 +1,5 @@
 ﻿using Arborist.Treenumerables;
+using System.Collections.Generic;
 
 namespace Arborist.Trees
 {

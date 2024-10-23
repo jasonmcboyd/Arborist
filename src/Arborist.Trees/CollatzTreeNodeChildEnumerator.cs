@@ -6,11 +6,12 @@
     {
       Value = value;
       _HasSecondChild = value != 4 && (value - 1) % 3 == 0;
+      _CurrentIndexByte = 0;
     }
 
     public ulong Value { get; }
     private bool _HasSecondChild;
-    private byte _CurrentIndexByte = 0;
+    private byte _CurrentIndexByte;
     private int ChildCount => _HasSecondChild ? 2 : 1;
     private int CurrentIndex => _CurrentIndexByte - 1;
 

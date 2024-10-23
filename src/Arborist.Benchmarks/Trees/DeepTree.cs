@@ -1,4 +1,5 @@
 ﻿using Arborist.Treenumerables;
+using System.Linq;
 
 namespace Arborist.Benchmarks.Trees
 {
@@ -10,7 +11,7 @@ namespace Arborist.Benchmarks.Trees
           MoveNextChild,
           DisposeChildEnumeratorDelegate,
           node => node,
-          Enumerable.Geometric(1, 2).Take(width))
+          EnumerableExtensions.Geometric(1, 2).Take(width))
     {
     }
 

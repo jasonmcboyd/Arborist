@@ -4,11 +4,6 @@
   {
     public CompleteBinaryTreeNodeChildEnumerator(int parentValue)
     {
-      TrySetFirstChildValue(parentValue);
-    }
-
-    private void TrySetFirstChildValue(int parentValue)
-    {
       try
       {
         _ChildValue = checked(parentValue * 2);

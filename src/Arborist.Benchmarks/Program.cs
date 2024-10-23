@@ -3,25 +3,16 @@ using Arborist.Benchmarks.Trees;
 using Arborist.Linq;
 using Arborist.Trees;
 using BenchmarkDotNet.Running;
+using System;
 
 BenchmarkRunner.Run<TraversalBenchmarks>();
 
-//var profiler = new Profiler();
+//Console.WriteLine(
+//Treenumerables
+//.GetTree(19, TreeShape.Deep)
+//.CountNodes());
 
-//Console.WriteLine($"Count: {profiler.LevelOrderTraversal_DeepTree()}");
-
-//var tree =
-//  new DeepTree()
-//  .TakeTrees(20)
-//  .CountNodes();
-
-//Console.WriteLine(tree);
-
-//benchmark.LevelOrderTraversal_DeepTree();
-//benchmark.LevelOrderTraversal_TriangleTree();
-//benchmark.LevelOrderTraversal_WideTree();
-//benchmark.PreOrderTraversal_DeepTree();
-//benchmark.PreOrderTraversal_TriangleTree();
-//benchmark.PreOrderTraversal_WideTree();
-
-
+//Console.WriteLine(
+//Treenumerables
+//.GetTree(19, TreeShape.Wide)
+//.CountNodes());
