@@ -57,11 +57,26 @@ namespace Arborist.Linq.Treenumerators.Enumerator
 
     private bool OnScheduling(NodeTraversalStrategies nodeTraversalStrategies)
     {
-      if (nodeTraversalStrategies == NodeTraversalStrategies.TraverseAll)
+      if (nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipDescendants))
       {
-        return VisitLeadNode();
+        if (nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipNode))
+        {
+          _Queue.RemoveLast();
+
+          if (_Queue.Count > 0)
+            return VisitLeadNode();
+
+          return false;
+        }
+
+        VisitLeadNode();
+
+        DisposeEnumerator();
+
+        return true;
       }
-      else if (nodeTraversalStrategies == NodeTraversalStrategies.SkipNode)
+
+      if (nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipNode))
       {
         _Queue.RemoveLast();
 
@@ -73,21 +88,8 @@ namespace Arborist.Linq.Treenumerators.Enumerator
 
         return false;
       }
-      else if (nodeTraversalStrategies == NodeTraversalStrategies.SkipDescendants)
-      {
-        VisitLeadNode();
 
-        DisposeEnumerator();
-
-        return true;
-      }
-
-      _Queue.RemoveLast();
-
-      if (_Queue.Count > 0)
-        return VisitLeadNode();
-
-      return false;
+      return VisitLeadNode();
     }
 
     private bool EnumeratorMoveNext()

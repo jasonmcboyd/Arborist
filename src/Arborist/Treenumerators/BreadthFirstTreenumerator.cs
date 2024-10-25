@@ -101,29 +101,32 @@ namespace Arborist.Treenumerators
 
     private bool? OnScheduling(NodeTraversalStrategies nodeTraversalStrategies)
     {
-      if (nodeTraversalStrategies == NodeTraversalStrategies.SkipNode)
-        return SkipNode();
+      if (nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipSiblings))
+      {
+        if (Position.Depth == 0)
+        {
+          _SkipRemainingRootNodes = true;
+        }
+        else
+        {
+          if (_ChildrenStack.Count > 1)
+            _ChildrenStack.GetFromBack(1).NodeTraversalStrategies |= NodeTraversalStrategies.SkipDescendants;
+          else
+            _CurrentLevel.GetFirst().NodeTraversalStrategies |= NodeTraversalStrategies.SkipDescendants;
+        }
+      }
 
-      if (nodeTraversalStrategies == NodeTraversalStrategies.SkipNodeAndDescendants)
+      if (nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipNodeAndDescendants))
         return SkipSubtree();
+
+      if (nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipNode))
+        return SkipNode();
 
       ref var scheduledVisit = ref _ChildrenStack.GetLast();
       ref var scheduledVisitChildEnumerator = ref _ChildrenStackChildEnumerators.GetLast();
 
       scheduledVisit.NodeTraversalStrategies = nodeTraversalStrategies;
       scheduledVisit.Mode = TreenumeratorMode.VisitingNode;
-
-      if (nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipSiblings))
-      {
-        if (scheduledVisit.Position.Depth == 0)
-        {
-          _SkipRemainingRootNodes = true;
-        }
-        else
-        {
-          _CurrentLevel.GetFirst().NodeTraversalStrategies |= NodeTraversalStrategies.SkipDescendants;
-        }
-      }
 
       PopChildrenStackOntoNextLevel();
 
@@ -245,6 +248,12 @@ namespace Arborist.Treenumerators
       {
         ref var nodeVisit = ref _ChildrenStack.GetLast();
         ref var nodeVisitChildEnumerator = ref _ChildrenStackChildEnumerators.GetLast();
+
+        if (nodeVisit.NodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipDescendants))
+        {
+          DisposeLastItemInChildrenStack();
+          continue;
+        }
 
         if (TryPushNextChild(ref nodeVisit, ref nodeVisitChildEnumerator, true))
           return true;

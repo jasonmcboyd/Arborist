@@ -57,13 +57,25 @@ namespace Arborist.Linq.Treenumerators.Enumerator
 
     private bool OnScheduling(NodeTraversalStrategies nodeTraversalStrategies)
     {
-      if (nodeTraversalStrategies == NodeTraversalStrategies.TraverseAll)
+      if (nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipDescendants))
       {
-        VisitCount = 1;
-        Mode = TreenumeratorMode.VisitingNode;
-        return true;
+        DisposeEnumerator();
+
+        if (nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipNode))
+        {
+          _Stack.RemoveLast();
+          return MoveUpStack();
+        }
+        else
+        {
+          VisitCount = 1;
+          Mode = TreenumeratorMode.VisitingNode;
+          _Stack.RemoveLast();
+          return true;
+        }
       }
-      else if (nodeTraversalStrategies == NodeTraversalStrategies.SkipNode)
+
+      if (nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipNode))
       {
         _Stack.RemoveLast();
 
@@ -74,23 +86,10 @@ namespace Arborist.Linq.Treenumerators.Enumerator
 
         return true;
       }
-      else
-      {
-        DisposeEnumerator();
 
-        if (nodeTraversalStrategies == NodeTraversalStrategies.SkipDescendants)
-        {
-          VisitCount = 1;
-          Mode = TreenumeratorMode.VisitingNode;
-          _Stack.RemoveLast();
-          return true;
-        }
-        else
-        {
-          _Stack.RemoveLast();
-          return MoveUpStack();
-        }
-      }
+      VisitCount = 1;
+      Mode = TreenumeratorMode.VisitingNode;
+      return true;
     }
 
     private bool EnumeratorMoveNext()

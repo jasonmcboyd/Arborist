@@ -482,6 +482,28 @@ namespace Arborist.Tests
                 (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0)),
               }.ToNodeVisitArray()
             },
+            // Mixed
+            new TestScenario
+            {
+              NodeTraversalStrategiesSelector =
+                visit =>
+                  visit.Position.Depth == 0
+                  ? NodeTraversalStrategies.SkipNode
+                  : visit.Position.Depth == 1
+                  ? NodeTraversalStrategies.SkipAll
+                  : NodeTraversalStrategies.TraverseAll,
+              Description = "Skip level 0 siblings, skip level 1 all",
+              ExpectedBreadthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (0, 1)),
+              }.ToNodeVisitArray(),
+              ExpectedDepthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (0, 1)),
+              }.ToNodeVisitArray()
+            },
           }
         },
 
@@ -719,6 +741,37 @@ namespace Arborist.Tests
                 (TreenumeratorMode.SchedulingNode, "g", 0, (0, 2)),
                 (TreenumeratorMode.VisitingNode,   "g", 1, (0, 2)),
                 (TreenumeratorMode.VisitingNode,   "a", 4, (0, 0)),
+              }.ToNodeVisitArray()
+            },
+
+            // Mixed
+            new TestScenario
+            {
+              NodeTraversalStrategiesSelector =
+                visit =>
+                  visit.Position.Depth == 0
+                  ? NodeTraversalStrategies.SkipSiblings
+                  : visit.Position == new NodePosition(0, 1)
+                  ? NodeTraversalStrategies.SkipNodeAndSiblings
+                  : NodeTraversalStrategies.TraverseAll,
+              Description = "Skip level 0 siblings, skip level 1 sibling 0 node and siblings",
+              ExpectedBreadthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "e", 0, (0, 2)),
+                (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "e", 1, (0, 2)),
+              }.ToNodeVisitArray(),
+              ExpectedDepthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "e", 0, (0, 2)),
+                (TreenumeratorMode.VisitingNode,   "e", 1, (0, 2)),
+                (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0)),
               }.ToNodeVisitArray()
             },
           }
@@ -1133,6 +1186,28 @@ namespace Arborist.Tests
                 (TreenumeratorMode.SchedulingNode, "h", 0, (0, 4)),
                 (TreenumeratorMode.VisitingNode,   "h", 1, (0, 4)),
                 (TreenumeratorMode.SchedulingNode, "i", 0, (1, 4)),
+              }.ToNodeVisitArray()
+            },
+            // Mixed
+            new TestScenario
+            {
+              NodeTraversalStrategiesSelector =
+                visit =>
+                  visit.Position.Depth == 0
+                  ? NodeTraversalStrategies.SkipNode
+                  : visit.Position.Depth == 1
+                  ? NodeTraversalStrategies.SkipAll
+                  : NodeTraversalStrategies.TraverseAll,
+              Description = "Skip level 0 node skip level 1 sibling 0 all",
+              ExpectedBreadthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (0, 1)),
+              }.ToNodeVisitArray(),
+              ExpectedDepthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (0, 1)),
               }.ToNodeVisitArray()
             },
           }

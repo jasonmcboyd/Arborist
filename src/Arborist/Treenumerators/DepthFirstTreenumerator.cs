@@ -1,5 +1,4 @@
 ﻿using Arborist.Core;
-using Arborist.Treenumerables;
 using System;
 using System.Collections.Generic;
 
@@ -103,16 +102,16 @@ namespace Arborist.Treenumerators
         }
       }
 
-      if (nodeTraversalStrategies == NodeTraversalStrategies.SkipNode)
+      if (nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipNodeAndDescendants))
+        return MoveUpTheTreeStack();
+
+      if (nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipNode))
       {
         if (TryPushNextChild(ref previousVisitChildEnumerator, popMainStacksOntoSkippedStacks: true))
           return true;
 
         return MoveUpTheTreeStack();
       }
-
-      if (nodeTraversalStrategies == NodeTraversalStrategies.SkipNodeAndDescendants)
-        return MoveUpTheTreeStack();
 
       previousVisit.Mode = TreenumeratorMode.VisitingNode;
 
@@ -152,8 +151,14 @@ namespace Arborist.Treenumerators
 
         nodeVisit.VisitCount++;
 
-        if (nodeVisit.NodeTraversalStrategies == NodeTraversalStrategies.SkipNode)
+        if (nodeVisit.NodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipNode))
         {
+          if (nodeVisit.NodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipDescendants))
+          {
+            PopStacks(stack, stackChildEnumerator);
+            continue;
+          }
+
           if (TryPushNextChild(ref nodeVisitChildEnumerator, cacheChild: true))
             return true;
 
@@ -286,8 +291,7 @@ namespace Arborist.Treenumerators
 
       while (stackChildEnumerators.Count > 0)
       {
-        stackChildEnumerators.GetLast().Dispose();
-        stackChildEnumerators.RemoveLast();
+        stackChildEnumerators.RemoveLast().Dispose();
       }
     }
 
