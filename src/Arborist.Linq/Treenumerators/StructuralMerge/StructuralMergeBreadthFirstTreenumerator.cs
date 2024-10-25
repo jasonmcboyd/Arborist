@@ -25,16 +25,16 @@ namespace Arborist.Linq.Treenumerators
 
     private Deque<NodeVisit<MergeNode<TLeft, TRight>>> _NodeVisits = new Deque<NodeVisit<MergeNode<TLeft, TRight>>>();
 
-    protected override bool OnMoveNext(NodeTraversalStrategy nodeTraversalStrategy)
+    protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
       if (Mode == TreenumeratorMode.SchedulingNode
-        && (nodeTraversalStrategy == NodeTraversalStrategy.SkipNode
-          || nodeTraversalStrategy == NodeTraversalStrategy.SkipSubtree))
+        && (nodeTraversalStrategies == NodeTraversalStrategies.SkipNode
+          || nodeTraversalStrategies == NodeTraversalStrategies.SkipNodeAndDescendants))
       {
         _NodeVisits.RemoveFromBack();
       }
 
-      HandleMoveNextForLeftAndRightTreenumerators(nodeTraversalStrategy);
+      HandleMoveNextForLeftAndRightTreenumerators(nodeTraversalStrategies);
 
       if (_BothTreenumeratorsFinished)
         return false;
@@ -51,7 +51,7 @@ namespace Arborist.Linq.Treenumerators
       return true;
     }
 
-    private void HandleMoveNextForLeftAndRightTreenumerators(NodeTraversalStrategy nodeTraversalStrategy)
+    private void HandleMoveNextForLeftAndRightTreenumerators(NodeTraversalStrategies nodeTraversalStrategies)
     {
       var callMoveNextOnLeftTreenumerator = false;
       var callMoveNextOnRightTreenumerator = false;
@@ -90,13 +90,13 @@ namespace Arborist.Linq.Treenumerators
       }
 
       if (callMoveNextOnLeftTreenumerator
-        && !_LeftTreenumerator.MoveNext(nodeTraversalStrategy))
+        && !_LeftTreenumerator.MoveNext(nodeTraversalStrategies))
       {
         _LeftTreenumeratorFinished = true;
       }
 
       if (callMoveNextOnRightTreenumerator
-        && !_RightTreenumerator.MoveNext(nodeTraversalStrategy))
+        && !_RightTreenumerator.MoveNext(nodeTraversalStrategies))
       {
         _RightTreenumeratorFinished = true;
       }

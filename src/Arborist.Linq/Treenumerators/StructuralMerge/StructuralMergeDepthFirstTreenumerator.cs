@@ -25,14 +25,14 @@ namespace Arborist.Linq.Treenumerators
 
     private Stack<NodeVisit<MergeNode<TLeft, TRight>>> _NodeVisits = new Stack<NodeVisit<MergeNode<TLeft, TRight>>>();
 
-    protected override bool OnMoveNext(NodeTraversalStrategy nodeTraversalStrategy)
+    protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
-      HandleMoveNextForLeftAndRightTreenumerators(nodeTraversalStrategy);
+      HandleMoveNextForLeftAndRightTreenumerators(nodeTraversalStrategies);
 
       if (_BothTreenumeratorsFinished)
         return false;
 
-      FixUpNodeVisitsStack(nodeTraversalStrategy);
+      FixUpNodeVisitsStack(nodeTraversalStrategies);
 
       var nodeVisit = CreateNextNodeVisit();
 
@@ -43,7 +43,7 @@ namespace Arborist.Linq.Treenumerators
       return true;
     }
 
-    private void HandleMoveNextForLeftAndRightTreenumerators(NodeTraversalStrategy nodeTraversalStrategy)
+    private void HandleMoveNextForLeftAndRightTreenumerators(NodeTraversalStrategies nodeTraversalStrategies)
     {
       var callMoveNextOnLeftTreenumerator =
         !_LeftTreenumeratorFinished
@@ -56,23 +56,23 @@ namespace Arborist.Linq.Treenumerators
           || (Node.HasRight && _RightTreenumerator.Position == Position));
 
       if (callMoveNextOnLeftTreenumerator
-        && !_LeftTreenumerator.MoveNext(nodeTraversalStrategy))
+        && !_LeftTreenumerator.MoveNext(nodeTraversalStrategies))
       {
         _LeftTreenumeratorFinished = true;
       }
 
       if (callMoveNextOnRightTreenumerator
-        && !_RightTreenumerator.MoveNext(nodeTraversalStrategy))
+        && !_RightTreenumerator.MoveNext(nodeTraversalStrategies))
       {
         _RightTreenumeratorFinished = true;
       }
     }
 
-    private void FixUpNodeVisitsStack(NodeTraversalStrategy nodeTraversalStrategy)
+    private void FixUpNodeVisitsStack(NodeTraversalStrategies nodeTraversalStrategies)
     {
       var mustPopLeadingNodeVisitOnStack =
-        nodeTraversalStrategy == NodeTraversalStrategy.SkipSubtree
-        || nodeTraversalStrategy == NodeTraversalStrategy.SkipNode
+        nodeTraversalStrategies == NodeTraversalStrategies.SkipNodeAndDescendants
+        || nodeTraversalStrategies == NodeTraversalStrategies.SkipNode
         || (Node.HasRight && !_RightTreenumeratorFinished && _RightTreenumerator.Position.Depth < Position.Depth)
         || (Node.HasLeft && !_LeftTreenumeratorFinished && _LeftTreenumerator.Position.Depth < Position.Depth);
 

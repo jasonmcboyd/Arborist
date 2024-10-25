@@ -9,13 +9,13 @@ namespace Arborist.Linq
     {
       using (var treenumerator = source.GetDepthFirstTreenumerator())
       {
-        if (!treenumerator.MoveNext(NodeTraversalStrategy.TraverseSubtree))
+        if (!treenumerator.MoveNext(NodeTraversalStrategies.TraverseAll))
           yield break;
 
         TNode previousNode = treenumerator.Node;
         int previousDepth = treenumerator.Position.Depth;
 
-        while (treenumerator.MoveNext(NodeTraversalStrategy.SkipNode))
+        while (treenumerator.MoveNext(NodeTraversalStrategies.SkipNode))
         {
           if (previousDepth >= treenumerator.Position.Depth)
             yield return previousNode;

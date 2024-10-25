@@ -9,7 +9,7 @@ namespace Arborist.Linq
       TreeTraversalStrategy treeTraversalStrategy = TreeTraversalStrategy.BreadthFirst)
     {
       using (var treenumerator = source.GetTreenumerator(treeTraversalStrategy))
-        while (treenumerator.MoveNext(NodeTraversalStrategy.TraverseSubtree));
+        while (treenumerator.MoveNext(NodeTraversalStrategies.TraverseAll));
     }
   }
 }

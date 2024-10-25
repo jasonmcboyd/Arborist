@@ -14,7 +14,7 @@ namespace Arborist.TestUtils
       string serializedTree,
       string testDescription,
       Func<ITreenumerable<string>, ITreenumerable<string>> operation,
-      Func<NodeContext<string>, NodeTraversalStrategy> nodeTraversalStrategySelector,
+      Func<NodeContext<string>, NodeTraversalStrategies> nodeTraversalStrategiesSelector,
       NodeVisit<string>[] expectedTraversal,
       TreeTraversalStrategy treeTraversalStrategy)
     {
@@ -38,7 +38,7 @@ namespace Arborist.TestUtils
       if (operation != null)
         treenumerable = operation(treenumerable);
 
-      var traversal = treenumerable.GetTraversal(treeTraversalStrategy, nodeTraversalStrategySelector);
+      var traversal = treenumerable.GetTraversal(treeTraversalStrategy, nodeTraversalStrategiesSelector);
 
       // Act
       Debug.WriteLine($"{Environment.NewLine}----- Actual Values -----");

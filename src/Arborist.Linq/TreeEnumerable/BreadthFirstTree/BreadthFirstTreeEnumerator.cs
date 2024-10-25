@@ -41,7 +41,7 @@ namespace Arborist.Linq.TreeEnumerable.BreadthFirstTree
         return true;
       }
 
-      while (_Treenumerator.MoveNext(NodeTraversalStrategy.TraverseSubtree))
+      while (_Treenumerator.MoveNext(NodeTraversalStrategies.TraverseAll))
       {
         if (!_EnumerationStarted)
         {

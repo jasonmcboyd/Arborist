@@ -33,17 +33,17 @@ namespace Arborist.Linq.Treenumerators
 
     private Stack<NodeVisit<TAccumulate>> _SkippedStack = new Stack<NodeVisit<TAccumulate>>();
 
-    protected override bool OnMoveNext(NodeTraversalStrategy nodeTraversalStrategy)
+    protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
       if (Mode == TreenumeratorMode.SchedulingNode)
       {
-        if (nodeTraversalStrategy == NodeTraversalStrategy.SkipNode)
+        if (nodeTraversalStrategies == NodeTraversalStrategies.SkipNode)
           _SkippedStack.Push(_NextLevel.RemoveFromBack());
-        else if (nodeTraversalStrategy == NodeTraversalStrategy.SkipSubtree)
+        else if (nodeTraversalStrategies == NodeTraversalStrategies.SkipNodeAndDescendants)
           _NextLevel.RemoveFromBack();
       }
 
-      if (!InnerTreenumerator.MoveNext(nodeTraversalStrategy))
+      if (!InnerTreenumerator.MoveNext(nodeTraversalStrategies))
         return false;
 
       if (InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode)

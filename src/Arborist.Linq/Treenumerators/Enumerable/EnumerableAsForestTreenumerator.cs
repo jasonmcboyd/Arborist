@@ -19,7 +19,7 @@ namespace Arborist.Linq.Treenumerators.Enumerator
     public NodePosition Position { get; private set; } = new NodePosition(0, -1);
     public TreenumeratorMode Mode { get; private set; } = default;
 
-    public bool MoveNext(NodeTraversalStrategy nodeTraversalStrategy)
+    public bool MoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
       if (Mode == TreenumeratorMode.VisitingNode
         || Position == new NodePosition(0, -1))
@@ -27,8 +27,8 @@ namespace Arborist.Linq.Treenumerators.Enumerator
         return TryMoveNext();
       }
 
-      if (nodeTraversalStrategy == NodeTraversalStrategy.SkipNode
-        || nodeTraversalStrategy == NodeTraversalStrategy.SkipSubtree)
+      if (nodeTraversalStrategies == NodeTraversalStrategies.SkipNode
+        || nodeTraversalStrategies == NodeTraversalStrategies.SkipNodeAndDescendants)
       {
         return TryMoveNext();
       }

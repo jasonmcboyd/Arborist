@@ -12,13 +12,13 @@ namespace Arborist.Linq
       Func<NodeContext<TNode>, bool> predicate,
       TreeTraversalStrategy treeTraversalStrategy = TreeTraversalStrategy.BreadthFirst)
     {
-      var nodeTraversalStrategy =
+      var nodeTraversalStrategies =
         treeTraversalStrategy == TreeTraversalStrategy.BreadthFirst
-        ? NodeTraversalStrategy.TraverseSubtree
-        : NodeTraversalStrategy.SkipNode;
+        ? NodeTraversalStrategies.TraverseAll
+        : NodeTraversalStrategies.SkipNode;
 
       using (var treenumerator = source.GetTreenumerator(treeTraversalStrategy))
-        while (treenumerator.MoveNext(nodeTraversalStrategy))
+        while (treenumerator.MoveNext(nodeTraversalStrategies))
           if (treenumerator.Mode == TreenumeratorMode.SchedulingNode && predicate(treenumerator.ToNodeContext()))
             return true;
 

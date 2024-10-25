@@ -16,12 +16,12 @@ namespace Arborist
 
     public abstract void Dispose();
 
-    public bool MoveNext(NodeTraversalStrategy nodeTraversalStrategy)
+    public bool MoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
       if (EnumerationFinished)
         return false;
 
-      if (OnMoveNext(nodeTraversalStrategy))
+      if (OnMoveNext(nodeTraversalStrategies))
         return true;
 
       EnumerationFinished = true;
@@ -29,6 +29,6 @@ namespace Arborist
       return false;
     }
 
-    protected abstract bool OnMoveNext(NodeTraversalStrategy nodeTraversalStrategy);
+    protected abstract bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies);
   }
 }

@@ -29,9 +29,9 @@ namespace Arborist.Tests
 
       var filterStrategies = new[]
       {
-        NodeTraversalStrategy.SkipNode,
-        NodeTraversalStrategy.SkipSubtree,
-        NodeTraversalStrategy.SkipDescendants,
+        NodeTraversalStrategies.SkipNode,
+        NodeTraversalStrategies.SkipNodeAndDescendants,
+        NodeTraversalStrategies.SkipDescendants,
       };
 
       foreach (var treeString in treeStrings)
@@ -46,7 +46,7 @@ namespace Arborist.Tests
 
     [TestMethod]
     [DynamicData(nameof(GetData), DynamicDataSourceType.Method)]
-    public void Test(string treeString, NodeTraversalStrategy? filterStrategy, string filterCharacter)
+    public void Test(string treeString, NodeTraversalStrategies? filterStrategy, string filterCharacter)
     {
       var treenumerable =
         TreeSerializer
@@ -58,24 +58,24 @@ namespace Arborist.Tests
         .OrderBy(nodeVisit => (nodeVisit.Mode, nodeVisit.Position.Depth, nodeVisit.Position.SiblingIndex, nodeVisit.Node))
         .ToArray();
 
-      var nodeTraversalStrategySelector =
-        new Func<NodeContext<string>, NodeTraversalStrategy>(
+      var nodeTraversalStrategiesSelector =
+        new Func<NodeContext<string>, NodeTraversalStrategies>(
           nodeVisit =>
             filterCharacter == null || filterCharacter != nodeVisit.Node
-            ? NodeTraversalStrategy.TraverseSubtree
+            ? NodeTraversalStrategies.TraverseAll
             : filterStrategy.Value);
 
       Debug.WriteLine("-----Breadth First-----");
       var breadthFirst =
         treenumerable
-        .GetBreadthFirstTraversal(nodeTraversalStrategySelector)
+        .GetBreadthFirstTraversal(nodeTraversalStrategiesSelector)
         .Do(nodeVisit => Debug.WriteLine(nodeVisit))
         .ToArray();
 
       Debug.WriteLine($"{Environment.NewLine}-----Depth First------");
       var depthFirst =
         treenumerable
-        .GetDepthFirstTraversal(nodeTraversalStrategySelector)
+        .GetDepthFirstTraversal(nodeTraversalStrategiesSelector)
         .Do(nodeVisit => Debug.WriteLine(nodeVisit))
         .ToArray();
 

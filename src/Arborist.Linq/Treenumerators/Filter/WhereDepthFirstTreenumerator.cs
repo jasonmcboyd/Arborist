@@ -28,36 +28,36 @@ namespace Arborist.Linq.Treenumerators
 
     private bool _EnumerationFinished = false;
 
-    protected override bool OnMoveNext(NodeTraversalStrategy nodeTraversalStrategy)
+    protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
       if (_EnumerationFinished)
         return false;
 
       if (Mode == TreenumeratorMode.VisitingNode)
-        nodeTraversalStrategy = NodeTraversalStrategy.TraverseSubtree;
+        nodeTraversalStrategies = NodeTraversalStrategies.TraverseAll;
 
-      return InnerTreenumeratorMoveNext(nodeTraversalStrategy);
+      return InnerTreenumeratorMoveNext(nodeTraversalStrategies);
     }
 
-    private bool InnerTreenumeratorMoveNext(NodeTraversalStrategy nodeTraversalStrategy)
+    private bool InnerTreenumeratorMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
       // Do not apply any traversal strategies to the sentinel node.
       if (InnerTreenumerator.Position.Depth == -1)
-        nodeTraversalStrategy = NodeTraversalStrategy.TraverseSubtree;
+        nodeTraversalStrategies = NodeTraversalStrategies.TraverseAll;
 
       // If the node was skipped, move it to the skipped stack.
       if (InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode
-        && nodeTraversalStrategy == NodeTraversalStrategy.SkipNode)
+        && nodeTraversalStrategies == NodeTraversalStrategies.SkipNode)
       {
         _SkippedNodeVisits.AddLast(_NodeVisits.RemoveLast());
         _SkippedNodeVisits.GetLast().VisitCount++;
       }
 
       // Enumerate until we yield something or exhaust the inner enumerator.
-      while (InnerTreenumerator.MoveNext(nodeTraversalStrategy))
+      while (InnerTreenumerator.MoveNext(nodeTraversalStrategies))
       {
         // Reset the traversal strategy.
-        nodeTraversalStrategy = NodeTraversalStrategy.TraverseSubtree;
+        nodeTraversalStrategies = NodeTraversalStrategies.TraverseAll;
 
         if (InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode)
         {
@@ -67,7 +67,7 @@ namespace Arborist.Linq.Treenumerators
           }
           else
           {
-            nodeTraversalStrategy = NodeTraversalStrategy.SkipNode;
+            nodeTraversalStrategies = NodeTraversalStrategies.SkipNode;
             continue;
           }
         }

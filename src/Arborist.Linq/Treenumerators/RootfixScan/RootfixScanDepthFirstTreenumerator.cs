@@ -45,15 +45,15 @@ namespace Arborist.Linq.Treenumerators
 
     private NodeVisit<TAccumulate> PopStackWithDeepestNodeVisit() => GetStackWithDeepestNodeVisit().Pop();
 
-    protected override bool OnMoveNext(NodeTraversalStrategy nodeTraversalStrategy)
+    protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
       if (InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode
-        && nodeTraversalStrategy == NodeTraversalStrategy.SkipNode)
+        && nodeTraversalStrategies == NodeTraversalStrategies.SkipNode)
       {
         _SkippedStack.Push(_Stack.Pop());
       }
 
-      if (!InnerTreenumerator.MoveNext(nodeTraversalStrategy))
+      if (!InnerTreenumerator.MoveNext(nodeTraversalStrategies))
         return false;
 
       var currentDepth = InnerTreenumerator.Position.Depth;

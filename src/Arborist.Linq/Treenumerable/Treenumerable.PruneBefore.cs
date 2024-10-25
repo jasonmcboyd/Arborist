@@ -18,7 +18,7 @@ namespace Arborist.Linq
           () => new WhereBreadthFirstTreenumerator<T>(
             source.GetBreadthFirstTreenumerator,
             predicate,
-            NodeTraversalStrategy.SkipSubtree),
+            NodeTraversalStrategies.SkipNodeAndDescendants),
           () => new PruneBeforeDepthFirstTreenumerator<T>(
             source.GetDepthFirstTreenumerator,
             predicate));

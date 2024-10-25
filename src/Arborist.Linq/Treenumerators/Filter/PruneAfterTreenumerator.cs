@@ -17,40 +17,40 @@ namespace Arborist.Linq.Treenumerators
 
     private readonly Func<NodeContext<TNode>, bool> _Predicate;
 
-    protected override bool OnMoveNext(NodeTraversalStrategy nodeTraversalStrategy)
+    protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
       if (EnumerationFinished)
         return false;
 
       if (Mode == TreenumeratorMode.SchedulingNode)
-        nodeTraversalStrategy = GetTraversalStrategy(nodeTraversalStrategy);
+        nodeTraversalStrategies = GetTraversalStrategy(nodeTraversalStrategies);
 
-      var result = InnerTreenumerator.MoveNext(nodeTraversalStrategy);
+      var result = InnerTreenumerator.MoveNext(nodeTraversalStrategies);
 
       UpdateState();
 
       return result;
     }
 
-    private NodeTraversalStrategy GetTraversalStrategy(NodeTraversalStrategy nodeTraversalStrategy)
+    private NodeTraversalStrategies GetTraversalStrategy(NodeTraversalStrategies nodeTraversalStrategies)
     {
       var skippingNode =
-        nodeTraversalStrategy == NodeTraversalStrategy.SkipSubtree
-        || nodeTraversalStrategy == NodeTraversalStrategy.SkipNode;
+        nodeTraversalStrategies == NodeTraversalStrategies.SkipNodeAndDescendants
+        || nodeTraversalStrategies == NodeTraversalStrategies.SkipNode;
 
       var skippingDescendants =
         _Predicate(this.ToNodeContext())
-        || nodeTraversalStrategy == NodeTraversalStrategy.SkipDescendants
-        || nodeTraversalStrategy == NodeTraversalStrategy.SkipSubtree;
+        || nodeTraversalStrategies == NodeTraversalStrategies.SkipDescendants
+        || nodeTraversalStrategies == NodeTraversalStrategies.SkipNodeAndDescendants;
 
       if (skippingNode && skippingDescendants)
-        return NodeTraversalStrategy.SkipSubtree;
+        return NodeTraversalStrategies.SkipNodeAndDescendants;
       else if (skippingNode && !skippingDescendants)
-        return NodeTraversalStrategy.SkipNode;
+        return NodeTraversalStrategies.SkipNode;
       else if (!skippingNode && skippingDescendants)
-        return NodeTraversalStrategy.SkipDescendants;
+        return NodeTraversalStrategies.SkipDescendants;
       else
-        return NodeTraversalStrategy.TraverseSubtree;
+        return NodeTraversalStrategies.TraverseAll;
     }
 
     private void UpdateState()

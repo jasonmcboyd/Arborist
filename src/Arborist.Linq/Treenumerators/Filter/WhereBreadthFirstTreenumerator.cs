@@ -10,16 +10,16 @@ namespace Arborist.Linq.Treenumerators
     public WhereBreadthFirstTreenumerator(
       Func<ITreenumerator<TNode>> innerTreenumeratorFactory,
       Func<NodeContext<TNode>, bool> predicate,
-      NodeTraversalStrategy nodeTraversalStrategy)
+      NodeTraversalStrategies nodeTraversalStrategies)
       : base(innerTreenumeratorFactory)
     {
       _Predicate = predicate;
-      _TraversalStrategy = nodeTraversalStrategy;
+      _TraversalStrategy = nodeTraversalStrategies;
       _NodePositionAndVisitCounts.AddLast(new NodeTraversalStatus(InnerTreenumerator.Position, 0));
     }
 
     private readonly Func<NodeContext<TNode>, bool> _Predicate;
-    private readonly NodeTraversalStrategy _TraversalStrategy;
+    private readonly NodeTraversalStrategies _TraversalStrategy;
 
     private readonly RefSemiDeque<NodeTraversalStatus> _NodePositionAndVisitCounts = new RefSemiDeque<NodeTraversalStatus>();
     private readonly RefSemiDeque<NodeVisit<TNode>> _SkippedStack = new RefSemiDeque<NodeVisit<TNode>>();
@@ -28,32 +28,32 @@ namespace Arborist.Linq.Treenumerators
 
     private bool _EnumerationFinished = false;
 
-    protected override bool OnMoveNext(NodeTraversalStrategy nodeTraversalStrategy)
+    protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
       if (_EnumerationFinished)
         return false;
 
       if (Mode == TreenumeratorMode.VisitingNode)
-        nodeTraversalStrategy = NodeTraversalStrategy.TraverseSubtree;
+        nodeTraversalStrategies = NodeTraversalStrategies.TraverseAll;
 
-      return InnerTreenumeratorMoveNext(nodeTraversalStrategy);
+      return InnerTreenumeratorMoveNext(nodeTraversalStrategies);
     }
 
-    private bool InnerTreenumeratorMoveNext(NodeTraversalStrategy nodeTraversalStrategy)
+    private bool InnerTreenumeratorMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
       var previouslySeenNodeWasScheduledAndSkipped =
         Position != new NodePosition(0, -1)
         && InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode
-        && (nodeTraversalStrategy == NodeTraversalStrategy.SkipNode || nodeTraversalStrategy == NodeTraversalStrategy.SkipSubtree);
+        && (nodeTraversalStrategies == NodeTraversalStrategies.SkipNode || nodeTraversalStrategies == NodeTraversalStrategies.SkipNodeAndDescendants);
 
       if (previouslySeenNodeWasScheduledAndSkipped)
       {
-        _NodePositionAndVisitCounts.GetLast().TraversalStrategy = nodeTraversalStrategy;
+        _NodePositionAndVisitCounts.GetLast().TraversalStrategy = nodeTraversalStrategies;
       }
 
       var previousModeWasVisitingNode = Mode == TreenumeratorMode.VisitingNode;
 
-      while (InnerTreenumerator.MoveNext(nodeTraversalStrategy))
+      while (InnerTreenumerator.MoveNext(nodeTraversalStrategies))
       {
         while (_SkippedStack.Count > 0 && _SkippedStack.GetLast().Position.Depth >= InnerTreenumerator.Position.Depth)
         {
@@ -70,7 +70,7 @@ namespace Arborist.Linq.Treenumerators
           {
             _SkippedStack.AddLast(InnerTreenumerator.ToNodeVisit());
 
-            nodeTraversalStrategy = _TraversalStrategy;
+            nodeTraversalStrategies = _TraversalStrategy;
 
             continue;
           }
@@ -176,17 +176,17 @@ namespace Arborist.Linq.Treenumerators
       public NodeTraversalStatus(
         NodePosition position,
         int visitCount,
-        NodeTraversalStrategy nodeTraversalStrategy = NodeTraversalStrategy.TraverseSubtree)
+        NodeTraversalStrategies nodeTraversalStrategies = NodeTraversalStrategies.TraverseAll)
       {
         Position = position;
         VisitCount = visitCount;
-        TraversalStrategy = nodeTraversalStrategy;
+        TraversalStrategy = nodeTraversalStrategies;
       }
 
       public NodePosition Position { get; set; }
       public int VisitCount { get; set; }
-      public NodeTraversalStrategy TraversalStrategy { get; set; }
-      public bool Skipped => TraversalStrategy != NodeTraversalStrategy.TraverseSubtree;
+      public NodeTraversalStrategies TraversalStrategy { get; set; }
+      public bool Skipped => TraversalStrategy != NodeTraversalStrategies.TraverseAll;
 
       public override string ToString() => $"({Position}), {VisitCount}, {TraversalStrategy}";
     }

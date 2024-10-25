@@ -49,7 +49,7 @@ namespace Arborist.Linq.Tests
       var treenumerator = Treenumerable.Empty<int>().GetBreadthFirstTreenumerator();
 
       // Act
-      var actual = treenumerator.MoveNext(NodeTraversalStrategy.TraverseSubtree);
+      var actual = treenumerator.MoveNext(NodeTraversalStrategies.TraverseAll);
 
       // Assert
       Assert.AreEqual(false, actual);
@@ -95,7 +95,7 @@ namespace Arborist.Linq.Tests
       var treenumerator = Treenumerable.Empty<int>().GetDepthFirstTreenumerator();
 
       // Act
-      var actual = treenumerator.MoveNext(NodeTraversalStrategy.TraverseSubtree);
+      var actual = treenumerator.MoveNext(NodeTraversalStrategies.TraverseAll);
 
       // Assert
       Assert.AreEqual(false, actual);

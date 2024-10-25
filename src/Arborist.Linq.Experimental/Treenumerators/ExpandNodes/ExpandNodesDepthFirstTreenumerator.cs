@@ -25,9 +25,9 @@ namespace Arborist.Linq.Experimental.Treenumerators.ExpandNodes
 
     private ITreenumerable<TExpandedNode> _ExpandedNode;
 
-    protected override bool OnMoveNext(NodeTraversalStrategy nodeTraversalStrategy)
+    protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
-      if (!_InnerTreenumerator.MoveNext(nodeTraversalStrategy))
+      if (!_InnerTreenumerator.MoveNext(nodeTraversalStrategies))
         return false;
 
       throw new NotImplementedException();

@@ -14,7 +14,7 @@ namespace Arborist.Linq
 
       using (var treenumerator = source.GetDepthFirstTreenumerator())
       {
-        while (treenumerator.MoveNext(NodeTraversalStrategy.SkipNode))
+        while (treenumerator.MoveNext(NodeTraversalStrategies.SkipNode))
         {
           while (nodes.Count - 1 >= treenumerator.Position.Depth)
             yield return nodes.RemoveLast();

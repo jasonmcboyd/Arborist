@@ -11,7 +11,7 @@ namespace Arborist.Linq
         yield break;
 
       using (var treenumerator = source.GetDepthFirstTreenumerator())
-        while (treenumerator.MoveNext(NodeTraversalStrategy.SkipNode))
+        while (treenumerator.MoveNext(NodeTraversalStrategies.SkipNode))
           yield return treenumerator.Node;
     }
   }

@@ -25,9 +25,9 @@ namespace Arborist.Linq.Tests
       };
 
       var nodeTraversalStrategies =
-        Enum.GetValues(typeof(NodeTraversalStrategy))
-        .Cast<NodeTraversalStrategy>()
-        .Where(nodeTraversalStrategy => nodeTraversalStrategy != NodeTraversalStrategy.TraverseSubtree)
+        Enum.GetValues(typeof(NodeTraversalStrategies))
+        .Cast<NodeTraversalStrategies>()
+        .Where(nodeTraversalStrategy => nodeTraversalStrategy != NodeTraversalStrategies.TraverseAll)
         .ToArray();
 
       foreach (var data in testData)
@@ -79,21 +79,21 @@ namespace Arborist.Linq.Tests
       }
     }
 
-    private static string SerializeNodeTraversalStrategies(params NodeTraversalStrategy[] nodeTraversalStrategies)
+    private static string SerializeNodeTraversalStrategies(params NodeTraversalStrategies[] nodeTraversalStrategies)
     {
       return string.Join("|", nodeTraversalStrategies.Select(nodeTraversalStrategy => nodeTraversalStrategy.ToString()));
     }
 
-    private static NodeTraversalStrategy[] DeserializeNodeTraversalStrategies(string nodeTraversalStrategies)
+    private static NodeTraversalStrategies[] DeserializeNodeTraversalStrategies(string nodeTraversalStrategies)
     {
       if (string.IsNullOrEmpty(nodeTraversalStrategies))
-        return Array.Empty<NodeTraversalStrategy>();
+        return Array.Empty<NodeTraversalStrategies>();
 
       return
         nodeTraversalStrategies
         .Split('|')
-        .Select(nodeTraversalStrategy => Enum.Parse(typeof(NodeTraversalStrategy), nodeTraversalStrategy))
-        .Cast<NodeTraversalStrategy>()
+        .Select(nodeTraversalStrategy => Enum.Parse(typeof(NodeTraversalStrategies), nodeTraversalStrategy))
+        .Cast<NodeTraversalStrategies>()
         .ToArray();
     }
 
@@ -165,7 +165,7 @@ namespace Arborist.Linq.Tests
     public void EnumerableToTreeTest(
       string treeString,
       string[] testNodes,
-      NodeTraversalStrategy[] nodeTraversalStrategies,
+      NodeTraversalStrategies[] nodeTraversalStrategies,
       TreeTraversalStrategy treeTraversalStrategy)
     {
       // Arrange
@@ -173,13 +173,13 @@ namespace Arborist.Linq.Tests
 
       var sut = enumerable.ToTree();
 
-      Func<NodeContext<string>, NodeTraversalStrategy> nodeTraversalStrategySelector =
+      Func<NodeContext<string>, NodeTraversalStrategies> nodeTraversalStrategiesSelector =
         nodeContext =>
         {
           var testNodeIndex = Array.IndexOf(testNodes, nodeContext.Node);
 
           if (testNodeIndex == -1)
-            return NodeTraversalStrategy.TraverseSubtree;
+            return NodeTraversalStrategies.TraverseAll;
           else
             return nodeTraversalStrategies[testNodeIndex];
         };
@@ -189,7 +189,7 @@ namespace Arborist.Linq.Tests
         .Deserialize(treeString)
         .GetTraversal(
           treeTraversalStrategy,
-          nodeTraversalStrategySelector)
+          nodeTraversalStrategiesSelector)
         .ToArray();
 
       Debug.WriteLine("-----Expected Values-----");
@@ -203,7 +203,7 @@ namespace Arborist.Linq.Tests
         //.Select(nodeContext => $"{nodeContext.Node.Left}{nodeContext.Node.Right}")
         .GetTraversal(
           treeTraversalStrategy,
-          nodeTraversalStrategySelector)
+          nodeTraversalStrategiesSelector)
         .Do(visit => Debug.WriteLine(visit))
         .ToArray();
 

@@ -20,7 +20,7 @@ namespace Arborist.Linq.Treenumerators.Enumerator
     public NodePosition Position { get; private set; } = new NodePosition(0, -1);
     public TreenumeratorMode Mode { get; private set; } = default;
 
-    public bool MoveNext(NodeTraversalStrategy nodeTraversalStrategy)
+    public bool MoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
       if (_EnumerationFinished)
         return false;
@@ -31,7 +31,7 @@ namespace Arborist.Linq.Treenumerators.Enumerator
       if (Mode == TreenumeratorMode.VisitingNode)
         return OnVisiting();
 
-      return OnScheduling(nodeTraversalStrategy);
+      return OnScheduling(nodeTraversalStrategies);
     }
 
     private bool OnEnumerationStarting()
@@ -55,13 +55,13 @@ namespace Arborist.Linq.Treenumerators.Enumerator
       return VisitLeadNode();
     }
 
-    private bool OnScheduling(NodeTraversalStrategy nodeTraversalStrategy)
+    private bool OnScheduling(NodeTraversalStrategies nodeTraversalStrategies)
     {
-      if (nodeTraversalStrategy == NodeTraversalStrategy.TraverseSubtree)
+      if (nodeTraversalStrategies == NodeTraversalStrategies.TraverseAll)
       {
         return VisitLeadNode();
       }
-      else if (nodeTraversalStrategy == NodeTraversalStrategy.SkipNode)
+      else if (nodeTraversalStrategies == NodeTraversalStrategies.SkipNode)
       {
         _Queue.RemoveLast();
 
@@ -73,7 +73,7 @@ namespace Arborist.Linq.Treenumerators.Enumerator
 
         return false;
       }
-      else if (nodeTraversalStrategy == NodeTraversalStrategy.SkipDescendants)
+      else if (nodeTraversalStrategies == NodeTraversalStrategies.SkipDescendants)
       {
         VisitLeadNode();
 

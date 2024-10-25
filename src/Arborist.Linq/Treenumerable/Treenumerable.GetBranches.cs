@@ -13,12 +13,12 @@ namespace Arborist.Linq
 
       using (var treenumerator = source.GetDepthFirstTreenumerator())
       {
-        if (!treenumerator.MoveNext(NodeTraversalStrategy.TraverseSubtree))
+        if (!treenumerator.MoveNext(NodeTraversalStrategies.TraverseAll))
           yield break;
 
         branch.Add(treenumerator.ToNodeContext());
 
-        while (treenumerator.MoveNext(NodeTraversalStrategy.TraverseSubtree))
+        while (treenumerator.MoveNext(NodeTraversalStrategies.TraverseAll))
         {
           if (treenumerator.Mode != TreenumeratorMode.SchedulingNode)
             continue;

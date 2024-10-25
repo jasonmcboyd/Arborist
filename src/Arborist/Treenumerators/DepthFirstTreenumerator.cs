@@ -29,17 +29,18 @@ namespace Arborist.Treenumerators
     private readonly RefSemiDeque<NodeVisit<TNode>> _SkippedStack = new RefSemiDeque<NodeVisit<TNode>>();
     private readonly RefSemiDeque<TChildEnumerator> _SkippedStackChildEnumerators = new RefSemiDeque<TChildEnumerator>();
 
-    private int CurrentDepth => _Stack.Count + _SkippedStack.Count;
+    private int CurrentDepth => _Stack.Count + _SkippedStack.Count - 1;
 
     private bool _HasCachedChild = false;
     private int _RootNodesSeen = 0;
+    private bool _SkipRemainingRootNodes = false;
 
-    protected override bool OnMoveNext(NodeTraversalStrategy nodeTraversalStrategy)
+    protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
       if (_Disposed)
         return false;
 
-      if (CurrentDepth == 0)
+      if (CurrentDepth == -1)
         return MoveToNextRootNode();
 
       if (_HasCachedChild)
@@ -52,14 +53,14 @@ namespace Arborist.Treenumerators
       }
 
       if (Mode == TreenumeratorMode.SchedulingNode)
-        return OnScheduling(nodeTraversalStrategy);
+        return OnScheduling(nodeTraversalStrategies);
 
       return OnVisiting();
     }
 
     private bool MoveToNextRootNode()
     {
-      if (!_RootsEnumerator.MoveNext())
+      if (_SkipRemainingRootNodes || !_RootsEnumerator.MoveNext())
         return false;
 
       PushNewNodeVisit(_RootsEnumerator.Current, _RootNodesSeen);
@@ -71,15 +72,38 @@ namespace Arborist.Treenumerators
       return true;
     }
 
-    private bool OnScheduling(NodeTraversalStrategy nodeTraversalStrategy)
+    private bool OnScheduling(NodeTraversalStrategies nodeTraversalStrategies)
     {
       ref var previousVisit = ref _Stack.GetLast();
       ref var previousVisitChildEnumerator = ref _StackChildEnumerators.GetLast();
       previousVisit.VisitCount++;
 
-      previousVisit.TraversalStrategy = nodeTraversalStrategy;
+      previousVisit.NodeTraversalStrategies = nodeTraversalStrategies;
 
-      if (nodeTraversalStrategy == NodeTraversalStrategy.SkipNode)
+      if (nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipSiblings))
+      {
+        if (CurrentDepth == 0)
+        {
+          _SkipRemainingRootNodes = true;
+        }
+        else
+        {
+          if (_SkippedStack.Count > 0)
+          {
+            ref var skippedNode = ref _SkippedStack.GetLast();
+            if (skippedNode.Position.Depth == previousVisit.Position.Depth - 1)
+              skippedNode.NodeTraversalStrategies |= NodeTraversalStrategies.SkipDescendants;
+            else
+              _Stack.GetFromBack(1).NodeTraversalStrategies |= NodeTraversalStrategies.SkipDescendants;
+          }
+          else
+          {
+            _Stack.GetFromBack(1).NodeTraversalStrategies |= NodeTraversalStrategies.SkipDescendants;
+          }
+        }
+      }
+
+      if (nodeTraversalStrategies == NodeTraversalStrategies.SkipNode)
       {
         if (TryPushNextChild(ref previousVisitChildEnumerator, popMainStacksOntoSkippedStacks: true))
           return true;
@@ -87,7 +111,7 @@ namespace Arborist.Treenumerators
         return MoveUpTheTreeStack();
       }
 
-      if (nodeTraversalStrategy == NodeTraversalStrategy.SkipSubtree)
+      if (nodeTraversalStrategies == NodeTraversalStrategies.SkipNodeAndDescendants)
         return MoveUpTheTreeStack();
 
       previousVisit.Mode = TreenumeratorMode.VisitingNode;
@@ -102,7 +126,7 @@ namespace Arborist.Treenumerators
       ref var previousVisit = ref _Stack.GetLast();
       ref var previousVisitChildEnumerator = ref _StackChildEnumerators.GetLast();
 
-      if (previousVisit.TraversalStrategy != NodeTraversalStrategy.SkipDescendants
+      if (!previousVisit.NodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipDescendants)
         && TryPushNextChild(ref previousVisitChildEnumerator))
       {
         return true;
@@ -128,7 +152,7 @@ namespace Arborist.Treenumerators
 
         nodeVisit.VisitCount++;
 
-        if (nodeVisit.TraversalStrategy == NodeTraversalStrategy.SkipNode)
+        if (nodeVisit.NodeTraversalStrategies == NodeTraversalStrategies.SkipNode)
         {
           if (TryPushNextChild(ref nodeVisitChildEnumerator, cacheChild: true))
             return true;
@@ -186,8 +210,8 @@ namespace Arborist.Treenumerators
           TreenumeratorMode.SchedulingNode,
           node,
           0,
-          new NodePosition(childIndex, CurrentDepth),
-          NodeTraversalStrategy.TraverseSubtree);
+          new NodePosition(childIndex, CurrentDepth + 1),
+          NodeTraversalStrategies.TraverseAll);
       var nodeChildEnumerator = _ChildEnumeratorFactory(new NodeContext<TNode>(nodeVisit.Node, nodeVisit.Position));
 
       _Stack.AddLast(nodeVisit);
@@ -199,8 +223,7 @@ namespace Arborist.Treenumerators
     private void PopStacks(RefSemiDeque<NodeVisit<TNode>> stack, RefSemiDeque<TChildEnumerator> stackChildEnumerator)
     {
       stack.RemoveLast();
-      stackChildEnumerator.GetLast().Dispose();
-      stackChildEnumerator.RemoveLast();
+      stackChildEnumerator.RemoveLast().Dispose();
     }
 
     private bool GetStacksWithDeepestSeenNode(

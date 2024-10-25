@@ -9,16 +9,16 @@ namespace Arborist.Linq
   {
     public static IEnumerable<NodeVisit<TNode>> GetDepthFirstTraversal<TNode>(
       this ITreenumerable<TNode> source,
-      Func<NodeContext<TNode>, NodeTraversalStrategy> nodeTraversalStrategySelector)
+      Func<NodeContext<TNode>, NodeTraversalStrategies> nodeTraversalStrategiesSelector)
     {
-      return GetTraversal(source, TreeTraversalStrategy.DepthFirst, nodeTraversalStrategySelector);
+      return GetTraversal(source, TreeTraversalStrategy.DepthFirst, nodeTraversalStrategiesSelector);
     }
 
     public static IEnumerable<NodeVisit<TNode>> GetBreadthFirstTraversal<TNode>(
       this ITreenumerable<TNode> source,
-      Func<NodeContext<TNode>, NodeTraversalStrategy> nodeTraversalStrategySelector)
+      Func<NodeContext<TNode>, NodeTraversalStrategies> nodeTraversalStrategiesSelector)
     {
-      return GetTraversal(source, TreeTraversalStrategy.BreadthFirst, nodeTraversalStrategySelector);
+      return GetTraversal(source, TreeTraversalStrategy.BreadthFirst, nodeTraversalStrategiesSelector);
     }
 
     public static IEnumerable<NodeVisit<TNode>> GetDepthFirstTraversal<TNode>(
@@ -36,18 +36,18 @@ namespace Arborist.Linq
     public static IEnumerable<NodeVisit<TNode>> GetTraversal<TNode>(
       this ITreenumerable<TNode> source,
       TreeTraversalStrategy treeTraversalStrategy,
-      Func<NodeContext<TNode>, NodeTraversalStrategy> nodeTraversalStrategySelector)
+      Func<NodeContext<TNode>, NodeTraversalStrategies> nodeTraversalStrategiesSelector)
     {
       using (var treenumerator = source.GetTreenumerator(treeTraversalStrategy))
       {
-        if (!treenumerator.MoveNext(NodeTraversalStrategy.TraverseSubtree))
+        if (!treenumerator.MoveNext(NodeTraversalStrategies.TraverseAll))
           yield break;
 
         yield return treenumerator.ToNodeVisit();
 
-        var nodeTraversalStrategy = nodeTraversalStrategySelector(treenumerator.ToNodeContext());
+        var nodeTraversalStrategies = nodeTraversalStrategiesSelector(treenumerator.ToNodeContext());
 
-        while (treenumerator.MoveNext(nodeTraversalStrategy))
+        while (treenumerator.MoveNext(nodeTraversalStrategies))
         {
           yield return treenumerator.ToNodeVisit();
 
@@ -56,7 +56,7 @@ namespace Arborist.Linq
           // the traversal strategy. I was doing that originally, but then I found
           // that it was covering up poorly behaved treenumerators. So I changed the
           // behavior here so that those bugs would get surfaced.
-          nodeTraversalStrategy = nodeTraversalStrategySelector(treenumerator.ToNodeContext());
+          nodeTraversalStrategies = nodeTraversalStrategiesSelector(treenumerator.ToNodeContext());
         }
       }
     }
@@ -67,7 +67,7 @@ namespace Arborist.Linq
     {
       using (var treenumerator = source.GetTreenumerator(treeTraversalStrategy))
       {
-        while (treenumerator.MoveNext(NodeTraversalStrategy.TraverseSubtree))
+        while (treenumerator.MoveNext(NodeTraversalStrategies.TraverseAll))
           yield return treenumerator.ToNodeVisit();
       }
     }

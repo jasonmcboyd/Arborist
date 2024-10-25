@@ -15,7 +15,7 @@ namespace Arborist.Linq
     public NodePosition Position => new NodePosition(0, -1);
     public TreenumeratorMode Mode => default;
 
-    public bool MoveNext(NodeTraversalStrategy nodeTraversalStrategy) => false;
+    public bool MoveNext(NodeTraversalStrategies nodeTraversalStrategies) => false;
 
     public void Dispose()
     {

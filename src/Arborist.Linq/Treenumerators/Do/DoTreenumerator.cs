@@ -25,9 +25,9 @@ namespace Arborist.Linq.Treenumerators
 
     public NodePosition Position => _InnerTreenumerator.Position;
 
-    public bool MoveNext(NodeTraversalStrategy nodeTraversalStrategy)
+    public bool MoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
-      if (!_InnerTreenumerator.MoveNext(nodeTraversalStrategy))
+      if (!_InnerTreenumerator.MoveNext(nodeTraversalStrategies))
         return false;
 
       _OnNext?.Invoke(_InnerTreenumerator.ToNodeVisit());

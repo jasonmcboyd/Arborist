@@ -131,16 +131,16 @@ namespace Arborist.Linq.Tests
         var expectedTree = TreeSerializer.Deserialize(testTrees[2]);
 
         foreach (var node in expectedTree.PreOrderTraversal())
-          foreach (var nodeTraversalStrategy in _SkipNodeTraversalStrategies)
-            yield return new object[] { testTrees[0], testTrees[1], testTrees[2], node, nodeTraversalStrategy };
+          foreach (var nodeTraversalStrategies in _SkipNodeTraversalStrategies)
+            yield return new object[] { testTrees[0], testTrees[1], testTrees[2], node, nodeTraversalStrategies };
       }
     }
 
-    private static NodeTraversalStrategy[] _SkipNodeTraversalStrategies = new[]
+    private static NodeTraversalStrategies[] _SkipNodeTraversalStrategies = new[]
     {
-      NodeTraversalStrategy.SkipNode,
-      NodeTraversalStrategy.SkipSubtree,
-      NodeTraversalStrategy.SkipDescendants,
+      NodeTraversalStrategies.SkipNode,
+      NodeTraversalStrategies.SkipNodeAndDescendants,
+      NodeTraversalStrategies.SkipDescendants,
     };
 
     public static string GetTestDisplayName(MethodInfo methodInfo, object[] data)
@@ -162,9 +162,9 @@ namespace Arborist.Linq.Tests
       string innerTreeString,
       string expectedResults,
       string nodeToSkip,
-      NodeTraversalStrategy? nodeTraversalStrategy)
+      NodeTraversalStrategies? nodeTraversalStrategies)
     {
-      SelectManyTest(treeString, innerTreeString, expectedResults, TreeTraversalStrategy.BreadthFirst, nodeToSkip, nodeTraversalStrategy);
+      SelectManyTest(treeString, innerTreeString, expectedResults, TreeTraversalStrategy.BreadthFirst, nodeToSkip, nodeTraversalStrategies);
     }
 
     [TestMethod]
@@ -174,9 +174,9 @@ namespace Arborist.Linq.Tests
       string innerTreeString,
       string expectedResults,
       string nodeToSkip,
-      NodeTraversalStrategy? nodeTraversalStrategy)
+      NodeTraversalStrategies? nodeTraversalStrategies)
     {
-      SelectManyTest(treeString, innerTreeString, expectedResults, TreeTraversalStrategy.DepthFirst, nodeToSkip, nodeTraversalStrategy);
+      SelectManyTest(treeString, innerTreeString, expectedResults, TreeTraversalStrategy.DepthFirst, nodeToSkip, nodeTraversalStrategies);
     }
 
     private void SelectManyTest(
@@ -185,7 +185,7 @@ namespace Arborist.Linq.Tests
       string expectedResults,
       TreeTraversalStrategy treeTraversalStrategy,
       string nodeToSkip,
-      NodeTraversalStrategy? nodeTraversalStrategy)
+      NodeTraversalStrategies? nodeTraversalStrategies)
     {
       // Arrange
       var treenumerable = TreeSerializer.Deserialize(treeString);
@@ -196,11 +196,11 @@ namespace Arborist.Linq.Tests
         .SelectMany(x => innerTreenumerable.Select(y => x + y.Node));
 
       var nodeVisitStrategySelector =
-        new Func<NodeContext<string>, NodeTraversalStrategy>(
+        new Func<NodeContext<string>, NodeTraversalStrategies>(
           nodeVisit =>
             nodeToSkip == null || nodeToSkip != nodeVisit.Node
-            ? NodeTraversalStrategy.TraverseSubtree
-            : nodeTraversalStrategy.Value);
+            ? NodeTraversalStrategies.TraverseAll
+            : nodeTraversalStrategies.Value);
 
       var expected =
         TreeSerializer

@@ -11,20 +11,20 @@ namespace Arborist.Treenumerators
       TNode node,
       int visitCount,
       NodePosition position,
-      NodeTraversalStrategy traversalStrategy)
+      NodeTraversalStrategies nodeTraversalStrategies)
     {
       Mode = mode;
       Node = node;
       VisitCount = visitCount;
       Position = position;
-      TraversalStrategy = traversalStrategy;
+      NodeTraversalStrategies = nodeTraversalStrategies;
     }
 
     public TreenumeratorMode Mode { get; set; }
     public TNode Node { get; set; }
     public int VisitCount { get; set; }
     public NodePosition Position { get; set; }
-    public NodeTraversalStrategy TraversalStrategy { get; set; }
+    public NodeTraversalStrategies NodeTraversalStrategies { get; set; }
 
     public override string ToString()
     {

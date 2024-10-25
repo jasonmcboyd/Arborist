@@ -38,7 +38,7 @@ namespace Arborist.Linq.TreeEnumerable.DepthFirstTree
         return true;
       }
 
-      while (_Treenumerator.MoveNext(NodeTraversalStrategy.TraverseSubtree))
+      while (_Treenumerator.MoveNext(NodeTraversalStrategies.TraverseAll))
       {
         if (_Treenumerator.Mode != TreenumeratorMode.SchedulingNode)
           continue;

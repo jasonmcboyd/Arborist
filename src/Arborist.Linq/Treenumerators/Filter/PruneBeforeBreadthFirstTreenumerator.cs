@@ -27,7 +27,7 @@ namespace Arborist.Linq.Treenumerators
 
     private bool _EnumerationFinished = false;
 
-    protected override bool OnMoveNext(NodeTraversalStrategy nodeTraversalStrategy)
+    protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
       if (_EnumerationFinished)
       {
@@ -36,21 +36,21 @@ namespace Arborist.Linq.Treenumerators
 
       if (Mode == TreenumeratorMode.VisitingNode)
       {
-        nodeTraversalStrategy = NodeTraversalStrategy.TraverseSubtree;
+        nodeTraversalStrategies = NodeTraversalStrategies.TraverseAll;
       }
 
-      return InnerTreenumeratorMoveNext(nodeTraversalStrategy);
+      return InnerTreenumeratorMoveNext(nodeTraversalStrategies);
     }
 
-    private bool InnerTreenumeratorMoveNext(NodeTraversalStrategy nodeTraversalStrategy)
+    private bool InnerTreenumeratorMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
       var previousNodeSkipped =
         InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode
-        && nodeTraversalStrategy == NodeTraversalStrategy.SkipNode;
+        && nodeTraversalStrategies == NodeTraversalStrategies.SkipNode;
 
       var previousSubtreeSkipped =
         InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode
-        && nodeTraversalStrategy == NodeTraversalStrategy.SkipSubtree;
+        && nodeTraversalStrategies == NodeTraversalStrategies.SkipNodeAndDescendants;
 
       if (previousSubtreeSkipped || previousNodeSkipped)
       {
@@ -59,7 +59,7 @@ namespace Arborist.Linq.Treenumerators
 
       var previousInnerTreenumeratorVisit = InnerTreenumerator.ToNodeVisit();
 
-      while (InnerTreenumerator.MoveNext(nodeTraversalStrategy))
+      while (InnerTreenumerator.MoveNext(nodeTraversalStrategies))
       {
         if (InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode)
         {
@@ -67,7 +67,7 @@ namespace Arborist.Linq.Treenumerators
 
           if (skipped)
           {
-            nodeTraversalStrategy = NodeTraversalStrategy.SkipSubtree;
+            nodeTraversalStrategies = NodeTraversalStrategies.SkipNodeAndDescendants;
 
             continue;
           }
