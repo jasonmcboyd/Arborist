@@ -34,14 +34,12 @@ namespace Arborist
       return ref _Partitions[0][_HeadOffset];
     }
 
-    public T RemoveFirst()
+    public ref T RemoveFirst()
     {
       if (Count == 0)
         throw new InvalidOperationException("The stack is empty.");
 
-      var result = _Partitions[0][_HeadOffset];
-
-      _Partitions[0][_HeadOffset] = default;
+      ref var result = ref _Partitions[0][_HeadOffset];
 
       Count--;
       _HeadOffset++;
@@ -59,7 +57,7 @@ namespace Arborist
         _HeadOffset = 0;
       }
 
-      return result;
+      return ref result;
     }
 
     public void AddLast(T item)
@@ -72,7 +70,7 @@ namespace Arborist
       Count++;
     }
 
-    public T RemoveLast()
+    public ref T RemoveLast()
     {
       if (Count == 0)
         throw new InvalidOperationException("The stack is empty.");
@@ -80,8 +78,7 @@ namespace Arborist
       Count--;
       _TailOffset--;
 
-      var item = CurrentPartition[_TailOffset];
-      CurrentPartition[_TailOffset] = default;
+      ref var item = ref CurrentPartition[_TailOffset];
 
       if (_CurrentPartitionIndex > 0 && _TailOffset == 0)
       {
@@ -89,7 +86,7 @@ namespace Arborist
         _TailOffset = CurrentPartition.Length;
       }
 
-      return item;
+      return ref item;
     }
 
     public ref T GetLast() => ref GetFromBack(0);
