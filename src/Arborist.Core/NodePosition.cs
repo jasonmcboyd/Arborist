@@ -14,12 +14,6 @@ namespace Arborist.Core
     public int SiblingIndex { get; }
     public int Depth { get; }
 
-    //public static implicit operator NodePosition((int, int) tuple)
-    //  => new NodePosition(tuple.Item1, tuple.Item2);
-
-    //public static implicit operator (int, int)(NodePosition nodePosition)
-    //  => (nodePosition.SiblingIndex, nodePosition.Depth);
-
     public override string ToString()
       => $"({SiblingIndex}, {Depth})";
 

@@ -21,17 +21,19 @@ namespace Arborist.Linq.Treenumerators.Enumerator
 
     public bool MoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
-      if (Mode == TreenumeratorMode.VisitingNode
-        || Position == new NodePosition(0, -1))
-      {
+      if (Mode == TreenumeratorMode.VisitingNode || Position == new NodePosition(0, -1))
         return TryMoveNext();
-      }
 
-      if (nodeTraversalStrategies == NodeTraversalStrategies.SkipNode
-        || nodeTraversalStrategies == NodeTraversalStrategies.SkipNodeAndDescendants)
-      {
+      return OnScheduling(nodeTraversalStrategies);
+    }
+
+    private bool OnScheduling(NodeTraversalStrategies nodeTraversalStrategies)
+    {
+      if (nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipSiblings))
+        return false;
+
+      if (nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipNode))
         return TryMoveNext();
-      }
 
       Mode = TreenumeratorMode.VisitingNode;
       VisitCount++;

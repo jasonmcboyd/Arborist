@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Nito.Collections.Deque" Version="1.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Arborist.Core\Arborist.Core.csproj" />
     <ProjectReference Include="..\Arborist\Arborist.csproj" />
   </ItemGroup>
