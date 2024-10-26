@@ -20,7 +20,7 @@
         return false;
       }
 
-      childNodeAndSiblingIndex = new NodeAndSiblingIndex<int>(_ChildIndex, 0);
+      childNodeAndSiblingIndex = new NodeAndSiblingIndex<int>(_ChildIndex, _ChildIndex);
       _ChildIndex++;
       return true;
     }
