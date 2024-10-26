@@ -876,6 +876,40 @@ namespace Arborist.Tests
                 (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0)),
               }.ToNodeVisitArray()
             },
+            // Mixed
+            new TestScenario
+            {
+              NodeTraversalStrategiesSelector =
+                visit =>
+                  visit.Position == new NodePosition(0, 1)
+                  ? NodeTraversalStrategies.SkipNodeAndSiblings
+                  : NodeTraversalStrategies.TraverseAll,
+              Description = "Skip level 1 sibling 0 node and siblings",
+              ExpectedBreadthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (0, 2)),
+                (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "d", 0, (1, 2)),
+                (TreenumeratorMode.VisitingNode,   "a", 3, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "c", 1, (0, 2)),
+                (TreenumeratorMode.VisitingNode,   "d", 1, (1, 2)),
+              }.ToNodeVisitArray(),
+              ExpectedDepthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (0, 2)),
+                (TreenumeratorMode.VisitingNode,   "c", 1, (0, 2)),
+                (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "d", 0, (1, 2)),
+                (TreenumeratorMode.VisitingNode,   "d", 1, (1, 2)),
+                (TreenumeratorMode.VisitingNode,   "a", 3, (0, 0)),
+              }.ToNodeVisitArray()
+            },
           }
         },
 

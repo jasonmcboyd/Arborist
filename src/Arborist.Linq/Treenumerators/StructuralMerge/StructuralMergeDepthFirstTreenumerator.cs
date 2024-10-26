@@ -71,8 +71,7 @@ namespace Arborist.Linq.Treenumerators
     private void FixUpNodeVisitsStack(NodeTraversalStrategies nodeTraversalStrategies)
     {
       var mustPopLeadingNodeVisitOnStack =
-        nodeTraversalStrategies == NodeTraversalStrategies.SkipNodeAndDescendants
-        || nodeTraversalStrategies == NodeTraversalStrategies.SkipNode
+        nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipNode)
         || (Node.HasRight && !_RightTreenumeratorFinished && _RightTreenumerator.Position.Depth < Position.Depth)
         || (Node.HasLeft && !_LeftTreenumeratorFinished && _LeftTreenumerator.Position.Depth < Position.Depth);
 

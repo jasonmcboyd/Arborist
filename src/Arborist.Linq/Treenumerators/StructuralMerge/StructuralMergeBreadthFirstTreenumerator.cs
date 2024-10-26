@@ -28,8 +28,7 @@ namespace Arborist.Linq.Treenumerators
     protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
       if (Mode == TreenumeratorMode.SchedulingNode
-        && (nodeTraversalStrategies == NodeTraversalStrategies.SkipNode
-          || nodeTraversalStrategies == NodeTraversalStrategies.SkipNodeAndDescendants))
+        && nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipNode))
       {
         _NodeVisits.RemoveFromBack();
       }

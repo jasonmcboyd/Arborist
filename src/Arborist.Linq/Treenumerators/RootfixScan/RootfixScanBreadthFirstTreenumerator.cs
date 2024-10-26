@@ -37,10 +37,10 @@ namespace Arborist.Linq.Treenumerators
     {
       if (Mode == TreenumeratorMode.SchedulingNode)
       {
-        if (nodeTraversalStrategies == NodeTraversalStrategies.SkipNode)
-          _SkippedStack.Push(_NextLevel.RemoveFromBack());
-        else if (nodeTraversalStrategies == NodeTraversalStrategies.SkipNodeAndDescendants)
+        if (nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipNodeAndDescendants))
           _NextLevel.RemoveFromBack();
+        else if (nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipNode))
+          _SkippedStack.Push(_NextLevel.RemoveFromBack());
       }
 
       if (!InnerTreenumerator.MoveNext(nodeTraversalStrategies))

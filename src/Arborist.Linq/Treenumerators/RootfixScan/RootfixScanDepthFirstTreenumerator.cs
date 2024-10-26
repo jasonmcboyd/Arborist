@@ -48,7 +48,7 @@ namespace Arborist.Linq.Treenumerators
     protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
       if (InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode
-        && nodeTraversalStrategies == NodeTraversalStrategies.SkipNode)
+        && nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipNode))
       {
         _SkippedStack.Push(_Stack.Pop());
       }
