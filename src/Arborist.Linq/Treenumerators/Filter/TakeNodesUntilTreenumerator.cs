@@ -20,39 +20,70 @@ namespace Arborist.Linq.Treenumerators
     private readonly Func<NodeContext<TNode>, bool> _Predicate;
     private bool _KeepFinalNode;
     private bool _StopSchedulingNodes;
-    private bool _EnumerationStarted = false;
+    private bool _FinalVisitRemaining = false;
 
     protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
       if (EnumerationFinished)
         return false;
 
-      if (!_EnumerationStarted)
-      {
-        _EnumerationStarted = true;
-      }
-      else if (Mode == TreenumeratorMode.SchedulingNode)
-      {
-        if (_StopSchedulingNodes)
-        {
-          nodeTraversalStrategies = NodeTraversalStrategies.SkipAll;
-        }
-        else if (_Predicate(this.ToNodeContext()))
-        {
-          _StopSchedulingNodes = true;
+      if (_StopSchedulingNodes)
+        return OnSchedulingStopped(nodeTraversalStrategies);
 
-          nodeTraversalStrategies =
-            _KeepFinalNode
-            ? NodeTraversalStrategies.SkipDescendantsAndSiblings
-            : NodeTraversalStrategies.SkipAll;
-        }
+      if (!InnerTreenumerator.MoveNext(nodeTraversalStrategies))
+        return false;
+
+      if (InnerTreenumerator.Mode == TreenumeratorMode.VisitingNode)
+      {
+        UpdateState();
+        return true;
       }
 
-      var result = InnerTreenumerator.MoveNext(nodeTraversalStrategies);
+      if (_Predicate(InnerTreenumerator.ToNodeContext()))
+      {
+        _StopSchedulingNodes = true;
+
+        if (_KeepFinalNode)
+          _FinalVisitRemaining = true;
+        else
+          return OnSchedulingStopped(nodeTraversalStrategies);
+      }
 
       UpdateState();
 
-      return result;
+      return true;
+    }
+
+    private bool OnSchedulingStopped(NodeTraversalStrategies nodeTraversalStrategies)
+    {
+      if (_FinalVisitRemaining == true)
+      {
+        _FinalVisitRemaining = false;
+        nodeTraversalStrategies |= NodeTraversalStrategies.SkipDescendantsAndSiblings;
+      }
+      else
+      {
+        nodeTraversalStrategies = NodeTraversalStrategies.SkipAll;
+      }
+
+      while (true)
+      {
+        var result = InnerTreenumerator.MoveNext(nodeTraversalStrategies);
+
+        if (!result)
+          return false;
+
+        if (InnerTreenumerator.Mode == TreenumeratorMode.VisitingNode
+          && (InnerTreenumerator.VisitCount < 2
+          || InnerTreenumerator.Position != Position
+          || InnerTreenumerator.VisitCount != VisitCount + 1))
+        {
+          UpdateState();
+          return true;
+        }
+
+        nodeTraversalStrategies = NodeTraversalStrategies.SkipAll;
+      }
     }
 
     private void UpdateState()
