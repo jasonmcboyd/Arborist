@@ -79,7 +79,7 @@ namespace Arborist.Treenumerators
 
       previousVisit.NodeTraversalStrategies = nodeTraversalStrategies;
 
-      if (nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipSiblings))
+      if ((nodeTraversalStrategies & NodeTraversalStrategies.SkipSiblings) == NodeTraversalStrategies.SkipSiblings)
       {
         if (CurrentDepth == 0)
         {
@@ -102,10 +102,10 @@ namespace Arborist.Treenumerators
         }
       }
 
-      if (nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipNodeAndDescendants))
+      if ((nodeTraversalStrategies & NodeTraversalStrategies.SkipNodeAndDescendants) == NodeTraversalStrategies.SkipNodeAndDescendants)
         return MoveUpTheTreeStack();
 
-      if (nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipNode))
+      if ((nodeTraversalStrategies & NodeTraversalStrategies.SkipNode) == NodeTraversalStrategies.SkipNode)
       {
         if (TryPushNextChild(ref previousVisitChildEnumerator, popMainStacksOntoSkippedStacks: true))
           return true;
@@ -125,7 +125,7 @@ namespace Arborist.Treenumerators
       ref var previousVisit = ref _Stack.GetLast();
       ref var previousVisitChildEnumerator = ref _StackChildEnumerators.GetLast();
 
-      if (!previousVisit.NodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipDescendants)
+      if ((previousVisit.NodeTraversalStrategies & NodeTraversalStrategies.SkipDescendants) == 0
         && TryPushNextChild(ref previousVisitChildEnumerator))
       {
         return true;
@@ -151,9 +151,9 @@ namespace Arborist.Treenumerators
 
         nodeVisit.VisitCount++;
 
-        if (nodeVisit.NodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipNode))
+        if ((nodeVisit.NodeTraversalStrategies & NodeTraversalStrategies.SkipNode) == NodeTraversalStrategies.SkipNode)
         {
-          if (nodeVisit.NodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipDescendants))
+          if ((nodeVisit.NodeTraversalStrategies & NodeTraversalStrategies.SkipDescendants) == NodeTraversalStrategies.SkipDescendants)
           {
             PopStacks(stack, stackChildEnumerator);
             continue;

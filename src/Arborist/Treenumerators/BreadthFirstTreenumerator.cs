@@ -101,7 +101,7 @@ namespace Arborist.Treenumerators
 
     private bool? OnScheduling(NodeTraversalStrategies nodeTraversalStrategies)
     {
-      if (nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipSiblings))
+      if ((nodeTraversalStrategies & NodeTraversalStrategies.SkipSiblings) == NodeTraversalStrategies.SkipSiblings)
       {
         if (Position.Depth == 0)
         {
@@ -116,10 +116,10 @@ namespace Arborist.Treenumerators
         }
       }
 
-      if (nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipNodeAndDescendants))
+      if ((nodeTraversalStrategies & NodeTraversalStrategies.SkipNodeAndDescendants) == NodeTraversalStrategies.SkipNodeAndDescendants)
         return SkipSubtree();
 
-      if (nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipNode))
+      if ((nodeTraversalStrategies & NodeTraversalStrategies.SkipNode) == NodeTraversalStrategies.SkipNode)
         return SkipNode();
 
       ref var scheduledVisit = ref _ChildrenStack.GetLast();
@@ -156,7 +156,7 @@ namespace Arborist.Treenumerators
         return true;
       }
 
-      if (!previousVisit.NodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipDescendants)
+      if ((previousVisit.NodeTraversalStrategies & NodeTraversalStrategies.SkipDescendants) == 0
         && TryPushNextChild(ref previousVisit, ref previousVisitChildEnumerator))
       {
         return true;
@@ -249,7 +249,7 @@ namespace Arborist.Treenumerators
         ref var nodeVisit = ref _ChildrenStack.GetLast();
         ref var nodeVisitChildEnumerator = ref _ChildrenStackChildEnumerators.GetLast();
 
-        if (nodeVisit.NodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipDescendants))
+        if ((nodeVisit.NodeTraversalStrategies & NodeTraversalStrategies.SkipDescendants) == NodeTraversalStrategies.SkipDescendants)
         {
           DisposeLastItemInChildrenStack();
           continue;
