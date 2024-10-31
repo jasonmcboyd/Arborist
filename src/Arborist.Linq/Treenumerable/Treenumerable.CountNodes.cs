@@ -1,6 +1,5 @@
 ﻿using Arborist.Core;
 using System;
-using System.Linq;
 
 namespace Arborist.Linq
 {
@@ -16,7 +15,18 @@ namespace Arborist.Linq
       if (source == null)
         return 0;
 
-      return source.Materialize().PreOrderTraversal().Count(predicate);
+      var result = 0;
+
+      using (var treenumerator = source.GetBreadthFirstTreenumerator())
+      {
+        while (treenumerator.MoveNext(NodeTraversalStrategies.SkipNode))
+        {
+          if (predicate(new NodeContext<TNode>(treenumerator.Node, treenumerator.Position)))
+            result++;
+        }
+      }
+
+      return result;
     }
   }
 }

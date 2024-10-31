@@ -1,6 +1,7 @@
 ﻿using Arborist.Core;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace Arborist.Treenumerators
 {
@@ -188,9 +189,11 @@ namespace Arborist.Treenumerators
 
       if (cacheChild && _Stack.Count > 1)
       {
+        ref var parent = ref _Stack.GetFromBack(1);
+
         _HasCachedChild = true;
-        _Stack.GetFromBack(1).VisitCount++;
-        UpdateStateFromVirtualNodeVisit(ref _Stack.GetFromBack(1));
+        parent.VisitCount++;
+        UpdateStateFromVirtualNodeVisit(ref parent);
       }
       else
       {
