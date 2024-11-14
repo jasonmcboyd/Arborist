@@ -22,35 +22,14 @@ namespace Arborist.Linq.Treenumerators
       if (EnumerationFinished)
         return false;
 
-      if (Mode == TreenumeratorMode.SchedulingNode)
-        nodeTraversalStrategies = GetTraversalStrategy(nodeTraversalStrategies);
+      if (Mode == TreenumeratorMode.SchedulingNode && _Predicate(this.ToNodeContext()))
+        nodeTraversalStrategies |= NodeTraversalStrategies.SkipDescendants;
 
       var result = InnerTreenumerator.MoveNext(nodeTraversalStrategies);
 
       UpdateState();
 
       return result;
-    }
-
-    private NodeTraversalStrategies GetTraversalStrategy(NodeTraversalStrategies nodeTraversalStrategies)
-    {
-      var skippingNode =
-        nodeTraversalStrategies == NodeTraversalStrategies.SkipNodeAndDescendants
-        || nodeTraversalStrategies == NodeTraversalStrategies.SkipNode;
-
-      var skippingDescendants =
-        _Predicate(this.ToNodeContext())
-        || nodeTraversalStrategies == NodeTraversalStrategies.SkipDescendants
-        || nodeTraversalStrategies == NodeTraversalStrategies.SkipNodeAndDescendants;
-
-      if (skippingNode && skippingDescendants)
-        return NodeTraversalStrategies.SkipNodeAndDescendants;
-      else if (skippingNode && !skippingDescendants)
-        return NodeTraversalStrategies.SkipNode;
-      else if (!skippingNode && skippingDescendants)
-        return NodeTraversalStrategies.SkipDescendants;
-      else
-        return NodeTraversalStrategies.TraverseAll;
     }
 
     private void UpdateState()

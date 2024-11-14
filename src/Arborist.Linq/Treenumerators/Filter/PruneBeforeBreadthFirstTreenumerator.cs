@@ -29,14 +29,10 @@ namespace Arborist.Linq.Treenumerators
     protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
       if (_EnumerationFinished)
-      {
         return false;
-      }
 
       if (Mode == TreenumeratorMode.VisitingNode)
-      {
         nodeTraversalStrategies = NodeTraversalStrategies.TraverseAll;
-      }
 
       return InnerTreenumeratorMoveNext(nodeTraversalStrategies);
     }
