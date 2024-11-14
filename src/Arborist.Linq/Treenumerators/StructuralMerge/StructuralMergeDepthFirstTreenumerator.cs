@@ -70,10 +70,16 @@ namespace Arborist.Linq.Treenumerators
 
     private void FixUpNodeVisitsStack(NodeTraversalStrategies nodeTraversalStrategies)
     {
+      var hasLeft = Node.HasLeft && !_LeftTreenumeratorFinished;
+      var hasRight = Node.HasRight && !_RightTreenumeratorFinished;
+      var leftDepthIsLessThanCurrent = _LeftTreenumerator.Position.Depth < Position.Depth;
+      var rightDepthIsLessThanCurrent = _RightTreenumerator.Position.Depth < Position.Depth;
+
       var mustPopLeadingNodeVisitOnStack =
         nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipNode)
-        || (Node.HasRight && !_RightTreenumeratorFinished && _RightTreenumerator.Position.Depth < Position.Depth)
-        || (Node.HasLeft && !_LeftTreenumeratorFinished && _LeftTreenumerator.Position.Depth < Position.Depth);
+        || (hasLeft && hasRight && leftDepthIsLessThanCurrent && rightDepthIsLessThanCurrent)
+        || (!hasLeft && _RightTreenumerator.Position.Depth < Position.Depth)
+        || (!hasRight && _LeftTreenumerator.Position.Depth < Position.Depth);
 
       if (mustPopLeadingNodeVisitOnStack)
         _NodeVisits.Pop();
