@@ -7,12 +7,14 @@ namespace Arborist.Linq
 {
   public static partial class EnumerableExtensions
   {
-    public static ITreenumerable<TNode> ToTree<TNode>(
+    public static ITreenumerable<TNode> ToRandomTree<TNode>(
       this IEnumerable<TNode> source,
-      Func<NodeContext<TNode>, bool> childAdderStrategy)
+      double weight = 0.5d)
     {
+      var random = new Random();
+
       return
-        new EnumerableTreenumerable<TNode>(source, childAdderStrategy);
+        new EnumerableTreenumerable<TNode>(source, nodeContext => nodeContext.Position.Depth == 1 || random.NextDouble() < weight);
     }
   }
 }

@@ -5,7 +5,7 @@ using System.ComponentModel;
 
 namespace Arborist.Treenumerators
 {
-  internal sealed class DepthFirstTreenumerator<TValue, TNode, TChildEnumerator>
+  public sealed class DepthFirstTreenumerator<TValue, TNode, TChildEnumerator>
     : TreenumeratorBase<TValue>
     where TChildEnumerator : IChildEnumerator<TNode>
   {

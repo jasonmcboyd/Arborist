@@ -171,7 +171,7 @@ namespace Arborist.Linq.Tests
       // Arrange
       var enumerable = treeString.Where(char.IsLetter).Select(x => x.ToString());
 
-      var sut = enumerable.ToTree();
+      var sut = enumerable.ToDegenerateTree();
 
       Func<NodeContext<string>, NodeTraversalStrategies> nodeTraversalStrategiesSelector =
         nodeContext =>

@@ -10,42 +10,20 @@ using System.Linq;
 
 BenchmarkRunner.Run<TraversalBenchmarks>();
 
-//var source = new CompleteBinaryTree();
+//var count =
+//  Enumerable.Range(0, 1 << 22)
+//  .ToTree(_ => false)
+//  .CountNodes();
 
-//Func<NodeContext<int>, bool> predicate = _ => true;
-
-//var result = 0;
-
-//using (var treenumerator = source.GetDepthFirstTreenumerator())
-//{
-//  var strat = NodeTraversalStrategies.SkipNode;
-
-//  while (treenumerator.MoveNext(strat))
-//  {
-//    if (predicate(new NodeContext<int>(treenumerator.Node, treenumerator.Position)))
-//      result++;
-
-//    strat = treenumerator.Position.Depth == 19 ? NodeTraversalStrategies.SkipDescendants : NodeTraversalStrategies.SkipNode;
-//  }
-//}
-
-//Console.WriteLine($"Result: {result:#,#}");
-
+//Console.WriteLine(count);
 
 //var count =
-//  new CompleteBinaryTree()
-//  .PruneBefore(nodeContext => nodeContext.Position.Depth == 22)
-//  .LevelOrderTraversal()
-//  .Count();
+//  Enumerable.Range(0, 1 << 20)
+//  .ToTree(_ => true)
+//  .CountNodes();
 
-//Console.WriteLine($"Count: {count:#,#}");
+//Console.WriteLine(count.ToString());
 
-//Console.WriteLine(
-//Treenumerables
-//.GetTree(19, TreeShape.Deep)
-//.CountNodes());
+//count = Enumerable.Range(0, 1 << 20).ToDegenerateTree().CountNodes();
 
-//Console.WriteLine(
-//Treenumerables
-//.GetTree(19, TreeShape.Wide)
-//.CountNodes());
+//Console.WriteLine(count.ToString());

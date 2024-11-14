@@ -293,7 +293,7 @@ namespace Arborist.Benchmarks
     public void PruneBeforeBft() =>
       Enumerable
       .Range(0, 1_000_000)
-      .ToForest()
+      .ToTrivialForest()
       .PruneBefore(_ => true)
       .Consume(TreeTraversalStrategy.BreadthFirst);
 
@@ -301,7 +301,7 @@ namespace Arborist.Benchmarks
     public void PruneBeforeDft() =>
       Enumerable
       .Range(0, 1_000_000)
-      .ToForest()
+      .ToTrivialForest()
       .PruneBefore(_ => true)
       .Consume(TreeTraversalStrategy.DepthFirst);
 
@@ -313,7 +313,7 @@ namespace Arborist.Benchmarks
     public void PruneAfterBft() =>
       Enumerable
       .Range(0, 1_000_000)
-      .ToForest()
+      .ToTrivialForest()
       .PruneAfter(_ => true)
       .Consume(TreeTraversalStrategy.BreadthFirst);
 
@@ -321,7 +321,7 @@ namespace Arborist.Benchmarks
     public void PruneAfterDft() =>
       Enumerable
       .Range(0, 1_000_000)
-      .ToForest()
+      .ToTrivialForest()
       .PruneAfter(_ => true)
       .Consume(TreeTraversalStrategy.DepthFirst);
 
@@ -333,7 +333,7 @@ namespace Arborist.Benchmarks
     public int SelectComposition() =>
       Enumerable
       .Range(0, 1_000_000)
-      .ToForest()
+      .ToTrivialForest()
       .Select(x => x.Node * 2)
       .Select(x => x.Node + 'a')
       .Select(x => x.Node + 1)
@@ -364,5 +364,33 @@ namespace Arborist.Benchmarks
       .CountNodes();
 
     #endregion
+
+    #region Enumerable To Tree
+
+    [Benchmark]
+    public int ToDegenerateTree() =>
+      Enumerable.Range(0, 1 << 20)
+      .ToDegenerateTree()
+      .CountNodes();
+
+    [Benchmark]
+    public int ToDegenerateTreeUsingToTree() =>
+      Enumerable.Range(0, 1 << 20)
+      .ToTree(_ => true)
+      .CountNodes();
+
+    [Benchmark]
+    public int ToTrivialForest() =>
+      Enumerable.Range(0, 1 << 20)
+      .ToTrivialForest()
+      .CountNodes();
+
+    [Benchmark]
+    public int ToTrivialForestUsingToTree() =>
+      Enumerable.Range(0, 1 << 20)
+      .ToTree(_ => false)
+      .CountNodes();
+
+    #endregion Enumerable To Tree
   }
 }

@@ -1,11 +1,10 @@
 ﻿using Arborist.Core;
 using System;
 using System.Collections.Generic;
-using System.Xml.Schema;
 
 namespace Arborist.Treenumerators
 {
-  internal sealed class BreadthFirstTreenumerator<TValue, TNode, TChildEnumerator>
+  public sealed class BreadthFirstTreenumerator<TValue, TNode, TChildEnumerator>
     : TreenumeratorBase<TValue>
     where TChildEnumerator : IChildEnumerator<TNode>
   {

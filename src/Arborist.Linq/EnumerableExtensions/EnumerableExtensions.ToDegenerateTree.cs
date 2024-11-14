@@ -6,13 +6,13 @@ namespace Arborist.Linq
 {
   public static partial class EnumerableExtensions
   {
-    public static ITreenumerable<TNode> ToForest<TNode>(this IEnumerable<TNode> source)
+    public static ITreenumerable<TNode> ToDegenerateTree<TNode>(this IEnumerable<TNode> source)
     {
       return
         TreenumerableFactory
         .Create(
-          () => new EnumerableAsForestTreenumerator<TNode>(source),
-          () => new EnumerableAsForestTreenumerator<TNode>(source));
+          () => new EnumerableAsTreeBreadthFirstTreenumerator<TNode>(source),
+          () => new EnumerableAsTreeDepthFirstTreenumerator<TNode>(source));
     }
   }
 }
