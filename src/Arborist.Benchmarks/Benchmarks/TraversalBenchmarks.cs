@@ -1,4 +1,5 @@
-﻿using Arborist.Benchmarks.Trees;
+﻿using Arborist.Benchmarks;
+using Arborist.Benchmarks.Trees;
 using Arborist.Core;
 using Arborist.Linq;
 using Arborist.Trees;
@@ -9,7 +10,7 @@ namespace Arborist.Benchmarks
 {
   [MemoryDiagnoser]
   [ShortRunJob]
-  public partial class TraversalBenchmarks
+  public class TraversalBenchmarks
   {
     //#region RefSemiDeque
 
@@ -173,55 +174,6 @@ namespace Arborist.Benchmarks
     //  .Consume();
 
     //#endregion PostOrderTraversal
-
-    #region Where
-
-    private ITreenumerable<int> GetTreeWithDepthWhere(int cutoff, TreeShape treeShape)
-    {
-      return
-        Treenumerables
-        .GetTree(cutoff, treeShape)
-        .Where(nodeContext => nodeContext.Position.Depth % 2 == 1);
-    }
-
-    private void WhereTest(
-      TreeTraversalStrategy treeTraversalStrategy,
-      TreeShape treeShape,
-      int depth)
-      => GetTreeWithDepthWhere(depth, treeShape).Consume(treeTraversalStrategy);
-
-    [Benchmark]
-    public void Where_Bft_DeepTree()
-      => WhereTest(TreeTraversalStrategy.BreadthFirst, TreeShape.Deep, 19);
-
-    [Benchmark]
-    public void Where_Bft_WideTree()
-      => WhereTest(TreeTraversalStrategy.BreadthFirst, TreeShape.Wide, 19);
-
-    [Benchmark]
-    public void Where_Dft_TriangleTree()
-      => new TriangleTree()
-      .PruneAfter(nodeContext => nodeContext.Position.Depth == 1448)
-      .Where(nodeContext => (nodeContext.Position.Depth + nodeContext.Position.SiblingIndex) % 2 == 0 )
-      .Consume();
-
-    [Benchmark]
-    public void Where_Dft_TrivialForest_WhereAll()
-      => Enumerable.Range(0, 1 << 20).ToTrivialForest().Where(_ => true).Consume();
-
-    [Benchmark]
-    public void Where_Dft_TrivialForest_WhereNone()
-      => Enumerable.Range(0, 1 << 20).ToTrivialForest().Where(_ => false).Consume();
-
-    [Benchmark]
-    public void Where_Dft_ToDegenerateTree_WhereAll()
-      => Enumerable.Range(0, 1 << 20).ToDegenerateTree().Where(_ => true).Consume();
-
-    [Benchmark]
-    public void Where_Dft_ToDegenerateTree_WhereNone()
-      => Enumerable.Range(0, 1 << 20).ToDegenerateTree().Where(_ => false).Consume();
-
-    #endregion Where
 
     //#region GetLeaves
 

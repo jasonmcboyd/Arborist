@@ -1,7 +1,7 @@
 ﻿using Arborist.Treenumerables;
 using Arborist.Trees;
 
-namespace Arborist.Benchmarks.Trees
+namespace Arborist.Trees
 {
   /// <summary>
   /// Interesting fact about this tree is that the width of the levels follows

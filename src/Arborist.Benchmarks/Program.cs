@@ -4,26 +4,30 @@ using Arborist.Benchmarks.Trees;
 using Arborist.Core;
 using Arborist.Linq;
 using Arborist.Trees;
+using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Running;
 using System;
 using System.Linq;
 
-BenchmarkRunner.Run<TraversalBenchmarks>();
+var config =
+  ManualConfig
+  .Create(DefaultConfig.Instance)
+  .WithOptions(ConfigOptions.JoinSummary)
+  .WithOptions(ConfigOptions.DisableLogFile);
+
+BenchmarkRunner.Run([
+  //BenchmarkConverter.TypeToBenchmarks(typeof(TraversalBenchmarks), config),
+  BenchmarkConverter.TypeToBenchmarks(typeof(DepthFirstTreenumerator), config),
+  //BenchmarkConverter.TypeToBenchmarks(typeof(DepthFirstWhere), config),
+]);
 
 //var count =
-//  Enumerable.Range(0, 1 << 22)
-//  .ToTree(_ => false)
-//  .CountNodes();
+//  new TriangleTree()
+//  //.Where(nodeContext => (nodeContext.Position.Depth + nodeContext.Position.SiblingIndex) % 2 == 0)
+//  .GetDepthFirstTraversal(
+//    nc => nc.Position.Depth == 1
+//    ? NodeTraversalStrategies.SkipDescendants
+//    : NodeTraversalStrategies.TraverseAll)
+//  .Count();
 
 //Console.WriteLine(count);
-
-//var count =
-//  Enumerable.Range(0, 1 << 20)
-//  .ToTree(_ => true)
-//  .CountNodes();
-
-//Console.WriteLine(count.ToString());
-
-//count = Enumerable.Range(0, 1 << 20).ToDegenerateTree().CountNodes();
-
-//Console.WriteLine(count.ToString());
