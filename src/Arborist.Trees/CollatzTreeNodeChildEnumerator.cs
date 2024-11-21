@@ -8,6 +8,7 @@
       Value = value;
       _HasSecondChild = value != 4 && (value - 1) % 3 == 0;
       _CurrentIndexByte = 0;
+      _Disposed = true;
     }
 
     public ulong Value { get; }
@@ -21,7 +22,7 @@
 
     public bool MoveNext(out NodeAndSiblingIndex<ulong> childNodeAndSiblingIndex)
     {
-      if (CurrentIndex == ChildCount)
+      if (_Disposed || CurrentIndex == ChildCount)
       {
         childNodeAndSiblingIndex = default;
         return false;
@@ -37,9 +38,11 @@
       return true;
     }
 
+    private bool _Disposed;
+
     public void Dispose()
     {
-      // Do nothing.
+      _Disposed = true;
     }
   }
 }

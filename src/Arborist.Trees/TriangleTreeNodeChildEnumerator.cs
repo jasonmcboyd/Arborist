@@ -7,6 +7,7 @@
     {
       _ChildCount = childCount;
       _ChildIndex = 0;
+      _Disposed = false;
     }
 
     private readonly int _ChildCount;
@@ -14,7 +15,7 @@
 
     public bool MoveNext(out NodeAndSiblingIndex<int> childNodeAndSiblingIndex)
     {
-      if (_ChildIndex == _ChildCount)
+      if (_Disposed || _ChildIndex == _ChildCount)
       {
         childNodeAndSiblingIndex = default;
         return false;
@@ -25,9 +26,11 @@
       return true;
     }
 
+    private bool _Disposed;
+
     public void Dispose()
     {
-      // Do nothing.
+      _Disposed = true;
     }
   }
 }

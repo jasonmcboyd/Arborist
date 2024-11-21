@@ -8,6 +8,7 @@ namespace Arborist
     {
       _ChildIndex = -1;
       _Children = children ?? Array.Empty<SimpleNode<TValue>>();
+      _Disposed = false;
     }
 
     private int _ChildIndex;
@@ -20,7 +21,7 @@ namespace Arborist
 
     public bool MoveNext(out NodeAndSiblingIndex<SimpleNode<TValue>> childNodeAndSiblingIndex)
     {
-      if (_ChildIndex + 1 >= _Children.Length)
+      if (_Disposed || _ChildIndex + 1 >= _Children.Length)
       {
         childNodeAndSiblingIndex = default;
         return false;
@@ -31,8 +32,11 @@ namespace Arborist
       return true;
     }
 
+    private bool _Disposed;
+
     public void Dispose()
     {
+      _Disposed = true;
     }
   }
 }

@@ -1,14 +1,12 @@
-﻿using Arborist.Benchmarks.Trees;
-using Arborist.Core;
+﻿using Arborist.Core;
 using Arborist.Linq;
 using Arborist.Trees;
 using BenchmarkDotNet.Attributes;
-using System.Linq;
 
 namespace Arborist.Benchmarks
 {
   [MemoryDiagnoser]
-  //[ShortRunJob]
+  [ShortRunJob]
   public class DepthFirstTreenumerator
   {
     [Benchmark]
@@ -28,6 +26,5 @@ namespace Arborist.Benchmarks
         ? NodeTraversalStrategies.SkipDescendants
         : NodeTraversalStrategies.TraverseAll)
       .Consume();
-
   }
 }

@@ -13,6 +13,7 @@
       {
         _ChildValue = int.MaxValue;
       }
+      _Disposed = false;
     }
 
     private void TryIncrementChildValue()
@@ -40,7 +41,7 @@
 
     public bool MoveNext(out NodeAndSiblingIndex<int> childNodeAndSiblingIndex)
     {
-      if (_ChildValue == int.MaxValue)
+      if (_Disposed || _ChildValue == int.MaxValue)
       {
         childNodeAndSiblingIndex = default;
         return false;
@@ -53,9 +54,11 @@
       return true;
     }
 
+    private bool _Disposed;
+
     public void Dispose()
     {
-      // Do nothing.
+      _Disposed = true;
     }
   }
 }
