@@ -162,6 +162,14 @@ namespace Arborist
       if (Count == 0)
         yield break;
 
+      if (CurrentPartition == _Partitions[0])
+      {
+        for (var offset = _TailPointerOffset; offset < _HeadPointerOffset; offset++)
+          yield return CurrentPartition[offset];
+
+        yield break;
+      }
+
       for (var offset = _TailPointerOffset; offset < _Partitions[0].Length; offset++)
         yield return _Partitions[0][offset];
 

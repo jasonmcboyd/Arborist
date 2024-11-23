@@ -445,6 +445,35 @@ namespace Arborist.Linq.Tests
           TreeString = "a(b(c,d,e))",
           TestScenarios = new List<TestScenario>
           {
+            // Traverse all
+            new TestScenario
+            {
+              NodeTraversalStrategiesSelector = visit => NodeTraversalStrategies.TraverseAll,
+              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.Node != "b" && visit.Node != "d"),
+              Description = "Where not b or d, traverse all",
+              ExpectedBreadthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (0, 1)),
+                (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "e", 0, (1, 1)),
+                (TreenumeratorMode.VisitingNode,   "a", 3, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "c", 1, (0, 1)),
+                (TreenumeratorMode.VisitingNode,   "e", 1, (1, 1)),
+              }.ToNodeVisitArray(),
+              ExpectedDepthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (0, 1)),
+                (TreenumeratorMode.VisitingNode,   "c", 1, (0, 1)),
+                (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "e", 0, (1, 1)),
+                (TreenumeratorMode.VisitingNode,   "e", 1, (1, 1)),
+                (TreenumeratorMode.VisitingNode,   "a", 3, (0, 0)),
+              }.ToNodeVisitArray()
+            },
             // Skip node
             new TestScenario
             {
@@ -474,6 +503,107 @@ namespace Arborist.Linq.Tests
                 (TreenumeratorMode.VisitingNode,   "a", 3, (0, 0)),
                 (TreenumeratorMode.SchedulingNode, "e", 0, (2, 2)),
                 (TreenumeratorMode.VisitingNode,   "a", 4, (0, 0)),
+              }.ToNodeVisitArray()
+            },
+            new TestScenario
+            {
+              NodeTraversalStrategiesSelector =
+                visit =>
+                  visit.Position.Depth == 2
+                  ? NodeTraversalStrategies.TraverseAll
+                  : NodeTraversalStrategies.SkipNode,
+              TreenumerableMap = treenumerable => treenumerable.Where(visit => true),
+              Description = "Where all, skip levels 0 and 1 ",
+              ExpectedBreadthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (0, 2)),
+                (TreenumeratorMode.SchedulingNode, "d", 0, (1, 2)),
+                (TreenumeratorMode.SchedulingNode, "e", 0, (2, 2)),
+                (TreenumeratorMode.VisitingNode,   "c", 1, (0, 2)),
+                (TreenumeratorMode.VisitingNode,   "d", 1, (1, 2)),
+                (TreenumeratorMode.VisitingNode,   "e", 1, (2, 2)),
+              }.ToNodeVisitArray(),
+              ExpectedDepthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (0, 2)),
+                (TreenumeratorMode.VisitingNode,   "c", 1, (0, 2)),
+                (TreenumeratorMode.SchedulingNode, "d", 0, (1, 2)),
+                (TreenumeratorMode.VisitingNode,   "d", 1, (1, 2)),
+                (TreenumeratorMode.SchedulingNode, "e", 0, (2, 2)),
+                (TreenumeratorMode.VisitingNode,   "e", 1, (2, 2)),
+              }.ToNodeVisitArray()
+            },
+            new TestScenario
+            {
+              NodeTraversalStrategiesSelector =
+                visit =>
+                  visit.Position.Depth == 2
+                  ? NodeTraversalStrategies.TraverseAll
+                  : NodeTraversalStrategies.SkipNode,
+              TreenumerableMap = treenumerable => treenumerable.Where(visit => visit.Node != "d"),
+              Description = "Where not d, skip levels 0 and 1 ",
+              ExpectedBreadthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (0, 2)),
+                (TreenumeratorMode.SchedulingNode, "e", 0, (1, 2)),
+                (TreenumeratorMode.VisitingNode,   "c", 1, (0, 2)),
+                (TreenumeratorMode.VisitingNode,   "e", 1, (1, 2)),
+              }.ToNodeVisitArray(),
+              ExpectedDepthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (0, 2)),
+                (TreenumeratorMode.VisitingNode,   "c", 1, (0, 2)),
+                (TreenumeratorMode.SchedulingNode, "e", 0, (1, 2)),
+                (TreenumeratorMode.VisitingNode,   "e", 1, (1, 2)),
+              }.ToNodeVisitArray()
+            },
+          }
+        },
+
+        new TreeTestDefinition
+        {
+          TreeString = "a(b(d(e)),c)",
+          TestScenarios = new List<TestScenario>
+          {
+            // Skip node
+            new TestScenario
+            {
+              NodeTraversalStrategiesSelector =
+                visit =>
+                  visit.Node == "a" || visit.Node == "b" || visit.Node == "e"
+                  ? NodeTraversalStrategies.SkipNode
+                  : NodeTraversalStrategies.TraverseAll,
+              TreenumerableMap = treenumerable => treenumerable.Where(visit => true),
+              Description = "Where all, skip a, b and e",
+              ExpectedBreadthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "d", 0, (0, 2)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (1, 1)),
+                (TreenumeratorMode.VisitingNode,   "d", 1, (0, 2)),
+                (TreenumeratorMode.SchedulingNode, "e", 0, (0, 3)),
+                (TreenumeratorMode.VisitingNode,   "d", 2, (0, 2)),
+                (TreenumeratorMode.VisitingNode,   "c", 1, (1, 1)),
+              }.ToNodeVisitArray(),
+              ExpectedDepthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "d", 0, (0, 2)),
+                (TreenumeratorMode.VisitingNode,   "d", 1, (0, 2)),
+                (TreenumeratorMode.SchedulingNode, "e", 0, (0, 3)),
+                (TreenumeratorMode.VisitingNode,   "d", 2, (0, 2)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (1, 1)),
+                (TreenumeratorMode.VisitingNode,   "c", 1, (1, 1)),
               }.ToNodeVisitArray()
             },
           }

@@ -10,12 +10,9 @@
       SiblingIndex = siblingIndex;
     }
 
-    public TNode Node { get; }
-    public int SiblingIndex { get; }
+    public readonly TNode Node;
+    public readonly int SiblingIndex;
 
-    public override string ToString()
-    {
-      return $"{SiblingIndex}  {Node}";
-    }
+    public override string ToString() => $"{SiblingIndex}  {Node}";
   }
 }

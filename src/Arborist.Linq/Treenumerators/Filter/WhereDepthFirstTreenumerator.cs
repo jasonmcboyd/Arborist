@@ -1,6 +1,7 @@
 ﻿using Arborist.Core;
 using Arborist.Linq.Extensions;
 using System;
+using System.Runtime.CompilerServices;
 
 namespace Arborist.Linq.Treenumerators
 {
@@ -26,21 +27,14 @@ namespace Arborist.Linq.Treenumerators
 
     private int _DepthOfLastSeenNode = -1;
 
-    private bool _EnumerationFinished = false;
-
     protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
-      if (_EnumerationFinished)
+      if (EnumerationFinished)
         return false;
 
       if (Mode == TreenumeratorMode.VisitingNode)
         nodeTraversalStrategies = NodeTraversalStrategies.TraverseAll;
 
-      return InnerTreenumeratorMoveNext(nodeTraversalStrategies);
-    }
-
-    private bool InnerTreenumeratorMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
-    {
       // Do not apply any traversal strategies to the sentinel node.
       if (InnerTreenumerator.Position.Depth == -1)
         nodeTraversalStrategies = NodeTraversalStrategies.TraverseAll;
@@ -72,12 +66,9 @@ namespace Arborist.Linq.Treenumerators
           }
         }
 
-        if (OnTraversing())
+        if (OnVisiting())
           return true;
       }
-
-      // If we are here we have exhausted the inner enumerator.
-      _EnumerationFinished = true;
 
       return false;
     }
@@ -101,11 +92,10 @@ namespace Arborist.Linq.Treenumerators
 
         stackWithDeepestNodeVisit = GetStackWithDeepestNodeVisit();
 
-        if (stackWithDeepestNodeVisit == _SkippedNodeVisits
-          || stackWithDeepestNodeVisit.Count == 1)
-        {
-          stackWithDeepestNodeVisit.GetLast().VisitCount++;
-        }
+        if (stackWithDeepestNodeVisit == _SkippedNodeVisits)
+          _SkippedNodeVisits.GetLast().VisitCount++;
+        else if (_NodeVisits.Count == 1)
+          _NodeVisits.GetLast().VisitCount++;
       }
 
       // Check if the current node visit should be skipped.
@@ -117,8 +107,6 @@ namespace Arborist.Linq.Treenumerators
 
       var nodeVisit =
         new InternalNodeVisit(
-          InnerTreenumerator.Node,
-          TreenumeratorMode.SchedulingNode,
           siblingIndex,
           depth,
           InnerTreenumerator.Position.Depth,
@@ -131,7 +119,7 @@ namespace Arborist.Linq.Treenumerators
       return true;
     }
 
-    private bool OnTraversing()
+    private bool OnVisiting()
     {
       if (InnerTreenumerator.VisitCount > 1
         && _DepthOfLastSeenNode <= InnerTreenumerator.Position.Depth)
@@ -145,20 +133,16 @@ namespace Arborist.Linq.Treenumerators
       ref var nodeVisit = ref _NodeVisits.GetLast();
 
       nodeVisit.VisitCount++;
-      nodeVisit.Mode = TreenumeratorMode.VisitingNode;
 
       UpdateStateFromNodeVisit(ref _NodeVisits.GetLast());
 
       return true;
     }
 
-    private int GetEffectiveDepth()
-    {
-      var depth = _NodeVisits.Count + _SkippedNodeVisits.Count - 1;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int GetEffectiveDepth() => _NodeVisits.Count + _SkippedNodeVisits.Count - 1;
 
-      return Math.Max(depth, 0);
-    }
-
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private RefSemiDeque<InternalNodeVisit> GetStackWithDeepestNodeVisit()
     {
       return
@@ -169,12 +153,12 @@ namespace Arborist.Linq.Treenumerators
 
     private void UpdateStateFromNodeVisit(ref InternalNodeVisit nodeVisit)
     {
-      Mode = nodeVisit.Mode;
+      Mode = InnerTreenumerator.Mode;
       _DepthOfLastSeenNode = InnerTreenumerator.Position.Depth;
 
-      if (!_EnumerationFinished)
+      if (!EnumerationFinished)
       {
-        Node = nodeVisit.Node;
+        Node = InnerTreenumerator.Node;
         VisitCount = nodeVisit.VisitCount;
         Position = new NodePosition(nodeVisit.SiblingIndex, nodeVisit.Depth);
       }
@@ -183,15 +167,11 @@ namespace Arborist.Linq.Treenumerators
     private struct InternalNodeVisit
     {
       public InternalNodeVisit(
-        TNode node,
-        TreenumeratorMode mode,
         int siblingIndex,
         int depth,
         int originalDepth,
         int visitCount)
       {
-        Node = node;
-        Mode = mode;
         SiblingIndex = siblingIndex;
         Depth = depth;
         OriginalDepth = originalDepth;
@@ -200,37 +180,20 @@ namespace Arborist.Linq.Treenumerators
 
       public InternalNodeVisit(ITreenumerator<TNode> treenumerator)
         : this(
-        treenumerator.Node,
-        treenumerator.Mode,
         treenumerator.Position.SiblingIndex,
         treenumerator.Position.Depth,
         treenumerator.Position.Depth,
         treenumerator.VisitCount)
       { }
 
-      public TNode Node { get; set; }
-      public TreenumeratorMode Mode { get; set; }
-      public int SiblingIndex { get; set; }
-      public int Depth { get; set; }
-      public int OriginalDepth { get; set; }
-      public int VisitCount { get; set; }
+      public readonly int SiblingIndex;
+      public readonly int Depth;
+      public readonly int OriginalDepth;
+      public int VisitCount;
 
       public override string ToString()
       {
-        return $"({SiblingIndex}, {Depth}),  {OriginalDepth},  {ModeToChar()}  {VisitCount}  {Node}";
-      }
-
-      private char ModeToChar()
-      {
-        switch (Mode)
-        {
-          case TreenumeratorMode.SchedulingNode:
-            return 'S';
-          case TreenumeratorMode.VisitingNode:
-            return 'V';
-          default:
-            throw new NotImplementedException();
-        }
+        return $"({SiblingIndex}, {Depth}),  {OriginalDepth},  {VisitCount}";
       }
     }
   }

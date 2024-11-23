@@ -12,12 +12,9 @@ namespace Arborist
       Position = position;
     }
 
-    public TNode Node { get; }
-    public NodePosition Position { get; }
+    public readonly TNode Node;
+    public readonly NodePosition Position;
 
-    public override string ToString()
-    {
-      return $"{Position}  {Node}";
-    }
+    public override string ToString() => $"{Position}  {Node}";
   }
 }

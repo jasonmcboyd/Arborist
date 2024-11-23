@@ -8,12 +8,12 @@ namespace Arborist.Benchmarks
 {
   [MemoryDiagnoser]
   [ShortRunJob]
-  public class DepthFirstTreenumerator
+  public class BreadthFirstTreenumerator
   {
     [Benchmark]
     public void TriangleTree()
       => new TriangleTree()
-      .GetDepthFirstTraversal(nc =>
+      .GetBreadthFirstTraversal(nc =>
         nc.Position.Depth == 2896
         ? NodeTraversalStrategies.SkipDescendants
         : NodeTraversalStrategies.TraverseAll)
@@ -33,13 +33,13 @@ namespace Arborist.Benchmarks
       => Enumerable
       .Range(0, 1 << 22)
       .ToTrivialForest()
-      .Consume(TreeTraversalStrategy.DepthFirst);
+      .Consume(TreeTraversalStrategy.BreadthFirst);
 
     [Benchmark]
-    public void eDegenerateTree()
+    public void DegenerateTree()
       => Enumerable
       .Range(0, 1 << 22)
       .ToDegenerateTree()
-      .Consume(TreeTraversalStrategy.DepthFirst);
+      .Consume(TreeTraversalStrategy.BreadthFirst);
   }
 }
