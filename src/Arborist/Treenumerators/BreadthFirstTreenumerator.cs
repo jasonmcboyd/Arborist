@@ -200,7 +200,7 @@ namespace Arborist.Treenumerators
         ref var nodeVisit = ref _Stack.GetLast();
         ref var nodeVisitChildEnumerator = ref _ChildEnumeratorsStack.GetLast();
 
-        if (TryPushNextChild(ref nodeVisit, ref nodeVisitChildEnumerator, nodeVisit.Position.Depth > _Stack.Count - 1))
+        if (TryPushNextChild(ref nodeVisit, ref _ChildEnumeratorsStack.GetLast(), nodeVisit.Position.Depth > _Stack.Count - 1))
           return true;
 
         DisposeLastItemInChildrenStack();

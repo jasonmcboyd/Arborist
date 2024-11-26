@@ -10,19 +10,19 @@ namespace Arborist
 
     public RefSemiDeque(int capacity)
     {
+      InitialCapacity = capacity;
       Capacity = capacity;
-      _Partitions = new List<T[]>()
-      {
-        new T[capacity]
-      };
+      _Partitions = new LinkedList<T[]>();
+      _Partitions.AddLast(new T[capacity]);
+      CurrentPartition = _Partitions.First;
     }
 
+    private int InitialCapacity { get; }
     public int Capacity { get; private set; }
     public int Count { get; private set; }
 
-    private List<T[]> _Partitions;
-    private int _CurrentPartitionIndex = 0;
-    private T[] CurrentPartition => _Partitions[_CurrentPartitionIndex];
+    private LinkedList<T[]> _Partitions;
+    private LinkedListNode<T[]> CurrentPartition { get; set; }
     private int _TailPointerOffset = 0;
     private int _HeadPointerOffset = 0;
 
@@ -31,7 +31,7 @@ namespace Arborist
       if (Count == 0)
         throw new InvalidOperationException("The stack is empty.");
 
-      return ref _Partitions[0][_TailPointerOffset];
+      return ref _Partitions.First.Value[_TailPointerOffset];
     }
 
     public ref T RemoveFirst()
@@ -39,7 +39,7 @@ namespace Arborist
       if (Count == 0)
         throw new InvalidOperationException("The stack is empty.");
 
-      ref var result = ref _Partitions[0][_TailPointerOffset];
+      ref var result = ref _Partitions.First.Value[_TailPointerOffset];
 
       Count--;
       _TailPointerOffset++;
@@ -49,12 +49,11 @@ namespace Arborist
         _TailPointerOffset = 0;
         _HeadPointerOffset = 0;
       }
-      else if (_TailPointerOffset == _Partitions[0].Length)
+      else if (_TailPointerOffset == _Partitions.First.Value.Length)
       {
-        _CurrentPartitionIndex--;
-        var partition = _Partitions[0];
-        _Partitions.RemoveAt(0);
-        _Partitions.Add(partition);
+        var node = _Partitions.First;
+        _Partitions.RemoveFirst();
+        _Partitions.AddLast(node);
         _TailPointerOffset = 0;
       }
 
@@ -63,10 +62,10 @@ namespace Arborist
 
     public void AddLast(T item)
     {
-      if (CurrentPartition.Length == _HeadPointerOffset)
+      if (CurrentPartition.Value.Length == _HeadPointerOffset)
         AddPartitionOrMoveToNextPartition();
 
-      CurrentPartition[_HeadPointerOffset] = item;
+      CurrentPartition.Value[_HeadPointerOffset] = item;
       _HeadPointerOffset++;
       Count++;
     }
@@ -79,18 +78,18 @@ namespace Arborist
       Count--;
       _HeadPointerOffset--;
 
-      ref var item = ref CurrentPartition[_HeadPointerOffset];
+      ref var item = ref CurrentPartition.Value[_HeadPointerOffset];
 
       if (Count == 0)
       {
-        _CurrentPartitionIndex = 0;
+        CurrentPartition = _Partitions.First;
         _HeadPointerOffset = 0;
         _TailPointerOffset = 0;
       }
       else if (_HeadPointerOffset == 0)
       {
-        _CurrentPartitionIndex--;
-        _HeadPointerOffset = CurrentPartition.Length;
+        CurrentPartition = CurrentPartition.Previous;
+        _HeadPointerOffset = CurrentPartition.Value.Length;
       }
 
       return ref item;
@@ -101,7 +100,7 @@ namespace Arborist
       if (Count == 0)
         throw new InvalidOperationException("The stack is empty.");
 
-      return ref CurrentPartition[_HeadPointerOffset - 1];
+      return ref CurrentPartition.Value[_HeadPointerOffset - 1];
     }
 
     public ref T GetFromBack(int index)
@@ -114,45 +113,44 @@ namespace Arborist
 
       GetPartitionAndOffset(index, out var partition, out var offset);
 
-      return ref _Partitions[partition][offset];
+      return ref partition[offset];
     }
 
-    private void AddPartitionOrMoveToNextPartition()
-    {
-      if (_CurrentPartitionIndex == _Partitions.Count - 1)
-      {
-        var newPartition = new T[CurrentPartition.Length * 2];
-        _Partitions.Add(newPartition);
-        Capacity += newPartition.Length;
-      }
-
-      _CurrentPartitionIndex++;
-      _HeadPointerOffset = 0;
-    }
-
-    private void GetPartitionAndOffset(int index, out int partition, out int offset)
+    private void GetPartitionAndOffset(int index, out T[] partition, out int offset)
     {
       if (index < _HeadPointerOffset)
       {
-        partition = _CurrentPartitionIndex;
+        partition = CurrentPartition.Value;
         offset = _HeadPointerOffset - 1 - index;
         return;
       }
 
       index -= _HeadPointerOffset;
 
-      var arrayIndex = _Partitions.Count - 2;
-      var array = _Partitions[arrayIndex];
+      var node = CurrentPartition.Previous;
 
-      while (array.Length <= index)
+      while (node.Value.Length <= index)
       {
-        index -= array.Length;
-        arrayIndex--;
-        array = _Partitions[arrayIndex];
+        index -= node.Value.Length;
+        node = node.Previous;
       }
 
-      partition = arrayIndex;
-      offset = array.Length - 1 - index;
+      partition = node.Value;
+      offset = node.Value.Length - 1 - index;
+    }
+
+    private void AddPartitionOrMoveToNextPartition()
+    {
+      if (CurrentPartition == _Partitions.Last)
+      {
+        var newPartitionSize = Capacity;
+        var newPartition = new T[newPartitionSize];
+        _Partitions.AddLast(newPartition);
+        Capacity += newPartition.Length;
+      }
+
+      CurrentPartition = CurrentPartition.Next;
+      _HeadPointerOffset = 0;
     }
 
     #region IEnumerable
@@ -162,46 +160,33 @@ namespace Arborist
       if (Count == 0)
         yield break;
 
-      if (CurrentPartition == _Partitions[0])
+      if (CurrentPartition == _Partitions.First)
       {
         for (var offset = _TailPointerOffset; offset < _HeadPointerOffset; offset++)
-          yield return CurrentPartition[offset];
+          yield return CurrentPartition.Value[offset];
 
         yield break;
       }
 
-      for (var offset = _TailPointerOffset; offset < _Partitions[0].Length; offset++)
-        yield return _Partitions[0][offset];
+      for (var offset = _TailPointerOffset; offset < _Partitions.First.Value.Length; offset++)
+        yield return _Partitions.First.Value[offset];
 
-      for (var partition = 1; partition < _CurrentPartitionIndex - 2; partition++)
-        for (var offset = 0; offset < _Partitions[partition].Length; offset++)
-          yield return _Partitions[partition][offset];
+      var node = _Partitions.First.Next;
+
+      while (node != CurrentPartition)
+      {
+        for (var offset = 0; offset < node.Value.Length; offset++)
+          yield return node.Value[offset];
+
+        node = node.Next;
+      }
 
       for (var offset = 0; offset < _HeadPointerOffset; offset++)
-        yield return _Partitions[_CurrentPartitionIndex][offset];
+        yield return CurrentPartition.Value[offset];
     }
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     #endregion IEnumerable
-
-    private struct PartitionAndOffset
-    {
-      public PartitionAndOffset(int partition, int offset)
-      {
-        Partition = partition;
-        Offset = offset;
-      }
-
-      public int Partition { get; }
-
-      public int Offset { get; }
-
-      public void Deconstruct(out int partition, out int offset)
-      {
-        partition = Partition;
-        offset = Offset;
-      }
-    }
   }
 }

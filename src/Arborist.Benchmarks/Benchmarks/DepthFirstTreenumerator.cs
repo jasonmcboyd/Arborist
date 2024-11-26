@@ -36,7 +36,7 @@ namespace Arborist.Benchmarks
       .Consume(TreeTraversalStrategy.DepthFirst);
 
     [Benchmark]
-    public void eDegenerateTree()
+    public void DegenerateTree()
       => Enumerable
       .Range(0, 1 << 22)
       .ToDegenerateTree()
