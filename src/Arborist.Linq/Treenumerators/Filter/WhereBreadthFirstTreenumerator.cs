@@ -36,29 +36,20 @@ namespace Arborist.Linq.Treenumerators
       if (Mode == TreenumeratorMode.VisitingNode)
         nodeTraversalStrategies = NodeTraversalStrategies.TraverseAll;
 
-      return InnerTreenumeratorMoveNext(nodeTraversalStrategies);
-    }
-
-    private bool InnerTreenumeratorMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
-    {
       var previouslySeenNodeWasScheduledAndSkipped =
         Position != new NodePosition(0, -1)
         && InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode
         && (nodeTraversalStrategies == NodeTraversalStrategies.SkipNode || nodeTraversalStrategies == NodeTraversalStrategies.SkipNodeAndDescendants);
 
       if (previouslySeenNodeWasScheduledAndSkipped)
-      {
         _NodePositionAndVisitCounts.GetLast().TraversalStrategy = nodeTraversalStrategies;
-      }
 
       var previousModeWasVisitingNode = Mode == TreenumeratorMode.VisitingNode;
 
       while (InnerTreenumerator.MoveNext(nodeTraversalStrategies))
       {
         while (_SkippedStack.Count > 0 && _SkippedStack.GetLast().Position.Depth >= InnerTreenumerator.Position.Depth)
-        {
           _SkippedStack.RemoveLast();
-        }
 
         var effectiveDepth = InnerTreenumerator.Position.Depth - _SkippedStack.Count;
 
@@ -81,9 +72,7 @@ namespace Arborist.Linq.Treenumerators
             var lastScheduleNodeVisitWasSkipped = _NodePositionAndVisitCounts.GetLast().Skipped;
 
             if (lastScheduleNodeVisitWasSkipped)
-            {
               _NodePositionAndVisitCounts.RemoveLast();
-            }
 
             _NodePositionAndVisitCounts.AddLast(new NodeTraversalStatus(effectivePosition, 0));
           }
@@ -91,13 +80,9 @@ namespace Arborist.Linq.Treenumerators
         else
         {
           if (InnerTreenumerator.VisitCount == 1)
-          {
             _NodePositionAndVisitCounts.RemoveFirst();
-          }
           else if (previousModeWasVisitingNode)
-          {
             continue;
-          }
 
           _NodePositionAndVisitCounts.GetFirst().VisitCount++;
         }
