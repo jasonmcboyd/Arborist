@@ -51,12 +51,10 @@ namespace Arborist.Linq
         {
           yield return treenumerator.ToNodeVisit();
 
-          // Should only need to get the traversal strategy if we are scheduling a
-          // node. If we are traversing a node, the treenumerator should ignore
-          // the traversal strategy. I was doing that originally, but then I found
-          // that it was covering up poorly behaved treenumerators. So I changed the
-          // behavior here so that those bugs would get surfaced.
-          nodeTraversalStrategies = nodeTraversalStrategiesSelector(treenumerator.ToNodeContext());
+          if (treenumerator.Mode == TreenumeratorMode.SchedulingNode)
+            nodeTraversalStrategies = nodeTraversalStrategiesSelector(treenumerator.ToNodeContext());
+          else
+            nodeTraversalStrategies = NodeTraversalStrategies.TraverseAll;
         }
       }
     }

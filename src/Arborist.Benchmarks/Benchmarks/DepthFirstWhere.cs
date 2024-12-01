@@ -12,40 +12,40 @@ namespace Arborist.Benchmarks
   public class DepthFirstWhere
   {
     [Benchmark]
-    public void TriangleTree()
+    public void TriangleTree_PruneAfter_1448()
       => new TriangleTree()
       .PruneAfter(nodeContext => nodeContext.Position.Depth == 1448)
       .Where(nodeContext => (nodeContext.Position.Depth + nodeContext.Position.SiblingIndex) % 2 == 0)
       .Consume(TreeTraversalStrategy.DepthFirst);
 
     [Benchmark]
-    public void TrivialForest_WhereAll()
+    public void WhereAll_TrivialForest_1M()
       => Enumerable
-      .Range(0, 1 << 20)
+      .Range(0, 1_000_000)
       .ToTrivialForest()
       .Where(_ => true)
       .Consume(TreeTraversalStrategy.DepthFirst);
 
     [Benchmark]
-    public void TrivialForest_WhereNone()
+    public void WhereNone_TrivialForest_1M()
       => Enumerable
-      .Range(0, 1 << 20)
+      .Range(0, 1_000_000)
       .ToTrivialForest()
       .Where(_ => false)
       .Consume(TreeTraversalStrategy.DepthFirst);
 
     [Benchmark]
-    public void ToDegenerateTree_WhereAll()
+    public void WhereAll_DegenerateTree_1M()
       => Enumerable
-      .Range(0, 1 << 20)
+      .Range(0, 1_000_000)
       .ToDegenerateTree()
       .Where(_ => true)
       .Consume(TreeTraversalStrategy.DepthFirst);
 
     [Benchmark]
-    public void ToDegenerateTree_WhereNone()
+    public void WhereNone_DegenerateTree_1M()
       => Enumerable
-      .Range(0, 1 << 20)
+      .Range(0, 1_000_000)
       .ToDegenerateTree()
       .Where(_ => false)
       .Consume(TreeTraversalStrategy.DepthFirst);

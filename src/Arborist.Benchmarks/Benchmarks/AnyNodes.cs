@@ -1,5 +1,6 @@
 ﻿using Arborist.Core;
 using Arborist.Linq;
+using Arborist.Trees;
 using BenchmarkDotNet.Attributes;
 
 namespace Arborist.Benchmarks
@@ -19,19 +20,21 @@ namespace Arborist.Benchmarks
     }
 
     [Benchmark]
-    public void AnyNodes_Bft_DeepTree()
-      => AnyNodesTest(TreeTraversalStrategy.BreadthFirst, TreeShape.Deep, 19);
+    public void Bft_DeepTree() =>
+      AnyNodesTest(TreeTraversalStrategy.BreadthFirst, TreeShape.Deep, 19);
 
     [Benchmark]
-    public void AnyNodes_Bft_WideTree()
-      => AnyNodesTest(TreeTraversalStrategy.BreadthFirst, TreeShape.Wide, 19);
+    public void Bft_CompleteBinaryTree_PruneBefore_19() =>
+      new CompleteBinaryTree()
+      .PruneBefore(nodeContext => nodeContext.Position.Depth == 19)
+      .AnyNodes(nodeContext => nodeContext.Node == -1, TreeTraversalStrategy.BreadthFirst);
 
     [Benchmark]
-    public void AnyNodes_Dft_DeepTree()
-      => AnyNodesTest(TreeTraversalStrategy.DepthFirst, TreeShape.Deep, 19);
+    public void Dft_DeepTree() =>
+      AnyNodesTest(TreeTraversalStrategy.DepthFirst, TreeShape.Deep, 19);
 
     [Benchmark]
-    public void AnyNodes_Dft_WideTree()
-      => AnyNodesTest(TreeTraversalStrategy.DepthFirst, TreeShape.Wide, 19);
+    public void Dft_WideTree() =>
+      AnyNodesTest(TreeTraversalStrategy.DepthFirst, TreeShape.Wide, 19);
   }
 }

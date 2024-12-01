@@ -10,29 +10,25 @@ namespace Arborist.Benchmarks
   public class SkipAllNodes
   {
     [Benchmark]
-    public void BreadthFirstTreenumerator_SkipNodes()
+    public void Bft_TriangleTree_1448()
     {
       var treenumerable =
         new TriangleTree()
-        .PruneAfter(nodeContext => nodeContext.Position.Depth == (1 << 12));
+        .PruneAfter(nodeContext => nodeContext.Position.Depth == 1448);
 
       using (var treenumerator = treenumerable.GetBreadthFirstTreenumerator())
-      {
         while (treenumerator.MoveNext(NodeTraversalStrategies.SkipNode)) ;
-      }
     }
 
     [Benchmark]
-    public void DepthFirstTreenumerator_SkipNodes()
+    public void Dft_TriangleTree_1448()
     {
       var treenumerable =
         new TriangleTree()
-        .PruneAfter(nodeContext => nodeContext.Position.Depth == (1 << 12));
+        .PruneAfter(nodeContext => nodeContext.Position.Depth == 1448);
 
       using (var treenumerator = treenumerable.GetDepthFirstTreenumerator())
-      {
         while (treenumerator.MoveNext(NodeTraversalStrategies.SkipNode)) ;
-      }
     }
   }
 }

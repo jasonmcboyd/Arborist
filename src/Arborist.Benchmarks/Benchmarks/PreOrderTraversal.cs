@@ -9,28 +9,28 @@ namespace Arborist.Benchmarks
   public class PreorderTraversal
   {
     [Benchmark]
-    public void PreOrderTraversal_DeepTree() =>
+    public void DeepTree() =>
       Treenumerables
       .GetDeepTree(20)
       .PreOrderTraversal()
       .Consume();
 
     [Benchmark]
-    public void PreOrderTraversal_TriangleTree() =>
+    public void TriangleTree_PruneAfter_1447() =>
       new TriangleTree()
       .PruneAfter(nodeContext => nodeContext.Position.Depth == 1447)
       .PreOrderTraversal()
       .Consume();
 
     [Benchmark]
-    public void PreOrderTraversal_WideTree_PruneBeforeDepth_20() =>
+    public void CompleteBinaryTree_PruneBefore_20() =>
       new CompleteBinaryTree()
       .PruneBefore(nodeContext => nodeContext.Position.Depth == 20)
       .PreOrderTraversal()
       .Consume();
 
     [Benchmark]
-    public void PreOrderTraversal_WideTree_PruneAfterDepth_19() =>
+    public void CompleteBinaryTree_PruneAfterDepth_19() =>
       new CompleteBinaryTree()
       .PruneAfter(nodeContext => nodeContext.Position.Depth == 19)
       .PreOrderTraversal()

@@ -11,7 +11,7 @@ namespace Arborist.Benchmarks
   public class DepthFirstTreenumerator
   {
     [Benchmark]
-    public void TriangleTree()
+    public void TriangleTree_2896()
       => new TriangleTree()
       .GetDepthFirstTraversal(nc =>
         nc.Position.Depth == 2896
@@ -20,7 +20,7 @@ namespace Arborist.Benchmarks
       .Consume();
 
     [Benchmark]
-    public void CompleteBinaryTree()
+    public void CompleteBinaryTree_21()
       => new CompleteBinaryTree()
       .GetDepthFirstTraversal(nc =>
         nc.Position.Depth == 21
@@ -29,16 +29,16 @@ namespace Arborist.Benchmarks
       .Consume();
 
     [Benchmark]
-    public void TrivialForest()
+    public void TrivialForest_4M()
       => Enumerable
-      .Range(0, 1 << 22)
+      .Range(0, 4_000_000)
       .ToTrivialForest()
       .Consume(TreeTraversalStrategy.DepthFirst);
 
     [Benchmark]
-    public void DegenerateTree()
+    public void DegenerateTree_4M()
       => Enumerable
-      .Range(0, 1 << 22)
+      .Range(0, 4_000_000)
       .ToDegenerateTree()
       .Consume(TreeTraversalStrategy.DepthFirst);
   }

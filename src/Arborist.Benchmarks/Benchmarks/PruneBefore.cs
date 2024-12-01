@@ -10,7 +10,7 @@ namespace Arborist.Benchmarks
   public class PruneBefore
   {
     [Benchmark]
-    public void PruneBeforeBft() =>
+    public void Bft_TrivialForest_1M() =>
       Enumerable
       .Range(0, 1_000_000)
       .ToTrivialForest()
@@ -18,7 +18,7 @@ namespace Arborist.Benchmarks
       .Consume(TreeTraversalStrategy.BreadthFirst);
 
     [Benchmark]
-    public void PruneBeforeDft() =>
+    public void Dft_TrivialForest_1M() =>
       Enumerable
       .Range(0, 1_000_000)
       .ToTrivialForest()

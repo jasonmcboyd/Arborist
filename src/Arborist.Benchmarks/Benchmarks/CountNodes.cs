@@ -9,19 +9,19 @@ namespace Arborist.Benchmarks
   public class CountNodes
   {
     [Benchmark]
-    public int CountNodes_DeepTree() =>
+    public int DeepTree() =>
       Treenumerables
       .GetDeepTree(20)
       .CountNodes();
 
     [Benchmark]
-    public int CountNodes_TriangleTree() =>
+    public int TriangleTree_PruneAfter_2048() =>
       new TriangleTree()
       .PruneAfter(nodeContext => nodeContext.Position.Depth == 2048)
       .CountNodes();
 
     [Benchmark]
-    public int CountNodes_WideTree() =>
+    public int CompleteBinaryTree_PruneAfter_20() =>
       new CompleteBinaryTree()
       .PruneAfter(nodeContext => nodeContext.Position.Depth == 20)
       .CountNodes();

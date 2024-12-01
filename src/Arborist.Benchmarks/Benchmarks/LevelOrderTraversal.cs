@@ -9,28 +9,28 @@ namespace Arborist.Benchmarks
   public class LevelOrderTraversal
   {
     [Benchmark]
-    public void LevelOrderTraversal_DeepTree() =>
+    public void DeepTree() =>
       Treenumerables
       .GetDeepTree(20)
       .LevelOrderTraversal()
       .Consume();
 
     [Benchmark]
-    public void LevelOrderTraversal_TriangleTree() =>
+    public void TriangleTree_PruneAfter_1447() =>
       new TriangleTree()
       .PruneAfter(nodeContext => nodeContext.Position.Depth == 1447)
       .LevelOrderTraversal()
       .Consume();
 
     [Benchmark]
-    public void LevelOrderTraversal_WideTree_PruneBeforeDepth_20() =>
+    public void CompleteBinaryTree_PruneBefore_20() =>
       new CompleteBinaryTree()
       .PruneBefore(nodeContext => nodeContext.Position.Depth == 20)
       .LevelOrderTraversal()
       .Consume();
 
     [Benchmark]
-    public void LevelOrderTraversal_WideTree_PruneAfterDepth_19() =>
+    public void CompleteBinaryTree_PruneAfter_19() =>
       new CompleteBinaryTree()
       .PruneAfter(nodeContext => nodeContext.Position.Depth == 19)
       .LevelOrderTraversal()

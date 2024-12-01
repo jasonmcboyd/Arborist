@@ -7,20 +7,20 @@ namespace Arborist.Benchmarks
   public class RefSemiDeque
   {
     [Benchmark]
-    public void RefSemiDeque_Add()
+    public void Add_8M()
     {
       var deque = new RefSemiDeque<int>();
 
-      for (int i = 0; i < (1 << 23); i++)
+      for (int i = 0; i < 8_000_000; i++)
         deque.AddLast(i);
     }
 
     [Benchmark]
-    public void RefSemiDeque_RemoveFirst()
+    public void RemoveFirst_8M()
     {
       var deque = new RefSemiDeque<int>();
 
-      for (int i = 0; i < (1 << 23); i++)
+      for (int i = 0; i < 8_000_000; i++)
         deque.AddLast(i);
 
       while (deque.Count > 0)
@@ -28,11 +28,11 @@ namespace Arborist.Benchmarks
     }
 
     [Benchmark]
-    public void RefSemiDeque_RemoveLast()
+    public void RemoveLast_8M()
     {
       var deque = new RefSemiDeque<int>();
 
-      for (int i = 0; i < (1 << 23); i++)
+      for (int i = 0; i < 8_000_000; i++)
         deque.AddLast(i);
 
       while (deque.Count > 0)
