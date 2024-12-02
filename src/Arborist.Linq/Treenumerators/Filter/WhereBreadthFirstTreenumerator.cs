@@ -10,16 +10,16 @@ namespace Arborist.Linq.Treenumerators
     public WhereBreadthFirstTreenumerator(
       Func<ITreenumerator<TNode>> innerTreenumeratorFactory,
       Func<NodeContext<TNode>, bool> predicate,
-      NodeTraversalStrategies nodeTraversalStrategies)
+      NodeTraversalStrategies nodeTraversalStrategy)
       : base(innerTreenumeratorFactory)
     {
       _Predicate = predicate;
-      _TraversalStrategy = nodeTraversalStrategies;
+      _NodeTraversalStrategy = nodeTraversalStrategy;
       _NodePositionAndVisitCounts.AddLast(new NodeTraversalStatus(InnerTreenumerator.Position, 0));
     }
 
     private readonly Func<NodeContext<TNode>, bool> _Predicate;
-    private readonly NodeTraversalStrategies _TraversalStrategy;
+    private readonly NodeTraversalStrategies _NodeTraversalStrategy;
 
     private readonly RefSemiDeque<NodeTraversalStatus> _NodePositionAndVisitCounts = new RefSemiDeque<NodeTraversalStatus>();
     private readonly RefSemiDeque<NodeVisit<TNode>> _SkippedStack = new RefSemiDeque<NodeVisit<TNode>>();
@@ -61,7 +61,7 @@ namespace Arborist.Linq.Treenumerators
           {
             _SkippedStack.AddLast(InnerTreenumerator.ToNodeVisit());
 
-            nodeTraversalStrategies = _TraversalStrategy;
+            nodeTraversalStrategies = _NodeTraversalStrategy;
 
             continue;
           }

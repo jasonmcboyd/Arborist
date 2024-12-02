@@ -21,7 +21,8 @@ namespace Arborist.Linq
             NodeTraversalStrategies.SkipNode),
           () => new WhereDepthFirstTreenumerator<TNode>(
             source.GetDepthFirstTreenumerator,
-            predicate));
+            predicate,
+            NodeTraversalStrategies.SkipNode));
     }
   }
 }

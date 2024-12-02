@@ -10,10 +10,12 @@ namespace Arborist.Linq.Treenumerators
   {
     public WhereDepthFirstTreenumerator(
       Func<ITreenumerator<TNode>> innerTreenumeratorFactory,
-      Func<NodeContext<TNode>, bool> predicate)
+      Func<NodeContext<TNode>, bool> predicate,
+      NodeTraversalStrategies nodeTraversalStrategy)
       : base(innerTreenumeratorFactory)
     {
       _Predicate = predicate;
+      _NodeTraversalStrategy = nodeTraversalStrategy;
 
       // Add a sentinel node to the stack.
       _NodeVisits.AddLast(new InternalNodeVisit(InnerTreenumerator));
@@ -21,6 +23,7 @@ namespace Arborist.Linq.Treenumerators
     }
 
     private readonly Func<NodeContext<TNode>, bool> _Predicate;
+    private readonly NodeTraversalStrategies _NodeTraversalStrategy;
 
     private readonly RefSemiDeque<InternalNodeVisit> _NodeVisits = new RefSemiDeque<InternalNodeVisit>();
     private readonly RefSemiDeque<InternalNodeVisit> _SkippedNodeVisits = new RefSemiDeque<InternalNodeVisit>();
@@ -55,15 +58,22 @@ namespace Arborist.Linq.Treenumerators
 
         if (InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode)
         {
-          if (OnScheduling())
+          if (!OnScheduling())
           {
-            return true;
-          }
-          else
-          {
-            nodeTraversalStrategies = NodeTraversalStrategies.SkipNode;
+            nodeTraversalStrategies = _NodeTraversalStrategy;
             continue;
           }
+
+          return true;
+          //if (OnScheduling())
+          //{
+          //  return true;
+          //}
+          //else
+          //{
+          //  nodeTraversalStrategies = NodeTraversalStrategies.SkipNode;
+          //  continue;
+          //}
         }
 
         if (OnVisiting())
