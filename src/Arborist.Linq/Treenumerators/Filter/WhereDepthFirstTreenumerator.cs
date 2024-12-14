@@ -65,15 +65,6 @@ namespace Arborist.Linq.Treenumerators
           }
 
           return true;
-          //if (OnScheduling())
-          //{
-          //  return true;
-          //}
-          //else
-          //{
-          //  nodeTraversalStrategies = NodeTraversalStrategies.SkipNode;
-          //  continue;
-          //}
         }
 
         if (OnVisiting())

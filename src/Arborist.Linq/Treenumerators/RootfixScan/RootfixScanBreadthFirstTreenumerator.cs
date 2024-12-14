@@ -37,9 +37,9 @@ namespace Arborist.Linq.Treenumerators
     {
       if (Mode == TreenumeratorMode.SchedulingNode)
       {
-        if (nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipNodeAndDescendants))
+        if (nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipNodeAndDescendants))
           _NextLevel.RemoveFromBack();
-        else if (nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipNode))
+        else if (nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipNode))
           _SkippedStack.Push(_NextLevel.RemoveFromBack());
       }
 

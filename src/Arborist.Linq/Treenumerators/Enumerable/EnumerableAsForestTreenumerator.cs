@@ -29,10 +29,10 @@ namespace Arborist.Linq.Treenumerators.Enumerator
 
     private bool OnScheduling(NodeTraversalStrategies nodeTraversalStrategies)
     {
-      if (nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipSiblings))
+      if (nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipSiblings))
         return false;
 
-      if (nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipNode))
+      if (nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipNode))
         return TryMoveNext();
 
       Mode = TreenumeratorMode.VisitingNode;

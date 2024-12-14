@@ -57,9 +57,9 @@ namespace Arborist.Linq.Treenumerators.Enumerator
 
     private bool OnScheduling(NodeTraversalStrategies nodeTraversalStrategies)
     {
-      if (nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipDescendants))
+      if (nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipDescendants))
       {
-        if (nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipNode))
+        if (nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipNode))
         {
           _Queue.RemoveLast();
 
@@ -76,7 +76,7 @@ namespace Arborist.Linq.Treenumerators.Enumerator
         return true;
       }
 
-      if (nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipNode))
+      if (nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipNode))
       {
         _Queue.RemoveLast();
 

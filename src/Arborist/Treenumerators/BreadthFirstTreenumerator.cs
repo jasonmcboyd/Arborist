@@ -68,7 +68,7 @@ namespace Arborist.Treenumerators
 
     private bool? OnScheduling(NodeTraversalStrategies nodeTraversalStrategies)
     {
-      if ((nodeTraversalStrategies & NodeTraversalStrategies.SkipSiblings) == NodeTraversalStrategies.SkipSiblings)
+      if (nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipSiblings))
       {
         if (Position.Depth == 0)
           _RootsEnumeratorFinished = true;
@@ -78,13 +78,13 @@ namespace Arborist.Treenumerators
           _ChildEnumeratorQueue.GetFirst().Dispose();
       }
 
-      if ((nodeTraversalStrategies & NodeTraversalStrategies.SkipNodeAndDescendants) == NodeTraversalStrategies.SkipNodeAndDescendants)
+      if (nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipNodeAndDescendants))
         return SkipSubtree();
 
-      if ((nodeTraversalStrategies & NodeTraversalStrategies.SkipNode) == NodeTraversalStrategies.SkipNode)
+      if (nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipNode))
         return SkipNode();
 
-      if ((nodeTraversalStrategies & NodeTraversalStrategies.SkipDescendants) == NodeTraversalStrategies.SkipDescendants)
+      if (nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipDescendants))
         _ChildEnumeratorsStack.GetLast().Dispose();
 
       _Queue.AddLast(_Stack.RemoveLast());

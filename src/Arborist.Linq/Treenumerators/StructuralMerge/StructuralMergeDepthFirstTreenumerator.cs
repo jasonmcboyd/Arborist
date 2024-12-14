@@ -76,7 +76,7 @@ namespace Arborist.Linq.Treenumerators
       var rightDepthIsLessThanCurrent = _RightTreenumerator.Position.Depth < Position.Depth;
 
       var mustPopLeadingNodeVisitOnStack =
-        nodeTraversalStrategies.HasFlag(NodeTraversalStrategies.SkipNode)
+        nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipNode)
         || (hasLeft && hasRight && leftDepthIsLessThanCurrent && rightDepthIsLessThanCurrent)
         || (!hasLeft && _RightTreenumerator.Position.Depth < Position.Depth)
         || (!hasRight && _LeftTreenumerator.Position.Depth < Position.Depth);
