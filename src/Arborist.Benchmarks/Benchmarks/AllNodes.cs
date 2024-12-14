@@ -9,38 +9,28 @@ namespace Arborist.Benchmarks
   [ShortRunJob]
   public class AllNodes
   {
-    #region AllNodes
-
-    private void AllNodesTest(
-      TreeTraversalStrategy treeTraversalStrategy,
-      TreeShape treeShape,
-      int cutoff)
-    {
-      Treenumerables
-      .GetTree(cutoff, treeShape)
-      .AllNodes(nodeContext => nodeContext.Node == -1, treeTraversalStrategy);
-    }
-
     [Benchmark]
-    public void Bft_DeepTree() =>
-      AllNodesTest(TreeTraversalStrategy.BreadthFirst, TreeShape.Deep, 19);
-
-    [Benchmark]
-    public void Bft_CompleteBinaryTree_19() =>
+    public void Bft_CompleteBinaryTree_PruneBefore_19() =>
       new CompleteBinaryTree()
       .PruneBefore(nodeContext => nodeContext.Position.Depth == 19)
-      .AllNodes(nodeContext => nodeContext.Node == -1, TreeTraversalStrategy.BreadthFirst);
+      .AllNodes(_ => true, TreeTraversalStrategy.BreadthFirst);
 
     [Benchmark]
-    public void Dft_DeepTree() =>
-      AllNodesTest(TreeTraversalStrategy.DepthFirst, TreeShape.Deep, 19);
-
-    [Benchmark]
-    public void Dft_WideTree() =>
+    public void Dft_CompleteBinaryTree_PruneBefore_19() =>
       new CompleteBinaryTree()
       .PruneBefore(nodeContext => nodeContext.Position.Depth == 19)
-      .AllNodes(nodeContext => nodeContext.Node == -1, TreeTraversalStrategy.DepthFirst);
+      .AllNodes(_ => true, TreeTraversalStrategy.DepthFirst);
 
-    #endregion AllNodes
+    [Benchmark]
+    public void Bft_TriangleTree_PruneBefore_19() =>
+      new TriangleTree()
+      .PruneBefore(nodeContext => nodeContext.Position.Depth == 1448)
+      .AllNodes(_ => true, TreeTraversalStrategy.BreadthFirst);
+
+    [Benchmark]
+    public void Dft_TriangleTree_PruneBefore_19() =>
+      new TriangleTree()
+      .PruneBefore(nodeContext => nodeContext.Position.Depth == 1448)
+      .AllNodes(_ => true, TreeTraversalStrategy.DepthFirst);
   }
 }
