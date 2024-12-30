@@ -1,3 +1,4 @@
+using Arborist.Core;
 using Arborist.SimpleSerializer;
 using Arborist.TestUtils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -15,12 +16,11 @@ namespace Arborist.Linq.Tests
     {
       var testData = new[]
       {
-        ("a,b,c", "a,b,c", 0),
-        ("a,b,c", "b,c",   1),
-        ("a,b,c", "c",     2),
-        ("a,b,c", "",      3),
-        ("a,b,c", "",      4),
-
+        ("a,b,c",         "a,b,c",         0),
+        ("a,b,c",         "b,c",           1),
+        ("a,b,c",         "c",             2),
+        ("a,b,c",         "",              3),
+        ("a,b,c",         "",              4),
         ("a(c,d),b(e,f)", "a(c,d),b(e,f)", 0),
         ("a(c,d),b(e,f)", "b(e,f)",        1),
         ("a(c,d),b(e,f)", "",              2),
@@ -28,14 +28,14 @@ namespace Arborist.Linq.Tests
 
       foreach (var data in testData)
       {
-        yield return new object[] { data.Item1, data.Item2, data.Item3, true };
-        yield return new object[] { data.Item1, data.Item2, data.Item3, false };
+        yield return new object[] { data.Item1, data.Item2, data.Item3, TreeTraversalStrategy.DepthFirst };
+        yield return new object[] { data.Item1, data.Item2, data.Item3, TreeTraversalStrategy.BreadthFirst };
       }
     }
 
     public static string GetTestDisplayName(MethodInfo methodInfo, object[] data)
     {
-      return $"{data[0]} | {data[1]} | {data[2]} | {data[3]}";
+      return $"{data[0]} | {data[1]} | {data[2]} | {((TreeTraversalStrategy)data[3]).ToString().Substring(0, 1)}";
     }
 
     [TestMethod]
@@ -44,23 +44,19 @@ namespace Arborist.Linq.Tests
       string treeString,
       string expectedTreeString,
       int skipCount,
-      bool isDepthFirst)
+      TreeTraversalStrategy treeTraversalStrategy)
     {
       // Arrange
       var treenumerable = TreeSerializer.Deserialize(treeString).SkipTrees(skipCount);
 
       var expectedTreenumerable = TreeSerializer.Deserialize(expectedTreeString);
 
-      var expected =
-        isDepthFirst
-        ? expectedTreenumerable.GetDepthFirstTraversal()
-        : expectedTreenumerable.GetBreadthFirstTraversal();
+      var expected = expectedTreenumerable.GetTraversal(treeTraversalStrategy);
 
       // Act
       var actual =
-        (isDepthFirst
-        ? treenumerable.GetDepthFirstTraversal()
-        : treenumerable.GetBreadthFirstTraversal())
+        treenumerable
+        .GetTraversal(treeTraversalStrategy)
         .Do(visit => Debug.WriteLine(visit));
 
       // Assert

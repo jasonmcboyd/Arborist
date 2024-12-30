@@ -24,7 +24,7 @@ namespace Arborist.Linq.Tests
           new [] { "a(b(d),c)"       , "abdc(bd(d),c)"      },
           new [] { "a(b)"            , "ab(b)"              },
           new [] { "a(b,c)"          , "abc(b,c)"           },
-          new [] { "a(c),b"          , "ac(c),b"           },
+          new [] { "a(c),b"          , "ac(c),b"            },
           new [] { "a(c),b(d)"       , "ac(c),bd(d)"        },
           new [] { "a(c,d),b(e,f)"   , "acd(c,d),bef(e,f)"  },
           new [] { "a(d),b,c(e)"     , "ad(d),b,ce(e)"      },

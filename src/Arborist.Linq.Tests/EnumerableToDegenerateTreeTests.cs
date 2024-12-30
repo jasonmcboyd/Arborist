@@ -11,7 +11,7 @@ using System.Reflection;
 namespace Arborist.Linq.Tests
 {
   [TestClass]
-  public class EnumerableToTreeTests
+  public class EnumerableToDegenerateTreeTests
   {
     public static IEnumerable<object[]> GetTestData()
     {
@@ -138,7 +138,7 @@ namespace Arborist.Linq.Tests
 
     [TestMethod]
     [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
-    public void EnumerableToTreeTest_BreadthFirst(
+    public void EnumerableToDegenerateTreeTest_BreadthFirst(
       string treeString,
       string testNodesString,
       string nodeTraversalStrategiesString)
@@ -146,12 +146,12 @@ namespace Arborist.Linq.Tests
       var testNodes = DeserializeTestNodes(testNodesString);
       var nodeTraversalStrategies = DeserializeNodeTraversalStrategies(nodeTraversalStrategiesString);
 
-      EnumerableToTreeTest(treeString, testNodes, nodeTraversalStrategies, TreeTraversalStrategy.BreadthFirst);
+      EnumerableToDegenerateTreeTest(treeString, testNodes, nodeTraversalStrategies, TreeTraversalStrategy.BreadthFirst);
     }
 
     [TestMethod]
     [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
-    public void EnumerableToTreeTest_DepthFirst(
+    public void EnumerableToDegenerateTreeTest_DepthFirst(
       string treeString,
       string testNodesString,
       string nodeTraversalStrategiesString)
@@ -159,10 +159,10 @@ namespace Arborist.Linq.Tests
       var testNodes = DeserializeTestNodes(testNodesString);
       var nodeTraversalStrategies = DeserializeNodeTraversalStrategies(nodeTraversalStrategiesString);
 
-      EnumerableToTreeTest(treeString, testNodes, nodeTraversalStrategies, TreeTraversalStrategy.DepthFirst);
+      EnumerableToDegenerateTreeTest(treeString, testNodes, nodeTraversalStrategies, TreeTraversalStrategy.DepthFirst);
     }
 
-    public void EnumerableToTreeTest(
+    public void EnumerableToDegenerateTreeTest(
       string treeString,
       string[] testNodes,
       NodeTraversalStrategies[] nodeTraversalStrategies,
