@@ -42,6 +42,7 @@ namespace Arborist.Treenumerators
           _HasCachedChild = false;
 
           UpdateState(ref _Stack.GetLast());
+
           return true;
         }
 

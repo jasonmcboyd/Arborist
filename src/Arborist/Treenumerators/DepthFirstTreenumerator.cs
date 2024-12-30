@@ -73,6 +73,9 @@ namespace Arborist.Treenumerators
         if (_Stack.Count == 1)
           _RootsEnumeratorFinished = true;
 
+        // TODO: I could probably avoid having to eagerly dispose of all of the
+        // skipped node's child enumerators, but it would require storing more
+        // state in the stack. I would have to benchmark it to see how it performed.
         var depthDelta = _ChildEnumeratorStack.Count - (_Stack.Count == 1 ? 0 : _Stack.GetFromBack(1).Position.Depth);
 
         for (int i = 1; i < depthDelta; i++)
