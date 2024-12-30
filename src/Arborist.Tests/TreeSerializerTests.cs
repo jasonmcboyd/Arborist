@@ -71,5 +71,23 @@ namespace Arborist.Tests
       // Assert
       CollectionAssert.AreEqual(expected, actual);
     }
+
+    [TestMethod]
+    [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
+    public void Serialize(
+      string treeString,
+      string testDescription,
+      int testTreeIndex,
+      int testScenarioIndex)
+    {
+      // Arrange
+      var treenumerable = TreeSerializer.Deserialize(treeString);
+
+      // Act
+      var serializedTreeString = treenumerable.Serialize();
+
+      // Assert
+      Assert.AreEqual(treeString, serializedTreeString);
+    }
   }
 }

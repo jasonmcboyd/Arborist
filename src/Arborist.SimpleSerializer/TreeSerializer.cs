@@ -85,11 +85,20 @@ namespace Arborist.SimpleSerializer
           if (previousDepth != -1)
           {
             if (depth > previousDepth)
+            {
               builder.Append('(');
+            }
             else if (depth < previousDepth)
-              builder.Append("),");
-            else
+            {
+              for (int i = 0; i < previousDepth - depth; i++)
+                builder.Append(')');
+
               builder.Append(',');
+            }
+            else
+            {
+              builder.Append(',');
+            }
           }
 
           builder.Append(map(treenumerator.Node));
