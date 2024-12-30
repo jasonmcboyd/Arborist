@@ -8,7 +8,7 @@ namespace Arborist.Linq
     public static bool AllNodes<TNode>(
       this ITreenumerable<TNode> source,
       Func<NodeContext<TNode>, bool> predicate,
-      TreeTraversalStrategy treeTraversalStrategy = TreeTraversalStrategy.BreadthFirst)
+      TreeTraversalStrategy treeTraversalStrategy = default)
     {
       return source.AnyNodes(nodeContext => !predicate(nodeContext), treeTraversalStrategy);
     }

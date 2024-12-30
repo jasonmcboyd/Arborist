@@ -10,7 +10,7 @@ namespace Arborist.Linq
     public static bool AnyNodes<TNode>(
       this ITreenumerable<TNode> source,
       Func<NodeContext<TNode>, bool> predicate,
-      TreeTraversalStrategy treeTraversalStrategy = TreeTraversalStrategy.BreadthFirst)
+      TreeTraversalStrategy treeTraversalStrategy = default)
     {
       var nodeTraversalStrategies =
         treeTraversalStrategy == TreeTraversalStrategy.BreadthFirst

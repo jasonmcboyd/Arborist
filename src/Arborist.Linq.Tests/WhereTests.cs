@@ -1436,7 +1436,7 @@ namespace Arborist.Linq.Tests
 
     [TestMethod]
     [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
-    public void Where_BreadthFirst_IndexableNodes(
+    public void Where_BreadthFirst(
       string treeString,
       string testDescription,
       int testIndex,
@@ -1456,7 +1456,7 @@ namespace Arborist.Linq.Tests
 
     [TestMethod]
     [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
-    public void Where_DepthFirst_IndexableNodes(
+    public void Where_DepthFirst(
       string treeString,
       string testDescription,
       int testIndex,
