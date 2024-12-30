@@ -34,9 +34,6 @@ namespace Arborist.Treenumerators
 
     protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
-      if (_Disposed)
-        return false;
-
       if (CurrentDepth == -1)
         return MoveToNextRootNode();
 
@@ -211,29 +208,12 @@ namespace Arborist.Treenumerators
 
     #region Dispose
 
-    private bool _Disposed = false;
-
-    public override void Dispose()
+    protected override void OnDisposing()
     {
-      // Call the private Dispose method with disposing = true.
-      Dispose(true);
-      // Suppress finalization to prevent the garbage collector from calling the finalizer.
-      GC.SuppressFinalize(this);
-    }
+      base.OnDisposing();
 
-    private void Dispose(bool disposing)
-    {
-      if (_Disposed)
-        return;
-
-      _Disposed = true;
-
-      if (disposing)
-      {
-        _RootsEnumerator?.Dispose();
-
-        DisposeStack(_ChildEnumeratorStack);
-      }
+      _RootsEnumerator?.Dispose();
+      DisposeStack(_ChildEnumeratorStack);
     }
 
     private void DisposeStack(RefSemiDeque<TChildEnumerator> stackChildEnumerators)
@@ -243,11 +223,6 @@ namespace Arborist.Treenumerators
 
       while (stackChildEnumerators.Count > 0)
         stackChildEnumerators.RemoveLast().Dispose();
-    }
-
-    ~DepthFirstTreenumerator()
-    {
-      Dispose(false);
     }
 
     #endregion Dispose

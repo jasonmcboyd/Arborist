@@ -14,8 +14,10 @@ namespace Arborist
 
     protected ITreenumerator<TInner> InnerTreenumerator { get; }
 
-    public override void Dispose()
+    protected override void OnDisposing()
     {
+      base.OnDisposing();
+
       InnerTreenumerator?.Dispose();
     }
   }

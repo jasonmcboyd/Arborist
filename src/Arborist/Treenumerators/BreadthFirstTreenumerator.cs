@@ -279,30 +279,14 @@ namespace Arborist.Treenumerators
 
     #region Dispose
 
-    private bool _Disposed = false;
-
-    public override void Dispose()
+    protected override void OnDisposing()
     {
-      // Call the private Dispose method with disposing = true.
-      Dispose(true);
-      // Suppress finalization to prevent the garbage collector from calling the finalizer.
-      GC.SuppressFinalize(this);
-    }
+      base.OnDisposing();
 
-    private void Dispose(bool disposing)
-    {
-      if (_Disposed)
-        return;
+      _RootsEnumerator?.Dispose();
 
-      _Disposed = true;
-
-      if (disposing)
-      {
-        _RootsEnumerator?.Dispose();
-
-        DisposeStack(_ChildEnumeratorQueue);
-        DisposeStack(_ChildEnumeratorsStack);
-      }
+      DisposeStack(_ChildEnumeratorQueue);
+      DisposeStack(_ChildEnumeratorsStack);
     }
 
     private void DisposeStack(RefSemiDeque<TChildEnumerator> stackChildEnumerators)
@@ -316,11 +300,6 @@ namespace Arborist.Treenumerators
       }
     }
     
-    ~BreadthFirstTreenumerator()
-    {
-      Dispose(false);
-    }
-
     #endregion Dispose
 
     private struct InternalNodeVisitState

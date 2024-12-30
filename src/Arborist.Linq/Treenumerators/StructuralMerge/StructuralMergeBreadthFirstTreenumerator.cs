@@ -194,8 +194,10 @@ namespace Arborist.Linq.Treenumerators
       Position = nodeVisit.Position;
     }
 
-    public override void Dispose()
+    protected override void OnDisposing()
     {
+      base.OnDisposing();
+
       _LeftTreenumerator?.Dispose();
       _RightTreenumerator?.Dispose();
     }

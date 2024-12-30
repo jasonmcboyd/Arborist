@@ -1,4 +1,5 @@
 ﻿using Arborist.Core;
+using System;
 
 namespace Arborist
 {
@@ -14,14 +15,13 @@ namespace Arborist
 
     protected bool EnumerationFinished { get; private set; }
 
-    public abstract void Dispose();
 
-    public bool MoveNext(NodeTraversalStrategies nodeTraversalStrategies)
+    public bool MoveNext(NodeTraversalStrategies nodeTraversalStrategy)
     {
-      if (EnumerationFinished)
+      if (Disposed || EnumerationFinished)
         return false;
 
-      if (OnMoveNext(nodeTraversalStrategies))
+      if (OnMoveNext(nodeTraversalStrategy))
         return true;
 
       EnumerationFinished = true;
@@ -29,6 +29,39 @@ namespace Arborist
       return false;
     }
 
-    protected abstract bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies);
+    protected abstract bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategy);
+
+    #region IDisposable
+
+    protected bool Disposed { get; private set; } = false;
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    private void Dispose(bool disposing)
+    {
+      if (!Disposed)
+      {
+        if (disposing)
+          OnDisposing();
+
+        Disposed = true;
+      }
+    }
+
+    protected virtual void OnDisposing()
+    {
+    }
+
+    // Finalizer to ensure resources are released if Dispose is not called.
+    ~TreenumeratorBase()
+    {
+      Dispose(false);
+    }
+
+    #endregion IDisposable
   }
 }

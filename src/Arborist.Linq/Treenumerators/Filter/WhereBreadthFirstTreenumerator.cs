@@ -26,13 +26,8 @@ namespace Arborist.Linq.Treenumerators
 
     private int _SeenRootNodesCount = 0;
 
-    private bool _EnumerationFinished = false;
-
     protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
-      if (_EnumerationFinished)
-        return false;
-
       if (Mode == TreenumeratorMode.VisitingNode)
         nodeTraversalStrategies = NodeTraversalStrategies.TraverseAll;
 
@@ -94,8 +89,6 @@ namespace Arborist.Linq.Treenumerators
 
       UpdateState();
 
-      _EnumerationFinished = true;
-
       return false;
     }
 
@@ -140,20 +133,17 @@ namespace Arborist.Linq.Treenumerators
     {
       Mode = InnerTreenumerator.Mode;
 
-      if (!_EnumerationFinished)
+      ref var nodePositionAndVisitCount = ref GetNodeTraversalStatusToUpdateState();
+
+      if (nodePositionAndVisitCount.Position.Depth == 0
+        && InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode)
       {
-        ref var nodePositionAndVisitCount = ref GetNodeTraversalStatusToUpdateState();
-
-        if (nodePositionAndVisitCount.Position.Depth == 0
-          && InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode)
-        {
-          _SeenRootNodesCount++;
-        }
-
-        Node = InnerTreenumerator.Node;
-        VisitCount = nodePositionAndVisitCount.VisitCount;
-        Position = nodePositionAndVisitCount.Position;
+        _SeenRootNodesCount++;
       }
+
+      Node = InnerTreenumerator.Node;
+      VisitCount = nodePositionAndVisitCount.VisitCount;
+      Position = nodePositionAndVisitCount.Position;
     }
 
     private struct NodeTraversalStatus
