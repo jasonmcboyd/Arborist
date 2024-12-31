@@ -17,10 +17,10 @@ namespace Arborist.Linq.Tests
     {
       var treeStrings = new[]
       {
-        //"a,b,c",
+        "a,b,c",
         //"a(b,c)",
         //"a,b(c)",
-        "a,b(d),c",
+        //"a,b(d),c",
         //"a(b(c))",
         //"a(b,c),d(e,f)",
         //"a,b(c),d(e(f))",

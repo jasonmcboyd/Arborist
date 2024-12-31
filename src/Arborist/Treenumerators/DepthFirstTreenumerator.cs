@@ -24,13 +24,13 @@ namespace Arborist.Treenumerators
     private readonly Func<TNode, TValue> _Map;
 
     private readonly RefSemiDeque<InternalNodeVisitState> _Stack = new RefSemiDeque<InternalNodeVisitState>();
-    private readonly RefSemiDeque<TChildEnumerator> _ChildEnumeratorStack = new RefSemiDeque<TChildEnumerator>();
+    private readonly RefSemiDeque<TChildEnumerator> _ChildEnumeratorsStack = new RefSemiDeque<TChildEnumerator>();
 
     private int _RootNodesSeen = 0;
     private bool _HasCachedChild = false;
     private bool _RootsEnumeratorFinished = false;
 
-    private int CurrentDepth => _ChildEnumeratorStack.Count - 1;
+    private int CurrentDepth => _ChildEnumeratorsStack.Count - 1;
 
     protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
@@ -76,10 +76,10 @@ namespace Arborist.Treenumerators
         // TODO: I could probably avoid having to eagerly dispose of all of the
         // skipped node's child enumerators, but it would require storing more
         // state in the stack. I would have to benchmark it to see how it performed.
-        var depthDelta = _ChildEnumeratorStack.Count - (_Stack.Count == 1 ? 0 : _Stack.GetFromBack(1).Position.Depth);
+        var depthDelta = _ChildEnumeratorsStack.Count - (_Stack.Count == 1 ? 0 : _Stack.GetFromBack(1).Position.Depth);
 
         for (int i = 1; i < depthDelta; i++)
-          _ChildEnumeratorStack.GetFromBack(i).Dispose();
+          _ChildEnumeratorsStack.GetFromBack(i).Dispose();
       }
 
       if (nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipNodeAndDescendants))
@@ -96,7 +96,7 @@ namespace Arborist.Treenumerators
       }
 
       if (nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipDescendants))
-        _ChildEnumeratorStack.GetLast().Dispose();
+        _ChildEnumeratorsStack.GetLast().Dispose();
 
       ref var previousVisit = ref _Stack.GetLast();
 
@@ -121,7 +121,7 @@ namespace Arborist.Treenumerators
       {
         PopStacks();
 
-        if (_ChildEnumeratorStack.Count == 0)
+        if (_ChildEnumeratorsStack.Count == 0)
           return MoveToNextRootNode();
 
         if (_Stack.Count == 0)
@@ -154,7 +154,7 @@ namespace Arborist.Treenumerators
 
     private bool TryPushNextChild(bool cacheChild = false)
     {
-      if (!_ChildEnumeratorStack.GetLast().MoveNext(out var childNodeAndSiblingIndex))
+      if (!_ChildEnumeratorsStack.GetLast().MoveNext(out var childNodeAndSiblingIndex))
         return false;
 
       PushNewNodeVisit(childNodeAndSiblingIndex.Node, childNodeAndSiblingIndex.SiblingIndex);
@@ -177,21 +177,22 @@ namespace Arborist.Treenumerators
 
     private void PushNewNodeVisit(
       TNode node,
-      int childIndex)
+      int siblingIndex)
     {
-      var internalNodeVisitState = new InternalNodeVisitState(node, new NodePosition(childIndex, CurrentDepth + 1));
+      var internalNodeVisitState = new InternalNodeVisitState(node, new NodePosition(siblingIndex, CurrentDepth + 1));
       var nodeChildEnumerator = _ChildEnumeratorFactory(new NodeContext<TNode>(internalNodeVisitState.Node, internalNodeVisitState.Position));
 
       _Stack.AddLast(internalNodeVisitState);
-      _ChildEnumeratorStack.AddLast(nodeChildEnumerator);
+      _ChildEnumeratorsStack.AddLast(nodeChildEnumerator);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void PopStacks()
     {
       if (_Stack.Count > 0 && _Stack.GetLast().Position.Depth == CurrentDepth)
         _Stack.RemoveLast();
 
-      _ChildEnumeratorStack.RemoveLast().Dispose();
+      _ChildEnumeratorsStack.RemoveLast().Dispose();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -215,11 +216,11 @@ namespace Arborist.Treenumerators
 
     private void DisposeChildEnumeratorsStack()
     {
-      if (_ChildEnumeratorStack == null)
+      if (_ChildEnumeratorsStack == null)
         return;
 
-      while (_ChildEnumeratorStack.Count > 0)
-        _ChildEnumeratorStack.RemoveLast().Dispose();
+      while (_ChildEnumeratorsStack.Count > 0)
+        _ChildEnumeratorsStack.RemoveLast().Dispose();
     }
 
     #endregion Dispose
