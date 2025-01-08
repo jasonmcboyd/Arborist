@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace Arborist.Treenumerators
 {
-  public sealed class DepthFirstTreenumerator<TValue, TNode, TChildEnumerator>
+  public sealed partial class DepthFirstTreenumerator<TValue, TNode, TChildEnumerator>
     : TreenumeratorBase<TValue>
     where TChildEnumerator : IChildEnumerator<TNode>
   {
@@ -23,10 +23,11 @@ namespace Arborist.Treenumerators
     private readonly Func<NodeContext<TNode>, TChildEnumerator> _ChildEnumeratorFactory;
     private readonly Func<TNode, TValue> _Map;
 
-    private readonly RefSemiDeque<InternalNodeVisitState> _Stack = new RefSemiDeque<InternalNodeVisitState>();
+    private readonly RefSemiDeque<InternalNodeVisitState<TNode>> _Stack = new RefSemiDeque<InternalNodeVisitState<TNode>>();
     private readonly RefSemiDeque<TChildEnumerator> _ChildEnumeratorsStack = new RefSemiDeque<TChildEnumerator>();
 
     private int _RootNodesSeen = 0;
+    private int _DepthOfLastVisitedNode = -1;
     private bool _HasCachedChild = false;
     private bool _RootsEnumeratorFinished = false;
 
@@ -124,6 +125,14 @@ namespace Arborist.Treenumerators
         if (_ChildEnumeratorsStack.Count == 0)
           return MoveToNextRootNode();
 
+        if (CurrentDepth == _DepthOfLastVisitedNode)
+        {
+          if (TryPushNextChild())
+            return true;
+
+          continue;
+        }
+
         if (_Stack.Count == 0)
         {
           if (TryPushNextChild())
@@ -138,7 +147,7 @@ namespace Arborist.Treenumerators
 
         if (nodeSkipped)
         {
-          if (TryPushNextChild(cacheChild: true))
+          if (TryPushNextChild(cacheChild: _DepthOfLastVisitedNode > CurrentDepth))
             return true;
 
           continue;
@@ -179,7 +188,7 @@ namespace Arborist.Treenumerators
       TNode node,
       int siblingIndex)
     {
-      var internalNodeVisitState = new InternalNodeVisitState(node, new NodePosition(siblingIndex, CurrentDepth + 1));
+      var internalNodeVisitState = new InternalNodeVisitState<TNode>(node, new NodePosition(siblingIndex, CurrentDepth + 1));
       var nodeChildEnumerator = _ChildEnumeratorFactory(new NodeContext<TNode>(internalNodeVisitState.Node, internalNodeVisitState.Position));
 
       _Stack.AddLast(internalNodeVisitState);
@@ -196,12 +205,15 @@ namespace Arborist.Treenumerators
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void UpdateState(ref InternalNodeVisitState nodeVisit)
+    private void UpdateState(ref InternalNodeVisitState<TNode> nodeVisit)
     {
       Mode = nodeVisit.VisitCount == 0 ? TreenumeratorMode.SchedulingNode : TreenumeratorMode.VisitingNode;
       Node = _Map(nodeVisit.Node);
       VisitCount = nodeVisit.VisitCount;
       Position = nodeVisit.Position;
+
+      if (Mode == TreenumeratorMode.VisitingNode)
+        _DepthOfLastVisitedNode = Position.Depth;
     }
 
     #region Dispose
@@ -224,21 +236,5 @@ namespace Arborist.Treenumerators
     }
 
     #endregion Dispose
-
-    private struct InternalNodeVisitState
-    {
-      public InternalNodeVisitState(
-        TNode node,
-        NodePosition position)
-      {
-        Node = node;
-        VisitCount = 0;
-        Position = position;
-      }
-
-      public TNode Node;
-      public int VisitCount;
-      public NodePosition Position;
-    }
   }
 }

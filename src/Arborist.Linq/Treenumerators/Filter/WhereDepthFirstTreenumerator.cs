@@ -41,8 +41,11 @@ namespace Arborist.Linq.Treenumerators
 
       // If the node was skipped, move it to the skipped stack.
       if (InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode
-        && nodeTraversalStrategies == NodeTraversalStrategies.SkipNode)
+        && nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipNode))
       {
+        if (Position.Depth == _NodeVisits.GetLast().Depth + 1)
+          _NodeVisits.GetLast().CurrentChildIndex++;
+
         _SkippedNodeVisits.AddLast(_NodeVisits.RemoveLast());
         _SkippedNodeVisits.GetLast().VisitCount++;
       }
@@ -91,17 +94,29 @@ namespace Arborist.Linq.Treenumerators
         stackWithDeepestNodeVisit = GetStackWithDeepestNodeVisit();
 
         if (stackWithDeepestNodeVisit == _SkippedNodeVisits)
+        {
+          // Increment the skipped node's visit count to ensure
+          // the sibling index calculation is correct.
           _SkippedNodeVisits.GetLast().VisitCount++;
+        }
         else if (_NodeVisits.Count == 1)
+        {
+          // Increment the sentinel node's visit count to ensure
+          // the sibling index calculation is correct.
           _NodeVisits.GetLast().VisitCount++;
+        }
       }
 
       // Check if the current node visit should be skipped.
       if (!_Predicate(InnerTreenumerator.ToNodeContext()))
         return false;
 
-      var siblingIndex = stackWithDeepestNodeVisit.GetLast().VisitCount - 1;
+      ref var deepestSeenNode = ref stackWithDeepestNodeVisit.GetLast();
+
       var depth = GetEffectiveDepth();
+      var siblingIndex = deepestSeenNode.CurrentChildIndex;
+
+      deepestSeenNode.CurrentChildIndex++;
 
       var nodeVisit =
         new InternalNodeVisit(
@@ -174,6 +189,7 @@ namespace Arborist.Linq.Treenumerators
         Depth = depth;
         OriginalDepth = originalDepth;
         VisitCount = visitCount;
+        CurrentChildIndex = 0;
       }
 
       public InternalNodeVisit(ITreenumerator<TNode> treenumerator)
@@ -188,10 +204,11 @@ namespace Arborist.Linq.Treenumerators
       public readonly int Depth;
       public readonly int OriginalDepth;
       public int VisitCount;
+      public int CurrentChildIndex;
 
       public override string ToString()
       {
-        return $"({SiblingIndex}, {Depth}),  {OriginalDepth},  {VisitCount}";
+        return $"({SiblingIndex}, {Depth}),  OD:{OriginalDepth},  VC:{VisitCount},  CI:{CurrentChildIndex}";
       }
     }
   }

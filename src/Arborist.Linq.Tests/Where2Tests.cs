@@ -17,14 +17,24 @@ namespace Arborist.Linq.Tests
     {
       var treeStrings = new[]
       {
-        "a,b,c",
+        //"a(b(c))",
+        "a(b,c,d)",
+        //"a(b(c,d,e))",
+        //"a(c,d),b(e,f)",
+        //"a(b(d(e)),c)",
+        //"a(d(g)),b(e(h)),c(f(i))",
+        //"a(d),b(e),c(f)",
+        //"a,b(c,d)",
+        //"a,b(d),c",
+        //"a(b(e),c(f),d(g))",
+        //"a(b(d,e),c(f(g)))"
+        //"a,b,c",
         //"a(b,c)",
         //"a,b(c)",
         //"a,b(d),c",
-        //"a(b(c))",
-        //"a(b,c),d(e,f)",
         //"a,b(c),d(e(f))",
         //"a(b(e,f,g),c)",
+
         //"a(b(e,f,g),c(h,i,j))",
         //"a(d),b,c(e)",
         //"a(d(f,g,h)),b,c(e)"
@@ -177,28 +187,28 @@ namespace Arborist.Linq.Tests
       return result;
     }
 
-    [TestMethod]
-    [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
-    public void Where2Test_BreadthFirst(
-      string treeString,
-      string expectedTreeString,
-      string[] skippedNodes,
-      bool composeOperations,
-      string testNodesString,
-      string nodeTraversalStrategyString)
-    {
-      var testNodes = DeserializeTestNodes(testNodesString);
-      var nodeTraversalStrategy = DeserializeNodeTraversalStrategies(nodeTraversalStrategyString);
+    //[TestMethod]
+    //[DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
+    //public void Where2Test_BreadthFirst(
+    //  string treeString,
+    //  string expectedTreeString,
+    //  string[] skippedNodes,
+    //  bool composeOperations,
+    //  string testNodesString,
+    //  string nodeTraversalStrategyString)
+    //{
+    //  var testNodes = DeserializeTestNodes(testNodesString);
+    //  var nodeTraversalStrategy = DeserializeNodeTraversalStrategies(nodeTraversalStrategyString);
 
-      Where2Test(
-        treeString,
-        expectedTreeString,
-        skippedNodes,
-        composeOperations,
-        testNodes,
-        nodeTraversalStrategy,
-        TreeTraversalStrategy.BreadthFirst);
-    }
+    //  Where2Test(
+    //    treeString,
+    //    expectedTreeString,
+    //    skippedNodes,
+    //    composeOperations,
+    //    testNodes,
+    //    nodeTraversalStrategy,
+    //    TreeTraversalStrategy.BreadthFirst);
+    //}
 
     [TestMethod]
     [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]

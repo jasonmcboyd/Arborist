@@ -21,7 +21,7 @@ BenchmarkRunner.Run([
   //BenchmarkConverter.TypeToBenchmarks(typeof(AllNodes), config),
   //BenchmarkConverter.TypeToBenchmarks(typeof(AnyNodes), config),
   //BenchmarkConverter.TypeToBenchmarks(typeof(CountNodes), config),
-  //BenchmarkConverter.TypeToBenchmarks(typeof(BreadthFirstTreenumerator), config),
+  BenchmarkConverter.TypeToBenchmarks(typeof(BreadthFirstTreenumerator), config),
   BenchmarkConverter.TypeToBenchmarks(typeof(DepthFirstTreenumerator), config),
   //BenchmarkConverter.TypeToBenchmarks(typeof(BreadthFirstWhere), config),
   //BenchmarkConverter.TypeToBenchmarks(typeof(DepthFirstWhere), config),
