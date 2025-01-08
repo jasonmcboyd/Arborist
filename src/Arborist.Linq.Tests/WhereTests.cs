@@ -1268,7 +1268,11 @@ namespace Arborist.Linq.Tests
             },
             new TestScenario
             {
-              NodeTraversalStrategiesSelector = nc => nc.Position.Depth == 1 ? NodeTraversalStrategies.SkipNode : NodeTraversalStrategies.TraverseAll,
+              NodeTraversalStrategiesSelector =
+                nc =>
+                  nc.Position.Depth == 1
+                  ? NodeTraversalStrategies.SkipNode
+                  : NodeTraversalStrategies.TraverseAll,
               TreenumerableMap = treenumerable => treenumerable.Where(nc => nc.Position != new NodePosition(1, 1)),
               Description = "Where not level 1 sibling 1, skip level 1 nodes",
               ExpectedBreadthFirstResults = new[]
@@ -1279,10 +1283,9 @@ namespace Arborist.Linq.Tests
                 (TreenumeratorMode.SchedulingNode, "e", 0, (0, 2)),
                 (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0)),
                 (TreenumeratorMode.SchedulingNode, "f", 0, (1, 1)),
-                (TreenumeratorMode.VisitingNode,   "a", 3, (0, 0)),
                 (TreenumeratorMode.SchedulingNode, "d", 0, (2, 1)),
                 (TreenumeratorMode.SchedulingNode, "g", 0, (0, 2)),
-                (TreenumeratorMode.VisitingNode,   "a", 4, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 3, (0, 0)),
                 (TreenumeratorMode.VisitingNode,   "e", 1, (0, 2)),
                 (TreenumeratorMode.VisitingNode,   "g", 1, (0, 2)),
               }.ToNodeVisitArray(),
@@ -1295,11 +1298,10 @@ namespace Arborist.Linq.Tests
                 (TreenumeratorMode.VisitingNode,   "e", 1, (0, 2)),
                 (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0)),
                 (TreenumeratorMode.SchedulingNode, "f", 0, (1, 1)),
-                (TreenumeratorMode.VisitingNode,   "a", 3, (0, 0)),
                 (TreenumeratorMode.SchedulingNode, "d", 0, (2, 1)),
                 (TreenumeratorMode.SchedulingNode, "g", 0, (0, 2)),
                 (TreenumeratorMode.VisitingNode,   "g", 1, (0, 2)),
-                (TreenumeratorMode.VisitingNode,   "a", 4, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 3, (0, 0)),
               }.ToNodeVisitArray()
             },
           }
