@@ -37,7 +37,9 @@ namespace Arborist.Treenumerators
     private bool _HasCachedChild = false;
     private bool _RootsEnumeratorFinished = false;
 
-    private int CurrentDepth => _Queue.GetFirst().Position.Depth + _SkippedChildEnumeratorsStack.Count;
+    // TODO:
+    //private int CurrentDepth => _Queue.GetFirst().Position.Depth + _SkippedChildEnumeratorsStack.Count;
+    private int CurrentDepth => (_Queue.Count == 0 ? -1 : _Queue.GetFirst().Position.Depth) + _SkippedChildEnumeratorsStack.Count;
 
     protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
@@ -113,8 +115,8 @@ namespace Arborist.Treenumerators
       if (MoveToNextRootNode())
         return true;
 
-      if (_ChildEnumeratorsQueue.Count == 0)
-        return false;
+      //if (_ChildEnumeratorsQueue.Count == 0)
+      //  return false;
 
       ref var previousVisit = ref _Queue.GetFirst();
 
@@ -184,6 +186,9 @@ namespace Arborist.Treenumerators
 
       ref var previousVisit = ref _Queue.GetFirst();
 
+      if (_DepthOfLastScheduledNode <= previousVisit.Position.Depth)
+        return false;
+
       previousVisit.VisitCount++;
 
       UpdateState(ref previousVisit);
@@ -215,16 +220,14 @@ namespace Arborist.Treenumerators
 
       ref var previousVisit = ref _Queue.GetFirst();
 
-      if (previousVisit.Position.Depth != -1)
-      {
-        previousVisit.VisitCount++;
+      if (_DepthOfLastScheduledNode <= previousVisit.Position.Depth)
+        return false;
 
-        UpdateState(ref previousVisit);
+      previousVisit.VisitCount++;
 
-        return true;
-      }
+      UpdateState(ref previousVisit);
 
-      return false;
+      return true;
     }
 
     private bool Backtrack()
@@ -236,6 +239,8 @@ namespace Arborist.Treenumerators
 
         _SkippedChildEnumeratorsStack.RemoveLast().Dispose();
       }
+
+      //return TryPushNextChild();
 
       return false;
     }
@@ -261,9 +266,10 @@ namespace Arborist.Treenumerators
       if (!childEnumerator.MoveNext(out var childNodeSiblingContext))
         return false;
 
-      var depth = _Queue.GetFirst().Position.Depth + _SkippedChildEnumeratorsStack.Count;
-
-      PushNewNodeVisit(childNodeSiblingContext.Node, new NodePosition(childNodeSiblingContext.SiblingIndex, depth + 1));
+      // TODO:
+      //var depth = _Queue.GetFirst().Position.Depth + _SkippedChildEnumeratorsStack.Count;
+      //PushNewNodeVisit(childNodeSiblingContext.Node, new NodePosition(childNodeSiblingContext.SiblingIndex, depth + 1));
+      PushNewNodeVisit(childNodeSiblingContext.Node, new NodePosition(childNodeSiblingContext.SiblingIndex, CurrentDepth + 1));
 
       if (cacheChild && _Queue.GetFirst().Position.Depth != -1)
       {

@@ -862,6 +862,31 @@ namespace Arborist.Tests
             // Skip nodes
             new TestScenario
             {
+              NodeTraversalStrategiesSelector =
+                nc =>
+                  nc.Node != "a"
+                  ? NodeTraversalStrategies.SkipNode
+                  : NodeTraversalStrategies.TraverseAll,
+              Description = "Skip all nodes except a",
+              ExpectedBreadthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (0, 2)),
+                (TreenumeratorMode.SchedulingNode, "d", 0, (1, 2)),
+              }.ToNodeVisitArray(),
+              ExpectedDepthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (0, 2)),
+                (TreenumeratorMode.SchedulingNode, "d", 0, (1, 2)),
+              }.ToNodeVisitArray()
+            },
+            new TestScenario
+            {
               NodeTraversalStrategiesSelector = nc => nc.Node == "b" ? NodeTraversalStrategies.SkipNode : NodeTraversalStrategies.TraverseAll,
               Description = "Skip level 1 node",
               ExpectedBreadthFirstResults = new[]
@@ -916,31 +941,6 @@ namespace Arborist.Tests
                 (TreenumeratorMode.SchedulingNode, "d", 0, (1, 2)),
                 (TreenumeratorMode.VisitingNode,   "d", 1, (1, 2)),
                 (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0)),
-              }.ToNodeVisitArray()
-            },
-            new TestScenario
-            {
-              NodeTraversalStrategiesSelector =
-                nc =>
-                  nc.Node != "a"
-                  ? NodeTraversalStrategies.SkipNode
-                  : NodeTraversalStrategies.TraverseAll,
-              Description = "Skip all nodes except a",
-              ExpectedBreadthFirstResults = new[]
-              {
-                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
-                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0)),
-                (TreenumeratorMode.SchedulingNode, "b", 0, (0, 1)),
-                (TreenumeratorMode.SchedulingNode, "c", 0, (0, 2)),
-                (TreenumeratorMode.SchedulingNode, "d", 0, (1, 2)),
-              }.ToNodeVisitArray(),
-              ExpectedDepthFirstResults = new[]
-              {
-                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
-                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0)),
-                (TreenumeratorMode.SchedulingNode, "b", 0, (0, 1)),
-                (TreenumeratorMode.SchedulingNode, "c", 0, (0, 2)),
-                (TreenumeratorMode.SchedulingNode, "d", 0, (1, 2)),
               }.ToNodeVisitArray()
             },
             new TestScenario
