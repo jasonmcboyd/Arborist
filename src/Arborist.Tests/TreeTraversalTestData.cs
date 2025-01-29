@@ -2948,11 +2948,11 @@ namespace Arborist.Tests
               {
                 (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
                 (TreenumeratorMode.SchedulingNode, "b", 0, (1, 0)),
+                (TreenumeratorMode.SchedulingNode, "e", 0, (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "f", 0, (1, 1)),
                 (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0)),
                 (TreenumeratorMode.SchedulingNode, "c", 0, (0, 1)),
                 (TreenumeratorMode.SchedulingNode, "d", 0, (1, 1)),
-                (TreenumeratorMode.SchedulingNode, "e", 0, (0, 1)),
-                (TreenumeratorMode.SchedulingNode, "f", 0, (1, 1)),
               }.ToNodeVisitArray(),
               ExpectedDepthFirstResults = new[]
               {
