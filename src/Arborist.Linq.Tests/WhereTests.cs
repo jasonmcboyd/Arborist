@@ -783,6 +783,75 @@ namespace Arborist.Linq.Tests
                 (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0)),
               }.ToNodeVisitArray()
             },
+            new TestScenario
+            {
+              NodeTraversalStrategiesSelector =
+                nc => NodeTraversalStrategies.TraverseAll,
+              TreenumerableMap = treenumerable => treenumerable.Where(nc => nc.Node != "b"),
+              Description = "Where not node b",
+              ExpectedBreadthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (0, 1)),
+                (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "d", 0, (1, 1)),
+                (TreenumeratorMode.VisitingNode,   "a", 3, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "e", 0, (2, 1)),
+                (TreenumeratorMode.VisitingNode,   "a", 4, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "c", 1, (0, 1)),
+                (TreenumeratorMode.VisitingNode,   "d", 1, (1, 1)),
+                (TreenumeratorMode.VisitingNode,   "e", 1, (2, 1)),
+              }.ToNodeVisitArray(),
+              ExpectedDepthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (0, 1)),
+                (TreenumeratorMode.VisitingNode,   "c", 1, (0, 1)),
+                (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "d", 0, (1, 1)),
+                (TreenumeratorMode.VisitingNode,   "d", 1, (1, 1)),
+                (TreenumeratorMode.VisitingNode,   "a", 3, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "e", 0, (2, 1)),
+                (TreenumeratorMode.VisitingNode,   "e", 1, (2, 1)),
+                (TreenumeratorMode.VisitingNode,   "a", 4, (0, 0)),
+              }.ToNodeVisitArray()
+            },
+            new TestScenario
+            {
+              NodeTraversalStrategiesSelector =
+                nc =>
+                  nc.Node == "b"
+                  ? NodeTraversalStrategies.SkipNode
+                  : NodeTraversalStrategies.TraverseAll,
+              TreenumerableMap = treenumerable => treenumerable.Where(nc => nc.Node != "d"),
+              Description = "Where not d, skip node b",
+              ExpectedBreadthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (0, 2)),
+                (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "e", 0, (1, 2)),
+                (TreenumeratorMode.VisitingNode,   "a", 3, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "c", 1, (0, 2)),
+                (TreenumeratorMode.VisitingNode,   "e", 1, (1, 2)),
+              }.ToNodeVisitArray(),
+              ExpectedDepthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (0, 2)),
+                (TreenumeratorMode.VisitingNode,   "c", 1, (0, 2)),
+                (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "e", 0, (1, 2)),
+                (TreenumeratorMode.VisitingNode,   "e", 1, (1, 2)),
+                (TreenumeratorMode.VisitingNode,   "a", 3, (0, 0)),
+              }.ToNodeVisitArray()
+            },
           }
         },
 

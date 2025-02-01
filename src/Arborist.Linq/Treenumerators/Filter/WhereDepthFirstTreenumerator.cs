@@ -29,9 +29,19 @@ namespace Arborist.Linq.Treenumerators
     private readonly RefSemiDeque<InternalNodeVisit> _SkippedNodeVisits = new RefSemiDeque<InternalNodeVisit>();
 
     private int _DepthOfLastSeenNode = -1;
+    private bool _HasCachedChild = false;
 
     protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
+      if (_HasCachedChild)
+      {
+        _HasCachedChild = false;
+
+        UpdateStateFromNodeVisit(ref _NodeVisits.GetLast());
+
+        return true;
+      }
+
       if (Mode == TreenumeratorMode.VisitingNode)
         nodeTraversalStrategies = NodeTraversalStrategies.TraverseAll;
 
@@ -49,6 +59,9 @@ namespace Arborist.Linq.Treenumerators
         _SkippedNodeVisits.AddLast(_NodeVisits.RemoveLast());
         _SkippedNodeVisits.GetLast().VisitCount++;
       }
+
+      var startingDepth = Position.Depth;
+      var cacheChild = false;
 
       // Enumerate until we yield something or exhaust the inner enumerator.
       while (InnerTreenumerator.MoveNext(nodeTraversalStrategies))
