@@ -32,7 +32,6 @@ namespace Arborist.Treenumerators
     private int _RootNodesSeen = 0;
     private bool _RootsEnumeratorFinished = false;
     private int _DepthOfLastScheduledNode = -1;
-    private int _DepthOfLastVisitedNode = -1;
 
     protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
@@ -257,9 +256,6 @@ namespace Arborist.Treenumerators
       Node = _Map(nodeVisit.Node);
       VisitCount = nodeVisit.VisitCount;
       Position = nodeVisit.Position;
-
-      if (Mode == TreenumeratorMode.VisitingNode)
-        _DepthOfLastVisitedNode = Position.Depth;
     }
 
     #region Dispose
