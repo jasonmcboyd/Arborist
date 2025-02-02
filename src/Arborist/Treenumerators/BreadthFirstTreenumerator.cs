@@ -32,6 +32,7 @@ namespace Arborist.Treenumerators
     private int _RootNodesSeen = 0;
     private bool _RootsEnumeratorFinished = false;
     private int _DepthOfLastScheduledNode = -1;
+    private int _DepthOfLastVisitedNode = -1;
 
     protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
@@ -65,24 +66,16 @@ namespace Arborist.Treenumerators
 
       if (nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipSiblings))
       {
-        // TODO:
-        //if (Position.Depth == 0)
-        //  _RootsEnumeratorFinished = true;
-        //else if (_Stack.Count > 1)
-        //  _ChildEnumeratorsStack.GetFromBack(1).Dispose();
-        //else
-        //  _ChildEnumeratorsQueue.GetFirst().Dispose();
-
-        if (_Stack.Count == 1)
-          _RootsEnumeratorFinished = true;
-
         // TODO: I could probably avoid having to eagerly dispose of all of the
         // skipped node's child enumerators, but it would require storing more
         // state in the stack. I would have to benchmark it to see how it performed.
-        var depthDelta = _ChildEnumeratorsStack.Count - (_Stack.Count == 1 ? 0 : _Stack.GetFromBack(1).Position.Depth);
-
-        for (int i = 1; i < depthDelta; i++)
+        for (int i = 1; i < _ChildEnumeratorsStack.Count; i++)
           _ChildEnumeratorsStack.GetFromBack(i).Dispose();
+
+        if (Position.Depth == 0 || _ChildEnumeratorsQueue.Count == 0)
+          _RootsEnumeratorFinished = true;
+        else
+          _ChildEnumeratorsQueue.GetFirst().Dispose();
       }
 
       if (nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipNodeAndDescendants))
@@ -148,7 +141,9 @@ namespace Arborist.Treenumerators
       if (_Queue.Count == 0)
         return false;
 
-      if (Position.Depth != 0)
+      ref var previousVisit = ref _Queue.GetFirst();
+
+      if (_ChildEnumeratorsStack.Count == 0 && previousVisit.VisitCount != 0)
       {
         if (TryPushNextChild(ref _Queue.GetFirst(), ref _ChildEnumeratorsQueue.GetFirst()))
           return true;
@@ -158,9 +153,9 @@ namespace Arborist.Treenumerators
 
         if (_Queue.Count == 0)
           return false;
+        else
+          previousVisit = ref _Queue.GetFirst();
       }
-
-      ref var previousVisit = ref _Queue.GetFirst();
 
       previousVisit.VisitCount++;
 
@@ -262,6 +257,9 @@ namespace Arborist.Treenumerators
       Node = _Map(nodeVisit.Node);
       VisitCount = nodeVisit.VisitCount;
       Position = nodeVisit.Position;
+
+      if (Mode == TreenumeratorMode.VisitingNode)
+        _DepthOfLastVisitedNode = Position.Depth;
     }
 
     #region Dispose
