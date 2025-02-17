@@ -162,32 +162,9 @@ namespace Arborist.Linq.Tests
       return result;
     }
 
-    //[TestMethod]
-    //[DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
-    //public void Where2Test_BreadthFirst(
-    //  string treeString,
-    //  string expectedTreeString,
-    //  string[] skippedNodes,
-    //  bool composeOperations,
-    //  string testNodesString,
-    //  string nodeTraversalStrategyString)
-    //{
-    //  var testNodes = DeserializeTestNodes(testNodesString);
-    //  var nodeTraversalStrategy = DeserializeNodeTraversalStrategies(nodeTraversalStrategyString);
-
-    //  Where2Test(
-    //    treeString,
-    //    expectedTreeString,
-    //    skippedNodes,
-    //    composeOperations,
-    //    testNodes,
-    //    nodeTraversalStrategy,
-    //    TreeTraversalStrategy.BreadthFirst);
-    //}
-
     [TestMethod]
     [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
-    public void Where2Test_DepthFirst(
+    public void Where2Test_BreadthFirst(
       string treeString,
       string expectedTreeString,
       string[] skippedNodes,
@@ -200,8 +177,26 @@ namespace Arborist.Linq.Tests
         skippedNodes,
         composeOperations,
         nodeAndTraversalStrategyPairs,
-        TreeTraversalStrategy.DepthFirst);
+        TreeTraversalStrategy.BreadthFirst);
     }
+
+    //[TestMethod]
+    //[DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
+    //public void Where2Test_DepthFirst(
+    //  string treeString,
+    //  string expectedTreeString,
+    //  string[] skippedNodes,
+    //  bool composeOperations,
+    //  NodeAndTraversalStrategy[] nodeAndTraversalStrategyPairs)
+    //{
+    //  Where2Test(
+    //    treeString,
+    //    expectedTreeString,
+    //    skippedNodes,
+    //    composeOperations,
+    //    nodeAndTraversalStrategyPairs,
+    //    TreeTraversalStrategy.DepthFirst);
+    //}
 
     public void Where2Test(
       string treeString,

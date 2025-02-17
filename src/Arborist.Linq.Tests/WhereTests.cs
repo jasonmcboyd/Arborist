@@ -487,10 +487,10 @@ namespace Arborist.Linq.Tests
                 (TreenumeratorMode.SchedulingNode, "b", 0, (0, 1)),
                 (TreenumeratorMode.SchedulingNode, "c", 0, (1, 1)),
                 (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0)),
-                (TreenumeratorMode.SchedulingNode, "d", 0, (2, 1)),
+                (TreenumeratorMode.SchedulingNode, "d", 0, (1, 1)),
                 (TreenumeratorMode.VisitingNode,   "a", 3, (0, 0)),
                 (TreenumeratorMode.VisitingNode,   "c", 1, (1, 1)),
-                (TreenumeratorMode.VisitingNode,   "d", 1, (2, 1)),
+                (TreenumeratorMode.VisitingNode,   "d", 1, (1, 1)),
               }.ToNodeVisitArray(),
               ExpectedDepthFirstResults = new[]
               {
@@ -519,12 +519,9 @@ namespace Arborist.Linq.Tests
                 (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
                 (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0)),
                 (TreenumeratorMode.SchedulingNode, "b", 0, (0, 1)),
-                (TreenumeratorMode.SchedulingNode, "c", 0, (1, 1)),
                 (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0)),
-                (TreenumeratorMode.SchedulingNode, "d", 0, (2, 1)),
-                (TreenumeratorMode.VisitingNode,   "a", 3, (0, 0)),
-                (TreenumeratorMode.VisitingNode,   "c", 1, (1, 1)),
-                (TreenumeratorMode.VisitingNode,   "d", 1, (2, 1)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (1, 1)),
+                (TreenumeratorMode.VisitingNode,   "b", 1, (0, 1)),
               }.ToNodeVisitArray(),
               ExpectedDepthFirstResults = new[]
               {
@@ -645,7 +642,7 @@ namespace Arborist.Linq.Tests
             {
               NodeTraversalStrategiesSelector = nc => NodeTraversalStrategies.TraverseAll,
               TreenumerableMap = treenumerable => treenumerable.Where(nc => nc.Node != "b" && nc.Node != "d"),
-              Description = "Where not b or d, traverse all",
+              Description = "Where not b and d, traverse all",
               ExpectedBreadthFirstResults = new[]
               {
                 (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
@@ -831,6 +828,11 @@ namespace Arborist.Linq.Tests
               ExpectedBreadthFirstResults = new[]
               {
                 (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (0, 1)),
+                (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "c", 1, (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "d", 0, (1, 1)),
               }.ToNodeVisitArray(),
               ExpectedDepthFirstResults = new[]
               {
@@ -1056,11 +1058,11 @@ namespace Arborist.Linq.Tests
               {
                 (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
                 (TreenumeratorMode.SchedulingNode, "b", 0, (1, 0)),
+                (TreenumeratorMode.SchedulingNode, "e", 0, (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "f", 0, (1, 1)),
                 (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0)),
                 (TreenumeratorMode.SchedulingNode, "c", 0, (0, 1)),
                 (TreenumeratorMode.SchedulingNode, "d", 0, (1, 1)),
-                (TreenumeratorMode.SchedulingNode, "e", 0, (0, 1)),
-                (TreenumeratorMode.SchedulingNode, "f", 0, (1, 1)),
               }.ToNodeVisitArray(),
               ExpectedDepthFirstResults = new[]
               {
@@ -1153,7 +1155,11 @@ namespace Arborist.Linq.Tests
             },
             new TestScenario
             {
-              NodeTraversalStrategiesSelector = nc => nc.Position.Depth == 1 ? NodeTraversalStrategies.SkipNode : NodeTraversalStrategies.TraverseAll,
+              NodeTraversalStrategiesSelector =
+                nc =>
+                  nc.Position.Depth == 1
+                  ? NodeTraversalStrategies.SkipNode
+                  : NodeTraversalStrategies.TraverseAll,
               TreenumerableMap = treenumerable => treenumerable.Where(nc => nc.Position.Depth < 2),
               Description = "Where before level 2, skip level 1 nodes",
               ExpectedBreadthFirstResults = new[]
@@ -1161,8 +1167,8 @@ namespace Arborist.Linq.Tests
                 (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
                 (TreenumeratorMode.SchedulingNode, "b", 0, (1, 0)),
                 (TreenumeratorMode.SchedulingNode, "c", 0, (2, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0)),
                 (TreenumeratorMode.SchedulingNode, "d", 0, (0, 1)),
-                (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0)),
                 (TreenumeratorMode.VisitingNode,   "b", 1, (1, 0)),
                 (TreenumeratorMode.SchedulingNode, "e", 0, (0, 1)),
                 (TreenumeratorMode.VisitingNode,   "c", 1, (2, 0)),
@@ -1432,7 +1438,7 @@ namespace Arborist.Linq.Tests
                   ? NodeTraversalStrategies.SkipNodeAndSiblings
                   : NodeTraversalStrategies.TraverseAll,
               TreenumerableMap = treenumerable => treenumerable.Where(nc => nc.Node != "a" && nc.Node != "c"),
-              Description = "Where not a or c, skip node b node and siblings",
+              Description = "Where not a and c, skip node b node and siblings",
               ExpectedBreadthFirstResults = new[]
               {
                 (TreenumeratorMode.SchedulingNode, "b", 0, (0, 0)),
@@ -1786,7 +1792,7 @@ namespace Arborist.Linq.Tests
             {
               NodeTraversalStrategiesSelector = nc => NodeTraversalStrategies.TraverseAll,
               TreenumerableMap = treenumerable => treenumerable.Where(nc => nc.Node != "d" && nc.Node != "e"),
-              Description = "Where not node d or e",
+              Description = "Where not node d and e",
               ExpectedBreadthFirstResults = new[]
               {
                 (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
@@ -1860,7 +1866,7 @@ namespace Arborist.Linq.Tests
                   ? NodeTraversalStrategies.SkipSiblings
                   : NodeTraversalStrategies.TraverseAll,
               TreenumerableMap = treenumerable => treenumerable.Where(nc => nc.Node != "d" && nc.Node != "e"),
-              Description = "Where not node d or e, skip node a siblings",
+              Description = "Where not node d and e, skip node a siblings",
               ExpectedBreadthFirstResults = new[]
               {
                 (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
@@ -1898,7 +1904,7 @@ namespace Arborist.Linq.Tests
                   ? NodeTraversalStrategies.SkipSiblings
                   : NodeTraversalStrategies.TraverseAll,
               TreenumerableMap = treenumerable => treenumerable.Where(nc => nc.Node != "d" && nc.Node != "e"),
-              Description = "Where not node d or e, skip node b siblings",
+              Description = "Where not node d and e, skip node b siblings",
               ExpectedBreadthFirstResults = new[]
               {
                 (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
@@ -1930,7 +1936,7 @@ namespace Arborist.Linq.Tests
                   ? NodeTraversalStrategies.SkipSiblings
                   : NodeTraversalStrategies.TraverseAll,
               TreenumerableMap = treenumerable => treenumerable.Where(nc => nc.Node != "d" && nc.Node != "e"),
-              Description = "Where not node d or e, skip a siblings",
+              Description = "Where not node d and e, skip a siblings",
               ExpectedBreadthFirstResults = new[]
               {
                 (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
@@ -1970,14 +1976,14 @@ namespace Arborist.Linq.Tests
                   ? NodeTraversalStrategies.SkipNodeAndSiblings
                   : NodeTraversalStrategies.TraverseAll,
               TreenumerableMap = treenumerable => treenumerable.Where(nc => nc.Node != "d" && nc.Node != "e"),
-              Description = "Where not node d or e, skip node b node and siblings",
+              Description = "Where not node d and e, skip node b node and siblings",
               ExpectedBreadthFirstResults = new[]
               {
                 (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
                 (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0)),
                 (TreenumeratorMode.SchedulingNode, "b", 0, (0, 1)),
-                (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0)),
                 (TreenumeratorMode.SchedulingNode, "f", 0, (0, 2)),
+                (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0)),
                 (TreenumeratorMode.VisitingNode,   "f", 1, (0, 2)),
               }.ToNodeVisitArray(),
               ExpectedDepthFirstResults = new[]
