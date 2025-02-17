@@ -23,7 +23,7 @@ namespace Arborist.Treenumerators
     private readonly Func<NodeContext<TNode>, TChildEnumerator> _ChildEnumeratorFactory;
     private readonly Func<TNode, TValue> _Map;
 
-    private readonly RefSemiDeque<InternalNodeVisitState> _Stack = new RefSemiDeque<InternalNodeVisitState>();
+    private readonly RefSemiDeque<InternalNodeVisitState<TNode>> _Stack = new RefSemiDeque<InternalNodeVisitState<TNode>>();
     private readonly RefSemiDeque<TChildEnumerator> _ChildEnumeratorsStack = new RefSemiDeque<TChildEnumerator>();
 
     private int _RootNodesSeen = 0;
@@ -179,7 +179,7 @@ namespace Arborist.Treenumerators
       TNode node,
       int siblingIndex)
     {
-      var internalNodeVisitState = new InternalNodeVisitState(node, new NodePosition(siblingIndex, CurrentDepth + 1));
+      var internalNodeVisitState = new InternalNodeVisitState<TNode>(node, new NodePosition(siblingIndex, CurrentDepth + 1));
       var nodeChildEnumerator = _ChildEnumeratorFactory(new NodeContext<TNode>(internalNodeVisitState.Node, internalNodeVisitState.Position));
 
       _Stack.AddLast(internalNodeVisitState);
@@ -196,7 +196,7 @@ namespace Arborist.Treenumerators
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void UpdateState(ref InternalNodeVisitState nodeVisit)
+    private void UpdateState(ref InternalNodeVisitState<TNode> nodeVisit)
     {
       Mode = nodeVisit.VisitCount == 0 ? TreenumeratorMode.SchedulingNode : TreenumeratorMode.VisitingNode;
       Node = _Map(nodeVisit.Node);
@@ -224,21 +224,5 @@ namespace Arborist.Treenumerators
     }
 
     #endregion Dispose
-
-    private struct InternalNodeVisitState
-    {
-      public InternalNodeVisitState(
-        TNode node,
-        NodePosition position)
-      {
-        Node = node;
-        VisitCount = 0;
-        Position = position;
-      }
-
-      public TNode Node;
-      public int VisitCount;
-      public NodePosition Position;
-    }
   }
 }
