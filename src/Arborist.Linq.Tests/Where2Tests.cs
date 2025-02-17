@@ -13,15 +13,30 @@ namespace Arborist.Linq.Tests
   [TestClass]
   public class Where2Tests
   {
+    public struct NodeAndTraversalStrategy
+    {
+      public NodeAndTraversalStrategy(string node, NodeTraversalStrategies nodeTraversalStrategy)
+      {
+        if (node == null)
+          throw new ArgumentNullException(nameof(node));
+
+        Node = node;
+        NodeTraversalStrategy = nodeTraversalStrategy;
+      }
+
+      public string Node { get; set; }
+      public NodeTraversalStrategies NodeTraversalStrategy { get; set; }
+    }
+
     public static IEnumerable<object[]> GetTestData()
     {
       var treeStrings = new[]
       {
         // c
         "a(b(c))",
-        //"a,b,c",
         //"a(b,c)",
         //"a,b(c)",
+        //"a,b,c",
 
         // d
         //"a(b,c,d)",
@@ -61,138 +76,85 @@ namespace Arborist.Linq.Tests
 
       foreach (var treeString in treeStrings)
       {
-        var nodePairs = GetTreeNodePairs(treeString).ToArray();
+        var allTreeNodes =
+          TreeSerializer
+          .Deserialize(treeString)
+          .PreOrderTraversal()
+          .ToArray();
 
-        foreach (var nodePair in nodePairs)
+        var allTreeNodeAndTraversalStrategyPairs =
+          allTreeNodes
+          .SelectMany(node => nodeTraversalStrategies.Select(nodeTraversalStrategy => new NodeAndTraversalStrategy(node, nodeTraversalStrategy)))
+          .ToArray();
+
+        // Get combinations of 0, 1, or 2 nodes that will not satisfy where clause in tests.
+        var treeNodeCombinations = GetTreeNodeCombinationsUpToCount(treeString, 2).ToArray();
+
+        // Get combinations of 0, 1, or 2 node / node traversal strategy pairs for use in the tests.
+        var treeNodeAndTraversalStrategyCombinations = Combinatorics.GetCombinationsUpToCount<NodeAndTraversalStrategy>(allTreeNodeAndTraversalStrategyPairs.AsSpan(), 2).ToArray();
+
+        foreach (var nodeCombinations in treeNodeCombinations)
         {
-          var expectedTreeString = GetExpectedTreeString(treeString, nodePair[0], nodePair[1]);
-
           foreach (var composeOperations in new[] { true, false })
           {
-            yield return new object[]
+            foreach (var nodeAndTraversalStrategyPairCombination in treeNodeAndTraversalStrategyCombinations)
             {
-              treeString,
-              expectedTreeString,
-              nodePair,
-              composeOperations,
-              "",
-              ""
-            };
-
-            var expectedTreeNodes =
-              TreeSerializer
-              .Deserialize(treeString)
-              .PreOrderTraversal()
-              .ToArray();
-
-            var cross =
-              expectedTreeNodes
-              .SelectMany(node => nodeTraversalStrategies.Select(nodeTraversalStrategy => (node, nodeTraversalStrategy)))
-              .ToArray();
-
-            for (int i = 0; i < cross.Length; i++)
-            {
-              var firstPair = cross[i];
+              var expectedTreeString = GetExpectedTreeString(treeString, nodeCombinations);
+              var nodeAndTraversalStrategyPairs = nodeAndTraversalStrategyPairCombination.ToArray();
 
               yield return new object[]
               {
                 treeString,
                 expectedTreeString,
-                nodePair,
+                nodeCombinations,
                 composeOperations,
-                firstPair.node,
-                firstPair.nodeTraversalStrategy.ToString()
+                nodeAndTraversalStrategyPairs
               };
-
-              for (int j = i + 1; j < cross.Length; j++)
-              {
-                var secondPair = cross[j];
-
-                if (firstPair.node == secondPair.node)
-                  continue;
-
-                yield return new object[]
-                {
-                  treeString,
-                  expectedTreeString,
-                  nodePair,
-                  composeOperations,
-                  SerializeTestNodes(firstPair.node, secondPair.node),
-                  SerializeNodeTraversalStrategies(firstPair.nodeTraversalStrategy, secondPair.nodeTraversalStrategy)
-                };
-              }
             }
           }
         }
       }
     }
 
-    private static IEnumerable<string[]> GetTreeNodePairs(string treeString)
+    private static IEnumerable<string[]> GetTreeNodeCombinationsUpToCount(string treeString, int count)
     {
-      var nodes = TreeSerializer.Deserialize(treeString).PreOrderTraversal().ToArray();
+      var nodes =
+        TreeSerializer
+        .Deserialize(treeString)
+        .PreOrderTraversal()
+        .ToArray()
+        .AsSpan();
 
-      for (int i = 0; i < nodes.Length - 1; i++)
-        for (int j = i + 1; j < nodes.Length; j++)
-          yield return new[] { nodes[i], nodes[j] };
+      return
+        Combinatorics
+        .GetCombinationsUpToCount<string>(nodes, count)
+        .Select(combination => combination.Select(node => node.ToString()).ToArray());
     }
 
-    private static string GetExpectedTreeString(string treeString, string node1, string node2)
+    private static string GetExpectedTreeString(string treeString, IEnumerable<string> whereNotNodes)
     {
       var tree = TreeSerializer.Deserialize(treeString);
 
-      var expectedTree =
-        tree
-        .Where(nc => nc.Node != node1)
-        .Hide()
-        .Where(nc => nc.Node != node2);
+      var expectedTree = tree;
+
+      foreach (var node in whereNotNodes)
+        expectedTree = expectedTree.Where(nc => nc.Node != node).Hide();
 
       return TreeSerializer.Serialize(expectedTree);
-    }
-
-    private static string SerializeNodeTraversalStrategies(params NodeTraversalStrategies[] nodeTraversalStrategies)
-    {
-      return string.Join("|", nodeTraversalStrategies.Select(nodeTraversalStrategy => nodeTraversalStrategy.ToString()));
-    }
-
-    private static NodeTraversalStrategies[] DeserializeNodeTraversalStrategies(string nodeTraversalStrategies)
-    {
-      if (string.IsNullOrEmpty(nodeTraversalStrategies))
-        return Array.Empty<NodeTraversalStrategies>();
-
-      return
-        nodeTraversalStrategies
-        .Split('|')
-        .Select(nodeTraversalStrategy => Enum.Parse(typeof(NodeTraversalStrategies), nodeTraversalStrategy))
-        .Cast<NodeTraversalStrategies>()
-        .ToArray();
-    }
-
-    private static string SerializeTestNodes(params string[] testNodes)
-    {
-      return string.Join("|", testNodes);
-    }
-
-    private static string[] DeserializeTestNodes(string testNodes)
-    {
-      if (string.IsNullOrEmpty(testNodes))
-        return Array.Empty<string>();
-
-      return testNodes.Split('|');
     }
 
     public static string GetTestDisplayName(MethodInfo methodInfo, object[] data)
     {
       var result = $"{data[0]} -> {data[1]} ";
 
-      var testNodes = DeserializeTestNodes(data[4].ToString());
-      var nodeTraversalStrategy = DeserializeNodeTraversalStrategies(data[5].ToString());
+      var nodeAndTraversalStrategyPairs = (NodeAndTraversalStrategy[])data[4];
 
-      for (int i = 0; i < testNodes.Length; i++)
+      for (int i = 0; i < nodeAndTraversalStrategyPairs.Length; i++)
       {
-        if (i == 1)
+        if (i > 0)
           result += ", ";
 
-        result += $"{nodeTraversalStrategy[i]}: {testNodes[i]}";
+        result += $"{nodeAndTraversalStrategyPairs[i].Node}: {nodeAndTraversalStrategyPairs[i].NodeTraversalStrategy}";
       }
 
       result += $" ({data[3].ToString().Substring(0, 1)})";
@@ -230,19 +192,14 @@ namespace Arborist.Linq.Tests
       string expectedTreeString,
       string[] skippedNodes,
       bool composeOperations,
-      string testNodesString,
-      string nodeTraversalStrategyString)
+      NodeAndTraversalStrategy[] nodeAndTraversalStrategyPairs)
     {
-      var testNodes = DeserializeTestNodes(testNodesString);
-      var nodeTraversalStrategy = DeserializeNodeTraversalStrategies(nodeTraversalStrategyString);
-
       Where2Test(
         treeString,
         expectedTreeString,
         skippedNodes,
         composeOperations,
-        testNodes,
-        nodeTraversalStrategy,
+        nodeAndTraversalStrategyPairs,
         TreeTraversalStrategy.DepthFirst);
     }
 
@@ -251,41 +208,49 @@ namespace Arborist.Linq.Tests
       string expectedTreeString,
       string[] skippedNodes,
       bool composeOperations,
-      string[] testNodes,
-      NodeTraversalStrategies[] nodeTraversalStrategy,
+      NodeAndTraversalStrategy[] nodeAndTraversalStrategyPairs,
       TreeTraversalStrategy treeTraversalStrategy)
     {
       // Arrange
       var treenumerable = TreeSerializer.Deserialize(treeString);
 
+      if (nodeAndTraversalStrategyPairs.Any(x => x.Node == null || x.NodeTraversalStrategy == NodeTraversalStrategies.TraverseAll))
+        throw new InternalTestFailureException();
+
       ITreenumerable<string> sut;
 
       if (composeOperations)
       {
-        sut =
-          treenumerable
-          .Where(nc => nc.Node != skippedNodes[0])
-          .Where(nc => nc.Node != skippedNodes[1]);
+        sut = treenumerable;
+
+        foreach (var node in skippedNodes)
+          sut = sut.Where(nc => nc.Node != node);
       }
       else
       {
         sut =
           treenumerable
-          .Where(nc =>
-            nc.Node != skippedNodes[0]
-            && nc.Node != skippedNodes[1]);
+          .Where(nc => !skippedNodes.Contains(nc.Node));
       }
-
 
       Func<NodeContext<string>, NodeTraversalStrategies> nodeTraversalStrategySelector =
         nodeContext =>
         {
-          var testNodeIndex = Array.IndexOf(testNodes, nodeContext.Node);
+          var testNodeIndex = -1;
+
+          for (int i = 0; i < nodeAndTraversalStrategyPairs.Length; i++)
+          {
+            if (nodeAndTraversalStrategyPairs[i].Node == nodeContext.Node)
+            {
+              testNodeIndex = i;
+              break;
+            }
+          }
 
           if (testNodeIndex == -1)
             return NodeTraversalStrategies.TraverseAll;
           else
-            return nodeTraversalStrategy[testNodeIndex];
+            return nodeAndTraversalStrategyPairs[testNodeIndex].NodeTraversalStrategy;
         };
 
       var expected =
