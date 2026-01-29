@@ -66,6 +66,7 @@ jobs:
       - name: Compare PR benchmarks
         uses: benchmark-action/github-action-benchmark@v1
         if: github.event_name == 'pull_request'
+        continue-on-error: true  # Don't fail if gh-pages doesn't exist yet
         with:
           name: Arborist Benchmarks
           tool: 'benchmarkdotnet'
