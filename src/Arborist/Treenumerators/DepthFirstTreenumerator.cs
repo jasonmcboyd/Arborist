@@ -1,6 +1,7 @@
 ﻿using Arborist.Core;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Arborist.Treenumerators
 {
@@ -22,15 +23,14 @@ namespace Arborist.Treenumerators
     private readonly Func<NodeContext<TNode>, TChildEnumerator> _ChildEnumeratorFactory;
     private readonly Func<TNode, TValue> _Map;
 
-    private readonly RefSemiDeque<InternalNodeVisitState> _Stack = new RefSemiDeque<InternalNodeVisitState>();
-    private readonly RefSemiDeque<InternalNodeVisitState> _SkippedStack = new RefSemiDeque<InternalNodeVisitState>();
-    private readonly RefSemiDeque<TChildEnumerator> _ChildEnumeratorStack = new RefSemiDeque<TChildEnumerator>();
+    private readonly RefSemiDeque<InternalNodeVisitState<TNode>> _Stack = new RefSemiDeque<InternalNodeVisitState<TNode>>();
+    private readonly RefSemiDeque<TChildEnumerator> _ChildEnumeratorsStack = new RefSemiDeque<TChildEnumerator>();
 
-    private bool _HasCachedChild = false;
     private int _RootNodesSeen = 0;
+    private bool _HasCachedChild = false;
     private bool _RootsEnumeratorFinished = false;
 
-    private int CurrentDepth => _ChildEnumeratorStack.Count - 1;
+    private int CurrentDepth => _ChildEnumeratorsStack.Count - 1;
 
     protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
@@ -68,15 +68,18 @@ namespace Arborist.Treenumerators
 
     private bool OnScheduling(NodeTraversalStrategies nodeTraversalStrategies)
     {
-      ref var previousVisit = ref _Stack.GetLast();
-      previousVisit.VisitCount++;
-
       if (nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipSiblings))
       {
-        if (CurrentDepth == 0)
+        if (_Stack.Count == 1)
           _RootsEnumeratorFinished = true;
-        else
-          _ChildEnumeratorStack.GetFromBack(1).Dispose();
+
+        // TODO: I could probably avoid having to eagerly dispose of all of the
+        // skipped node's child enumerators, but it would require storing more
+        // state in the stack. I would have to benchmark it to see how it performed.
+        var depthDelta = _ChildEnumeratorsStack.Count - (_Stack.Count == 1 ? 0 : _Stack.GetFromBack(1).Position.Depth);
+
+        for (int i = 1; i < depthDelta; i++)
+          _ChildEnumeratorsStack.GetFromBack(i).Dispose();
       }
 
       if (nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipNodeAndDescendants))
@@ -84,7 +87,7 @@ namespace Arborist.Treenumerators
 
       if (nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipNode))
       {
-        _SkippedStack.AddLast(_Stack.RemoveLast());
+        _Stack.RemoveLast();
 
         if (TryPushNextChild())
           return true;
@@ -93,7 +96,11 @@ namespace Arborist.Treenumerators
       }
 
       if (nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipDescendants))
-        _ChildEnumeratorStack.GetLast().Dispose();
+        _ChildEnumeratorsStack.GetLast().Dispose();
+
+      ref var previousVisit = ref _Stack.GetLast();
+
+      previousVisit.VisitCount++;
 
       UpdateState(ref previousVisit);
 
@@ -110,32 +117,34 @@ namespace Arborist.Treenumerators
 
     private bool Backtrack()
     {
-      RefSemiDeque<InternalNodeVisitState> stack = GetStackWithDeepestSeenNode();
-
-      PopStacks(stack);
-
       while (true)
       {
-        stack = GetStackWithDeepestSeenNode();
+        PopStacks();
 
-        var nodeSkipped = stack == _SkippedStack;
-
-        if (stack == null)
+        if (_ChildEnumeratorsStack.Count == 0)
           return MoveToNextRootNode();
 
-        ref var nodeVisit = ref stack.GetLast();
+        if (_Stack.Count == 0)
+        {
+          if (TryPushNextChild())
+            return true;
 
-        nodeVisit.VisitCount++;
+          continue;
+        }
+
+        ref var nodeVisit = ref _Stack.GetLast();
+
+        var nodeSkipped = nodeVisit.Position.Depth < CurrentDepth;
 
         if (nodeSkipped)
         {
           if (TryPushNextChild(cacheChild: true))
             return true;
 
-          PopStacks(stack);
-
           continue;
         }
+
+        nodeVisit.VisitCount++;
 
         UpdateState(ref nodeVisit);
 
@@ -145,7 +154,7 @@ namespace Arborist.Treenumerators
 
     private bool TryPushNextChild(bool cacheChild = false)
     {
-      if (!_ChildEnumeratorStack.GetLast().MoveNext(out var childNodeAndSiblingIndex))
+      if (!_ChildEnumeratorsStack.GetLast().MoveNext(out var childNodeAndSiblingIndex))
         return false;
 
       PushNewNodeVisit(childNodeAndSiblingIndex.Node, childNodeAndSiblingIndex.SiblingIndex);
@@ -168,37 +177,26 @@ namespace Arborist.Treenumerators
 
     private void PushNewNodeVisit(
       TNode node,
-      int childIndex)
+      int siblingIndex)
     {
-      var internalNodeVisitState = new InternalNodeVisitState(node, new NodePosition(childIndex, CurrentDepth + 1));
+      var internalNodeVisitState = new InternalNodeVisitState<TNode>(node, new NodePosition(siblingIndex, CurrentDepth + 1));
       var nodeChildEnumerator = _ChildEnumeratorFactory(new NodeContext<TNode>(internalNodeVisitState.Node, internalNodeVisitState.Position));
 
       _Stack.AddLast(internalNodeVisitState);
-      _ChildEnumeratorStack.AddLast(nodeChildEnumerator);
+      _ChildEnumeratorsStack.AddLast(nodeChildEnumerator);
     }
 
-    private void PopStacks(RefSemiDeque<InternalNodeVisitState> stack)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void PopStacks()
     {
-      stack.RemoveLast();
-      _ChildEnumeratorStack.RemoveLast().Dispose();
+      if (_Stack.Count > 0 && _Stack.GetLast().Position.Depth == CurrentDepth)
+        _Stack.RemoveLast();
+
+      _ChildEnumeratorsStack.RemoveLast().Dispose();
     }
 
-    private RefSemiDeque<InternalNodeVisitState> GetStackWithDeepestSeenNode()
-    {
-      if (_Stack.Count == 0 && _SkippedStack.Count == 0)
-        return null;
-
-      return
-        _SkippedStack.Count == 0
-        ? _Stack
-        : _Stack.Count == 0
-        ? _SkippedStack
-        : _Stack.GetLast().Position.Depth > _SkippedStack.GetLast().Position.Depth
-        ? _Stack
-        : _SkippedStack;
-    }
-
-    private void UpdateState(ref InternalNodeVisitState nodeVisit)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void UpdateState(ref InternalNodeVisitState<TNode> nodeVisit)
     {
       Mode = nodeVisit.VisitCount == 0 ? TreenumeratorMode.SchedulingNode : TreenumeratorMode.VisitingNode;
       Node = _Map(nodeVisit.Node);
@@ -213,34 +211,18 @@ namespace Arborist.Treenumerators
       base.OnDisposing();
 
       _RootsEnumerator?.Dispose();
-      DisposeStack(_ChildEnumeratorStack);
+      DisposeChildEnumeratorsStack();
     }
 
-    private void DisposeStack(RefSemiDeque<TChildEnumerator> stackChildEnumerators)
+    private void DisposeChildEnumeratorsStack()
     {
-      if (stackChildEnumerators == null)
+      if (_ChildEnumeratorsStack == null)
         return;
 
-      while (stackChildEnumerators.Count > 0)
-        stackChildEnumerators.RemoveLast().Dispose();
+      while (_ChildEnumeratorsStack.Count > 0)
+        _ChildEnumeratorsStack.RemoveLast().Dispose();
     }
 
     #endregion Dispose
-
-    private struct InternalNodeVisitState
-    {
-      public InternalNodeVisitState(
-        TNode node,
-        NodePosition position)
-      {
-        Node = node;
-        VisitCount = 0;
-        Position = position;
-      }
-
-      public readonly TNode Node;
-      public int VisitCount;
-      public NodePosition Position;
-    }
   }
 }

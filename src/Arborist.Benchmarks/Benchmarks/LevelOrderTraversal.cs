@@ -5,7 +5,7 @@ using BenchmarkDotNet.Attributes;
 namespace Arborist.Benchmarks
 {
   [MemoryDiagnoser]
-  [ShortRunJob]
+  [BenchmarkCategory("Traversal", "LevelOrder")]
   public class LevelOrderTraversal
   {
     [Benchmark]

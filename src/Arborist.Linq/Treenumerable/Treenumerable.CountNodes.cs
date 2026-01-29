@@ -10,21 +10,18 @@ namespace Arborist.Linq
 
     public static int CountNodes<TNode>(
       this ITreenumerable<TNode> source,
-      Func<NodeContext<TNode>, bool> predicate)
+      Func<NodeContext<TNode>, bool> predicate,
+      TreeTraversalStrategy treeTraversalStrategy = default)
     {
       if (source == null)
         return 0;
 
       var result = 0;
 
-      using (var treenumerator = source.GetBreadthFirstTreenumerator())
-      {
+      using (var treenumerator = source.GetTreenumerator(treeTraversalStrategy))
         while (treenumerator.MoveNext(NodeTraversalStrategies.SkipNode))
-        {
           if (predicate(new NodeContext<TNode>(treenumerator.Node, treenumerator.Position)))
             result++;
-        }
-      }
 
       return result;
     }

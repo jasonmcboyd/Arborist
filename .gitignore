@@ -399,3 +399,6 @@ FodyWeavers.xsd
 
 # Temporary working directory
 local-temp/
+
+# Claude
+.claude

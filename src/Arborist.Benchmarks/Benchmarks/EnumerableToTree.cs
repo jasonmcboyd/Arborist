@@ -1,11 +1,11 @@
-﻿using Arborist.Linq;
+using Arborist.Linq;
 using BenchmarkDotNet.Attributes;
 using System.Linq;
 
 namespace Arborist.Benchmarks
 {
   [MemoryDiagnoser]
-  [ShortRunJob]
+  [BenchmarkCategory("Conversion")]
   public class EnumerableToTree
   {
     [Benchmark]

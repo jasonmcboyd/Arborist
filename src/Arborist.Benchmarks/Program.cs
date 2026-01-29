@@ -1,69 +1,49 @@
-﻿using Arborist;
-using Arborist.Benchmarks;
-using Arborist.Benchmarks.Trees;
-using Arborist.Core;
-using Arborist.Linq;
-using Arborist.Trees;
 using BenchmarkDotNet.Configs;
-using BenchmarkDotNet.Order;
+using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
 using System;
-using System.Linq;
 
-var config =
-  ManualConfig
-  .Create(DefaultConfig.Instance)
-  .WithOptions(ConfigOptions.JoinSummary)
-  .WithOptions(ConfigOptions.DisableLogFile)
-  .WithOrderer(new DefaultOrderer(SummaryOrderPolicy.Declared));
+namespace Arborist.Benchmarks;
 
-BenchmarkRunner.Run([
-  BenchmarkConverter.TypeToBenchmarks(typeof(AllNodes), config),
-  BenchmarkConverter.TypeToBenchmarks(typeof(AnyNodes), config),
-  BenchmarkConverter.TypeToBenchmarks(typeof(CountNodes), config),
-  BenchmarkConverter.TypeToBenchmarks(typeof(BreadthFirstTreenumerator), config),
-  BenchmarkConverter.TypeToBenchmarks(typeof(DepthFirstTreenumerator), config),
-  BenchmarkConverter.TypeToBenchmarks(typeof(BreadthFirstWhere), config),
-  BenchmarkConverter.TypeToBenchmarks(typeof(DepthFirstWhere), config),
-  BenchmarkConverter.TypeToBenchmarks(typeof(EnumerableToTree), config),
-  BenchmarkConverter.TypeToBenchmarks(typeof(GetLeaves), config),
-  BenchmarkConverter.TypeToBenchmarks(typeof(LevelOrderTraversal), config),
-  BenchmarkConverter.TypeToBenchmarks(typeof(PostOrderTraversal), config),
-  BenchmarkConverter.TypeToBenchmarks(typeof(PreorderTraversal), config),
-  BenchmarkConverter.TypeToBenchmarks(typeof(PruneAfter), config),
-  BenchmarkConverter.TypeToBenchmarks(typeof(PruneBefore), config),
-  BenchmarkConverter.TypeToBenchmarks(typeof(RefSemiDeque), config),
-  BenchmarkConverter.TypeToBenchmarks(typeof(Select), config),
-  BenchmarkConverter.TypeToBenchmarks(typeof(SkipAllNodes), config),
-]);
+public class Program
+{
+  public static void Main(string[] args)
+  {
+    // Detect if running in CI
+    var isCI = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("CI"))
+            || !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GITHUB_ACTIONS"));
 
-//var count =
-//  new TriangleTree()
-//  .GetBreadthFirstTraversal(nc =>
-//    nc.Position.Depth == 2896
-//    ? NodeTraversalStrategies.SkipDescendants
-//    : NodeTraversalStrategies.TraverseAll)
-//  .Count();
+    var config = GetConfig(isCI);
 
-//Console.WriteLine(count);
+    // Use BenchmarkSwitcher for automatic discovery of all benchmark classes
+    // This replaces the manual list and supports filtering via command line
+    BenchmarkSwitcher
+      .FromAssembly(typeof(Program).Assembly)
+      .Run(args, config);
+  }
 
-//var count1 =
-//  new CompleteBinaryTree()
-//    .GetBreadthFirstTraversal(nc =>
-//      nc.Position.Depth == 21
-//      ? NodeTraversalStrategies.SkipDescendants
-//      : NodeTraversalStrategies.TraverseAll)
-//    .Count();
+  private static IConfig GetConfig(bool isCI)
+  {
+    var config = ManualConfig
+      .Create(DefaultConfig.Instance)
+      .WithOptions(ConfigOptions.JoinSummary);
 
-//Console.WriteLine(count1);
+    if (isCI)
+    {
+      // CI: Accurate, longer runs
+      // Remove ShortRunJob - use default for accurate measurements
+      config = config
+        .AddJob(Job.Default)
+        .WithOptions(ConfigOptions.DisableLogFile);
+    }
+    else
+    {
+      // Local: Fast iterations for development
+      config = config
+        .AddJob(Job.ShortRun)
+        .WithOptions(ConfigOptions.DisableLogFile);
+    }
 
-//new CompleteBinaryTree()
-//.PruneBefore(nodeContext => nodeContext.Position.Depth == 20)
-//.LevelOrderTraversal()
-//.Consume();
-
-//new CompleteBinaryTree()
-//.PruneBefore(nodeContext => nodeContext.Position.Depth == 19)
-//.AllNodes(
-//  nodeContext => nodeContext.Node == -1,
-//  TreeTraversalStrategy.DepthFirst);
+    return config;
+  }
+}
