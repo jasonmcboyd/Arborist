@@ -45,6 +45,32 @@ jobs:
           echo "results_file=$RESULTS_FILE" >> $GITHUB_OUTPUT
           echo "Found results file: $RESULTS_FILE"
 
+      - name: Initialize gh-pages branch if needed
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          # Check if gh-pages branch exists remotely
+          if ! git ls-remote --exit-code --heads origin gh-pages; then
+            echo "gh-pages branch does not exist, creating it..."
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+
+            # Create orphan branch
+            git checkout --orphan gh-pages
+            git rm -rf .
+
+            # Create initial commit
+            echo "# Benchmark Results" > README.md
+            git add README.md
+            git commit -m "Initialize gh-pages branch for benchmarks"
+            git push origin gh-pages
+
+            # Switch back to main
+            git checkout main
+            echo "gh-pages branch created successfully"
+          else
+            echo "gh-pages branch already exists"
+          fi
+
       - name: Store benchmark results
         uses: benchmark-action/github-action-benchmark@v1
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
