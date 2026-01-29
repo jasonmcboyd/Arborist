@@ -1,4 +1,4 @@
-﻿using Arborist.Core;
+using Arborist.Core;
 using Arborist.Linq;
 using Arborist.Trees;
 using BenchmarkDotNet.Attributes;
@@ -7,7 +7,7 @@ using System.Linq;
 namespace Arborist.Benchmarks
 {
   [MemoryDiagnoser]
-  [ShortRunJob]
+  [BenchmarkCategory("Traversal", "BreadthFirst")]
   public class BreadthFirstTreenumerator
   {
     [Benchmark]
@@ -22,7 +22,7 @@ namespace Arborist.Benchmarks
     [Benchmark]
     public void CompleteBinaryTree_21()
       => new CompleteBinaryTree()
-      .GetDepthFirstTraversal(nc =>
+      .GetBreadthFirstTraversal(nc =>
         nc.Position.Depth == 21
         ? NodeTraversalStrategies.SkipDescendants
         : NodeTraversalStrategies.TraverseAll)

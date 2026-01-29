@@ -6,7 +6,7 @@ using BenchmarkDotNet.Attributes;
 namespace Arborist.Benchmarks
 {
   [MemoryDiagnoser]
-  [ShortRunJob]
+  [BenchmarkCategory("LINQ", "Skip")]
   public class SkipAllNodes
   {
     [Benchmark]

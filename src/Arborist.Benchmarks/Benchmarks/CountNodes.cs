@@ -1,11 +1,11 @@
-﻿using Arborist.Linq;
+using Arborist.Linq;
 using Arborist.Trees;
 using BenchmarkDotNet.Attributes;
 
 namespace Arborist.Benchmarks
 {
   [MemoryDiagnoser]
-  [ShortRunJob]
+  [BenchmarkCategory("LINQ", "Query")]
   public class CountNodes
   {
     [Benchmark]

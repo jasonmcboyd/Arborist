@@ -1,4 +1,4 @@
-﻿using Arborist.Core;
+using Arborist.Core;
 using Arborist.Linq;
 using Arborist.Trees;
 using BenchmarkDotNet.Attributes;
@@ -6,7 +6,7 @@ using BenchmarkDotNet.Attributes;
 namespace Arborist.Benchmarks
 {
   [MemoryDiagnoser]
-  [ShortRunJob]
+  [BenchmarkCategory("LINQ", "Query")]
   public class AnyNodes
   {
     [Benchmark]
