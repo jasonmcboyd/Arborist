@@ -88,7 +88,13 @@ jobs:
             fi
           done
 
-      # Store results for each category (main branch only)
+      # Ensure clean gh-pages state before benchmark action fetches it
+      - name: Force fetch gh-pages branch
+        run: |
+          git branch -D gh-pages 2>/dev/null || true
+          git fetch origin gh-pages:gh-pages || true
+
+      # Store results for each category
       - name: Store Traversal benchmark results
         uses: benchmark-action/github-action-benchmark@v1
         with:
