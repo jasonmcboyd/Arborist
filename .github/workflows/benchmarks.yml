@@ -5,6 +5,11 @@ on:
     branches:
       - main
 
+# Ensure only one benchmark run at a time to prevent gh-pages conflicts
+concurrency:
+  group: benchmarks
+  cancel-in-progress: false
+
 permissions:
   contents: write
   deployments: write
