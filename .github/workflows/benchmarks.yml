@@ -4,14 +4,10 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 
 permissions:
   contents: write
   deployments: write
-  pull-requests: write
 
 jobs:
   benchmark:
@@ -53,26 +49,31 @@ jobs:
           cd src/Arborist.Benchmarks
           dotnet run -c Release --no-build -- --exporters json --allCategories DataStructures --artifacts ./artifacts/DataStructures --join
 
-      # Transform benchmark results to extract memory metrics
-      - name: Create memory benchmark JSON files
+      # Find benchmark result files and create memory benchmark JSON files
+      - name: Find results and create memory benchmarks
+        id: find-results
         run: |
           for category in Traversal LINQ Conversion DataStructures; do
-            INPUT_FILE=$(find src/Arborist.Benchmarks/artifacts/$category/results -name "*-report-full-compressed.json" -type f | head -n 1)
-            if [ -f "$INPUT_FILE" ]; then
-              OUTPUT_FILE="src/Arborist.Benchmarks/artifacts/$category/results/memory-benchmarks.json"
-              jq '[.Benchmarks[] | {name: .FullName, unit: "bytes", value: (.Memory.BytesAllocatedPerOperation // 0)}]' "$INPUT_FILE" > "$OUTPUT_FILE"
-              echo "Created memory benchmark file: $OUTPUT_FILE"
+            # Find the runtime benchmark JSON file
+            RESULTS_FILE=$(find src/Arborist.Benchmarks/artifacts/$category/results -name "*-report-full-compressed.json" -type f | head -n 1)
+            echo "${category,,}_file=$RESULTS_FILE" >> $GITHUB_OUTPUT
+            echo "Found $category results: $RESULTS_FILE"
+
+            # Create memory benchmark JSON from the results
+            if [ -f "$RESULTS_FILE" ]; then
+              MEMORY_FILE="src/Arborist.Benchmarks/artifacts/$category/results/memory-benchmarks.json"
+              jq '[.Benchmarks[] | {name: .FullName, unit: "bytes", value: (.Memory.BytesAllocatedPerOperation // 0)}]' "$RESULTS_FILE" > "$MEMORY_FILE"
+              echo "Created memory benchmark file: $MEMORY_FILE"
             fi
           done
 
       # Store results for each category (main branch only)
       - name: Store Traversal benchmark results
         uses: benchmark-action/github-action-benchmark@v1
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
           name: Traversal Benchmarks
           tool: 'benchmarkdotnet'
-          output-file-path: src/Arborist.Benchmarks/artifacts/Traversal/results/BenchmarkRun-joined-*-report-full-compressed.json
+          output-file-path: ${{ steps.find-results.outputs.traversal_file }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: false
           alert-threshold: '150%'
@@ -84,11 +85,10 @@ jobs:
 
       - name: Store LINQ benchmark results
         uses: benchmark-action/github-action-benchmark@v1
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
           name: LINQ Benchmarks
           tool: 'benchmarkdotnet'
-          output-file-path: src/Arborist.Benchmarks/artifacts/LINQ/results/BenchmarkRun-joined-*-report-full-compressed.json
+          output-file-path: ${{ steps.find-results.outputs.linq_file }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: false
           alert-threshold: '150%'
@@ -100,11 +100,10 @@ jobs:
 
       - name: Store Conversion benchmark results
         uses: benchmark-action/github-action-benchmark@v1
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
           name: Conversion Benchmarks
           tool: 'benchmarkdotnet'
-          output-file-path: src/Arborist.Benchmarks/artifacts/Conversion/results/BenchmarkRun-joined-*-report-full-compressed.json
+          output-file-path: ${{ steps.find-results.outputs.conversion_file }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: false
           alert-threshold: '150%'
@@ -116,11 +115,10 @@ jobs:
 
       - name: Store DataStructures benchmark results
         uses: benchmark-action/github-action-benchmark@v1
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
           name: DataStructures Benchmarks
           tool: 'benchmarkdotnet'
-          output-file-path: src/Arborist.Benchmarks/artifacts/DataStructures/results/BenchmarkRun-joined-*-report-full-compressed.json
+          output-file-path: ${{ steps.find-results.outputs.datastructures_file }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: false
           alert-threshold: '150%'
@@ -133,7 +131,6 @@ jobs:
       # Store memory benchmark results for each category (main branch only)
       - name: Store Traversal memory results
         uses: benchmark-action/github-action-benchmark@v1
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
           name: Traversal Memory
           tool: 'customSmallerIsBetter'
@@ -149,7 +146,6 @@ jobs:
 
       - name: Store LINQ memory results
         uses: benchmark-action/github-action-benchmark@v1
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
           name: LINQ Memory
           tool: 'customSmallerIsBetter'
@@ -165,7 +161,6 @@ jobs:
 
       - name: Store Conversion memory results
         uses: benchmark-action/github-action-benchmark@v1
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
           name: Conversion Memory
           tool: 'customSmallerIsBetter'
@@ -181,7 +176,6 @@ jobs:
 
       - name: Store DataStructures memory results
         uses: benchmark-action/github-action-benchmark@v1
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
           name: DataStructures Memory
           tool: 'customSmallerIsBetter'
@@ -194,128 +188,6 @@ jobs:
           alert-comment-cc-users: '@ktrz'
           gh-pages-branch: gh-pages
           benchmark-data-dir-path: benchmarks
-
-      # Compare PR benchmarks for each category
-      - name: Compare Traversal PR benchmarks
-        uses: benchmark-action/github-action-benchmark@v1
-        if: github.event_name == 'pull_request'
-        continue-on-error: true
-        with:
-          name: Traversal Benchmarks
-          tool: 'benchmarkdotnet'
-          output-file-path: src/Arborist.Benchmarks/artifacts/Traversal/results/BenchmarkRun-joined-*-report-full-compressed.json
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          auto-push: false
-          comment-on-alert: true
-          alert-threshold: '150%'
-          fail-on-alert: false
-          save-data-file: false
-
-      - name: Compare LINQ PR benchmarks
-        uses: benchmark-action/github-action-benchmark@v1
-        if: github.event_name == 'pull_request'
-        continue-on-error: true
-        with:
-          name: LINQ Benchmarks
-          tool: 'benchmarkdotnet'
-          output-file-path: src/Arborist.Benchmarks/artifacts/LINQ/results/BenchmarkRun-joined-*-report-full-compressed.json
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          auto-push: false
-          comment-on-alert: true
-          alert-threshold: '150%'
-          fail-on-alert: false
-          save-data-file: false
-
-      - name: Compare Conversion PR benchmarks
-        uses: benchmark-action/github-action-benchmark@v1
-        if: github.event_name == 'pull_request'
-        continue-on-error: true
-        with:
-          name: Conversion Benchmarks
-          tool: 'benchmarkdotnet'
-          output-file-path: src/Arborist.Benchmarks/artifacts/Conversion/results/BenchmarkRun-joined-*-report-full-compressed.json
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          auto-push: false
-          comment-on-alert: true
-          alert-threshold: '150%'
-          fail-on-alert: false
-          save-data-file: false
-
-      - name: Compare DataStructures PR benchmarks
-        uses: benchmark-action/github-action-benchmark@v1
-        if: github.event_name == 'pull_request'
-        continue-on-error: true
-        with:
-          name: DataStructures Benchmarks
-          tool: 'benchmarkdotnet'
-          output-file-path: src/Arborist.Benchmarks/artifacts/DataStructures/results/BenchmarkRun-joined-*-report-full-compressed.json
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          auto-push: false
-          comment-on-alert: true
-          alert-threshold: '150%'
-          fail-on-alert: false
-          save-data-file: false
-
-      # Compare PR memory benchmarks for each category
-      - name: Compare Traversal memory PR benchmarks
-        uses: benchmark-action/github-action-benchmark@v1
-        if: github.event_name == 'pull_request'
-        continue-on-error: true
-        with:
-          name: Traversal Memory
-          tool: 'customSmallerIsBetter'
-          output-file-path: src/Arborist.Benchmarks/artifacts/Traversal/results/memory-benchmarks.json
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          auto-push: false
-          comment-on-alert: true
-          alert-threshold: '150%'
-          fail-on-alert: false
-          save-data-file: false
-
-      - name: Compare LINQ memory PR benchmarks
-        uses: benchmark-action/github-action-benchmark@v1
-        if: github.event_name == 'pull_request'
-        continue-on-error: true
-        with:
-          name: LINQ Memory
-          tool: 'customSmallerIsBetter'
-          output-file-path: src/Arborist.Benchmarks/artifacts/LINQ/results/memory-benchmarks.json
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          auto-push: false
-          comment-on-alert: true
-          alert-threshold: '150%'
-          fail-on-alert: false
-          save-data-file: false
-
-      - name: Compare Conversion memory PR benchmarks
-        uses: benchmark-action/github-action-benchmark@v1
-        if: github.event_name == 'pull_request'
-        continue-on-error: true
-        with:
-          name: Conversion Memory
-          tool: 'customSmallerIsBetter'
-          output-file-path: src/Arborist.Benchmarks/artifacts/Conversion/results/memory-benchmarks.json
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          auto-push: false
-          comment-on-alert: true
-          alert-threshold: '150%'
-          fail-on-alert: false
-          save-data-file: false
-
-      - name: Compare DataStructures memory PR benchmarks
-        uses: benchmark-action/github-action-benchmark@v1
-        if: github.event_name == 'pull_request'
-        continue-on-error: true
-        with:
-          name: DataStructures Memory
-          tool: 'customSmallerIsBetter'
-          output-file-path: src/Arborist.Benchmarks/artifacts/DataStructures/results/memory-benchmarks.json
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          auto-push: false
-          comment-on-alert: true
-          alert-threshold: '150%'
-          fail-on-alert: false
-          save-data-file: false
 
       - name: Upload benchmark artifacts
         uses: actions/upload-artifact@v4
