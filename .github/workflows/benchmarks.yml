@@ -32,51 +32,151 @@ jobs:
       - name: Build benchmarks
         run: dotnet build src/Arborist.Benchmarks/Arborist.Benchmarks.csproj -c Release --no-restore
 
-      - name: Run benchmarks
+      # Run benchmarks by category for better organization
+      - name: Run Traversal benchmarks
         run: |
           cd src/Arborist.Benchmarks
-          dotnet run -c Release --no-build -- --exporters json --filter '*'
+          dotnet run -c Release --no-build -- --exporters json --allCategories Traversal --artifacts ./artifacts/Traversal --join
 
-      - name: Find benchmark results
-        id: find-results
+      - name: Run LINQ benchmarks
         run: |
-          # Find the actual results file (BenchmarkDotNet generates with unique names)
-          RESULTS_FILE=$(find src/Arborist.Benchmarks/BenchmarkDotNet.Artifacts/results -name "*-report-full-compressed.json" -type f | head -n 1)
-          echo "results_file=$RESULTS_FILE" >> $GITHUB_OUTPUT
-          echo "Found results file: $RESULTS_FILE"
+          cd src/Arborist.Benchmarks
+          dotnet run -c Release --no-build -- --exporters json --allCategories LINQ --artifacts ./artifacts/LINQ --join
 
-      - name: Store benchmark results
+      - name: Run Conversion benchmarks
+        run: |
+          cd src/Arborist.Benchmarks
+          dotnet run -c Release --no-build -- --exporters json --allCategories Conversion --artifacts ./artifacts/Conversion --join
+
+      - name: Run DataStructures benchmarks
+        run: |
+          cd src/Arborist.Benchmarks
+          dotnet run -c Release --no-build -- --exporters json --allCategories DataStructures --artifacts ./artifacts/DataStructures --join
+
+      # Store results for each category (main branch only)
+      - name: Store Traversal benchmark results
         uses: benchmark-action/github-action-benchmark@v1
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
-          name: Arborist Benchmarks
+          name: Traversal Benchmarks
           tool: 'benchmarkdotnet'
-          output-file-path: ${{ steps.find-results.outputs.results_file }}
+          output-file-path: src/Arborist.Benchmarks/artifacts/Traversal/results/BenchmarkRun-joined-*-report-full-compressed.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          auto-push: true
-          # Show alert with commit comment on detecting possible performance regression
+          auto-push: false
           alert-threshold: '150%'
           comment-on-alert: true
           fail-on-alert: false
           alert-comment-cc-users: '@ktrz'
-          # Store results in gh-pages branch
           gh-pages-branch: gh-pages
           benchmark-data-dir-path: benchmarks
 
-      - name: Compare PR benchmarks
+      - name: Store LINQ benchmark results
+        uses: benchmark-action/github-action-benchmark@v1
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        with:
+          name: LINQ Benchmarks
+          tool: 'benchmarkdotnet'
+          output-file-path: src/Arborist.Benchmarks/artifacts/LINQ/results/BenchmarkRun-joined-*-report-full-compressed.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: false
+          alert-threshold: '150%'
+          comment-on-alert: true
+          fail-on-alert: false
+          alert-comment-cc-users: '@ktrz'
+          gh-pages-branch: gh-pages
+          benchmark-data-dir-path: benchmarks
+
+      - name: Store Conversion benchmark results
+        uses: benchmark-action/github-action-benchmark@v1
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        with:
+          name: Conversion Benchmarks
+          tool: 'benchmarkdotnet'
+          output-file-path: src/Arborist.Benchmarks/artifacts/Conversion/results/BenchmarkRun-joined-*-report-full-compressed.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: false
+          alert-threshold: '150%'
+          comment-on-alert: true
+          fail-on-alert: false
+          alert-comment-cc-users: '@ktrz'
+          gh-pages-branch: gh-pages
+          benchmark-data-dir-path: benchmarks
+
+      - name: Store DataStructures benchmark results
+        uses: benchmark-action/github-action-benchmark@v1
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        with:
+          name: DataStructures Benchmarks
+          tool: 'benchmarkdotnet'
+          output-file-path: src/Arborist.Benchmarks/artifacts/DataStructures/results/BenchmarkRun-joined-*-report-full-compressed.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: true
+          alert-threshold: '150%'
+          comment-on-alert: true
+          fail-on-alert: false
+          alert-comment-cc-users: '@ktrz'
+          gh-pages-branch: gh-pages
+          benchmark-data-dir-path: benchmarks
+
+      # Compare PR benchmarks for each category
+      - name: Compare Traversal PR benchmarks
         uses: benchmark-action/github-action-benchmark@v1
         if: github.event_name == 'pull_request'
-        continue-on-error: true  # Don't fail if gh-pages doesn't exist yet
+        continue-on-error: true
         with:
-          name: Arborist Benchmarks
+          name: Traversal Benchmarks
           tool: 'benchmarkdotnet'
-          output-file-path: ${{ steps.find-results.outputs.results_file }}
+          output-file-path: src/Arborist.Benchmarks/artifacts/Traversal/results/BenchmarkRun-joined-*-report-full-compressed.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: false
           comment-on-alert: true
           alert-threshold: '150%'
           fail-on-alert: false
-          # Only comment, don't push
+          save-data-file: false
+
+      - name: Compare LINQ PR benchmarks
+        uses: benchmark-action/github-action-benchmark@v1
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        with:
+          name: LINQ Benchmarks
+          tool: 'benchmarkdotnet'
+          output-file-path: src/Arborist.Benchmarks/artifacts/LINQ/results/BenchmarkRun-joined-*-report-full-compressed.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: false
+          comment-on-alert: true
+          alert-threshold: '150%'
+          fail-on-alert: false
+          save-data-file: false
+
+      - name: Compare Conversion PR benchmarks
+        uses: benchmark-action/github-action-benchmark@v1
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        with:
+          name: Conversion Benchmarks
+          tool: 'benchmarkdotnet'
+          output-file-path: src/Arborist.Benchmarks/artifacts/Conversion/results/BenchmarkRun-joined-*-report-full-compressed.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: false
+          comment-on-alert: true
+          alert-threshold: '150%'
+          fail-on-alert: false
+          save-data-file: false
+
+      - name: Compare DataStructures PR benchmarks
+        uses: benchmark-action/github-action-benchmark@v1
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        with:
+          name: DataStructures Benchmarks
+          tool: 'benchmarkdotnet'
+          output-file-path: src/Arborist.Benchmarks/artifacts/DataStructures/results/BenchmarkRun-joined-*-report-full-compressed.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: false
+          comment-on-alert: true
+          alert-threshold: '150%'
+          fail-on-alert: false
           save-data-file: false
 
       - name: Upload benchmark artifacts
@@ -84,5 +184,5 @@ jobs:
         if: always()
         with:
           name: benchmark-results
-          path: src/Arborist.Benchmarks/BenchmarkDotNet.Artifacts/
+          path: src/Arborist.Benchmarks/artifacts/
           retention-days: 30
