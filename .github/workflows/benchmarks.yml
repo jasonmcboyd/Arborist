@@ -33,6 +33,7 @@ jobs:
             git commit --allow-empty -m "Initialize gh-pages branch"
             git push origin gh-pages
             git checkout main
+            git branch -D gh-pages
           else
             echo "gh-pages branch already exists"
           fi
