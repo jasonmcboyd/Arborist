@@ -53,6 +53,18 @@ jobs:
           cd src/Arborist.Benchmarks
           dotnet run -c Release --no-build -- --exporters json --allCategories DataStructures --artifacts ./artifacts/DataStructures --join
 
+      # Transform benchmark results to extract memory metrics
+      - name: Create memory benchmark JSON files
+        run: |
+          for category in Traversal LINQ Conversion DataStructures; do
+            INPUT_FILE=$(find src/Arborist.Benchmarks/artifacts/$category/results -name "*-report-full-compressed.json" -type f | head -n 1)
+            if [ -f "$INPUT_FILE" ]; then
+              OUTPUT_FILE="src/Arborist.Benchmarks/artifacts/$category/results/memory-benchmarks.json"
+              jq '[.Benchmarks[] | {name: .FullName, unit: "bytes", value: (.Memory.BytesAllocatedPerOperation // 0)}]' "$INPUT_FILE" > "$OUTPUT_FILE"
+              echo "Created memory benchmark file: $OUTPUT_FILE"
+            fi
+          done
+
       # Store results for each category (main branch only)
       - name: Store Traversal benchmark results
         uses: benchmark-action/github-action-benchmark@v1
@@ -109,6 +121,71 @@ jobs:
           name: DataStructures Benchmarks
           tool: 'benchmarkdotnet'
           output-file-path: src/Arborist.Benchmarks/artifacts/DataStructures/results/BenchmarkRun-joined-*-report-full-compressed.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: false
+          alert-threshold: '150%'
+          comment-on-alert: true
+          fail-on-alert: false
+          alert-comment-cc-users: '@ktrz'
+          gh-pages-branch: gh-pages
+          benchmark-data-dir-path: benchmarks
+
+      # Store memory benchmark results for each category (main branch only)
+      - name: Store Traversal memory results
+        uses: benchmark-action/github-action-benchmark@v1
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        with:
+          name: Traversal Memory
+          tool: 'customSmallerIsBetter'
+          output-file-path: src/Arborist.Benchmarks/artifacts/Traversal/results/memory-benchmarks.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: false
+          alert-threshold: '150%'
+          comment-on-alert: true
+          fail-on-alert: false
+          alert-comment-cc-users: '@ktrz'
+          gh-pages-branch: gh-pages
+          benchmark-data-dir-path: benchmarks
+
+      - name: Store LINQ memory results
+        uses: benchmark-action/github-action-benchmark@v1
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        with:
+          name: LINQ Memory
+          tool: 'customSmallerIsBetter'
+          output-file-path: src/Arborist.Benchmarks/artifacts/LINQ/results/memory-benchmarks.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: false
+          alert-threshold: '150%'
+          comment-on-alert: true
+          fail-on-alert: false
+          alert-comment-cc-users: '@ktrz'
+          gh-pages-branch: gh-pages
+          benchmark-data-dir-path: benchmarks
+
+      - name: Store Conversion memory results
+        uses: benchmark-action/github-action-benchmark@v1
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        with:
+          name: Conversion Memory
+          tool: 'customSmallerIsBetter'
+          output-file-path: src/Arborist.Benchmarks/artifacts/Conversion/results/memory-benchmarks.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: false
+          alert-threshold: '150%'
+          comment-on-alert: true
+          fail-on-alert: false
+          alert-comment-cc-users: '@ktrz'
+          gh-pages-branch: gh-pages
+          benchmark-data-dir-path: benchmarks
+
+      - name: Store DataStructures memory results
+        uses: benchmark-action/github-action-benchmark@v1
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        with:
+          name: DataStructures Memory
+          tool: 'customSmallerIsBetter'
+          output-file-path: src/Arborist.Benchmarks/artifacts/DataStructures/results/memory-benchmarks.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: true
           alert-threshold: '150%'
@@ -172,6 +249,67 @@ jobs:
           name: DataStructures Benchmarks
           tool: 'benchmarkdotnet'
           output-file-path: src/Arborist.Benchmarks/artifacts/DataStructures/results/BenchmarkRun-joined-*-report-full-compressed.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: false
+          comment-on-alert: true
+          alert-threshold: '150%'
+          fail-on-alert: false
+          save-data-file: false
+
+      # Compare PR memory benchmarks for each category
+      - name: Compare Traversal memory PR benchmarks
+        uses: benchmark-action/github-action-benchmark@v1
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        with:
+          name: Traversal Memory
+          tool: 'customSmallerIsBetter'
+          output-file-path: src/Arborist.Benchmarks/artifacts/Traversal/results/memory-benchmarks.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: false
+          comment-on-alert: true
+          alert-threshold: '150%'
+          fail-on-alert: false
+          save-data-file: false
+
+      - name: Compare LINQ memory PR benchmarks
+        uses: benchmark-action/github-action-benchmark@v1
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        with:
+          name: LINQ Memory
+          tool: 'customSmallerIsBetter'
+          output-file-path: src/Arborist.Benchmarks/artifacts/LINQ/results/memory-benchmarks.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: false
+          comment-on-alert: true
+          alert-threshold: '150%'
+          fail-on-alert: false
+          save-data-file: false
+
+      - name: Compare Conversion memory PR benchmarks
+        uses: benchmark-action/github-action-benchmark@v1
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        with:
+          name: Conversion Memory
+          tool: 'customSmallerIsBetter'
+          output-file-path: src/Arborist.Benchmarks/artifacts/Conversion/results/memory-benchmarks.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: false
+          comment-on-alert: true
+          alert-threshold: '150%'
+          fail-on-alert: false
+          save-data-file: false
+
+      - name: Compare DataStructures memory PR benchmarks
+        uses: benchmark-action/github-action-benchmark@v1
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        with:
+          name: DataStructures Memory
+          tool: 'customSmallerIsBetter'
+          output-file-path: src/Arborist.Benchmarks/artifacts/DataStructures/results/memory-benchmarks.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: false
           comment-on-alert: true
