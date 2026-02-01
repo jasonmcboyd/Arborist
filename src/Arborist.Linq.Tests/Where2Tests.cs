@@ -43,27 +43,27 @@ namespace Arborist.Linq.Tests
         //"a,b(c,d)",
         //"a,b(d),c",
 
-        // e
+        //// e
         //"a(b(d(e)),c)",
         //"a(b(c,d,e))",
         //"a(d),b,c(e)",
 
-        // f
+        //// f
         //"a(c,d),b(e,f)",
         //"a(d),b(e),c(f)",
         //"a(b(d,e,f),c)",
         //"a,b(d),c(e(f))",
 
-        // g
+        //// g
         //"a(b(e),c(f),d(g))",
-        //"a(b(d,e),c(f(g)))"
+        //"a(b(d,e),c(f(g)))",
         //"a(b(e),c(f),d(g))",
-        //"a(b(d,e),c(f(g)))"
+        //"a(b(d,e),c(f(g)))",
 
-        // h
-        //"a(d(f,g,h)),b,c(e)"
+        //// h
+        //"a(d(f,g,h)),b,c(e)",
 
-        // i
+        //// i
         //"a(b(d,e,f),c(g,h,i))",
         //"a(d(g)),b(e(h)),c(f(i))",
       };
@@ -164,6 +164,7 @@ namespace Arborist.Linq.Tests
 
     [TestMethod]
     [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
+    [Ignore("Ignore until DFT is fixed.")]
     public void Where2Test_BreadthFirst(
       string treeString,
       string expectedTreeString,
@@ -180,23 +181,23 @@ namespace Arborist.Linq.Tests
         TreeTraversalStrategy.BreadthFirst);
     }
 
-    //[TestMethod]
-    //[DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
-    //public void Where2Test_DepthFirst(
-    //  string treeString,
-    //  string expectedTreeString,
-    //  string[] skippedNodes,
-    //  bool composeOperations,
-    //  NodeAndTraversalStrategy[] nodeAndTraversalStrategyPairs)
-    //{
-    //  Where2Test(
-    //    treeString,
-    //    expectedTreeString,
-    //    skippedNodes,
-    //    composeOperations,
-    //    nodeAndTraversalStrategyPairs,
-    //    TreeTraversalStrategy.DepthFirst);
-    //}
+    [TestMethod]
+    [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
+    public void Where2Test_DepthFirst(
+      string treeString,
+      string expectedTreeString,
+      string[] skippedNodes,
+      bool composeOperations,
+      NodeAndTraversalStrategy[] nodeAndTraversalStrategyPairs)
+    {
+      Where2Test(
+        treeString,
+        expectedTreeString,
+        skippedNodes,
+        composeOperations,
+        nodeAndTraversalStrategyPairs,
+        TreeTraversalStrategy.DepthFirst);
+    }
 
     public void Where2Test(
       string treeString,

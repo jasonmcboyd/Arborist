@@ -18,6 +18,10 @@ namespace Arborist.Linq.Treenumerators
     private readonly ITreenumerator<TLeft> _LeftTreenumerator;
     private readonly ITreenumerator<TRight> _RightTreenumerator;
 
+    private bool _LeftSiblingSkipPending = false;
+    private bool _RightSiblingSkipPending = false;
+    private int _SiblingSkipDepth = -1;
+
     private bool _LeftTreenumeratorFinished;
     private bool _RightTreenumeratorFinished;
 
@@ -45,6 +49,23 @@ namespace Arborist.Linq.Treenumerators
 
     private void HandleMoveNextForLeftAndRightTreenumerators(NodeTraversalStrategies nodeTraversalStrategies)
     {
+      // When SkipSiblings is received and the node is at "effective root" level
+      // (all ancestors were skipped), propagate the skip to the other treenumerator.
+      // This mirrors the _Stack.Count == 1 check in plain DepthFirstTreenumerator.
+      // We check if there are any non-skipped ancestors by looking for nodes at a
+      // shallower depth than the current node in the _NodeVisits stack.
+      if (nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipSiblings)
+        && !HasAncestorInNodeVisits())
+      {
+        _SiblingSkipDepth = Position.Depth;
+
+        if (!Node.HasLeft)
+          _LeftSiblingSkipPending = true;
+
+        if (!Node.HasRight)
+          _RightSiblingSkipPending = true;
+      }
+
       var callMoveNextOnLeftTreenumerator =
         !_LeftTreenumeratorFinished
         && (_NodeVisits.Count == 0
@@ -66,23 +87,52 @@ namespace Arborist.Linq.Treenumerators
       {
         _RightTreenumeratorFinished = true;
       }
+
+      // Apply pending sibling skips to treenumerators that weren't called above
+      if (_LeftSiblingSkipPending
+        && !_LeftTreenumeratorFinished
+        && _LeftTreenumerator.Position.Depth <= _SiblingSkipDepth)
+      {
+        if (!_LeftTreenumerator.MoveNext(NodeTraversalStrategies.SkipNodeAndDescendants | NodeTraversalStrategies.SkipSiblings))
+          _LeftTreenumeratorFinished = true;
+
+        _LeftSiblingSkipPending = false;
+      }
+
+      if (_RightSiblingSkipPending
+        && !_RightTreenumeratorFinished
+        && _RightTreenumerator.Position.Depth <= _SiblingSkipDepth)
+      {
+        if (!_RightTreenumerator.MoveNext(NodeTraversalStrategies.SkipNodeAndDescendants | NodeTraversalStrategies.SkipSiblings))
+          _RightTreenumeratorFinished = true;
+
+        _RightSiblingSkipPending = false;
+      }
     }
 
     private void FixUpNodeVisitsStack(NodeTraversalStrategies nodeTraversalStrategies)
     {
-      var hasLeft = Node.HasLeft && !_LeftTreenumeratorFinished;
-      var hasRight = Node.HasRight && !_RightTreenumeratorFinished;
-      var leftDepthIsLessThanCurrent = _LeftTreenumerator.Position.Depth < Position.Depth;
-      var rightDepthIsLessThanCurrent = _RightTreenumerator.Position.Depth < Position.Depth;
-
-      var mustPopLeadingNodeVisitOnStack =
-        nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipNode)
-        || (hasLeft && hasRight && leftDepthIsLessThanCurrent && rightDepthIsLessThanCurrent)
-        || (!hasLeft && _RightTreenumerator.Position.Depth < Position.Depth)
-        || (!hasRight && _LeftTreenumerator.Position.Depth < Position.Depth);
-
-      if (mustPopLeadingNodeVisitOnStack)
+      // Pop the current node if it was skipped
+      if (nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipNode))
         _NodeVisits.Pop();
+
+      // Keep popping while the top of the stack is deeper than where the treenumerators are.
+      // This handles cases where the treenumerators have backtracked multiple levels
+      // (e.g., when a deep node is skipped and its ancestors have no more children).
+      while (_NodeVisits.Count > 0)
+      {
+        var topDepth = _NodeVisits.Peek().Position.Depth;
+        var leftDepth = _LeftTreenumeratorFinished ? -1 : _LeftTreenumerator.Position.Depth;
+        var rightDepth = _RightTreenumeratorFinished ? -1 : _RightTreenumerator.Position.Depth;
+        var maxTreenumeratorDepth = Math.Max(leftDepth, rightDepth);
+
+        // If both treenumerators are at a shallower depth than the top of the stack,
+        // the top node has been fully processed and should be popped.
+        if (maxTreenumeratorDepth < topDepth)
+          _NodeVisits.Pop();
+        else
+          break;
+      }
     }
 
     private NodeVisit<MergeNode<TLeft, TRight>> CreateNextNodeVisit()
@@ -152,6 +202,18 @@ namespace Arborist.Linq.Treenumerators
       VisitCount = nodeVisit.VisitCount;
       Mode = nodeVisit.Mode;
       Position = nodeVisit.Position;
+    }
+
+    private bool HasAncestorInNodeVisits()
+    {
+      // Check if there are any nodes in _NodeVisits at a depth shallower than
+      // the current node's depth. If not, all ancestors were skipped.
+      foreach (var nodeVisit in _NodeVisits)
+      {
+        if (nodeVisit.Position.Depth < Position.Depth)
+          return true;
+      }
+      return false;
     }
 
     protected override void OnDisposing()
