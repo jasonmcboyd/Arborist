@@ -50,20 +50,20 @@ jobs:
         run: dotnet build src/Arborist.Benchmarks/Arborist.Benchmarks.csproj -c Release --no-restore
 
       # Run benchmarks by category for better organization
-      - name: Run Traversal benchmarks
-        run: |
-          cd src/Arborist.Benchmarks
-          dotnet run -c Release --no-build -- --exporters json --allCategories Traversal --artifacts ./artifacts/Traversal --join
+      # - name: Run Traversal benchmarks
+      #   run: |
+      #     cd src/Arborist.Benchmarks
+      #     dotnet run -c Release --no-build -- --exporters json --allCategories Traversal --artifacts ./artifacts/Traversal --join
 
-      - name: Run LINQ benchmarks
-        run: |
-          cd src/Arborist.Benchmarks
-          dotnet run -c Release --no-build -- --exporters json --allCategories LINQ --artifacts ./artifacts/LINQ --join
+      # - name: Run LINQ benchmarks
+      #   run: |
+      #     cd src/Arborist.Benchmarks
+      #     dotnet run -c Release --no-build -- --exporters json --allCategories LINQ --artifacts ./artifacts/LINQ --join
 
-      - name: Run Conversion benchmarks
-        run: |
-          cd src/Arborist.Benchmarks
-          dotnet run -c Release --no-build -- --exporters json --allCategories Conversion --artifacts ./artifacts/Conversion --join
+      # - name: Run Conversion benchmarks
+      #   run: |
+      #     cd src/Arborist.Benchmarks
+      #     dotnet run -c Release --no-build -- --exporters json --allCategories Conversion --artifacts ./artifacts/Conversion --join
 
       - name: Run DataStructures benchmarks
         run: |
@@ -88,11 +88,11 @@ jobs:
             fi
           done
 
-      # Ensure clean gh-pages state before benchmark action fetches it
-      - name: Force fetch gh-pages branch
+      # Ensure no local gh-pages exists so benchmark action can fetch cleanly
+      - name: Clean local gh-pages state
         run: |
           git branch -D gh-pages 2>/dev/null || true
-          git fetch origin +gh-pages:gh-pages || true
+          git update-ref -d refs/heads/gh-pages 2>/dev/null || true
 
       # Store results for each category
       - name: Store Traversal benchmark results
