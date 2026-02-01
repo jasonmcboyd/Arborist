@@ -92,7 +92,7 @@ jobs:
       - name: Force fetch gh-pages branch
         run: |
           git branch -D gh-pages 2>/dev/null || true
-          git fetch origin gh-pages:gh-pages || true
+          git fetch origin +gh-pages:gh-pages || true
 
       # Store results for each category
       - name: Store Traversal benchmark results
