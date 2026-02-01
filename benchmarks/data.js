@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1769975445731,
+  "lastUpdate": 1769975445918,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -400,6 +400,50 @@ window.BENCHMARK_DATA = {
             "value": 36525244.895604394,
             "unit": "ns",
             "range": "± 149874.0086375628"
+          }
+        ]
+      }
+    ],
+    "DataStructures Benchmarks": [
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "87495d479356376af86c640133c60ba9554a0463",
+          "message": "Merge pull request #13 from jasonmcboyd/continuous-benchmark\n\nAdd skip-fetch-gh-pages to subsequent benchmark steps",
+          "timestamp": "2026-02-01T11:32:13-08:00",
+          "tree_id": "0695c436854481b2e3514228c9f79baa1419b3ae",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/87495d479356376af86c640133c60ba9554a0463"
+        },
+        "date": 1769975445893,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.Add_8M",
+            "value": 19767683.225,
+            "unit": "ns",
+            "range": "± 114998.70681724027"
+          },
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.RemoveFirst_8M",
+            "value": 32311528.229166668,
+            "unit": "ns",
+            "range": "± 408281.6234405529"
+          },
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.RemoveLast_8M",
+            "value": 27217033.014423076,
+            "unit": "ns",
+            "range": "± 192510.91620227537"
           }
         ]
       }
