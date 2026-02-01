@@ -50,20 +50,20 @@ jobs:
         run: dotnet build src/Arborist.Benchmarks/Arborist.Benchmarks.csproj -c Release --no-restore
 
       # Run benchmarks by category for better organization
-      # - name: Run Traversal benchmarks
-      #   run: |
-      #     cd src/Arborist.Benchmarks
-      #     dotnet run -c Release --no-build -- --exporters json --allCategories Traversal --artifacts ./artifacts/Traversal --join
+      - name: Run Traversal benchmarks
+        run: |
+          cd src/Arborist.Benchmarks
+          dotnet run -c Release --no-build -- --exporters json --allCategories Traversal --artifacts ./artifacts/Traversal --join
 
-      # - name: Run LINQ benchmarks
-      #   run: |
-      #     cd src/Arborist.Benchmarks
-      #     dotnet run -c Release --no-build -- --exporters json --allCategories LINQ --artifacts ./artifacts/LINQ --join
+      - name: Run LINQ benchmarks
+        run: |
+          cd src/Arborist.Benchmarks
+          dotnet run -c Release --no-build -- --exporters json --allCategories LINQ --artifacts ./artifacts/LINQ --join
 
-      # - name: Run Conversion benchmarks
-      #   run: |
-      #     cd src/Arborist.Benchmarks
-      #     dotnet run -c Release --no-build -- --exporters json --allCategories Conversion --artifacts ./artifacts/Conversion --join
+      - name: Run Conversion benchmarks
+        run: |
+          cd src/Arborist.Benchmarks
+          dotnet run -c Release --no-build -- --exporters json --allCategories Conversion --artifacts ./artifacts/Conversion --join
 
       - name: Run DataStructures benchmarks
         run: |
