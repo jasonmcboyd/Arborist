@@ -14,6 +14,7 @@ namespace Arborist.Linq.Treenumerators.Enumerator
     private IEnumerator<TNode> _Enumerator;
     private readonly RefSemiDeque<(TNode, int)> _Stack = new RefSemiDeque<(TNode, int)>();
     private bool _EnumerationFinished = false;
+    private int _DepthOfLastVisitedNode = -1;
 
     public TNode Node { get; private set; } = default;
     public int VisitCount { get; private set; } = 0;
@@ -70,6 +71,7 @@ namespace Arborist.Linq.Treenumerators.Enumerator
         {
           VisitCount = 1;
           Mode = TreenumeratorMode.VisitingNode;
+          _DepthOfLastVisitedNode = Position.Depth;
           _Stack.RemoveLast();
           return true;
         }
@@ -89,6 +91,7 @@ namespace Arborist.Linq.Treenumerators.Enumerator
 
       VisitCount = 1;
       Mode = TreenumeratorMode.VisitingNode;
+      _DepthOfLastVisitedNode = Position.Depth;
       return true;
     }
 
@@ -114,20 +117,25 @@ namespace Arborist.Linq.Treenumerators.Enumerator
 
     private bool MoveUpStack()
     {
-      if (_Stack.Count == 0)
+      while (_Stack.Count > 0)
       {
-        _EnumerationFinished = true;
-        return false;
+        (var node, var depth) = _Stack.RemoveLast();
+
+        // Only return V2 if we actually descended below this node.
+        // If _DepthOfLastVisitedNode <= depth, all children were skipped
+        // without being visited, so this node shouldn't get V2.
+        if (_DepthOfLastVisitedNode > depth)
+        {
+          Node = node;
+          VisitCount = 2;
+          Position = new NodePosition(0, depth);
+          Mode = TreenumeratorMode.VisitingNode;
+          return true;
+        }
       }
 
-      (var node, var depth) = _Stack.RemoveLast();
-
-      Node = node;
-      VisitCount = 2;
-      Position = new NodePosition(0, depth);
-      Mode = TreenumeratorMode.VisitingNode;
-
-      return true;
+      _EnumerationFinished = true;
+      return false;
     }
 
     public void Dispose()
