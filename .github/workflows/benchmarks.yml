@@ -118,6 +118,7 @@ jobs:
           output-file-path: ${{ steps.find-results.outputs.linq_file }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: false
+          skip-fetch-gh-pages: true
           alert-threshold: '150%'
           comment-on-alert: true
           fail-on-alert: false
@@ -133,6 +134,7 @@ jobs:
           output-file-path: ${{ steps.find-results.outputs.conversion_file }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: false
+          skip-fetch-gh-pages: true
           alert-threshold: '150%'
           comment-on-alert: true
           fail-on-alert: false
@@ -148,6 +150,7 @@ jobs:
           output-file-path: ${{ steps.find-results.outputs.datastructures_file }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: false
+          skip-fetch-gh-pages: true
           alert-threshold: '150%'
           comment-on-alert: true
           fail-on-alert: false
@@ -164,6 +167,7 @@ jobs:
           output-file-path: src/Arborist.Benchmarks/artifacts/Traversal/results/memory-benchmarks.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: false
+          skip-fetch-gh-pages: true
           alert-threshold: '150%'
           comment-on-alert: true
           fail-on-alert: false
@@ -179,6 +183,7 @@ jobs:
           output-file-path: src/Arborist.Benchmarks/artifacts/LINQ/results/memory-benchmarks.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: false
+          skip-fetch-gh-pages: true
           alert-threshold: '150%'
           comment-on-alert: true
           fail-on-alert: false
@@ -194,6 +199,7 @@ jobs:
           output-file-path: src/Arborist.Benchmarks/artifacts/Conversion/results/memory-benchmarks.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: false
+          skip-fetch-gh-pages: true
           alert-threshold: '150%'
           comment-on-alert: true
           fail-on-alert: false
@@ -209,6 +215,7 @@ jobs:
           output-file-path: src/Arborist.Benchmarks/artifacts/DataStructures/results/memory-benchmarks.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: true
+          skip-fetch-gh-pages: true
           alert-threshold: '150%'
           comment-on-alert: true
           fail-on-alert: false
