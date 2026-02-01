@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1769975445536,
+  "lastUpdate": 1769975445731,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -350,6 +350,56 @@ window.BENCHMARK_DATA = {
             "value": 29200810.723214287,
             "unit": "ns",
             "range": "± 37368.565383578105"
+          }
+        ]
+      }
+    ],
+    "Conversion Benchmarks": [
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "87495d479356376af86c640133c60ba9554a0463",
+          "message": "Merge pull request #13 from jasonmcboyd/continuous-benchmark\n\nAdd skip-fetch-gh-pages to subsequent benchmark steps",
+          "timestamp": "2026-02-01T11:32:13-08:00",
+          "tree_id": "0695c436854481b2e3514228c9f79baa1419b3ae",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/87495d479356376af86c640133c60ba9554a0463"
+        },
+        "date": 1769975445703,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToDegenerateTree",
+            "value": 14532779.056490384,
+            "unit": "ns",
+            "range": "± 9766.432910244412"
+          },
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToDegenerateTreeUsingToTree",
+            "value": 49469890.23571428,
+            "unit": "ns",
+            "range": "± 361134.59508236306"
+          },
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToTrivialForest",
+            "value": 3586461.216346154,
+            "unit": "ns",
+            "range": "± 52588.99896932711"
+          },
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToTrivialForestUsingToTree",
+            "value": 36525244.895604394,
+            "unit": "ns",
+            "range": "± 149874.0086375628"
           }
         ]
       }
