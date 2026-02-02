@@ -14,6 +14,7 @@ namespace Arborist.Linq.Treenumerators.Enumerator
     private IEnumerator<TNode> _Enumerator;
     private readonly RefSemiDeque<NodeAndDepth> _Queue = new RefSemiDeque<NodeAndDepth>();
     private bool _EnumerationFinished = false;
+    private int _DepthOfLastVisitedNode = -1;
 
     public TNode Node { get; private set; } = default;
     public int VisitCount { get; private set; } = 0;
@@ -64,9 +65,9 @@ namespace Arborist.Linq.Treenumerators.Enumerator
           _Queue.RemoveLast();
 
           if (_Queue.Count > 0)
-            return VisitLeadNode();
+            return TryVisitLeadNodeIfDescendantWasVisited();
 
-          return false;
+          return FinishEnumeration();
         }
 
         VisitLeadNode();
@@ -84,9 +85,9 @@ namespace Arborist.Linq.Treenumerators.Enumerator
           return AddScheduledNode();
 
         if (_Queue.Count > 0)
-          return VisitLeadNode();
+          return TryVisitLeadNodeIfDescendantWasVisited();
 
-        return false;
+        return FinishEnumeration();
       }
 
       return VisitLeadNode();
@@ -105,7 +106,7 @@ namespace Arborist.Linq.Treenumerators.Enumerator
     private bool VisitLeadNode()
     {
       if (_Queue.Count == 0)
-        return false;
+        return FinishEnumeration();
 
       ref var nodeAndDepth = ref _Queue.GetFirst();
 
@@ -116,7 +117,34 @@ namespace Arborist.Linq.Treenumerators.Enumerator
       Position = new NodePosition(0, nodeAndDepth.Depth);
       Mode = TreenumeratorMode.VisitingNode;
 
+      // Track the depth of the last V1 visit
+      if (VisitCount == 1)
+        _DepthOfLastVisitedNode = nodeAndDepth.Depth;
+
       return true;
+    }
+
+    private bool TryVisitLeadNodeIfDescendantWasVisited()
+    {
+      // When a node is skipped, we need to check if the parent should get V2.
+      // A parent only gets V2 if at least one descendant was visited (had V1).
+      while (_Queue.Count > 0)
+      {
+        var nodeAndDepth = _Queue.GetFirst();
+
+        // For V2+ (VisitCount > 0), only emit if a descendant at greater depth was visited
+        if (nodeAndDepth.VisitCount > 0 && _DepthOfLastVisitedNode <= nodeAndDepth.Depth)
+        {
+          // No descendants were visited at a greater depth, skip this node's V2
+          _Queue.RemoveFirst();
+          continue;
+        }
+
+        // Otherwise, proceed with normal visit
+        return VisitLeadNode();
+      }
+
+      return FinishEnumeration();
     }
 
     private bool AddScheduledNode()
