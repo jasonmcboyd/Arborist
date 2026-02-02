@@ -33,6 +33,10 @@ namespace Arborist.Linq.Treenumerators
 
     private Stack<NodeVisit<TAccumulate>> _SkippedStack = new Stack<NodeVisit<TAccumulate>>();
 
+    // Tracks whether we've scheduled any children since the last node was pushed to _SkippedStack.
+    // This helps detect when we've moved to scheduling children of a different parent.
+    private bool _ScheduledChildrenSinceSkip = false;
+
     protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
       if (Mode == TreenumeratorMode.SchedulingNode)
@@ -40,7 +44,10 @@ namespace Arborist.Linq.Treenumerators
         if (nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipNodeAndDescendants))
           _NextLevel.RemoveFromBack();
         else if (nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipNode))
+        {
           _SkippedStack.Push(_NextLevel.RemoveFromBack());
+          _ScheduledChildrenSinceSkip = false;
+        }
       }
 
       if (!InnerTreenumerator.MoveNext(nodeTraversalStrategies))
@@ -56,15 +63,40 @@ namespace Arborist.Linq.Treenumerators
 
     private void OnSchedulingNode()
     {
+      var parentDepth = InnerTreenumerator.Position.Depth - 1;
+
+      // Pop skipped items that are not the immediate parent
       while (_SkippedStack.Count > 0
-        && InnerTreenumerator.Position.Depth <= _SkippedStack.Peek().Position.Depth)
+        && _SkippedStack.Peek().Position.Depth != parentDepth)
       {
         _SkippedStack.Pop();
       }
 
-      var accumulateNodeVisit = _SkippedStack.Count > 0
-        ? _SkippedStack.Peek()
-        : _CurrentLevel[0];
+      // When sibling index is 0 and we've already scheduled some children from the skipped node,
+      // we've moved to a different parent's children. Pop from the skipped stack.
+      if (InnerTreenumerator.Position.SiblingIndex == 0
+        && _ScheduledChildrenSinceSkip
+        && _SkippedStack.Count > 0)
+      {
+        _SkippedStack.Pop();
+        _ScheduledChildrenSinceSkip = false;
+      }
+
+      // Find the parent node visit:
+      // 1. If _CurrentLevel[0] has parent depth, use it (we're currently visiting the parent)
+      // 2. Else if skipped stack has an item at parent depth, use it (parent was skipped)
+      // 3. Else if _NextLevel has items at parent depth, use the first one
+      //    (this happens when grandparent was skipped but parent wasn't yet visited)
+      // 4. Else use _CurrentLevel[0] (for root nodes, parent is seed at depth -1)
+      NodeVisit<TAccumulate> accumulateNodeVisit;
+      if (_CurrentLevel[0].Position.Depth == parentDepth)
+        accumulateNodeVisit = _CurrentLevel[0];
+      else if (_SkippedStack.Count > 0)
+        accumulateNodeVisit = _SkippedStack.Peek();
+      else if (_NextLevel.Count > 0 && _NextLevel[0].Position.Depth == parentDepth)
+        accumulateNodeVisit = _NextLevel[0];
+      else
+        accumulateNodeVisit = _CurrentLevel[0];
 
       var node = _Accumulator(accumulateNodeVisit.ToNodeContext(), InnerTreenumerator.ToNodeContext());
 
@@ -73,6 +105,8 @@ namespace Arborist.Linq.Treenumerators
       _NextLevel.AddToBack(visit);
 
       UpdateStateFromNodeVisit(visit);
+
+      _ScheduledChildrenSinceSkip = true;
     }
 
     private void OnVisitingNode()
@@ -84,6 +118,14 @@ namespace Arborist.Linq.Treenumerators
 
         if (_CurrentLevel.Count == 0)
           (_CurrentLevel, _NextLevel) = (_NextLevel, _CurrentLevel);
+
+        // Remove items that were skipped by the inner treenumerator
+        // (e.g., due to SkipSiblings affecting earlier siblings)
+        while (_CurrentLevel.Count > 0
+          && _CurrentLevel[0].Position != InnerTreenumerator.Position)
+        {
+          _CurrentLevel.RemoveFromFront();
+        }
       }
 
       var visit = _CurrentLevel[0];
