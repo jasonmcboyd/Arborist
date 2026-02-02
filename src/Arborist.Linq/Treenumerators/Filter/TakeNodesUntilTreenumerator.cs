@@ -63,7 +63,10 @@ namespace Arborist.Linq.Treenumerators
       }
       else
       {
-        nodeTraversalStrategies = NodeTraversalStrategies.SkipAll;
+        // Use SkipNodeAndDescendants instead of SkipAll to avoid the SkipSiblings
+        // side effect that disposes the queue's first item's child enumerator,
+        // which would prevent already-queued nodes from being visited in BFS.
+        nodeTraversalStrategies = NodeTraversalStrategies.SkipNodeAndDescendants;
       }
 
       while (true)
@@ -82,7 +85,7 @@ namespace Arborist.Linq.Treenumerators
           return true;
         }
 
-        nodeTraversalStrategies = NodeTraversalStrategies.SkipAll;
+        nodeTraversalStrategies = NodeTraversalStrategies.SkipNodeAndDescendants;
       }
     }
 

@@ -181,11 +181,16 @@ namespace Arborist.Treenumerators
         if (TryPushNextChild(ref _Queue.GetFirst(), ref _ChildEnumeratorsQueue.GetFirst()))
           return true;
 
-        _Queue.RemoveFirst();
-        _ChildEnumeratorsQueue.RemoveFirst().Dispose();
+        // Only remove from queue if the node has already been visited.
+        // If VisitCount == 0, the node hasn't been visited yet and should still be visited.
+        if (_Queue.GetFirst().VisitCount != 0)
+        {
+          _Queue.RemoveFirst();
+          _ChildEnumeratorsQueue.RemoveFirst().Dispose();
 
-        if (_Queue.Count == 0)
-          return false;
+          if (_Queue.Count == 0)
+            return false;
+        }
       }
 
       ref var previousVisit = ref _Queue.GetFirst();
