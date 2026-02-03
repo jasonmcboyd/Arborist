@@ -84,6 +84,62 @@ The library **never performs node equality comparisons**. This is a deliberate d
 - `BreadthFirstTreenumerator<TValue, TNode, TChildEnumerator>` - Queue+stack-based BFS
 - `RefSemiDeque<T>` - Custom high-performance dual-ended queue for O(1) operations
 
+### DFT vs BFT Scheduling and Visiting Behavior
+
+Understanding the difference between DFT and BFT scheduling/visiting is critical when implementing treenumerator wrappers (like `Where`, `Select`, etc.):
+
+**Key Invariant:** DFT and BFT produce the exact same scheduling and visiting nodes, just in a different order. Both strategies visit a parent node between scheduling each of its children.
+
+**Depth-First Traversal (DFT):**
+- Schedules a child, **visits it completely** (including all its descendants), then returns to the parent before scheduling the next sibling
+- Children are visited immediately after being scheduled
+- Stack-based: uses a single stack to track the current path from root to the current node
+
+**Breadth-First Traversal (BFT):**
+- Schedules all children at the current level, with parent visits interleaved between each schedule
+- Children are NOT visited until ALL nodes at the current level have been scheduled
+- Queue+stack-based: stack holds nodes being scheduled, queue holds nodes awaiting visits
+
+**Example Tree:**
+```
+    a
+   / \
+  b   c
+```
+
+**DFT MoveNext() sequence:**
+```
+S a (schedule a)
+V a (visit a, about to enumerate children)
+S b (schedule b)
+V b (visit b, no children)
+V a (visit a again, between children)
+S c (schedule c)
+V c (visit c, no children)
+V a (visit a, done with children)
+```
+
+**BFT MoveNext() sequence:**
+```
+S a (schedule a)
+V a (visit a, about to enumerate children)
+S b (schedule b)
+V a (visit a, between children)
+S c (schedule c)
+V a (visit a, done scheduling children)
+V b (visit b)
+V c (visit c)
+```
+
+Note that both produce: S a, S b, S c, V a (×3), V b (×1), V c (×1) — just in different orders.
+
+**Why This Matters for Wrapper Implementations:**
+
+When implementing operators that filter or transform nodes (like `Where`), the wrapper must account for these different patterns. For example, when a node is filtered and its children are "promoted" to become children of the grandparent:
+
+- In DFT: The child is visited immediately after scheduling, so the wrapper naturally sees schedule→visit pairs
+- In BFT: All promoted children are scheduled (with inner parent visits between them) before any are visited. The wrapper must track which parent visits were already emitted to avoid duplicates (see `WhereBreadthFirstTreenumerator._PendingParentVisit` and `_ExtraParentVisitsEmitted`)
+
 ## Code Conventions
 
 ### Naming (from .editorconfig)
