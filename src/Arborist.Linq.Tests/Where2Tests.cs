@@ -32,16 +32,16 @@ namespace Arborist.Linq.Tests
     {
       var treeStrings = new[]
       {
-        // c
-        "a(b(c))",
+        //// c
+        //"a(b(c))",
         //"a(b,c)",
         //"a,b(c)",
         //"a,b,c",
 
         // d
-        //"a(b,c,d)",
-        //"a,b(c,d)",
-        //"a,b(d),c",
+        "a(b,c,d)",
+        "a,b(c,d)",
+        "a,b(d),c",
 
         //// e
         //"a(b(d(e)),c)",
@@ -164,7 +164,7 @@ namespace Arborist.Linq.Tests
 
     [TestMethod]
     [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
-    [Ignore("Ignore until DFT is fixed.")]
+    //[Ignore("Ignore until BFT is fixed.")]
     public void Where2Test_BreadthFirst(
       string treeString,
       string expectedTreeString,

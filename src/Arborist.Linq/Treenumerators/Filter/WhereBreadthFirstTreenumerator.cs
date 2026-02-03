@@ -1,4 +1,4 @@
-﻿using Arborist.Core;
+using Arborist.Core;
 using Arborist.Linq.Extensions;
 using System;
 
@@ -15,7 +15,7 @@ namespace Arborist.Linq.Treenumerators
     {
       _Predicate = predicate;
       _NodeTraversalStrategy = nodeTraversalStrategy;
-      _NodePositionAndVisitCounts.AddLast(new NodeTraversalStatus(InnerTreenumerator.Position, 0));
+      _NodePositionAndVisitCounts.AddLast(new NodeTraversalStatus(InnerTreenumerator.Node, InnerTreenumerator.Position, 0));
     }
 
     private readonly Func<NodeContext<TNode>, bool> _Predicate;
@@ -26,6 +26,16 @@ namespace Arborist.Linq.Treenumerators
 
     private int _SeenRootNodesCount = 0;
 
+    // Track the position of the last skipped node that was removed, for sibling index calculation
+    private NodePosition? _LastRemovedSkippedNodePosition = null;
+
+    // Track if we need to emit a parent visit before the next inner event
+    private bool _PendingParentVisit = false;
+
+    // Track how many extra parent visits we've emitted via _PendingParentVisit
+    // These correspond to inner parent visits that we should skip
+    private int _ExtraParentVisitsEmitted = 0;
+
     protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
       if (Mode == TreenumeratorMode.VisitingNode)
@@ -34,22 +44,48 @@ namespace Arborist.Linq.Treenumerators
       var previouslySeenNodeWasScheduledAndSkipped =
         Position != new NodePosition(0, -1)
         && InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode
-        && (nodeTraversalStrategies == NodeTraversalStrategies.SkipNode || nodeTraversalStrategies == NodeTraversalStrategies.SkipNodeAndDescendants);
+        && nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipNode);
 
       if (previouslySeenNodeWasScheduledAndSkipped)
         _NodePositionAndVisitCounts.GetLast().TraversalStrategy = nodeTraversalStrategies;
+
+      // If we have a pending parent visit, emit it now
+      // But only if:
+      // 1. The previously scheduled node was NOT skipped by the caller
+      // 2. The parent is not the sentinel (position != (0,-1))
+      if (_PendingParentVisit && !previouslySeenNodeWasScheduledAndSkipped)
+      {
+        ref var parentStatus = ref _NodePositionAndVisitCounts.GetFirst();
+
+        // Only emit if parent is not the sentinel
+        if (parentStatus.Position.Depth >= 0)
+        {
+          _PendingParentVisit = false;
+          parentStatus.VisitCount++;
+          _ExtraParentVisitsEmitted++;
+
+          Mode = TreenumeratorMode.VisitingNode;
+          Node = parentStatus.Node;
+          Position = parentStatus.Position;
+          VisitCount = parentStatus.VisitCount;
+          return true;
+        }
+      }
+
+      // Clear pending flag if we're not emitting
+      _PendingParentVisit = false;
 
       var previousModeWasVisitingNode = Mode == TreenumeratorMode.VisitingNode;
 
       while (InnerTreenumerator.MoveNext(nodeTraversalStrategies))
       {
-        while (_SkippedStack.Count > 0 && _SkippedStack.GetLast().Position.Depth >= InnerTreenumerator.Position.Depth)
-          _SkippedStack.RemoveLast();
-
-        var effectiveDepth = InnerTreenumerator.Position.Depth - _SkippedStack.Count;
-
         if (InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode)
         {
+          // Only pop skipped nodes when scheduling at the same or shallower depth
+          // This indicates we've moved past the skipped node's subtree
+          while (_SkippedStack.Count > 0 && _SkippedStack.GetLast().Position.Depth >= InnerTreenumerator.Position.Depth)
+            _SkippedStack.RemoveLast();
+
           var skipped = _Predicate(InnerTreenumerator.ToNodeContext());
 
           if (skipped)
@@ -67,13 +103,60 @@ namespace Arborist.Linq.Treenumerators
             var lastScheduleNodeVisitWasSkipped = _NodePositionAndVisitCounts.GetLast().Skipped;
 
             if (lastScheduleNodeVisitWasSkipped)
+            {
+              // Save the position of the skipped node for sibling index calculation
+              _LastRemovedSkippedNodePosition = _NodePositionAndVisitCounts.GetLast().Position;
               _NodePositionAndVisitCounts.RemoveLast();
+            }
 
-            _NodePositionAndVisitCounts.AddLast(new NodeTraversalStatus(effectivePosition, 0));
+            // Check if this is a promoted child (child of a filtered node)
+            // If so, set pending parent visit flag - but only if the promoted child
+            // is NOT becoming a root (effectiveDepth > 0)
+            if (_SkippedStack.Count > 0
+              && InnerTreenumerator.Position.Depth == _SkippedStack.GetLast().Position.Depth + 1
+              && effectivePosition.Depth > 0)
+            {
+              _PendingParentVisit = true;
+            }
+
+            _NodePositionAndVisitCounts.AddLast(new NodeTraversalStatus(InnerTreenumerator.Node, effectivePosition, 0));
           }
         }
-        else
+        else // VisitingNode
         {
+          // Check if we're visiting a filtered node
+          var isVisitingFilteredNode = _SkippedStack.Count > 0
+            && _SkippedStack.GetLast().Position == InnerTreenumerator.Position;
+
+          if (isVisitingFilteredNode)
+          {
+            // Skip all visits to filtered nodes - the parent visits are handled via _PendingParentVisit
+            continue;
+          }
+
+          // Check if this is a parent visit that we've already emitted via _PendingParentVisit
+          // This happens when visiting the parent of a filtered node
+          // We need to check if the inner position is the parent of ANY filtered node in the stack
+          if (_ExtraParentVisitsEmitted > 0 && _SkippedStack.Count > 0)
+          {
+            var isParentOfAnyFilteredNode = false;
+            for (int i = 0; i < _SkippedStack.Count; i++)
+            {
+              if (InnerTreenumerator.Position.Depth == _SkippedStack.GetFromBack(i).Position.Depth - 1)
+              {
+                isParentOfAnyFilteredNode = true;
+                break;
+              }
+            }
+
+            if (isParentOfAnyFilteredNode)
+            {
+              _ExtraParentVisitsEmitted--;
+              continue;
+            }
+          }
+
+          // Normal visiting logic
           if (InnerTreenumerator.VisitCount == 1)
             _NodePositionAndVisitCounts.RemoveFirst();
           else if (previousModeWasVisitingNode)
@@ -108,14 +191,23 @@ namespace Arborist.Linq.Treenumerators
       }
       else
       {
-        // TODO: I am not sure this block is 100% correct. I would like to add
-        // more tests to try and uncover more edge cases here.
+        // Check the queue for the last node at this depth
         var previousNodePosition = _NodePositionAndVisitCounts.GetLast().Position;
 
-        effectiveSiblingIndex =
-          previousNodePosition.Depth == effectiveDepth
-          ? previousNodePosition.SiblingIndex + 1
-          : 0;
+        if (previousNodePosition.Depth == effectiveDepth)
+        {
+          effectiveSiblingIndex = previousNodePosition.SiblingIndex + 1;
+        }
+        // Also check the saved position from a recently removed skipped node
+        else if (_LastRemovedSkippedNodePosition.HasValue
+          && _LastRemovedSkippedNodePosition.Value.Depth == effectiveDepth)
+        {
+          effectiveSiblingIndex = _LastRemovedSkippedNodePosition.Value.SiblingIndex + 1;
+        }
+        else
+        {
+          effectiveSiblingIndex = 0;
+        }
       }
 
       return new NodePosition(effectiveSiblingIndex, effectiveDepth);
@@ -141,7 +233,7 @@ namespace Arborist.Linq.Treenumerators
         _SeenRootNodesCount++;
       }
 
-      Node = InnerTreenumerator.Node;
+      Node = nodePositionAndVisitCount.Node;
       VisitCount = nodePositionAndVisitCount.VisitCount;
       Position = nodePositionAndVisitCount.Position;
     }
@@ -149,15 +241,18 @@ namespace Arborist.Linq.Treenumerators
     private struct NodeTraversalStatus
     {
       public NodeTraversalStatus(
+        TNode node,
         NodePosition position,
         int visitCount,
         NodeTraversalStrategies nodeTraversalStrategies = NodeTraversalStrategies.TraverseAll)
       {
+        Node = node;
         Position = position;
         VisitCount = visitCount;
         TraversalStrategy = nodeTraversalStrategies;
       }
 
+      public TNode Node { get; set; }
       public NodePosition Position { get; set; }
       public int VisitCount { get; set; }
       public NodeTraversalStrategies TraversalStrategy { get; set; }

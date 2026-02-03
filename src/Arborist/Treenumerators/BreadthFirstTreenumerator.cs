@@ -117,7 +117,7 @@ namespace Arborist.Treenumerators
       if (_Queue.Count == 0)
         return false;
 
-      // Otherwise, 
+      // Otherwise,
       previousVisit = ref _Queue.GetFirst();
 
       previousVisit.VisitCount++;
