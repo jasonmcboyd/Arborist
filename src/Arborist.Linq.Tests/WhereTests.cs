@@ -2136,6 +2136,112 @@ namespace Arborist.Linq.Tests
 
         new TreeTestDefinition
         {
+          TreeString = "a(d(f,g,h)),b,c(e)",
+          TestScenarios = new List<TestScenario>
+          {
+            // Traverse all
+            new TestScenario
+            {
+              NodeTraversalStrategiesSelector = nc => NodeTraversalStrategies.TraverseAll,
+              TreenumerableMap = treenumerable => treenumerable.Where(_ => true),
+              Description = "Where all nodes",
+              ExpectedBreadthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (1, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (2, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "d", 0, (0, 1)),
+                (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "b", 1, (1, 0)),
+                (TreenumeratorMode.VisitingNode,   "c", 1, (2, 0)),
+                (TreenumeratorMode.SchedulingNode, "e", 0, (0, 1)),
+                (TreenumeratorMode.VisitingNode,   "c", 2, (2, 0)),
+                (TreenumeratorMode.VisitingNode,   "d", 1, (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "f", 0, (0, 2)),
+                (TreenumeratorMode.VisitingNode,   "d", 2, (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "g", 0, (1, 2)),
+                (TreenumeratorMode.VisitingNode,   "d", 3, (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "h", 0, (2, 2)),
+                (TreenumeratorMode.VisitingNode,   "d", 4, (0, 1)),
+                (TreenumeratorMode.VisitingNode,   "e", 1, (0, 1)),
+                (TreenumeratorMode.VisitingNode,   "f", 1, (0, 2)),
+                (TreenumeratorMode.VisitingNode,   "g", 1, (1, 2)),
+                (TreenumeratorMode.VisitingNode,   "h", 1, (2, 2)),
+              }.ToNodeVisitArray(),
+              ExpectedDepthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "d", 0, (0, 1)),
+                (TreenumeratorMode.VisitingNode,   "d", 1, (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "f", 0, (0, 2)),
+                (TreenumeratorMode.VisitingNode,   "f", 1, (0, 2)),
+                (TreenumeratorMode.VisitingNode,   "d", 2, (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "g", 0, (1, 2)),
+                (TreenumeratorMode.VisitingNode,   "g", 1, (1, 2)),
+                (TreenumeratorMode.VisitingNode,   "d", 3, (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "h", 0, (2, 2)),
+                (TreenumeratorMode.VisitingNode,   "h", 1, (2, 2)),
+                (TreenumeratorMode.VisitingNode,   "d", 4, (0, 1)),
+                (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (1, 0)),
+                (TreenumeratorMode.VisitingNode,   "b", 1, (1, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (2, 0)),
+                (TreenumeratorMode.VisitingNode,   "c", 1, (2, 0)),
+                (TreenumeratorMode.SchedulingNode, "e", 0, (0, 1)),
+                (TreenumeratorMode.VisitingNode,   "e", 1, (0, 1)),
+                (TreenumeratorMode.VisitingNode,   "c", 2, (2, 0)),
+              }.ToNodeVisitArray()
+            },
+
+            // Mixed
+            new TestScenario
+            {
+              NodeTraversalStrategiesSelector =
+                nc => nc.Node == "c"
+                ? NodeTraversalStrategies.SkipNode
+                : nc.Node == "e"
+                ? NodeTraversalStrategies.SkipNodeAndDescendants
+                : NodeTraversalStrategies.TraverseAll,
+              TreenumerableMap = treenumerable => treenumerable.Where(nc => nc.Node != "g" && nc.Node != "h"),
+              Description = "Where not g or h, SkipNode: c, SkipNodeAndDescendants: e",
+              ExpectedBreadthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (1, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (2, 0)),
+                (TreenumeratorMode.SchedulingNode, "e", 0, (0, 1)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "d", 0, (0, 1)),
+                (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "b", 1, (1, 0)),
+                (TreenumeratorMode.VisitingNode,   "d", 1, (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "f", 0, (0, 2)),
+                (TreenumeratorMode.VisitingNode,   "d", 2, (0, 1)),
+                (TreenumeratorMode.VisitingNode,   "f", 1, (0, 2)),
+              }.ToNodeVisitArray(),
+              ExpectedDepthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "d", 0, (0, 1)),
+                (TreenumeratorMode.VisitingNode,   "d", 1, (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "f", 0, (0, 2)),
+                (TreenumeratorMode.VisitingNode,   "f", 1, (0, 2)),
+                (TreenumeratorMode.VisitingNode,   "d", 2, (0, 1)),
+                (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "b", 0, (1, 0)),
+                (TreenumeratorMode.VisitingNode,   "b", 1, (1, 0)),
+                (TreenumeratorMode.SchedulingNode, "c", 0, (2, 0)),
+                (TreenumeratorMode.SchedulingNode, "e", 0, (0, 1)),
+              }.ToNodeVisitArray()
+            },
+          }
+        },
+
+        new TreeTestDefinition
+        {
           TreeString = "a(c,d),b(e,f)",
           TestScenarios = new List<TestScenario>
           {

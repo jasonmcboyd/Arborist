@@ -178,7 +178,10 @@ namespace Arborist.Treenumerators
 
       if (Position.Depth != 0)
       {
-        if (TryPushNextChild(ref _Queue.GetFirst(), ref _ChildEnumeratorsQueue.GetFirst()))
+        // Only try to push next child if the queue front has already been visited.
+        // If VisitCount == 0, the node hasn't been visited yet and should be visited first.
+        if (_Queue.GetFirst().VisitCount != 0
+          && TryPushNextChild(ref _Queue.GetFirst(), ref _ChildEnumeratorsQueue.GetFirst()))
           return true;
 
         // Only remove from queue if the node has already been visited and we've
