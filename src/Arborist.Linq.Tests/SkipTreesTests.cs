@@ -51,13 +51,20 @@ namespace Arborist.Linq.Tests
 
       var expectedTreenumerable = TreeSerializer.Deserialize(expectedTreeString);
 
-      var expected = expectedTreenumerable.GetTraversal(treeTraversalStrategy);
+      Debug.WriteLine("---- Expected Values ----");
+      var expected =
+        expectedTreenumerable
+        .GetTraversal(treeTraversalStrategy)
+        .Do(visit => Debug.WriteLine(visit))
+        .ToArray();
 
       // Act
+      Debug.WriteLine("----- Actual Values -----");
       var actual =
         treenumerable
         .GetTraversal(treeTraversalStrategy)
-        .Do(visit => Debug.WriteLine(visit));
+        .Do(visit => Debug.WriteLine(visit))
+        .ToArray();
 
       // Assert
       CollectionAssert.AreEqual(expected.ToArray(), actual.ToArray());

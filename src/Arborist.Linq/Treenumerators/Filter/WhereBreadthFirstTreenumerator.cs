@@ -40,6 +40,11 @@ namespace Arborist.Linq.Treenumerators
     // When we remove a skipped parent and schedule its child, the sibling index should reset to 0
     private int? _DepthOfLastRemovedSkippedParent = null;
 
+    // Track the last visited node's depth and visit count for sibling index calculation
+    // In BFT, after visiting a node at depth D, scheduled nodes at D+1 are its children
+    private int _LastVisitedNodeDepth = -1;
+    private int _LastVisitedNodeVisitCount = 0;
+
     protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
       if (Mode == TreenumeratorMode.VisitingNode)
@@ -67,6 +72,10 @@ namespace Arborist.Linq.Treenumerators
           _PendingParentVisit = false;
           parentStatus.VisitCount++;
           _ExtraParentVisitsEmitted++;
+
+          // Track the visited node's depth and visit count for sibling index calculation
+          _LastVisitedNodeDepth = parentStatus.Position.Depth;
+          _LastVisitedNodeVisitCount = parentStatus.VisitCount;
 
           Mode = TreenumeratorMode.VisitingNode;
           Node = parentStatus.Node;
@@ -112,9 +121,11 @@ namespace Arborist.Linq.Treenumerators
               _DepthOfLastRemovedSkippedParent = _NodePositionAndVisitCounts.GetLast().Position.Depth;
 
               // Save the position of the skipped node for sibling index calculation
-              // Only save if we haven't visited in between - if we visited, the skipped node
-              // is from a different parent's subtree and shouldn't affect sibling index
-              if (!previousModeWasVisitingNode)
+              // Save if:
+              // 1. Previous output was not a visit (consecutive schedules), OR
+              // 2. Parent's VC > 1 (we've scheduled siblings before, so this is a sibling being removed)
+              // Don't save if we just visited a NEW parent (VC == 1) - those are from different parent
+              if (!previousModeWasVisitingNode || _LastVisitedNodeVisitCount > 1)
               {
                 _LastRemovedSkippedNodePosition = _NodePositionAndVisitCounts.GetLast().Position;
               }
@@ -142,10 +153,10 @@ namespace Arborist.Linq.Treenumerators
         }
         else // VisitingNode
         {
-          // When visiting a node, clear the saved positions - we're entering a new subtree
-          // and any previously saved position from a different parent's skipped child is no longer relevant
+          // When visiting a node, clear saved positions - we're entering a new subtree
+          // Note: _LastRemovedSkippedNodePosition needs special handling (see saving condition)
+          // but _DepthOfLastRemovedSkippedParent is cleared after use in GetEffectivePosition
           _LastRemovedSkippedNodePosition = null;
-          _DepthOfLastRemovedSkippedParent = null;
 
 
           // When visiting a node at depth D, pop skipped nodes at depth D (siblings that were skipped)
@@ -192,6 +203,11 @@ namespace Arborist.Linq.Treenumerators
             continue;
 
           _NodePositionAndVisitCounts.GetFirst().VisitCount++;
+
+          // Track the visited node's effective depth and visit count for sibling index calculation
+          // In BFT, after visiting a node at depth D, scheduled nodes at D+1 are its children
+          _LastVisitedNodeDepth = _NodePositionAndVisitCounts.GetFirst().Position.Depth;
+          _LastVisitedNodeVisitCount = _NodePositionAndVisitCounts.GetFirst().VisitCount;
         }
 
         UpdateState();
@@ -222,15 +238,36 @@ namespace Arborist.Linq.Treenumerators
           && _DepthOfLastRemovedSkippedParent.Value + 1 == effectiveDepth)
         {
           effectiveSiblingIndex = 0;
+          _DepthOfLastRemovedSkippedParent = null;  // Clear after use - only affects first child
         }
         else
         {
-          // First, check if there's a previous sibling in the queue at the same depth
           var previousNodePosition = _NodePositionAndVisitCounts.GetLast().Position;
 
-          if (previousNodePosition.Depth == effectiveDepth)
+          // If previous output was a visit at depth-1, we need to determine the sibling index
+          if (Mode == TreenumeratorMode.VisitingNode
+            && _LastVisitedNodeDepth + 1 == effectiveDepth)
           {
-            // Use previous sibling's position
+            var siblingIndexFromVC = _LastVisitedNodeVisitCount - 1;
+
+            // Only check for existing siblings if this is not the first child (VC > 1)
+            // For the first child (VC == 1), any existing nodes at this depth are from a previous parent
+            if (_LastVisitedNodeVisitCount > 1
+              && previousNodePosition.Depth == effectiveDepth
+              && previousNodePosition.SiblingIndex >= siblingIndexFromVC)
+            {
+              // Continue from the previous sibling's position
+              effectiveSiblingIndex = previousNodePosition.SiblingIndex + 1;
+            }
+            else
+            {
+              // No sibling at this depth yet (after this visit), use parent's VisitCount
+              effectiveSiblingIndex = siblingIndexFromVC;
+            }
+          }
+          // If previous output was a schedule and there's a node at the same depth, it's a sibling
+          else if (previousNodePosition.Depth == effectiveDepth)
+          {
             effectiveSiblingIndex = previousNodePosition.SiblingIndex + 1;
           }
           // Check saved position from a recently removed skipped node
@@ -238,12 +275,6 @@ namespace Arborist.Linq.Treenumerators
             && _LastRemovedSkippedNodePosition.Value.Depth == effectiveDepth)
           {
             effectiveSiblingIndex = _LastRemovedSkippedNodePosition.Value.SiblingIndex + 1;
-          }
-          // If previous output was a visit, use the parent's VisitCount for sibling index
-          // This handles the case where the previous sibling is deeper in the queue (not at the end)
-          else if (Mode == TreenumeratorMode.VisitingNode)
-          {
-            effectiveSiblingIndex = _NodePositionAndVisitCounts.GetFirst().VisitCount - 1;
           }
           else
           {
