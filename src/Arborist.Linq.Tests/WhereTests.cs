@@ -1117,6 +1117,36 @@ namespace Arborist.Linq.Tests
           TreeString = "a(b(d(e)),c)",
           TestScenarios = new List<TestScenario>
           {
+            // Traverse all
+            new TestScenario
+            {
+              NodeTraversalStrategiesSelector =
+                nc => NodeTraversalStrategies.TraverseAll,
+              TreenumerableMap = treenumerable => treenumerable.Where(nc => nc.Node == "a" || nc.Node == "d" || nc.Node == "e"),
+              Description = "Where a, d, and e",
+              ExpectedBreadthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "d", 0, (0, 1)),
+                (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "d", 1, (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "e", 0, (0, 2)),
+                (TreenumeratorMode.VisitingNode,   "d", 2, (0, 1)),
+                (TreenumeratorMode.VisitingNode,   "e", 1, (0, 2)),
+              }.ToNodeVisitArray(),
+              ExpectedDepthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "a", 1, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "d", 0, (0, 1)),
+                (TreenumeratorMode.VisitingNode,   "d", 1, (0, 1)),
+                (TreenumeratorMode.SchedulingNode, "e", 0, (0, 2)),
+                (TreenumeratorMode.VisitingNode,   "e", 1, (0, 2)),
+                (TreenumeratorMode.VisitingNode,   "d", 2, (0, 1)),
+                (TreenumeratorMode.VisitingNode,   "a", 2, (0, 0)),
+              }.ToNodeVisitArray()
+            },
             // Skip node
             new TestScenario
             {
