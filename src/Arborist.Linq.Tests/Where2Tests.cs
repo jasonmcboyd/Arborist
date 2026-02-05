@@ -32,19 +32,19 @@ namespace Arborist.Linq.Tests
     {
       var treeStrings = new[]
       {
-        //// c
+        // c
         //"a(b(c))",
         //"a(b,c)",
         //"a,b(c)",
         //"a,b,c",
 
-        // d
-        "a(b,c,d)",
-        "a,b(c,d)",
-        "a,b(d),c",
+        //// d
+        //"a(b,c,d)",
+        //"a,b(c,d)",
+        // "a,b(d),c",
 
-        //// e
-        //"a(b(d(e)),c)",
+        // e
+        "a(b(d(e)),c)",
         //"a(b(c,d,e))",
         //"a(d),b,c(e)",
 
