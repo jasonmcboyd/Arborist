@@ -16,7 +16,7 @@ namespace Arborist.Linq.Treenumerators
     {
       _Predicate = predicate;
       _NodeTraversalStrategy = nodeTraversalStrategy;
-      _NodePositionAndVisitCounts.AddLast(new NodeTraversalStatus(InnerTreenumerator.Node, InnerTreenumerator.Position, 0, System.Array.Empty<int>()));
+      _NodePositionAndVisitCounts.AddLast(new NodeTraversalStatus(InnerTreenumerator.Node, InnerTreenumerator.Position, 0, 0, -1));
     }
 
     private readonly Func<NodeContext<TNode>, bool> _Predicate;
@@ -29,6 +29,13 @@ namespace Arborist.Linq.Treenumerators
 
     // Track the inner sibling index at each depth for the current path
     private readonly List<int> _CurrentInnerPath = new List<int>();
+
+    // Flat shared buffers for inner path data, replacing per-node int[] allocations.
+    // Queue buffer is append-only (grows monotonically over the traversal).
+    // Skipped buffer is LIFO with memory reuse: on push, write at top; on pop, reset top.
+    private readonly List<int> _QueuePathData = new List<int>();
+    private readonly List<int> _SkippedPathData = new List<int>();
+    private int _SkippedPathDataTop = 0;
 
     // Track the position of the last skipped node that was removed, for sibling index calculation
     private NodePosition? _LastRemovedSkippedNodePosition = null;
@@ -54,11 +61,15 @@ namespace Arborist.Linq.Treenumerators
     private NodeTraversalStrategies? _DeferredNodeTraversalStrategies = null;
 
     // When SkipSiblings is stripped from the inner strategy (to avoid damaging the inner
-    // BFT's queue), the wrapper handles sibling skipping itself by tracking the inner depth
-    // and parent path at which remaining siblings should be skipped.
+    // BFT's queue), the wrapper handles sibling skipping itself. It tracks:
+    // - The inner depth and parent path for fast inner-sibling matching
+    // - The effective depth and queue front position for catching promoted siblings
+    //   from different subtrees (slow path)
     private bool _SkipRemainingSiblings = false;
     private int _SkipSiblingsInnerDepth = -1;
     private int[] _SkipSiblingsInnerParentPath = null;
+    private int _SkipSiblingsEffectiveDepth = -1;
+    private NodePosition _SkipSiblingsQueueFrontPosition;
 
 
     protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
@@ -108,6 +119,8 @@ namespace Arborist.Linq.Treenumerators
           _SkipRemainingSiblings = true;
           _SkipSiblingsInnerDepth = InnerTreenumerator.Position.Depth;
           _SkipSiblingsInnerParentPath = BuildInnerPath(InnerTreenumerator.Position.Depth - 1);
+          _SkipSiblingsEffectiveDepth = outerDepth;
+          _SkipSiblingsQueueFrontPosition = _NodePositionAndVisitCounts.GetFirst().Position;
         }
       }
 
@@ -158,45 +171,56 @@ namespace Arborist.Linq.Treenumerators
           // In BFT, siblings at the same depth might be from different subtrees,
           // so we must not pop them (path-based counting handles correctness)
           while (_SkippedStack.Count > 0 && _SkippedStack.GetLast().Position.Depth > InnerTreenumerator.Position.Depth)
+          {
+            _SkippedPathDataTop = _SkippedStack.GetLast().InnerPathOffset;
             _SkippedStack.RemoveLast();
+          }
 
           // When SkipSiblings was stripped from the inner strategy, skip remaining
-          // siblings at the same inner depth by passing SkipNodeAndDescendants to
-          // the inner BFT (which safely prunes the subtree without damaging the queue).
-          // We must verify the inner parent path matches to avoid skipping nodes from
-          // different subtrees that happen to be at the same inner depth.
+          // siblings by passing SkipNodeAndDescendants to the inner BFT.
+          // Two paths: (1) fast path for true inner siblings (same inner parent),
+          // (2) slow path using effective depth for promoted siblings from different subtrees.
           if (_SkipRemainingSiblings)
           {
-            if (innerDepth == _SkipSiblingsInnerDepth)
-            {
-              var isSibling = _SkipSiblingsInnerParentPath != null
-                && _SkipSiblingsInnerParentPath.Length <= _CurrentInnerPath.Count;
+            var shouldSkip = false;
 
-              if (isSibling)
+            // Fast path: same inner depth and same inner parent
+            if (innerDepth == _SkipSiblingsInnerDepth
+              && _SkipSiblingsInnerParentPath != null
+              && _SkipSiblingsInnerParentPath.Length <= _CurrentInnerPath.Count)
+            {
+              shouldSkip = true;
+              for (int i = 0; i < _SkipSiblingsInnerParentPath.Length; i++)
               {
-                for (int i = 0; i < _SkipSiblingsInnerParentPath.Length; i++)
+                if (_CurrentInnerPath[i] != _SkipSiblingsInnerParentPath[i])
                 {
-                  if (_CurrentInnerPath[i] != _SkipSiblingsInnerParentPath[i])
-                  {
-                    isSibling = false;
-                    break;
-                  }
+                  shouldSkip = false;
+                  break;
                 }
               }
-
-              if (isSibling)
-              {
-                nodeTraversalStrategies = NodeTraversalStrategies.SkipNodeAndDescendants;
-                continue;
-              }
-              else
-              {
-                _SkipRemainingSiblings = false;
-              }
             }
-            else
+
+            // Slow path: check effective depth for promoted siblings at different inner depths.
+            // Also verify the queue front hasn't changed, which ensures we're still scheduling
+            // children of the same effective parent. If the queue front has changed (e.g., due
+            // to visiting events moving to a different parent), nodes at the same effective depth
+            // are under a different parent and should not be skipped.
+            if (!shouldSkip)
             {
-              _SkipRemainingSiblings = false;
+              var skippedAncestorCount = CountSkippedAncestors();
+              var effectiveDepth = innerDepth - skippedAncestorCount;
+
+              if (effectiveDepth == _SkipSiblingsEffectiveDepth
+                && _NodePositionAndVisitCounts.GetFirst().Position == _SkipSiblingsQueueFrontPosition)
+                shouldSkip = true;
+              else
+                _SkipRemainingSiblings = false;
+            }
+
+            if (shouldSkip)
+            {
+              nodeTraversalStrategies = NodeTraversalStrategies.SkipNodeAndDescendants;
+              continue;
             }
           }
 
@@ -204,8 +228,8 @@ namespace Arborist.Linq.Treenumerators
 
           if (skipped)
           {
-            var skippedPath = BuildInnerPath(innerDepth);
-            _SkippedStack.AddLast(new SkippedNodeInfo(InnerTreenumerator.Position, skippedPath));
+            var skippedPathOffset = AppendSkippedPath(innerDepth);
+            _SkippedStack.AddLast(new SkippedNodeInfo(InnerTreenumerator.Position, skippedPathOffset));
 
             nodeTraversalStrategies = _NodeTraversalStrategy;
 
@@ -254,7 +278,8 @@ namespace Arborist.Linq.Treenumerators
               for (int i = 0; i < _SkippedStack.Count; i++)
               {
                 var skippedInfo = _SkippedStack.GetFromBack(i);
-                if (skippedInfo.Position.Depth == parentDepth && IsPathPrefix(skippedInfo.InnerPath, parentDepth))
+                if (skippedInfo.Position.Depth == parentDepth
+                  && IsSkippedPathPrefix(skippedInfo.InnerPathOffset, skippedInfo.Position.Depth + 1, parentDepth + 1))
                 {
                   parentIsSkipped = true;
                   break;
@@ -267,8 +292,8 @@ namespace Arborist.Linq.Treenumerators
               }
             }
 
-            var innerPath = BuildInnerPath(innerDepth);
-            _NodePositionAndVisitCounts.AddLast(new NodeTraversalStatus(InnerTreenumerator.Node, effectivePosition, 0, innerPath));
+            var innerPathOffset = AppendQueuePath(innerDepth);
+            _NodePositionAndVisitCounts.AddLast(new NodeTraversalStatus(InnerTreenumerator.Node, effectivePosition, 0, innerPathOffset, innerDepth));
           }
         }
         else // VisitingNode
@@ -281,20 +306,28 @@ namespace Arborist.Linq.Treenumerators
 
           // When visiting a node at depth D, pop skipped nodes at depth D (siblings that were skipped)
           while (_SkippedStack.Count > 0 && _SkippedStack.GetLast().Position.Depth == innerDepth)
+          {
+            _SkippedPathDataTop = _SkippedStack.GetLast().InnerPathOffset;
             _SkippedStack.RemoveLast();
+          }
 
-          // Get the visiting node's InnerPath from our queue for full path comparison.
+          // Get the visiting node's path info from our queue for full path comparison.
           // For VC==1: the visiting node is at queue index 1 (index 0 is the previous front to be removed)
           // For VC>1: the visiting node is at queue index 0 (the front)
-          int[] visitingNodeInnerPath = null;
+          int visitingNodePathOffset = 0;
+          int visitingNodePathLength = 0;
           if (InnerTreenumerator.VisitCount == 1 && _NodePositionAndVisitCounts.Count >= 2)
           {
             var indexFromBack = _NodePositionAndVisitCounts.Count - 2;
-            visitingNodeInnerPath = _NodePositionAndVisitCounts.GetFromBack(indexFromBack).InnerPath;
+            var entry = _NodePositionAndVisitCounts.GetFromBack(indexFromBack);
+            visitingNodePathOffset = entry.InnerPathOffset;
+            visitingNodePathLength = entry.InnerDepth + 1;
           }
           else if (_NodePositionAndVisitCounts.Count >= 1)
           {
-            visitingNodeInnerPath = _NodePositionAndVisitCounts.GetFirst().InnerPath;
+            var entry = _NodePositionAndVisitCounts.GetFirst();
+            visitingNodePathOffset = entry.InnerPathOffset;
+            visitingNodePathLength = entry.InnerDepth + 1;
           }
 
           // Check if we're visiting a filtered node using full path comparison.
@@ -304,15 +337,15 @@ namespace Arborist.Linq.Treenumerators
           for (int i = 0; i < _SkippedStack.Count; i++)
           {
             var skippedInfo = _SkippedStack.GetFromBack(i);
+            var skippedPathLength = skippedInfo.Position.Depth + 1;
             if (skippedInfo.Position == InnerTreenumerator.Position
-              && skippedInfo.InnerPath != null
-              && visitingNodeInnerPath != null
-              && skippedInfo.InnerPath.Length == visitingNodeInnerPath.Length)
+              && visitingNodePathLength > 0
+              && skippedPathLength == visitingNodePathLength)
             {
               var pathsMatch = true;
-              for (int j = 0; j < skippedInfo.InnerPath.Length; j++)
+              for (int j = 0; j < skippedPathLength; j++)
               {
-                if (skippedInfo.InnerPath[j] != visitingNodeInnerPath[j])
+                if (_SkippedPathData[skippedInfo.InnerPathOffset + j] != _QueuePathData[visitingNodePathOffset + j])
                 {
                   pathsMatch = false;
                   break;
@@ -342,15 +375,15 @@ namespace Arborist.Linq.Treenumerators
             for (int i = 0; i < _SkippedStack.Count; i++)
             {
               var skippedInfo = _SkippedStack.GetFromBack(i);
+              var skippedPathLength = skippedInfo.Position.Depth + 1;
               if (innerDepth == skippedInfo.Position.Depth - 1
-                && skippedInfo.InnerPath != null
-                && visitingNodeInnerPath != null
-                && skippedInfo.InnerPath.Length > innerDepth)
+                && visitingNodePathLength > 0
+                && skippedPathLength > innerDepth)
               {
                 var pathPrefixMatches = true;
-                for (int j = 0; j <= innerDepth && j < visitingNodeInnerPath.Length; j++)
+                for (int j = 0; j <= innerDepth && j < visitingNodePathLength; j++)
                 {
-                  if (skippedInfo.InnerPath[j] != visitingNodeInnerPath[j])
+                  if (_SkippedPathData[skippedInfo.InnerPathOffset + j] != _QueuePathData[visitingNodePathOffset + j])
                   {
                     pathPrefixMatches = false;
                     break;
@@ -377,9 +410,9 @@ namespace Arborist.Linq.Treenumerators
             _NodePositionAndVisitCounts.RemoveFirst();
 
             // Restore inner path from the visited node's stored path
-            var visitedPath = _NodePositionAndVisitCounts.GetFirst().InnerPath;
-            if (visitedPath != null)
-              RestoreInnerPath(visitedPath);
+            ref var visitedEntry = ref _NodePositionAndVisitCounts.GetFirst();
+            if (visitedEntry.InnerDepth >= 0)
+              RestoreInnerPathFromQueue(visitedEntry.InnerPathOffset, visitedEntry.InnerDepth + 1);
           }
           else if (previousModeWasVisitingNode)
             continue;
@@ -409,26 +442,49 @@ namespace Arborist.Linq.Treenumerators
       return path;
     }
 
-    private void RestoreInnerPath(int[] path)
+    private int AppendQueuePath(int innerDepth)
     {
-      while (_CurrentInnerPath.Count > path.Length)
+      var offset = _QueuePathData.Count;
+      for (int i = 0; i <= innerDepth && i < _CurrentInnerPath.Count; i++)
+        _QueuePathData.Add(_CurrentInnerPath[i]);
+      return offset;
+    }
+
+    private int AppendSkippedPath(int innerDepth)
+    {
+      var offset = _SkippedPathDataTop;
+      for (int i = 0; i <= innerDepth && i < _CurrentInnerPath.Count; i++)
+      {
+        if (_SkippedPathDataTop < _SkippedPathData.Count)
+          _SkippedPathData[_SkippedPathDataTop] = _CurrentInnerPath[i];
+        else
+          _SkippedPathData.Add(_CurrentInnerPath[i]);
+        _SkippedPathDataTop++;
+      }
+      return offset;
+    }
+
+    private void RestoreInnerPathFromQueue(int offset, int pathLength)
+    {
+      while (_CurrentInnerPath.Count > pathLength)
         _CurrentInnerPath.RemoveAt(_CurrentInnerPath.Count - 1);
-      while (_CurrentInnerPath.Count < path.Length)
+      while (_CurrentInnerPath.Count < pathLength)
         _CurrentInnerPath.Add(0);
-      for (int i = 0; i < path.Length; i++)
-        _CurrentInnerPath[i] = path[i];
+      for (int i = 0; i < pathLength; i++)
+        _CurrentInnerPath[i] = _QueuePathData[offset + i];
     }
 
     /// <summary>
-    /// Checks if a skipped node's path (up to parentDepth) is a prefix of _CurrentInnerPath.
+    /// Checks if a skipped node's path (up to prefixLength elements) is a prefix of _CurrentInnerPath.
+    /// Reads from the shared _SkippedPathData buffer.
     /// </summary>
-    private bool IsPathPrefix(int[] skippedPath, int parentDepth)
+    private bool IsSkippedPathPrefix(int skippedPathOffset, int skippedPathLength, int prefixLength)
     {
-      if (skippedPath == null || skippedPath.Length < parentDepth + 1)
+      if (skippedPathLength < prefixLength)
         return false;
-      for (int d = 0; d <= parentDepth && d < _CurrentInnerPath.Count; d++)
+      for (int d = 0; d < prefixLength && d < _CurrentInnerPath.Count; d++)
       {
-        if (_CurrentInnerPath[d] != skippedPath[d])
+        if (_CurrentInnerPath[d] != _SkippedPathData[skippedPathOffset + d])
           return false;
       }
       return true;
@@ -436,7 +492,8 @@ namespace Arborist.Linq.Treenumerators
 
     /// <summary>
     /// Counts skipped nodes that are actual ancestors of the current node being scheduled.
-    /// A skipped node is an ancestor if its stored InnerPath is a prefix of _CurrentInnerPath.
+    /// A skipped node is an ancestor if its stored path is a prefix of _CurrentInnerPath.
+    /// Reads from the shared _SkippedPathData buffer.
     /// </summary>
     private int CountSkippedAncestors()
     {
@@ -444,12 +501,13 @@ namespace Arborist.Linq.Treenumerators
       for (int i = 0; i < _SkippedStack.Count; i++)
       {
         var skippedInfo = _SkippedStack.GetFromBack(i);
-        if (skippedInfo.InnerPath != null && skippedInfo.InnerPath.Length <= _CurrentInnerPath.Count)
+        var skippedPathLength = skippedInfo.Position.Depth + 1;
+        if (skippedPathLength <= _CurrentInnerPath.Count)
         {
           var isPrefix = true;
-          for (int d = 0; d < skippedInfo.InnerPath.Length; d++)
+          for (int d = 0; d < skippedPathLength; d++)
           {
-            if (d >= _CurrentInnerPath.Count || _CurrentInnerPath[d] != skippedInfo.InnerPath[d])
+            if (d >= _CurrentInnerPath.Count || _CurrentInnerPath[d] != _SkippedPathData[skippedInfo.InnerPathOffset + d])
             {
               isPrefix = false;
               break;
@@ -573,20 +631,23 @@ namespace Arborist.Linq.Treenumerators
         TNode node,
         NodePosition position,
         int visitCount,
-        int[] innerPath,
+        int innerPathOffset,
+        int innerDepth,
         NodeTraversalStrategies nodeTraversalStrategies = NodeTraversalStrategies.TraverseAll)
       {
         Node = node;
         Position = position;
         VisitCount = visitCount;
-        InnerPath = innerPath;
+        InnerPathOffset = innerPathOffset;
+        InnerDepth = innerDepth;
         TraversalStrategy = nodeTraversalStrategies;
       }
 
       public TNode Node { get; set; }
       public NodePosition Position { get; set; }
       public int VisitCount { get; set; }
-      public int[] InnerPath { get; set; }
+      public int InnerPathOffset { get; set; }
+      public int InnerDepth { get; set; }
       public NodeTraversalStrategies TraversalStrategy { get; set; }
       public bool Skipped => TraversalStrategy != NodeTraversalStrategies.TraverseAll;
 
@@ -595,14 +656,14 @@ namespace Arborist.Linq.Treenumerators
 
     private struct SkippedNodeInfo
     {
-      public SkippedNodeInfo(NodePosition position, int[] innerPath)
+      public SkippedNodeInfo(NodePosition position, int innerPathOffset)
       {
         Position = position;
-        InnerPath = innerPath;
+        InnerPathOffset = innerPathOffset;
       }
 
       public NodePosition Position { get; }
-      public int[] InnerPath { get; }
+      public int InnerPathOffset { get; }
 
       public override string ToString() => $"({Position})";
     }

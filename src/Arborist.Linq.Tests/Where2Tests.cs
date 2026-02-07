@@ -56,13 +56,13 @@ namespace Arborist.Linq.Tests
         //"a,b(d),c(e(f))",
 
         // g
-        //"a(b(e),c(f),d(g))",
-        //"a(b(d,e),c(f(g)))",
+        "a(b(e),c(f),d(g))",
+        "a(b(d,e),c(f(g)))",
         //"a(b(e),c(f),d(g))",
         //"a(b(d,e),c(f(g)))",
 
         // h
-        "a(d(f,g,h)),b,c(e)",
+        //"a(d(f,g,h)),b,c(e)",
 
         // i
         //"a(b(d,e,f),c(g,h,i))",

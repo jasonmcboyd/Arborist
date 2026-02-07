@@ -2609,6 +2609,29 @@ namespace Arborist.Linq.Tests
             new TestScenario
             {
               NodeTraversalStrategiesSelector =
+                nc => nc.Node == "g"
+                ? NodeTraversalStrategies.SkipSiblings
+                : NodeTraversalStrategies.TraverseAll,
+              TreenumerableMap = treenumerable => treenumerable.Where(nc => nc.Node != "a" && nc.Node != "d"),
+              Description = "Where not a or d, SkipSiblings: g",
+              ExpectedBreadthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "f", 0, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "g", 0, (1, 0)),
+                (TreenumeratorMode.VisitingNode,   "f", 1, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "g", 1, (1, 0)),
+              }.ToNodeVisitArray(),
+              ExpectedDepthFirstResults = new[]
+              {
+                (TreenumeratorMode.SchedulingNode, "f", 0, (0, 0)),
+                (TreenumeratorMode.VisitingNode,   "f", 1, (0, 0)),
+                (TreenumeratorMode.SchedulingNode, "g", 0, (1, 0)),
+                (TreenumeratorMode.VisitingNode,   "g", 1, (1, 0)),
+              }.ToNodeVisitArray()
+            },
+            new TestScenario
+            {
+              NodeTraversalStrategiesSelector =
                 nc => nc.Node == "a"
                 ? NodeTraversalStrategies.SkipNode
                 : nc.Node == "f"
