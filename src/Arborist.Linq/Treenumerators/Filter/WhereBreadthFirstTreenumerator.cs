@@ -55,9 +55,10 @@ namespace Arborist.Linq.Treenumerators
 
     // When SkipSiblings is stripped from the inner strategy (to avoid damaging the inner
     // BFT's queue), the wrapper handles sibling skipping itself by tracking the inner depth
-    // at which remaining siblings should be skipped.
+    // and parent path at which remaining siblings should be skipped.
     private bool _SkipRemainingSiblings = false;
     private int _SkipSiblingsInnerDepth = -1;
+    private int[] _SkipSiblingsInnerParentPath = null;
 
 
     protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
@@ -106,6 +107,7 @@ namespace Arborist.Linq.Treenumerators
           nodeTraversalStrategies = nodeTraversalStrategies & ~NodeTraversalStrategies.SkipSiblings;
           _SkipRemainingSiblings = true;
           _SkipSiblingsInnerDepth = InnerTreenumerator.Position.Depth;
+          _SkipSiblingsInnerParentPath = BuildInnerPath(InnerTreenumerator.Position.Depth - 1);
         }
       }
 
@@ -161,12 +163,36 @@ namespace Arborist.Linq.Treenumerators
           // When SkipSiblings was stripped from the inner strategy, skip remaining
           // siblings at the same inner depth by passing SkipNodeAndDescendants to
           // the inner BFT (which safely prunes the subtree without damaging the queue).
+          // We must verify the inner parent path matches to avoid skipping nodes from
+          // different subtrees that happen to be at the same inner depth.
           if (_SkipRemainingSiblings)
           {
             if (innerDepth == _SkipSiblingsInnerDepth)
             {
-              nodeTraversalStrategies = NodeTraversalStrategies.SkipNodeAndDescendants;
-              continue;
+              var isSibling = _SkipSiblingsInnerParentPath != null
+                && _SkipSiblingsInnerParentPath.Length <= _CurrentInnerPath.Count;
+
+              if (isSibling)
+              {
+                for (int i = 0; i < _SkipSiblingsInnerParentPath.Length; i++)
+                {
+                  if (_CurrentInnerPath[i] != _SkipSiblingsInnerParentPath[i])
+                  {
+                    isSibling = false;
+                    break;
+                  }
+                }
+              }
+
+              if (isSibling)
+              {
+                nodeTraversalStrategies = NodeTraversalStrategies.SkipNodeAndDescendants;
+                continue;
+              }
+              else
+              {
+                _SkipRemainingSiblings = false;
+              }
             }
             else
             {
