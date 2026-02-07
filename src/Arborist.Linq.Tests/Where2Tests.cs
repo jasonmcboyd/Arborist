@@ -11,6 +11,7 @@ using System.Reflection;
 namespace Arborist.Linq.Tests
 {
   [TestClass]
+  //[Ignore("This generates a ton of tests and takes forever. I only run it occasionally.")]
   public class Where2Tests
   {
     public struct NodeAndTraversalStrategy
@@ -38,32 +39,32 @@ namespace Arborist.Linq.Tests
         //"a,b(c)",
         //"a,b,c",
 
-        //// d
+        // d
         //"a(b,c,d)",
         //"a,b(c,d)",
         // "a,b(d),c",
 
         // e
-        "a(b(d(e)),c)",
+        //"a(b(d(e)),c)",
         //"a(b(c,d,e))",
         //"a(d),b,c(e)",
 
-        //// f
+        // f
         //"a(c,d),b(e,f)",
         //"a(d),b(e),c(f)",
         //"a(b(d,e,f),c)",
         //"a,b(d),c(e(f))",
 
-        //// g
+        // g
         //"a(b(e),c(f),d(g))",
         //"a(b(d,e),c(f(g)))",
         //"a(b(e),c(f),d(g))",
         //"a(b(d,e),c(f(g)))",
 
-        //// h
-        //"a(d(f,g,h)),b,c(e)",
+        // h
+        "a(d(f,g,h)),b,c(e)",
 
-        //// i
+        // i
         //"a(b(d,e,f),c(g,h,i))",
         //"a(d(g)),b(e(h)),c(f(i))",
       };

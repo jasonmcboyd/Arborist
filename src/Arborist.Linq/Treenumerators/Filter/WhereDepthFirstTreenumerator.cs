@@ -2,7 +2,6 @@
 using Arborist.Linq.Extensions;
 using System;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 namespace Arborist.Linq.Treenumerators
 {
@@ -101,7 +100,6 @@ namespace Arborist.Linq.Treenumerators
 
         stackWithDeepestNodeVisit = GetStackWithDeepestNodeVisit();
 
-        // TODO: Do we need to increment the visit count?
         if (stackWithDeepestNodeVisit == _SkippedNodeVisits)
         {
           // Increment the skipped node's visit count to ensure
