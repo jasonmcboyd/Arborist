@@ -56,12 +56,10 @@ namespace Arborist.Linq.Treenumerators
     private NodePosition? _SkipSiblingsQueueFrontPosition = null;
 
     // Effective depth of a consumer-SkipNode'd node whose removal requires the wrapper
-    // to generate a parent visit when scheduling exits the subtree. -1 when inactive.
+    // to generate a parent visit when scheduling exits the subtree.
+    // -1 when inactive, DeferredSchedulePending when a deferred schedule is queued.
     private int _ConsumerSkippedParentEffectiveDepth = -1;
-
-    // When a parent visit is generated for a consumer-SkipNode'd transition,
-    // the accepted node's scheduling output is deferred to the next MoveNext.
-    private bool _HasDeferredSchedule = false;
+    private const int DeferredSchedulePending = int.MinValue;
 
     // Whether the last child in a consumer-SkipNode'd parent's subtree was itself
     // consumer-SkipNode'd. Suppresses the deferred parent visit when true.
@@ -71,9 +69,9 @@ namespace Arborist.Linq.Treenumerators
     protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
       // Output the deferred schedule from a consumer-SkipNode'd parent transition.
-      if (_HasDeferredSchedule)
+      if (_ConsumerSkippedParentEffectiveDepth == DeferredSchedulePending)
       {
-        _HasDeferredSchedule = false;
+        _ConsumerSkippedParentEffectiveDepth = -1;
 
         ref var deferredEntry = ref _NodePositionAndVisitCounts.GetLast();
 
@@ -150,8 +148,6 @@ namespace Arborist.Linq.Treenumerators
       }
 
       _PendingParentVisit = false;
-
-      var previousModeWasVisitingNode = Mode == TreenumeratorMode.VisitingNode;
 
       while (InnerTreenumerator.MoveNext(nodeTraversalStrategies))
       {
@@ -256,17 +252,16 @@ namespace Arborist.Linq.Treenumerators
           else if (_ConsumerSkippedParentEffectiveDepth >= 0
             && effectivePosition.Depth <= _ConsumerSkippedParentEffectiveDepth
             && effectivePosition.Depth > 0
-            && !previousModeWasVisitingNode
+            && Mode != TreenumeratorMode.VisitingNode
             && _NodePositionAndVisitCounts.GetFirst().Position.Depth >= 0)
           {
             if (!_ConsumerSkippedChildAfterLastAccepted)
             {
-              _ConsumerSkippedParentEffectiveDepth = -1;
               _ConsumerSkippedChildAfterLastAccepted = false;
 
               var deferredInnerPathOffset = AppendQueuePath(innerDepth);
               _NodePositionAndVisitCounts.AddLast(new NodeTraversalStatus(InnerTreenumerator.Node, effectivePosition, 0, deferredInnerPathOffset, innerDepth));
-              _HasDeferredSchedule = true;
+              _ConsumerSkippedParentEffectiveDepth = DeferredSchedulePending;
 
               ref var parentStatus = ref _NodePositionAndVisitCounts.GetFirst();
               parentStatus.VisitCount++;
@@ -308,7 +303,7 @@ namespace Arborist.Linq.Treenumerators
             if (visitedEntry.InnerDepth >= 0)
               RestoreInnerPathFromQueue(visitedEntry.InnerPathOffset, visitedEntry.InnerDepth + 1);
           }
-          else if (previousModeWasVisitingNode)
+          else if (Mode == TreenumeratorMode.VisitingNode)
             continue;
 
           _NodePositionAndVisitCounts.GetFirst().VisitCount++;
