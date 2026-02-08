@@ -392,8 +392,6 @@ namespace Arborist.Linq.Treenumerators
         }
         else // VisitingNode
         {
-          var innerDepth = InnerTreenumerator.Position.Depth;
-
           // In BFT, do NOT pop skipped nodes during visiting. Unlike DFT where
           // visiting means the subtree is complete, in BFT visiting happens BEFORE
           // children at deeper levels are scheduled. Popping here would lose skipped
@@ -403,66 +401,10 @@ namespace Arborist.Linq.Treenumerators
           // when scheduling at a shallower depth. Path-based CountSkippedAncestors
           // safely ignores stale entries from unrelated subtrees.
 
-          // Get the visiting node's path info from our queue for full path comparison.
-          // For VC==1: the visiting node is at queue index 1 (index 0 is the previous front to be removed)
-          // For VC>1: the visiting node is at queue index 0 (the front)
-          int visitingNodePathOffset = 0;
-          int visitingNodePathLength = 0;
-          if (InnerTreenumerator.VisitCount == 1 && _NodePositionAndVisitCounts.Count >= 2)
-          {
-            var indexFromBack = _NodePositionAndVisitCounts.Count - 2;
-            var entry = _NodePositionAndVisitCounts.GetFromBack(indexFromBack);
-            visitingNodePathOffset = entry.InnerPathOffset;
-            visitingNodePathLength = entry.InnerDepth + 1;
-          }
-          else if (_NodePositionAndVisitCounts.Count >= 1)
-          {
-            var entry = _NodePositionAndVisitCounts.GetFirst();
-            visitingNodePathOffset = entry.InnerPathOffset;
-            visitingNodePathLength = entry.InnerDepth + 1;
-          }
-
-          // Check if we're visiting a filtered node using full path comparison.
-          // Nodes from different subtrees can share the same inner position (e.g. d at (0,1)
-          // under a and e at (0,1) under c). Full path comparison distinguishes them.
-          var isVisitingFilteredNode = false;
-          for (int i = 0; i < _SkippedStack.Count; i++)
-          {
-            var skippedInfo = _SkippedStack.GetFromBack(i);
-            var skippedPathLength = skippedInfo.Position.Depth + 1;
-            if (skippedInfo.Position == InnerTreenumerator.Position
-              && visitingNodePathLength > 0
-              && skippedPathLength == visitingNodePathLength)
-            {
-              var pathsMatch = true;
-              for (int j = 0; j < skippedPathLength; j++)
-              {
-                if (_SkippedPathData[skippedInfo.InnerPathOffset + j] != _QueuePathData[visitingNodePathOffset + j])
-                {
-                  pathsMatch = false;
-                  break;
-                }
-              }
-              if (pathsMatch)
-              {
-                isVisitingFilteredNode = true;
-                break;
-              }
-            }
-          }
-
-          if (isVisitingFilteredNode)
-          {
-            // Skip all visits to filtered nodes - the parent visits are handled via _PendingParentVisit
-            continue;
-          }
-
-          // Check if this inner parent visit should be consumed.
           // When the consumer SkipNode'd a previously scheduled node, the wrapper may have
           // already emitted the corresponding parent visit (via deferred schedule or
           // _PendingParentVisit). If the wrapper's queue front VisitCount is already >= the
           // inner's VisitCount, the visit is redundant and should be skipped.
-          // If the wrapper is behind, check the slow path (parent-of-filtered relationship).
           if (_ConsumeNextInnerParentVisit
             && InnerTreenumerator.VisitCount > 1)
           {
