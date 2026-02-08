@@ -42,7 +42,7 @@ namespace Arborist.Linq.Tests
         // d
         //"a(b,c,d)",
         //"a,b(c,d)",
-        // "a,b(d),c",
+        //"a,b(d),c",
 
         // e
         //"a(b(d(e)),c)",
@@ -50,14 +50,14 @@ namespace Arborist.Linq.Tests
         //"a(d),b,c(e)",
 
         // f
-        //"a(c,d),b(e,f)",
-        //"a(d),b(e),c(f)",
-        //"a(b(d,e,f),c)",
-        //"a,b(d),c(e(f))",
+        "a(c,d),b(e,f)",
+        "a(d),b(e),c(f)",
+        "a(b(d,e,f),c)",
+        "a,b(d),c(e(f))",
 
         // g
-        "a(b(e),c(f),d(g))",
-        "a(b(d,e),c(f(g)))",
+        //"a(b(e),c(f),d(g))",
+        //"a(b(d,e),c(f(g)))",
         //"a(b(e),c(f),d(g))",
         //"a(b(d,e),c(f(g)))",
 

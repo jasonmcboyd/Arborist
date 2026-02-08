@@ -37,15 +37,23 @@ namespace Arborist.Linq.Treenumerators
     private readonly List<int> _SkippedPathData = new List<int>();
     private int _SkippedPathDataTop = 0;
 
-    // Track the position of the last skipped node that was removed, for sibling index calculation
-    private NodePosition? _LastRemovedSkippedNodePosition = null;
+    // Track the sibling index of the last consumer-skipped node removed at each depth.
+    // When consecutive consumer-skipped nodes are removed at different depths (e.g. b at
+    // depth 1 then d at depth 2), we need to remember both positions. A single variable
+    // would be overwritten by the deeper removal, losing the shallower sibling info.
+    // Value of -1 means no removed node at that depth.
+    private readonly List<int> _RemovedSkippedSiblingIndices = new List<int>();
 
     // Track if we need to emit a parent visit before the next inner event
     private bool _PendingParentVisit = false;
 
-    // Track how many extra parent visits we've emitted via _PendingParentVisit
-    // These correspond to inner parent visits that we should skip
-    private int _ExtraParentVisitsEmitted = 0;
+    // When a _PendingParentVisit is cancelled by consumer SkipNode (because
+    // previouslySeenNodeWasScheduledAndSkipped prevents emission), the inner BFT
+    // MAY produce a redundant parent visit. This is only redundant if no new accepted
+    // child was scheduled between the cancellation and the inner parent visit.
+    // If a new child WAS scheduled (e.g. an inner sibling like c), the inner parent
+    // visit is legitimate and should be output.
+    private bool _ConsumeNextInnerParentVisit = false;
 
     // Track the depth of the last removed skipped parent, for sibling index calculation
     // When we remove a skipped parent and schedule its child, the sibling index should reset to 0
@@ -71,9 +79,49 @@ namespace Arborist.Linq.Treenumerators
     private int _SkipSiblingsEffectiveDepth = -1;
     private NodePosition _SkipSiblingsQueueFrontPosition;
 
+    // When a consumer-SkipNode'd node is removed from the queue, its effective depth
+    // is saved here. The inner BFT's SkipNode processes the node's children directly,
+    // then jumps to the queue front's next child WITHOUT producing a parent visit.
+    // When the next accepted node is scheduled at a depth <= this saved depth, the
+    // wrapper must generate a parent visit. Set to -1 when not applicable.
+    private int _ConsumerSkippedParentEffectiveDepth = -1;
+
+    // When a parent visit is generated due to a consumer-SkipNode'd parent transition
+    // (see _ConsumerSkippedParentEffectiveDepth), the scheduling of the new accepted
+    // node is deferred until the next MoveNext call.
+    private bool _HasDeferredSchedule = false;
+
+    // Tracks whether the last child action in a consumer-SkipNode'd parent's subtree
+    // was a consumer SkipNode. When transitioning out of the subtree, the deferred
+    // schedule should only fire if the last action was NOT a consumer SkipNode.
+    // In a clean BFT, when the last child is SkipNode'd, SkipNode calls TryPushNextChild
+    // on the queue front which succeeds without incrementing VisitCount -- no V parent
+    // is produced. When the last child is TraverseAll'd (or Where-filtered only),
+    // the terminal path DOES produce V parent via VisitCount++.
+    private bool _ConsumerSkippedChildAfterLastAccepted = false;
+
 
     protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
+      // When a parent visit was emitted due to a consumer-SkipNode'd parent transition,
+      // the scheduling of the accepted node was deferred. Output it now.
+      if (_HasDeferredSchedule)
+      {
+        _HasDeferredSchedule = false;
+
+        ref var deferredEntry = ref _NodePositionAndVisitCounts.GetLast();
+
+        if (deferredEntry.Position.Depth == 0)
+          _SeenRootNodesCount++;
+
+        Mode = TreenumeratorMode.SchedulingNode;
+        Node = deferredEntry.Node;
+        Position = deferredEntry.Position;
+        VisitCount = deferredEntry.VisitCount;
+
+        return true;
+      }
+
       if (Mode == TreenumeratorMode.VisitingNode)
       {
         if (_DeferredNodeTraversalStrategies.HasValue)
@@ -95,25 +143,22 @@ namespace Arborist.Linq.Treenumerators
       if (previouslySeenNodeWasScheduledAndSkipped)
         _NodePositionAndVisitCounts.GetLast().TraversalStrategy = nodeTraversalStrategies;
 
-      // If a promoted node (outer depth differs from inner depth due to filtered ancestors)
-      // has SkipSiblings, we may need to strip it from the strategy passed to the inner
-      // treenumerator. The inner BFT's SkipSiblings disposes the queue front's child
-      // enumerator, which would damage unrelated subtrees already in the inner queue.
+      // When a promoted node has SkipSiblings and its effective depth is 0 (root)
+      // but inner depth > 0, strip SkipSiblings. The clean BFT would set
+      // _RootsEnumeratorFinished (no CE disposal), but the inner BFT at depth > 0
+      // would dispose the queue front's CE (damaging unrelated subtrees).
       //
-      // However, when the inner queue is empty (no other accepted nodes), SkipSiblings
-      // safely sets _RootsEnumeratorFinished = true, correctly terminating the traversal.
-      // This is needed when the entire ancestor chain was SkipNode'd/filtered — the inner
-      // BFT's stack still holds those ancestors, but nothing is queued for visiting.
-      //
-      // We approximate "inner queue is empty" by checking our own queue: if it only contains
-      // the sentinel and the current node (Count <= 2), there are no other accepted nodes.
+      // When effective depth > 0 (even if != inner depth), DON'T strip. The inner
+      // BFT's SkipSiblings disposes the queue front's CE, matching what the clean
+      // BFT would do at the same depth > 0. This correctly prevents the queue
+      // front's children from being scheduled.
       if (Position != new NodePosition(0, -1)
         && InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode
         && nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipSiblings))
       {
         var outerDepth = _NodePositionAndVisitCounts.GetLast().Position.Depth;
         var innerDepth = InnerTreenumerator.Position.Depth;
-        if (outerDepth != innerDepth && _NodePositionAndVisitCounts.Count > 2)
+        if (outerDepth == 0 && innerDepth > 0)
         {
           nodeTraversalStrategies = nodeTraversalStrategies & ~NodeTraversalStrategies.SkipSiblings;
           _SkipRemainingSiblings = true;
@@ -138,7 +183,6 @@ namespace Arborist.Linq.Treenumerators
           _PendingParentVisit = false;
           _DeferredNodeTraversalStrategies = nodeTraversalStrategies;
           parentStatus.VisitCount++;
-          _ExtraParentVisitsEmitted++;
 
           // Track the visited node's depth and visit count for sibling index calculation
           _LastVisitedNodeDepth = parentStatus.Position.Depth;
@@ -150,6 +194,26 @@ namespace Arborist.Linq.Treenumerators
           VisitCount = parentStatus.VisitCount;
           return true;
         }
+      }
+
+      // When the consumer SkipNode'd the previously scheduled child, the inner BFT
+      // may produce a redundant parent visit. This happens when the wrapper has already
+      // emitted parent visits (via _PendingParentVisit) that the inner BFT hasn't
+      // accounted for. The actual redundancy is verified in the consumption check by
+      // comparing the wrapper's VisitCount with the inner BFT's VisitCount.
+      // The flag is cleared when any accepted child is scheduled (see scheduling section).
+      if (previouslySeenNodeWasScheduledAndSkipped)
+      {
+        _ConsumeNextInnerParentVisit = true;
+      }
+
+      // When a consumer-SkipNode'd child is within the consumer-SkipNode'd parent's subtree,
+      // track that the last child action was a consumer SkipNode. This determines whether
+      // the deferred schedule should fire when transitioning out of the subtree.
+      if (previouslySeenNodeWasScheduledAndSkipped
+        && _ConsumerSkippedParentEffectiveDepth >= 0)
+      {
+        _ConsumerSkippedChildAfterLastAccepted = true;
       }
 
       // Clear pending flag if we're not emitting
@@ -241,6 +305,11 @@ namespace Arborist.Linq.Treenumerators
             // This ensures we don't use positions from a different parent's skipped children
             var lastScheduleNodeVisitWasSkipped = _NodePositionAndVisitCounts.GetLast().Skipped;
 
+            // Save the depth before removal for post-effectivePosition checks
+            var removedSkippedParentDepth = lastScheduleNodeVisitWasSkipped
+              ? _NodePositionAndVisitCounts.GetLast().Position.Depth
+              : -1;
+
             if (lastScheduleNodeVisitWasSkipped)
             {
               // Track the depth of the skipped parent for sibling index calculation
@@ -253,7 +322,8 @@ namespace Arborist.Linq.Treenumerators
               // Don't save if we just visited a NEW parent (VC == 1) - those are from different parent
               if (!previousModeWasVisitingNode || _LastVisitedNodeVisitCount > 1)
               {
-                _LastRemovedSkippedNodePosition = _NodePositionAndVisitCounts.GetLast().Position;
+                var removedPos = _NodePositionAndVisitCounts.GetLast().Position;
+                SetRemovedSkippedSiblingIndex(removedPos.Depth, removedPos.SiblingIndex);
               }
 
               _NodePositionAndVisitCounts.RemoveLast();
@@ -292,6 +362,75 @@ namespace Arborist.Linq.Treenumerators
               }
             }
 
+            // An accepted child was scheduled. If we were waiting to consume a
+            // redundant inner parent visit (from a cancelled _PendingParentVisit),
+            // the scheduling of this child means the next inner parent visit is
+            // legitimate, not redundant. Clear the consumption flag.
+            _ConsumeNextInnerParentVisit = false;
+
+            // An accepted child is being scheduled. If it's WITHIN the consumer-
+            // SkipNode'd parent's subtree (deeper than the saved depth), this means
+            // the last action in the subtree is NOT a consumer SkipNode. Clear the
+            // flag so the deferred schedule can fire when transitioning out.
+            // Don't clear for nodes AT or ABOVE the saved depth - those are siblings,
+            // not children of the consumer-SkipNode'd node.
+            if (_ConsumerSkippedParentEffectiveDepth >= 0
+              && effectivePosition.Depth > _ConsumerSkippedParentEffectiveDepth)
+              _ConsumerSkippedChildAfterLastAccepted = false;
+
+            // Track transitions from consumer-SkipNode'd node subtrees.
+            // When a consumer-SkipNode'd node is removed and the new accepted node is
+            // at a DEEPER effective depth, it's a child of the SkipNode'd node. Save the
+            // depth so we can detect when we leave the subtree later.
+            // When a previously-tracked consumer-SkipNode'd subtree is exited (new node
+            // at depth <= saved depth), emit a parent visit for the queue front.
+            if (lastScheduleNodeVisitWasSkipped && removedSkippedParentDepth >= 0
+              && effectivePosition.Depth > removedSkippedParentDepth)
+            {
+              // New node is a child of the consumer-SkipNode'd parent.
+              // Track the depth for transition detection.
+              _ConsumerSkippedParentEffectiveDepth = removedSkippedParentDepth;
+            }
+
+            if (_ConsumerSkippedParentEffectiveDepth >= 0
+              && effectivePosition.Depth <= _ConsumerSkippedParentEffectiveDepth
+              && effectivePosition.Depth > 0
+              && !previousModeWasVisitingNode
+              && _NodePositionAndVisitCounts.GetFirst().Position.Depth >= 0)
+            {
+              if (!_ConsumerSkippedChildAfterLastAccepted)
+              {
+                _ConsumerSkippedParentEffectiveDepth = -1;
+                _ConsumerSkippedChildAfterLastAccepted = false;
+
+                // Add the node to queue (its output will be deferred)
+                var deferredInnerPathOffset = AppendQueuePath(innerDepth);
+                _NodePositionAndVisitCounts.AddLast(new NodeTraversalStatus(InnerTreenumerator.Node, effectivePosition, 0, deferredInnerPathOffset, innerDepth));
+                _HasDeferredSchedule = true;
+
+                // Emit parent visit for the queue front
+                ref var parentStatus = ref _NodePositionAndVisitCounts.GetFirst();
+                parentStatus.VisitCount++;
+
+                _LastVisitedNodeDepth = parentStatus.Position.Depth;
+                _LastVisitedNodeVisitCount = parentStatus.VisitCount;
+
+                Mode = TreenumeratorMode.VisitingNode;
+                Node = parentStatus.Node;
+                Position = parentStatus.Position;
+                VisitCount = parentStatus.VisitCount;
+
+                return true;
+              }
+              else
+              {
+                // The last child was consumer-SkipNode'd, so no deferred V parent needed.
+                // Clear tracking and fall through to normal scheduling.
+                _ConsumerSkippedParentEffectiveDepth = -1;
+                _ConsumerSkippedChildAfterLastAccepted = false;
+              }
+            }
+
             var innerPathOffset = AppendQueuePath(innerDepth);
             _NodePositionAndVisitCounts.AddLast(new NodeTraversalStatus(InnerTreenumerator.Node, effectivePosition, 0, innerPathOffset, innerDepth));
           }
@@ -299,17 +438,19 @@ namespace Arborist.Linq.Treenumerators
         else // VisitingNode
         {
           // When visiting a node, clear saved positions - we're entering a new subtree
-          _LastRemovedSkippedNodePosition = null;
+          ClearRemovedSkippedSiblingIndices();
 
           var innerDepth = InnerTreenumerator.Position.Depth;
           var innerSiblingIndex = InnerTreenumerator.Position.SiblingIndex;
 
-          // When visiting a node at depth D, pop skipped nodes at depth D (siblings that were skipped)
-          while (_SkippedStack.Count > 0 && _SkippedStack.GetLast().Position.Depth == innerDepth)
-          {
-            _SkippedPathDataTop = _SkippedStack.GetLast().InnerPathOffset;
-            _SkippedStack.RemoveLast();
-          }
+          // In BFT, do NOT pop skipped nodes during visiting. Unlike DFT where
+          // visiting means the subtree is complete, in BFT visiting happens BEFORE
+          // children at deeper levels are scheduled. Popping here would lose skipped
+          // ancestor information needed for later depth calculations.
+          //
+          // The scheduling section handles cleanup: it pops strictly-deeper nodes
+          // when scheduling at a shallower depth. Path-based CountSkippedAncestors
+          // safely ignores stale entries from unrelated subtrees.
 
           // Get the visiting node's path info from our queue for full path comparison.
           // For VC==1: the visiting node is at queue index 1 (index 0 is the previous front to be removed)
@@ -365,43 +506,26 @@ namespace Arborist.Linq.Treenumerators
             continue;
           }
 
-          // Check if this is a parent visit that we've already emitted via _PendingParentVisit.
-          // Use full path prefix comparison to verify actual parent-of-filtered relationship.
-          // Single-level comparison is insufficient when nodes from different subtrees share
-          // the same inner sibling index at the same depth.
-          if (_ExtraParentVisitsEmitted > 0 && _SkippedStack.Count > 0)
+          // Check if this inner parent visit should be consumed.
+          // When the consumer SkipNode'd a previously scheduled node, the wrapper may have
+          // already emitted the corresponding parent visit (via deferred schedule or
+          // _PendingParentVisit). If the wrapper's queue front VisitCount is already >= the
+          // inner's VisitCount, the visit is redundant and should be skipped.
+          // If the wrapper is behind, check the slow path (parent-of-filtered relationship).
+          if (_ConsumeNextInnerParentVisit
+            && InnerTreenumerator.VisitCount > 1)
           {
-            var isActualParentOfFilteredNode = false;
-            for (int i = 0; i < _SkippedStack.Count; i++)
+            // Fast path: if the wrapper's queue front VisitCount is already >= the inner's
+            // VisitCount, the wrapper has already emitted this visit (via deferred schedule
+            // or _PendingParentVisit). The inner V parent is definitely redundant.
+            if (_NodePositionAndVisitCounts.GetFirst().VisitCount >= InnerTreenumerator.VisitCount)
             {
-              var skippedInfo = _SkippedStack.GetFromBack(i);
-              var skippedPathLength = skippedInfo.Position.Depth + 1;
-              if (innerDepth == skippedInfo.Position.Depth - 1
-                && visitingNodePathLength > 0
-                && skippedPathLength > innerDepth)
-              {
-                var pathPrefixMatches = true;
-                for (int j = 0; j <= innerDepth && j < visitingNodePathLength; j++)
-                {
-                  if (_SkippedPathData[skippedInfo.InnerPathOffset + j] != _QueuePathData[visitingNodePathOffset + j])
-                  {
-                    pathPrefixMatches = false;
-                    break;
-                  }
-                }
-                if (pathPrefixMatches)
-                {
-                  isActualParentOfFilteredNode = true;
-                  break;
-                }
-              }
-            }
-
-            if (isActualParentOfFilteredNode)
-            {
-              _ExtraParentVisitsEmitted--;
+              _ConsumeNextInnerParentVisit = false;
               continue;
             }
+
+            // Neither path consumed -- clear the flag.
+            _ConsumeNextInnerParentVisit = false;
           }
 
           // Normal visiting logic
@@ -422,6 +546,13 @@ namespace Arborist.Linq.Treenumerators
           // Track the visited node's effective depth and visit count for sibling index calculation
           _LastVisitedNodeDepth = _NodePositionAndVisitCounts.GetFirst().Position.Depth;
           _LastVisitedNodeVisitCount = _NodePositionAndVisitCounts.GetFirst().VisitCount;
+
+          // Note: do NOT clear _ConsumerSkippedParentEffectiveDepth here.
+          // The deferred schedule mechanism needs to persist through visiting events.
+          // When the last child of the consumer-SkipNode'd parent's subtree ends,
+          // the deferred schedule fires on the NEXT scheduling event (at or above
+          // the saved depth). Clearing here would prevent Pattern B cases (no c)
+          // from getting their required V parent.
         }
 
         UpdateState();
@@ -501,6 +632,12 @@ namespace Arborist.Linq.Treenumerators
       for (int i = 0; i < _SkippedStack.Count; i++)
       {
         var skippedInfo = _SkippedStack.GetFromBack(i);
+
+        // A skipped node can only be an ancestor if it's at a strictly shallower depth.
+        // Same-depth nodes are siblings, not ancestors.
+        if (skippedInfo.Position.Depth >= InnerTreenumerator.Position.Depth)
+          continue;
+
         var skippedPathLength = skippedInfo.Position.Depth + 1;
         if (skippedPathLength <= _CurrentInnerPath.Count)
         {
@@ -518,6 +655,89 @@ namespace Arborist.Linq.Treenumerators
         }
       }
       return count;
+    }
+
+    private void SetRemovedSkippedSiblingIndex(int depth, int siblingIndex)
+    {
+      while (_RemovedSkippedSiblingIndices.Count <= depth)
+        _RemovedSkippedSiblingIndices.Add(-1);
+      _RemovedSkippedSiblingIndices[depth] = siblingIndex;
+    }
+
+    private int GetRemovedSkippedSiblingIndex(int depth)
+    {
+      if (depth < _RemovedSkippedSiblingIndices.Count)
+        return _RemovedSkippedSiblingIndices[depth];
+      return -1;
+    }
+
+    private void ClearRemovedSkippedSiblingIndices()
+    {
+      for (int i = 0; i < _RemovedSkippedSiblingIndices.Count; i++)
+        _RemovedSkippedSiblingIndices[i] = -1;
+    }
+
+    /// <summary>
+    /// Checks if the current node's parent (at inner depth - 1) is on the skipped stack.
+    /// Used to determine whether a filtered node's parent is accepted or also filtered.
+    /// </summary>
+    private bool IsParentOnSkippedStack()
+    {
+      var parentDepth = InnerTreenumerator.Position.Depth - 1;
+      if (parentDepth < 0)
+        return false;
+
+      for (int i = 0; i < _SkippedStack.Count; i++)
+      {
+        var skippedInfo = _SkippedStack.GetFromBack(i);
+        if (skippedInfo.Position.Depth == parentDepth
+          && IsSkippedPathPrefix(skippedInfo.InnerPathOffset, skippedInfo.Position.Depth + 1, parentDepth + 1))
+        {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    /// <summary>
+    /// Checks if a queue entry shares the same inner parent as the current node being scheduled.
+    /// Two nodes at the same inner depth are siblings if their inner path prefixes (depth 0..D-2) match.
+    /// Nodes at different inner depths cannot share a parent (they have different filtered ancestor counts).
+    /// </summary>
+    private bool HasSameInnerParent(ref NodeTraversalStatus queueEntry)
+    {
+      var currentInnerDepth = InnerTreenumerator.Position.Depth;
+
+      // Different inner depths means different subtree contexts
+      if (queueEntry.InnerDepth != currentInnerDepth)
+        return false;
+
+      // Root-level nodes (inner depth 0) share the same parent (the virtual root)
+      if (currentInnerDepth == 0)
+        return true;
+
+      // Compare inner parent path (depth 0 to D-2) from queue entry's stored path
+      // against _CurrentInnerPath
+      var parentPathLength = currentInnerDepth; // depths 0..D-1, excluding D itself = D elements, i.e. indices 0..D-2 + depth D-1?
+      // Actually: parent is at depth D-1. The parent's identity is the path from root to depth D-1.
+      // That means comparing indices 0..D-2 (the path TO the parent) plus the parent's own sibling index at D-1.
+      // Wait, the parent path is the full path up to and including the parent, which is depths 0..D-1 = D elements.
+      // No: the inner path stores the sibling index at each depth. For a node at inner depth D, its parent
+      // is uniquely identified by the path [0..D-1], which is D elements (indices 0 through D-1).
+      // But we want to check if they share the same PARENT, so we compare indices 0..D-2 (the path to
+      // the grandparent) and index D-1 (the parent's sibling index).
+      // Actually it's simpler: the path [0..D-1] identifies the parent. Compare all D elements.
+      // That IS the parent's path. If both nodes have the same path at indices 0..D-1, they share a parent.
+
+      for (int d = 0; d < currentInnerDepth; d++)
+      {
+        if (d >= _CurrentInnerPath.Count)
+          return false;
+        var queuePathValue = _QueuePathData[queueEntry.InnerPathOffset + d];
+        if (queuePathValue != _CurrentInnerPath[d])
+          return false;
+      }
+      return true;
     }
 
     private NodePosition GetEffectivePosition()
@@ -567,28 +787,36 @@ namespace Arborist.Linq.Treenumerators
               effectiveSiblingIndex = siblingIndexFromVC;
             }
           }
-          // If previous output was a schedule and there's a node at the same depth, it's a sibling
-          else if (previousNodePosition.Depth == effectiveDepth)
+          // If previous output was a schedule and there's a node at the same depth, it may be a sibling.
+          // However, in BFT the queue may contain nodes from different parents at the same depth.
+          // We verify they share the same inner parent before treating them as siblings.
+          // When HasSameInnerParent fails, the nodes might still be effective siblings if one
+          // was promoted (inner depth != effective depth). This happens when a filtered node's
+          // children are promoted to be siblings of the filtered node's own siblings:
+          // e.g., a(b(d,e),c) with b filtered -> a(d,e,c), where d,e have innerDepth=2
+          // and c has innerDepth=1 but all are effective siblings at depth 1.
+          else if (previousNodePosition.Depth == effectiveDepth
+            && (HasSameInnerParent(ref _NodePositionAndVisitCounts.GetLast())
+                || _NodePositionAndVisitCounts.GetLast().InnerDepth != previousNodePosition.Depth
+                || InnerTreenumerator.Position.Depth != effectiveDepth))
           {
             var baseIndex = previousNodePosition.SiblingIndex;
 
             // Also check if a recently removed consumer-skipped node had a higher sibling index.
             // This happens when a consumer-skipped node (e.g. g) was between accepted nodes (e.g. f, h):
             // f is in the queue at (0,2), g was removed at (1,2), h should be (2,2).
-            if (_LastRemovedSkippedNodePosition.HasValue
-              && _LastRemovedSkippedNodePosition.Value.Depth == effectiveDepth
-              && _LastRemovedSkippedNodePosition.Value.SiblingIndex > baseIndex)
+            var removedSiblingIndex = GetRemovedSkippedSiblingIndex(effectiveDepth);
+            if (removedSiblingIndex >= 0 && removedSiblingIndex > baseIndex)
             {
-              baseIndex = _LastRemovedSkippedNodePosition.Value.SiblingIndex;
+              baseIndex = removedSiblingIndex;
             }
 
             effectiveSiblingIndex = baseIndex + 1;
           }
           // Check saved position from a recently removed skipped node
-          else if (_LastRemovedSkippedNodePosition.HasValue
-            && _LastRemovedSkippedNodePosition.Value.Depth == effectiveDepth)
+          else if (GetRemovedSkippedSiblingIndex(effectiveDepth) >= 0)
           {
-            effectiveSiblingIndex = _LastRemovedSkippedNodePosition.Value.SiblingIndex + 1;
+            effectiveSiblingIndex = GetRemovedSkippedSiblingIndex(effectiveDepth) + 1;
           }
           else
           {
