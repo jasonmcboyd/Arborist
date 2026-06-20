@@ -5,6 +5,32 @@ using System.Runtime.CompilerServices;
 
 namespace Arborist.Treenumerators
 {
+  /// <summary>
+  /// Breadth-first treenumerator. Emits the SAME (Mode, Node, VisitCount, Position) visits as the
+  /// depth-first treenumerator, but in level order. Every node is scheduled exactly once and ends
+  /// with VisitCount == (raw child count + 1), independent of any skip strategy.
+  ///
+  /// State is two pairs of ref-returning deques (node value and its mutable-struct child enumerator
+  /// kept in lockstep, never copied by value):
+  ///   * _VisitQueue (FIFO): accepted nodes that are scheduled but not yet fully visited. The front
+  ///     is the current effective parent whose VisitCount is driven toward (raw children + 1),
+  ///     emitting an interleaved parent visit between each child.
+  ///   * _SchedulingStack (LIFO): the node currently being classified, plus any SkipNode'd ancestors
+  ///     kept resident so their remaining children can be promoted into the skipped node's slot. The
+  ///     engine does not compress depth: a promoted child keeps its raw reported depth.
+  ///
+  /// Cadence: visiting is deferred. All nodes at a level are scheduled (with parent visits
+  /// interleaved) before any of them is visited; a node is visited only once it reaches the queue front.
+  ///
+  /// Deferred parent visit (the subtle part, and the source of past regressions): when a SkipNode'd
+  /// node's children are promoted, scheduling jumps to a promoted sibling instead of returning to the
+  /// queue-front parent, so that parent's interleaved visit is swallowed. It is recorded in
+  /// _OwesPromotedParentVisit and paid later -- either by the subtree's last normal enqueue, or, if
+  /// the subtree exhausts with no further enqueue (its last promoted child is itself SkipNode'd or
+  /// SkipNodeAndDescendants'd), by PayOwedParentVisitAndDeferChild, which emits the owed parent visit
+  /// now and stashes the just-scheduled child in _HasDeferredScheduledChild for the next MoveNext to
+  /// re-surface, preserving the order "owed parent visit, then promoted child".
+  /// </summary>
   public sealed class BreadthFirstTreenumerator<TValue, TNode, TChildEnumerator>
     : TreenumeratorBase<TValue>
     where TChildEnumerator : IChildEnumerator<TNode>
@@ -23,32 +49,46 @@ namespace Arborist.Treenumerators
     private readonly Func<NodeContext<TNode>, TChildEnumerator> _ChildEnumeratorFactory;
     private readonly Func<TNode, TValue> _Map;
 
-    private RefSemiDeque<InternalNodeVisitState<TNode>> _Queue = new RefSemiDeque<InternalNodeVisitState<TNode>>();
-    private RefSemiDeque<TChildEnumerator> _ChildEnumeratorsQueue = new RefSemiDeque<TChildEnumerator>();
+    // The accepted (non-skipped) nodes that have been scheduled but not yet fully
+    // visited. FIFO: the front is the current effective parent whose children are
+    // being scheduled/visited and whose VisitCount is driven to (raw children + 1).
+    private readonly RefSemiDeque<InternalNodeVisitState<TNode>> _VisitQueue = new RefSemiDeque<InternalNodeVisitState<TNode>>();
+    private readonly RefSemiDeque<TChildEnumerator> _VisitQueueChildEnumerators = new RefSemiDeque<TChildEnumerator>();
 
-    private RefSemiDeque<InternalNodeVisitState<TNode>> _Stack = new RefSemiDeque<InternalNodeVisitState<TNode>>();
-    private RefSemiDeque<TChildEnumerator> _ChildEnumeratorsStack = new RefSemiDeque<TChildEnumerator>();
+    // The scheduling-descent path: the node currently being classified, plus any
+    // SkipNode'd ancestors kept resident so their remaining children can be promoted
+    // into the skipped node's slot. LIFO: the top is the node being acted on.
+    private readonly RefSemiDeque<InternalNodeVisitState<TNode>> _SchedulingStack = new RefSemiDeque<InternalNodeVisitState<TNode>>();
+    private readonly RefSemiDeque<TChildEnumerator> _SchedulingStackChildEnumerators = new RefSemiDeque<TChildEnumerator>();
 
     private int _RootNodesSeen = 0;
     private bool _RootsEnumeratorFinished = false;
+    // Depth of the last node actually acted on (visited, or scheduled-as-accepted -- NOT a
+    // node carrying the SkipNode bit this step, i.e. SkipNode or SkipNodeAndDescendants). The
+    // skip paths use it to decide whether the visit-queue front's subtree is finished and the
+    // front can be retired.
     private int _DepthOfLastActedOnNode = -1;
-    private bool _HasCachedChild = false;
-    private bool _PendingParentVisit = false;
+    // A child was scheduled but an owed parent visit had to be emitted first, so the
+    // child's emission is deferred to the next MoveNext. See PayOwedParentVisitAndDeferChild.
+    private bool _HasDeferredScheduledChild = false;
+    // A promoted-child subtree took the parent's slot, swallowing one of the parent's
+    // interleaved visits; this records that the parent is still owed that visit.
+    private bool _OwesPromotedParentVisit = false;
 
     protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
       if (Mode == TreenumeratorMode.VisitingNode || !nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipNode))
         _DepthOfLastActedOnNode = Position.Depth;
 
-      // Release a child cached so an owed parent visit could be emitted first.
-      if (_HasCachedChild)
+      // Release the child deferred so an owed parent visit could be emitted first.
+      if (_HasDeferredScheduledChild)
       {
-        _HasCachedChild = false;
-        UpdateState(ref _Stack.GetLast());
+        _HasDeferredScheduledChild = false;
+        UpdateState(ref _SchedulingStack.GetLast());
         return true;
       }
 
-      if (_Queue.Count == 0 && _Stack.Count == 0)
+      if (_VisitQueue.Count == 0 && _SchedulingStack.Count == 0)
         return MoveToNextRootNode();
 
       if (Mode == TreenumeratorMode.SchedulingNode)
@@ -66,7 +106,7 @@ namespace Arborist.Treenumerators
 
       _RootNodesSeen++;
 
-      UpdateState(ref _Stack.GetLast());
+      UpdateState(ref _SchedulingStack.GetLast());
 
       return true;
     }
@@ -78,51 +118,55 @@ namespace Arborist.Treenumerators
         // TODO: I could probably avoid having to eagerly dispose of all of the
         // skipped node's child enumerators, but it would require storing more
         // state in the stack. I would have to benchmark it to see how it performed.
-        for (int i = 1; i < _ChildEnumeratorsStack.Count; i++)
-          _ChildEnumeratorsStack.GetFromBack(i).Dispose();
+        for (int i = 1; i < _SchedulingStackChildEnumerators.Count; i++)
+          _SchedulingStackChildEnumerators.GetFromBack(i).Dispose();
 
         // The node being SkipSibling'd is effectively a root when its only ancestors
         // are SkipNode'd ones still on the stack below it (accepted ancestors live in
         // the queue, skipped ones stay on the stack). That is the BFT analog of DFT's
-        // `_Stack.Count == 1`: Position.Depth == (skipped ancestors) == _Stack.Count - 1.
+        // `_Stack.Count == 1`: Position.Depth == (skipped ancestors) == _SchedulingStack.Count - 1.
         // In that case skipping siblings ends the root enumeration. Otherwise the node
         // has an accepted parent at the queue front whose remaining children we skip.
-        if (Position.Depth == _Stack.Count - 1 || _ChildEnumeratorsQueue.Count == 0)
+        if (Position.Depth == _SchedulingStack.Count - 1 || _VisitQueueChildEnumerators.Count == 0)
           _RootsEnumeratorFinished = true;
         else
-          _ChildEnumeratorsQueue.GetFirst().Dispose();
+          _VisitQueueChildEnumerators.GetFirst().Dispose();
       }
 
+      // Order matters: SkipNodeAndDescendants carries the SkipNode bit (it is a superset) and
+      // HasNodeTraversalStrategies is an all-bits test, so it must be checked first -- otherwise a
+      // SkipNodeAndDescendants node would route into PromoteChildren and its descendants would be
+      // wrongly promoted instead of pruned. (DFT depends on the same ordering.)
       if (nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipNodeAndDescendants))
         return SkipSubtree();
 
       if (nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipNode))
-        return SkipNode();
+        return PromoteChildren();
 
       if (nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipDescendants))
-        _ChildEnumeratorsStack.GetLast().Dispose();
+        _SchedulingStackChildEnumerators.GetLast().Dispose();
 
-      _Queue.AddLast(_Stack.RemoveLast());
-      _ChildEnumeratorsQueue.AddLast(_ChildEnumeratorsStack.RemoveLast());
+      _VisitQueue.AddLast(_SchedulingStack.RemoveLast());
+      _VisitQueueChildEnumerators.AddLast(_SchedulingStackChildEnumerators.RemoveLast());
 
       // A SkipNode'd ancestor still on the stack means this enqueued node is a promoted
       // child, and Backtrack is about to schedule its sibling instead of returning to the
       // queue-front parent -- so the parent's visit gets swallowed. Defer it: it'll be
       // retriggered by the subtree's last enqueue, or paid at skip-exhaustion if none.
-      var swallowedParentVisit = _Stack.Count > 0;
+      var swallowedParentVisit = _SchedulingStack.Count > 0;
 
       if (Backtrack())
       {
         if (swallowedParentVisit)
-          _PendingParentVisit = true;
+          _OwesPromotedParentVisit = true;
 
         return true;
       }
 
-      // Normal path: this visit is the (re)trigger that pays any pending parent visit.
-      _PendingParentVisit = false;
+      // Normal path: this visit is the (re)trigger that pays any owed parent visit.
+      _OwesPromotedParentVisit = false;
 
-      ref var previousVisit = ref _Queue.GetFirst();
+      ref var previousVisit = ref _VisitQueue.GetFirst();
 
       previousVisit.VisitCount++;
 
@@ -133,22 +177,22 @@ namespace Arborist.Treenumerators
 
     private bool OnVisiting()
     {
-      ref var previousVisit = ref _Queue.GetFirst();
-      ref var previousVisitChildEnumerator = ref _ChildEnumeratorsQueue.GetFirst();
+      ref var previousVisit = ref _VisitQueue.GetFirst();
+      ref var previousVisitChildEnumerator = ref _VisitQueueChildEnumerators.GetFirst();
 
       if (TryPushNextChild(ref previousVisit, ref previousVisitChildEnumerator))
         return true;
 
       // We have exhausted all children of the current node. We can remove it.
-      _Queue.RemoveFirst();
-      _ChildEnumeratorsQueue.RemoveFirst().Dispose();
+      _VisitQueue.RemoveFirst();
+      _VisitQueueChildEnumerators.RemoveFirst().Dispose();
 
       // If there are no nodes left in the queue, return false.
-      if (_Queue.Count == 0)
+      if (_VisitQueue.Count == 0)
         return false;
 
       // Otherwise,
-      previousVisit = ref _Queue.GetFirst();
+      previousVisit = ref _VisitQueue.GetFirst();
 
       previousVisit.VisitCount++;
 
@@ -157,9 +201,12 @@ namespace Arborist.Treenumerators
       return true;
     }
 
-    private bool SkipNode()
+    // Handles the full SkipNode strategy: the node is removed and its children are promoted
+    // into its slot among its siblings (contrast SkipSubtree, which prunes them), or, if it
+    // has no children, scheduling simply backtracks to the next sibling/root.
+    private bool PromoteChildren()
     {
-      if (TryPushNextChild(ref _Stack.GetLast(), ref _ChildEnumeratorsStack.GetLast()))
+      if (TryPushNextChild(ref _SchedulingStack.GetLast(), ref _SchedulingStackChildEnumerators.GetLast()))
         return true;
 
       PopStacks();
@@ -167,39 +214,32 @@ namespace Arborist.Treenumerators
       if (Backtrack())
         return true;
 
-      if (_Queue.Count == 0)
+      if (_VisitQueue.Count == 0)
         return false;
 
-      ref var previousVisit = ref _Queue.GetFirst();
+      ref var previousVisit = ref _VisitQueue.GetFirst();
 
-      if (_ChildEnumeratorsStack.Count == 0 && previousVisit.VisitCount != 0)
+      if (_SchedulingStackChildEnumerators.Count == 0 && previousVisit.VisitCount != 0)
       {
-        if (TryPushNextChild(ref _Queue.GetFirst(), ref _ChildEnumeratorsQueue.GetFirst()))
+        if (TryPushNextChild(ref _VisitQueue.GetFirst(), ref _VisitQueueChildEnumerators.GetFirst()))
         {
-          // Finished a SkipNode'd subtree and moving to the parent's next child. If the
-          // parent still owes a visit for that subtree (no enqueue retriggered it), pay it
-          // now and cache the just-scheduled child to release on the next MoveNext.
-          if (_PendingParentVisit)
-          {
-            _PendingParentVisit = false;
-            _HasCachedChild = true;
-            ref var owedParent = ref _Queue.GetFirst();
-            owedParent.VisitCount++;
-            UpdateState(ref owedParent);
-          }
+          // Finished a skipped node's subtree and moved to the parent's next child. If the
+          // parent still owes a visit for that subtree (no enqueue retriggered it), pay it now.
+          if (_OwesPromotedParentVisit)
+            PayOwedParentVisitAndDeferChild();
 
           return true;
         }
 
         if (_DepthOfLastActedOnNode <= previousVisit.Position.Depth)
         {
-          _Queue.RemoveFirst();
-          _ChildEnumeratorsQueue.RemoveFirst().Dispose();
+          _VisitQueue.RemoveFirst();
+          _VisitQueueChildEnumerators.RemoveFirst().Dispose();
 
-          if (_Queue.Count == 0)
+          if (_VisitQueue.Count == 0)
             return false;
           else
-            previousVisit = ref _Queue.GetFirst();
+            previousVisit = ref _VisitQueue.GetFirst();
         }
       }
 
@@ -217,29 +257,21 @@ namespace Arborist.Treenumerators
       if (Backtrack())
         return true;
 
-      if (_Queue.Count == 0)
+      if (_VisitQueue.Count == 0)
         return false;
 
       if (Position.Depth != 0)
       {
         // Only try to push next child if the queue front has already been visited.
         // If VisitCount == 0, the node hasn't been visited yet and should be visited first.
-        if (_Queue.GetFirst().VisitCount != 0
-          && TryPushNextChild(ref _Queue.GetFirst(), ref _ChildEnumeratorsQueue.GetFirst()))
+        if (_VisitQueue.GetFirst().VisitCount != 0
+          && TryPushNextChild(ref _VisitQueue.GetFirst(), ref _VisitQueueChildEnumerators.GetFirst()))
         {
-          // Reaching here means a SkipNode'd parent's subtree just exhausted via a
-          // skip-subtree of its LAST promoted child (Backtrack found no sibling to push),
-          // and we are now scheduling the queue-front parent's next child. If that parent
-          // still owes a swallowed visit for the exhausted subtree, pay it now and cache
-          // the just-scheduled child to release on the next MoveNext -- mirroring SkipNode.
-          if (_PendingParentVisit)
-          {
-            _PendingParentVisit = false;
-            _HasCachedChild = true;
-            ref var owedParent = ref _Queue.GetFirst();
-            owedParent.VisitCount++;
-            UpdateState(ref owedParent);
-          }
+          // Same as PromoteChildren's payment, but the skipped node's LAST promoted child
+          // exhausted the subtree via skip-subtree rather than running out of children:
+          // the parent may still owe a swallowed visit, so pay it before its next child.
+          if (_OwesPromotedParentVisit)
+            PayOwedParentVisitAndDeferChild();
 
           return true;
         }
@@ -248,17 +280,17 @@ namespace Arborist.Treenumerators
         // finished processing its descendants (depth check ensures we've backtracked
         // to the same level or higher).
         // If VisitCount == 0, the node hasn't been visited yet and should still be visited.
-        if (_Queue.GetFirst().VisitCount != 0 && _DepthOfLastActedOnNode <= _Queue.GetFirst().Position.Depth)
+        if (_VisitQueue.GetFirst().VisitCount != 0 && _DepthOfLastActedOnNode <= _VisitQueue.GetFirst().Position.Depth)
         {
-          _Queue.RemoveFirst();
-          _ChildEnumeratorsQueue.RemoveFirst().Dispose();
+          _VisitQueue.RemoveFirst();
+          _VisitQueueChildEnumerators.RemoveFirst().Dispose();
 
-          if (_Queue.Count == 0)
+          if (_VisitQueue.Count == 0)
             return false;
         }
       }
 
-      ref var previousVisit = ref _Queue.GetFirst();
+      ref var previousVisit = ref _VisitQueue.GetFirst();
 
       previousVisit.VisitCount++;
 
@@ -267,27 +299,33 @@ namespace Arborist.Treenumerators
       return true;
     }
 
+    // Advance scheduling past exhausted nodes: pull the next child of the deepest node
+    // still on the scheduling stack (popping exhausted ones), else move to the next root.
     private bool Backtrack()
     {
-      var depthOfScheduleAncestor = _Queue.Count == 0 ? -1 : _Queue.GetFirst().Position.Depth;
-
-      while (_Stack.Count > 0)
+      while (_SchedulingStack.Count > 0)
       {
-        ref var nodeVisit = ref _Stack.GetLast();
-        ref var nodeVisitChildEnumerator = ref _ChildEnumeratorsStack.GetLast();
-
-        var cacheChild =
-          nodeVisit.Position.Depth != 0
-          && depthOfScheduleAncestor > -1
-          && depthOfScheduleAncestor < _DepthOfLastActedOnNode;
-
-        if (TryPushNextChild(ref nodeVisit, ref nodeVisitChildEnumerator))
+        if (TryPushNextChild(ref _SchedulingStack.GetLast(), ref _SchedulingStackChildEnumerators.GetLast()))
           return true;
 
         PopStacks();
       }
 
       return MoveToNextRootNode();
+    }
+
+    // The child just scheduled by the caller occupies a promoted slot, so the parent's
+    // swallowed visit must be emitted before it. Pay that visit now and defer the child to
+    // the next MoveNext (released at the top of OnMoveNext), keeping the emission order
+    // "owed parent visit, then promoted child".
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void PayOwedParentVisitAndDeferChild()
+    {
+      _OwesPromotedParentVisit = false;
+      _HasDeferredScheduledChild = true;
+      ref var owedParent = ref _VisitQueue.GetFirst();
+      owedParent.VisitCount++;
+      UpdateState(ref owedParent);
     }
 
     private bool TryPushNextChild(
@@ -299,7 +337,7 @@ namespace Arborist.Treenumerators
 
       PushNewNodeVisit(childNodeSiblingContext.Node, new NodePosition(childNodeSiblingContext.SiblingIndex, nodeVisit.Position.Depth + 1));
 
-      UpdateState(ref _Stack.GetLast());
+      UpdateState(ref _SchedulingStack.GetLast());
 
       return true;
     }
@@ -311,15 +349,15 @@ namespace Arborist.Treenumerators
       var internalNodeVisitState = new InternalNodeVisitState<TNode>(node, nodePosition);
       var nodeChildEnumerator = _ChildEnumeratorFactory(new NodeContext<TNode>(internalNodeVisitState.Node, internalNodeVisitState.Position));
 
-      _Stack.AddLast(internalNodeVisitState);
-      _ChildEnumeratorsStack.AddLast(nodeChildEnumerator);
+      _SchedulingStack.AddLast(internalNodeVisitState);
+      _SchedulingStackChildEnumerators.AddLast(nodeChildEnumerator);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void PopStacks()
     {
-      _Stack.RemoveLast();
-      _ChildEnumeratorsStack.RemoveLast().Dispose();
+      _SchedulingStack.RemoveLast();
+      _SchedulingStackChildEnumerators.RemoveLast().Dispose();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -339,17 +377,17 @@ namespace Arborist.Treenumerators
 
       _RootsEnumerator?.Dispose();
 
-      DisposeStack(_ChildEnumeratorsQueue);
-      DisposeStack(_ChildEnumeratorsStack);
+      DisposeChildEnumerators(_VisitQueueChildEnumerators);
+      DisposeChildEnumerators(_SchedulingStackChildEnumerators);
     }
 
-    private void DisposeStack(RefSemiDeque<TChildEnumerator> stackChildEnumerators)
+    private void DisposeChildEnumerators(RefSemiDeque<TChildEnumerator> childEnumerators)
     {
-      if (stackChildEnumerators == null)
+      if (childEnumerators == null)
         return;
 
-      while (stackChildEnumerators.Count > 0)
-        stackChildEnumerators.RemoveLast().Dispose();
+      while (childEnumerators.Count > 0)
+        childEnumerators.RemoveLast().Dispose();
     }
     
     #endregion Dispose
