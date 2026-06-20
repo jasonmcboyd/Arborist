@@ -32,11 +32,21 @@ namespace Arborist.Treenumerators
     private int _RootNodesSeen = 0;
     private bool _RootsEnumeratorFinished = false;
     private int _DepthOfLastActedOnNode = -1;
+    private bool _HasCachedChild = false;
+    private bool _PendingParentVisit = false;
 
     protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
       if (Mode == TreenumeratorMode.VisitingNode || !nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipNode))
         _DepthOfLastActedOnNode = Position.Depth;
+
+      // Release a child cached so an owed parent visit could be emitted first.
+      if (_HasCachedChild)
+      {
+        _HasCachedChild = false;
+        UpdateState(ref _Stack.GetLast());
+        return true;
+      }
 
       if (_Queue.Count == 0 && _Stack.Count == 0)
         return MoveToNextRootNode();
@@ -89,8 +99,22 @@ namespace Arborist.Treenumerators
       _Queue.AddLast(_Stack.RemoveLast());
       _ChildEnumeratorsQueue.AddLast(_ChildEnumeratorsStack.RemoveLast());
 
+      // A SkipNode'd ancestor still on the stack means this enqueued node is a promoted
+      // child, and Backtrack is about to schedule its sibling instead of returning to the
+      // queue-front parent -- so the parent's visit gets swallowed. Defer it: it'll be
+      // retriggered by the subtree's last enqueue, or paid at skip-exhaustion if none.
+      var swallowedParentVisit = _Stack.Count > 0;
+
       if (Backtrack())
+      {
+        if (swallowedParentVisit)
+          _PendingParentVisit = true;
+
         return true;
+      }
+
+      // Normal path: this visit is the (re)trigger that pays any pending parent visit.
+      _PendingParentVisit = false;
 
       ref var previousVisit = ref _Queue.GetFirst();
 
@@ -145,7 +169,21 @@ namespace Arborist.Treenumerators
       if (_ChildEnumeratorsStack.Count == 0 && previousVisit.VisitCount != 0)
       {
         if (TryPushNextChild(ref _Queue.GetFirst(), ref _ChildEnumeratorsQueue.GetFirst()))
+        {
+          // Finished a SkipNode'd subtree and moving to the parent's next child. If the
+          // parent still owes a visit for that subtree (no enqueue retriggered it), pay it
+          // now and cache the just-scheduled child to release on the next MoveNext.
+          if (_PendingParentVisit)
+          {
+            _PendingParentVisit = false;
+            _HasCachedChild = true;
+            ref var owedParent = ref _Queue.GetFirst();
+            owedParent.VisitCount++;
+            UpdateState(ref owedParent);
+          }
+
           return true;
+        }
 
         if (_DepthOfLastActedOnNode <= previousVisit.Position.Depth)
         {
