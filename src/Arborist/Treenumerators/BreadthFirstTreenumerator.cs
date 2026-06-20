@@ -71,9 +71,6 @@ namespace Arborist.Treenumerators
     // A child was scheduled but an owed parent visit had to be emitted first, so the
     // child's emission is deferred to the next MoveNext. See PayOwedParentVisitAndDeferChild.
     private bool _HasDeferredScheduledChild = false;
-    // A promoted-child subtree took the parent's slot, swallowing one of the parent's
-    // interleaved visits; this records that the parent is still owed that visit.
-    private bool _OwesPromotedParentVisit = false;
 
     protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
@@ -153,21 +150,32 @@ namespace Arborist.Treenumerators
       // child, and Backtrack is about to schedule its sibling instead of returning to the
       // queue-front parent -- so the parent's visit gets swallowed. Defer it: it'll be
       // retriggered by the subtree's last enqueue, or paid at skip-exhaustion if none.
-      var swallowedParentVisit = _SchedulingStack.Count > 0;
+      //
+      // ...but only when a real accepted parent exists. If EVERY ancestor on the descent
+      // is SkipNode'd (raw depth == skipped-ancestor count, the BFT analog of the Bug B
+      // effective-root test), this node is itself an effective ROOT: the queue front is an
+      // unrelated earlier root, not its parent, so no parent visit was swallowed. Owing one
+      // there leaves a stale visit that a later skip payment mis-pays to that unrelated root
+      // -- the +1 over-count seen only once three concurrent promotions interact.
+      var swallowedParentVisit =
+        _SchedulingStack.Count > 0
+        && Position.Depth > _SchedulingStack.Count;
 
       if (Backtrack())
       {
+        // Record the owe ON the effective parent's queue entry (the front), not an
+        // engine-wide flag, so it is paid only to THIS parent and discarded when the
+        // parent retires -- never leaked to a later, unrelated front.
         if (swallowedParentVisit)
-          _OwesPromotedParentVisit = true;
+          _VisitQueue.GetFirst().OwesPromotedParentVisit = true;
 
         return true;
       }
 
       // Normal path: this visit is the (re)trigger that pays any owed parent visit.
-      _OwesPromotedParentVisit = false;
-
       ref var previousVisit = ref _VisitQueue.GetFirst();
 
+      previousVisit.OwesPromotedParentVisit = false;
       previousVisit.VisitCount++;
 
       UpdateState(ref previousVisit);
@@ -225,7 +233,7 @@ namespace Arborist.Treenumerators
         {
           // Finished a skipped node's subtree and moved to the parent's next child. If the
           // parent still owes a visit for that subtree (no enqueue retriggered it), pay it now.
-          if (_OwesPromotedParentVisit)
+          if (previousVisit.OwesPromotedParentVisit)
             PayOwedParentVisitAndDeferChild();
 
           return true;
@@ -270,7 +278,7 @@ namespace Arborist.Treenumerators
           // Same as PromoteChildren's payment, but the skipped node's LAST promoted child
           // exhausted the subtree via skip-subtree rather than running out of children:
           // the parent may still owe a swallowed visit, so pay it before its next child.
-          if (_OwesPromotedParentVisit)
+          if (_VisitQueue.GetFirst().OwesPromotedParentVisit)
             PayOwedParentVisitAndDeferChild();
 
           return true;
@@ -321,9 +329,9 @@ namespace Arborist.Treenumerators
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void PayOwedParentVisitAndDeferChild()
     {
-      _OwesPromotedParentVisit = false;
       _HasDeferredScheduledChild = true;
       ref var owedParent = ref _VisitQueue.GetFirst();
+      owedParent.OwesPromotedParentVisit = false;
       owedParent.VisitCount++;
       UpdateState(ref owedParent);
     }

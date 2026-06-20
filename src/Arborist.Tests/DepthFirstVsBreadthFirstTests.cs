@@ -137,5 +137,75 @@ namespace Arborist.Tests
 
       CollectionAssert.AreEqual(Sort(breadthFirst), Sort(depthFirst));
     }
+
+    // Exhaustive in-process guard for THREE concurrent (node, strategy) skips -- the blind
+    // spot the 2-pair DynamicData fuzzer (Test, above) cannot reach. Kept as a single fast
+    // test (~1s over ~80k configs) rather than ~68k DynamicData rows. This is the class that
+    // caught base-engine "Bug D": BFT over-counted a promoted parent's visit by one once
+    // three promotions interacted. Includes the Where2 f-group shapes that surfaced it.
+    private static readonly string[] ThreeSkipTreeStrings = new[]
+    {
+      "a,b,c", "a(b,c)", "a(b(c))", "a(b),c(d)", "a(b(c,d))", "a(b(c,d)),e(f(g,h))",
+      "a(b,c),d(e,f)", "a(b(d,e),c(f,g))", "a(b(c)),d(e(f))", "a,b(d),c(e(f))",
+      "b(d),c(f)", "b(d),e(f)",
+      "a(c,d),b(e,f)", "a(d),b(e),c(f)", "a(b(d,e,f),c)",
+    };
+
+    [TestMethod]
+    public void BreadthFirstMatchesDepthFirst_ThreeConcurrentSkips()
+    {
+      var strategies =
+        Enum
+        .GetValues<NodeTraversalStrategies>()
+        .Where(strategy => strategy != NodeTraversalStrategies.TraverseAll)
+        .ToArray();
+
+      string[] SortedVisits(IEnumerable<NodeVisit<string>> visits) =>
+        visits.Take(1000).Select(visit => visit.ToString()).OrderBy(text => text).ToArray();
+
+      var failures = new List<string>();
+
+      foreach (var treeString in ThreeSkipTreeStrings)
+      {
+        var treenumerable =
+          TreeSerializer
+          .Deserialize(treeString)
+          .Select(visit => visit.Node);
+
+        var nodes =
+          treeString
+          .Split(new[] { ',', '(', ')' }, StringSplitOptions.RemoveEmptyEntries);
+
+        for (int i = 0; i < nodes.Length; i++)
+          for (int j = i + 1; j < nodes.Length; j++)
+            for (int k = j + 1; k < nodes.Length; k++)
+              foreach (var strategy1 in strategies)
+                foreach (var strategy2 in strategies)
+                  foreach (var strategy3 in strategies)
+                  {
+                    var node1 = nodes[i];
+                    var node2 = nodes[j];
+                    var node3 = nodes[k];
+
+                    NodeTraversalStrategies Selector(NodeContext<string> nodeContext) =>
+                      nodeContext.Node == node1 ? strategy1
+                      : nodeContext.Node == node2 ? strategy2
+                      : nodeContext.Node == node3 ? strategy3
+                      : NodeTraversalStrategies.TraverseAll;
+
+                    var breadthFirst = SortedVisits(treenumerable.GetBreadthFirstTraversal(Selector));
+                    var depthFirst = SortedVisits(treenumerable.GetDepthFirstTraversal(Selector));
+
+                    if (!breadthFirst.SequenceEqual(depthFirst))
+                      failures.Add($"{treeString} [{node1}:{strategy1}, {node2}:{strategy2}, {node3}:{strategy3}]");
+                  }
+      }
+
+      Assert.AreEqual(
+        0,
+        failures.Count,
+        $"BFT diverged from trusted DFT on {failures.Count} three-skip configs:{Environment.NewLine}"
+        + string.Join(Environment.NewLine, failures.Take(40)));
+    }
   }
 }
