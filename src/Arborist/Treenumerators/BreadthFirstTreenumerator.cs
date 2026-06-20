@@ -226,7 +226,23 @@ namespace Arborist.Treenumerators
         // If VisitCount == 0, the node hasn't been visited yet and should be visited first.
         if (_Queue.GetFirst().VisitCount != 0
           && TryPushNextChild(ref _Queue.GetFirst(), ref _ChildEnumeratorsQueue.GetFirst()))
+        {
+          // Reaching here means a SkipNode'd parent's subtree just exhausted via a
+          // skip-subtree of its LAST promoted child (Backtrack found no sibling to push),
+          // and we are now scheduling the queue-front parent's next child. If that parent
+          // still owes a swallowed visit for the exhausted subtree, pay it now and cache
+          // the just-scheduled child to release on the next MoveNext -- mirroring SkipNode.
+          if (_PendingParentVisit)
+          {
+            _PendingParentVisit = false;
+            _HasCachedChild = true;
+            ref var owedParent = ref _Queue.GetFirst();
+            owedParent.VisitCount++;
+            UpdateState(ref owedParent);
+          }
+
           return true;
+        }
 
         // Only remove from queue if the node has already been visited and we've
         // finished processing its descendants (depth check ensures we've backtracked
