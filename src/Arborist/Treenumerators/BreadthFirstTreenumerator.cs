@@ -81,7 +81,13 @@ namespace Arborist.Treenumerators
         for (int i = 1; i < _ChildEnumeratorsStack.Count; i++)
           _ChildEnumeratorsStack.GetFromBack(i).Dispose();
 
-        if (Position.Depth == 0 || _ChildEnumeratorsQueue.Count == 0)
+        // The node being SkipSibling'd is effectively a root when its only ancestors
+        // are SkipNode'd ones still on the stack below it (accepted ancestors live in
+        // the queue, skipped ones stay on the stack). That is the BFT analog of DFT's
+        // `_Stack.Count == 1`: Position.Depth == (skipped ancestors) == _Stack.Count - 1.
+        // In that case skipping siblings ends the root enumeration. Otherwise the node
+        // has an accepted parent at the queue front whose remaining children we skip.
+        if (Position.Depth == _Stack.Count - 1 || _ChildEnumeratorsQueue.Count == 0)
           _RootsEnumeratorFinished = true;
         else
           _ChildEnumeratorsQueue.GetFirst().Dispose();
