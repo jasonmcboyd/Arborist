@@ -54,6 +54,17 @@ namespace Arborist.Linq.Treenumerators
     // Only the deepest (first) should. Reset on any scheduling event and on any accepted-node emit.
     private bool _BoundaryConsumed = false;
 
+    // SkipSiblings is promotion-aware (effective siblings != inner siblings), so we can't delegate it
+    // to the inner. While active, we prune everything the inner schedules until it exits the effective
+    // parent's subtree (inner depth <= _SkipSiblingsParentDepth), excluding the SkipSiblings'd node's
+    // own subtree (inner depth > _SkipSiblingsNodeDepth). The visit cap (in TryHandleVisiting) stops
+    // the effective parent from being visited for the pruned siblings.
+    // Active SkipSiblings scopes, innermost last (a stack -- nested SkipSiblings can overlap). Each
+    // prunes its effective parent's remaining children (inner depth in (ParentDepth, NodeDepth]) until
+    // the traversal exits that effective parent's subtree (inner depth <= ParentDepth).
+    private readonly List<(int NodeDepth, int ParentDepth)> _SkipSiblings = new List<(int, int)>();
+    private bool _PruneNext = false;
+
     protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
       // The consumer's strategy applies to the accepted node we last emitted as a scheduling node
@@ -62,18 +73,32 @@ namespace Arborist.Linq.Treenumerators
 
       if (Mode == TreenumeratorMode.SchedulingNode)
       {
-        // Forward the consumer strategy to the inner: its native SkipNode IS the engine-collapse we
-        // want (skipped node not visited, children promoted at their depth). We additionally MARK a
-        // pure-SkipNode'd node so we suppress reassigning its extracted descendants' interleaves to
-        // it -- otherwise the extraction stream-rewrite emits phantom parent visits for a node the
-        // consumer collapsed. (SkipNodeAndDescendants / SkipAll prune the subtree, so no promotion.)
-        innerStrategies = nodeTraversalStrategies;
+        var strategies = nodeTraversalStrategies;
 
-        var skipsNode = nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipNode);
-        var skipsDescendants = nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipDescendants);
+        // SkipSiblings: arm pruning of the effective parent's remaining children. The node itself
+        // keeps the strategy's other bits (SkipNode / SkipDescendants), forwarded to the inner.
+        if (strategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipSiblings))
+        {
+          var node = _Path[_Path.Count - 1];
+          // The effective parent for sibling purposes is the nearest REAL node in the effective
+          // tree: not extracted (predicate) and not collapse-skipped (consumer SkipNode). If there
+          // is none, the node is an effective root and SkipSiblings ends the remaining forest.
+          var effectiveParent = NearestSiblingParent(_Path.Count - 2);
+          _SkipSiblings.Add((node.SourceDepth, effectiveParent?.SourceDepth ?? -1));
+          strategies &= ~NodeTraversalStrategies.SkipSiblings;
+        }
+
+        // Forward the rest to the inner: its native SkipNode IS the engine-collapse we want (skipped
+        // node not visited, children promoted at their depth). We additionally MARK a pure-SkipNode'd
+        // node so we suppress reassigning its extracted descendants' interleaves to it -- otherwise
+        // the extraction rewrite emits phantom parent visits for a node the consumer collapsed.
+        innerStrategies = strategies;
+
+        var skipsNode = strategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipNode);
+        var skipsDescendants = strategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipDescendants);
 
         if (skipsNode && !skipsDescendants)
-          _Path[_Path.Count - 1].CollapseSkipped = true;   // TODO: SkipSiblings bit not yet handled
+          _Path[_Path.Count - 1].CollapseSkipped = true;
       }
 
       while (InnerTreenumerator.MoveNext(innerStrategies))
@@ -84,6 +109,13 @@ namespace Arborist.Linq.Treenumerators
         {
           if (TryHandleScheduling())
             return true;
+
+          // A pruned effective sibling: advance the inner past its whole subtree.
+          if (_PruneNext)
+          {
+            _PruneNext = false;
+            innerStrategies = NodeTraversalStrategies.SkipNodeAndDescendants;
+          }
         }
         else if (TryHandleVisiting())
         {
@@ -104,6 +136,17 @@ namespace Arborist.Linq.Treenumerators
       // Remove the previous sibling (same depth) and any of its leftover subtree.
       while (_Path.Count > 0 && _Path[_Path.Count - 1].SourceDepth >= depth)
         _Path.RemoveAt(_Path.Count - 1);
+
+      // SkipSiblings: drop scopes whose effective parent's subtree we've now exited, then -- if this
+      // node is an effective sibling within the innermost remaining scope -- prune it and its subtree.
+      while (_SkipSiblings.Count > 0 && depth <= _SkipSiblings[_SkipSiblings.Count - 1].ParentDepth)
+        _SkipSiblings.RemoveAt(_SkipSiblings.Count - 1);
+
+      if (_SkipSiblings.Count > 0 && depth <= _SkipSiblings[_SkipSiblings.Count - 1].NodeDepth)
+      {
+        _PruneNext = true;
+        return false;
+      }
 
       if (!_Predicate(InnerTreenumerator.ToNodeContext()))
       {
@@ -220,6 +263,11 @@ namespace Arborist.Linq.Treenumerators
           return false;
       }
 
+      // A node has exactly (effective children + 1) visits. The inner emits extra parent visits for
+      // children we pruned via SkipSiblings (never counted as effective children), so cap here.
+      if (frame.EffectiveVisitsEmitted > frame.EffectiveChildCount)
+        return false;
+
       frame.EffectiveVisitsEmitted++;
       EmitAccepted(frame, frame.EffectiveVisitsEmitted);
       return true;
@@ -247,6 +295,17 @@ namespace Arborist.Linq.Treenumerators
     {
       for (int i = fromIndex; i >= 0; i--)
         if (!_Path[i].Extracted)
+          return _Path[i];
+
+      return null;
+    }
+
+    // The nearest ancestor that is a REAL node in the effective tree (neither extracted nor
+    // collapse-skipped) -- i.e. the node whose remaining children are this node's effective siblings.
+    private Frame NearestSiblingParent(int fromIndex)
+    {
+      for (int i = fromIndex; i >= 0; i--)
+        if (!_Path[i].Extracted && !_Path[i].CollapseSkipped)
           return _Path[i];
 
       return null;
