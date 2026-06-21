@@ -5,7 +5,7 @@ using BenchmarkDotNet.Attributes;
 namespace Arborist.Benchmarks
 {
   [MemoryDiagnoser]
-  [ShortRunJob]
+  [BenchmarkCategory("LINQ", "Query")]
   public class GetLeaves
   {
     [Benchmark]

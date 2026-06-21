@@ -3,7 +3,7 @@
 namespace Arborist.Benchmarks
 {
   [MemoryDiagnoser]
-  [ShortRunJob]
+  [BenchmarkCategory("DataStructures")]
   public class RefSemiDeque
   {
     [Benchmark]

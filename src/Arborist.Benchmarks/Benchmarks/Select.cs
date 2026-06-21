@@ -5,7 +5,7 @@ using System.Linq;
 namespace Arborist.Benchmarks
 {
   [MemoryDiagnoser]
-  [ShortRunJob]
+  [BenchmarkCategory("LINQ", "Projection")]
   public class Select
   {
     [Benchmark]

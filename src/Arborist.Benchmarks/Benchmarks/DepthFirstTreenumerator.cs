@@ -7,7 +7,7 @@ using System.Linq;
 namespace Arborist.Benchmarks
 {
   [MemoryDiagnoser]
-  [ShortRunJob]
+  [BenchmarkCategory("Traversal", "DepthFirst")]
   public class DepthFirstTreenumerator
   {
     [Benchmark]

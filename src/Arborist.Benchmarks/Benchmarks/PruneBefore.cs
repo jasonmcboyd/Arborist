@@ -1,4 +1,4 @@
-﻿using Arborist.Core;
+using Arborist.Core;
 using Arborist.Linq;
 using BenchmarkDotNet.Attributes;
 using System.Linq;
@@ -6,7 +6,7 @@ using System.Linq;
 namespace Arborist.Benchmarks
 {
   [MemoryDiagnoser]
-  [ShortRunJob]
+  [BenchmarkCategory("LINQ", "Pruning")]
   public class PruneBefore
   {
     [Benchmark]

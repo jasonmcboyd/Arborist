@@ -1,4 +1,4 @@
-﻿using Arborist.Benchmarks;
+using Arborist.Benchmarks;
 using Arborist.Core;
 using Arborist.Linq;
 using Arborist.Trees;
@@ -8,7 +8,7 @@ using System.Linq;
 namespace Arborist.Benchmarks
 {
   [MemoryDiagnoser]
-  [ShortRunJob]
+  [BenchmarkCategory("LINQ", "Filter", "DepthFirst")]
   public class DepthFirstWhere
   {
     [Benchmark]
