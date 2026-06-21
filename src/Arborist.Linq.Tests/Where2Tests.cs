@@ -58,8 +58,6 @@ namespace Arborist.Linq.Tests
         // g
         //"a(b(e),c(f),d(g))",
         //"a(b(d,e),c(f(g)))",
-        //"a(b(e),c(f),d(g))",
-        //"a(b(d,e),c(f(g)))",
 
         // h
         //"a(d(f,g,h)),b,c(e)",
@@ -172,7 +170,7 @@ namespace Arborist.Linq.Tests
 
     [TestMethod]
     [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
-    //[Ignore("Ignore until BFT is fixed.")]
+    [Ignore("Superseded by the fast in-process Where2InProcessScan (same BFT-vs-oracle coverage in ~seconds). Un-ignore for the slow exhaustive per-case DynamicData variant.")]
     public void Where2Test_BreadthFirst(
       string treeString,
       string expectedTreeString,
@@ -191,6 +189,7 @@ namespace Arborist.Linq.Tests
 
     [TestMethod]
     [DynamicData(nameof(GetTestData), DynamicDataSourceType.Method, DynamicDataDisplayName = nameof(GetTestDisplayName))]
+    [Ignore("Too slow to discover with many trees enabled; DFT is the trusted oracle and is covered by the curated WhereTests. Un-ignore for the slow exhaustive DFT-vs-oracle DynamicData run.")]
     public void Where2Test_DepthFirst(
       string treeString,
       string expectedTreeString,

@@ -127,7 +127,16 @@ namespace Arborist.Linq.Treenumerators
 
       if (previouslySeenNodeWasScheduledAndSkipped)
       {
-        _ConsumeNextInnerParentVisit = true;
+        // Only a PROMOTED child (one whose immediate inner parent was predicate-filtered, so a
+        // pending parent visit was set then cancelled just above) produces a redundant inner
+        // parent visit: its earlier promoted siblings' manufactured visits already advanced the
+        // parent past the inner's between-children visit. A consumer-SkipNode'd node that is NOT
+        // a promoted child (its inner parent is itself consumer-skipped, e.g. the last child of a
+        // promoted subtree) does NOT inflate the parent's count, so the inner's owed final parent
+        // visit must pass through. Gating on _PendingParentVisit (still set here; cleared below)
+        // distinguishes the two and fixes the swallowed promoted-parent visit.
+        if (_PendingParentVisit)
+          _ConsumeNextInnerParentVisit = true;
 
         if (_ConsumerSkippedParentEffectiveDepth >= 0)
           _ConsumerSkippedChildAfterLastAccepted = true;
