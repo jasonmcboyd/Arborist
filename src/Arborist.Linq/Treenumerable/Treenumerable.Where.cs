@@ -20,10 +20,11 @@ namespace Arborist.Linq
             source.GetBreadthFirstTreenumerator,
             nodeContext => !predicate(nodeContext),
             NodeTraversalStrategies.SkipNode),
-          () => new WhereDepthFirstTreenumerator<TNode>(
+          // SPIKE: DFT path swapped to the clean-room extraction treenumerator to validate it
+          // against the full existing DFT test suite (consumer strategies included).
+          () => new WhereDepthFirstTreenumerator2<TNode>(
             source.GetDepthFirstTreenumerator,
-            predicate,
-            NodeTraversalStrategies.SkipNode));
+            predicate));
     }
   }
 }

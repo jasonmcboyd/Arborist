@@ -42,6 +42,8 @@ namespace Arborist.Linq.Treenumerators
       public int EffectiveChildCount;          // accepted only: # accepted effective children scheduled
       public int EffectiveVisitsEmitted;       // accepted only
       public bool YieldedAccepted;             // subtree has produced >= 1 accepted node
+      public bool CollapseSkipped;             // consumer SkipNode'd: anchors children's positions
+                                               // but emits none of its own visits (engine collapse)
     }
 
     private readonly List<Frame> _Path = new List<Frame>();
@@ -54,8 +56,30 @@ namespace Arborist.Linq.Treenumerators
 
     protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
-      while (InnerTreenumerator.MoveNext(NodeTraversalStrategies.TraverseAll))
+      // The consumer's strategy applies to the accepted node we last emitted as a scheduling node
+      // (== the inner's current scheduling node, and the top of _Path).
+      var innerStrategies = NodeTraversalStrategies.TraverseAll;
+
+      if (Mode == TreenumeratorMode.SchedulingNode)
       {
+        // Forward the consumer strategy to the inner: its native SkipNode IS the engine-collapse we
+        // want (skipped node not visited, children promoted at their depth). We additionally MARK a
+        // pure-SkipNode'd node so we suppress reassigning its extracted descendants' interleaves to
+        // it -- otherwise the extraction stream-rewrite emits phantom parent visits for a node the
+        // consumer collapsed. (SkipNodeAndDescendants / SkipAll prune the subtree, so no promotion.)
+        innerStrategies = nodeTraversalStrategies;
+
+        var skipsNode = nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipNode);
+        var skipsDescendants = nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipDescendants);
+
+        if (skipsNode && !skipsDescendants)
+          _Path[_Path.Count - 1].CollapseSkipped = true;   // TODO: SkipSiblings bit not yet handled
+      }
+
+      while (InnerTreenumerator.MoveNext(innerStrategies))
+      {
+        innerStrategies = NodeTraversalStrategies.TraverseAll;
+
         if (InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode)
         {
           if (TryHandleScheduling())
@@ -160,7 +184,8 @@ namespace Arborist.Linq.Treenumerators
         if (completedChild != null && completedChild.YieldedAccepted && !_BoundaryConsumed)
         {
           var ancestor = NearestAcceptedAncestor(_Path.Count - 2);
-          if (ancestor != null)
+          // A collapse-skipped ancestor absorbs the boundary visit (no interleaves emitted for it).
+          if (ancestor != null && !ancestor.CollapseSkipped)
           {
             ancestor.EffectiveVisitsEmitted++;
             EmitReassigned(ancestor);
@@ -171,7 +196,9 @@ namespace Arborist.Linq.Treenumerators
         return false;
       }
 
-      // Accepted node.
+      // Accepted node. (A pure-SkipNode'd node's own visits never arrive -- the inner suppresses
+      // them under SkipNode -- so there is nothing to drop here; only its reassigned interleaves,
+      // suppressed above, would have leaked.)
       if (visitCount == 1)
       {
         frame.EffectiveVisitsEmitted = 1;

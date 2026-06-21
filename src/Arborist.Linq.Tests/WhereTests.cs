@@ -2140,7 +2140,7 @@ namespace Arborist.Linq.Tests
                   ? NodeTraversalStrategies.SkipNode
                   :NodeTraversalStrategies.TraverseAll,
               TreenumerableMap = treenumerable => treenumerable.Where(nc => nc.Node != "f" && nc.Node != "c"),
-              Description = "Where not nodes f and c, traverse all",
+              Description = "Where not nodes f and c, skip node b",
               ExpectedBreadthFirstResults = new[]
               {
                 (TreenumeratorMode.SchedulingNode, "a", 0, (0, 0)),
