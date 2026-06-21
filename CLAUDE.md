@@ -176,6 +176,13 @@ Original:  a(b[0], c[1], d[2])     After filtering c:  a(b[0], d[1])
 - **DFT implementation**: `Arborist.Linq/Treenumerators/Filter/WhereDepthFirstTreenumerator.cs`
 - **BFT implementation**: `Arborist.Linq/Treenumerators/Filter/WhereBreadthFirstTreenumerator.cs`
 
+> **Design history:** An alternative *stream-rewrite ("extraction")* DFT `Where` was spiked as a
+> potential simpler replacement and **rejected** (correct full drop-in, but ~par on size and a
+> performance regression). The write-up is worth reading before reworking `Where` — it captures the
+> `Where`-as-visit-stream-splicing model and why the DFT approach does **not** generalize to BFT
+> (the Θ(N) reorder wall). See [docs/DFT_WHERE_EXTRACTION_SPIKE.md](docs/DFT_WHERE_EXTRACTION_SPIKE.md)
+> (branch `spike-dft-extraction`).
+
 ---
 
 ### WhereDepthFirstTreenumerator
