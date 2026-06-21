@@ -206,10 +206,19 @@ namespace Arborist.Linq.Treenumerators
         return true;
       }
 
-      // Interleave / final visit (after the just-completed source child).
-      // If that child was extracted, its reassigned visits already covered this boundary.
-      if (completedChild != null && completedChild.Extracted)
-        return false;
+      // Interleave / final visit after the just-completed source child.
+      if (completedChild != null)
+      {
+        // An extracted child's interleaves were already reassigned to this frame.
+        if (completedChild.Extracted)
+          return false;
+
+        // A consumer-collapsed child whose promoted brood was entirely predicate-filtered is an
+        // empty effective slot: the inner still emits a parent visit for it (it saw the promoted
+        // child before we extracted it), but the effective tree has no child there, so drop it.
+        if (completedChild.CollapseSkipped && completedChild.EffectiveChildCount == 0)
+          return false;
+      }
 
       frame.EffectiveVisitsEmitted++;
       EmitAccepted(frame, frame.EffectiveVisitsEmitted);
