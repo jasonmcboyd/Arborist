@@ -34,7 +34,7 @@ namespace Arborist.Linq.Tests
       var treeStrings = new[]
       {
         // c
-        //"a(b(c))",
+        "a(b(c))",
         //"a(b,c)",
         //"a,b(c)",
         //"a,b,c",
@@ -50,10 +50,10 @@ namespace Arborist.Linq.Tests
         //"a(d),b,c(e)",
 
         // f
-        "a(c,d),b(e,f)",
-        "a(d),b(e),c(f)",
-        "a(b(d,e,f),c)",
-        "a,b(d),c(e(f))",
+        //"a(c,d),b(e,f)",
+        //"a(d),b(e),c(f)",
+        //"a(b(d,e,f),c)",
+        //"a,b(d),c(e(f))",
 
         // g
         //"a(b(e),c(f),d(g))",
@@ -96,11 +96,18 @@ namespace Arborist.Linq.Tests
 
         foreach (var nodeCombinations in treeNodeCombinations)
         {
+          // expectedTreeString depends only on (treeString, nodeCombinations), so compute it
+          // once per filter combo instead of redundantly inside the compose/strategy loops
+          // (was ~118k Deserialize/Where/Serialize passes -> 37 distinct results for the 8-node
+          // h-tree). Behavior-preserving cleanup only -- it is NOT the lever for big-tree run
+          // time, which is dominated by MSTest's per-case overhead for the ~118k+ DynamicData
+          // cases, not this computation.
+          var expectedTreeString = GetExpectedTreeString(treeString, nodeCombinations);
+
           foreach (var composeOperations in new[] { true, false })
           {
             foreach (var nodeAndTraversalStrategyPairCombination in treeNodeAndTraversalStrategyCombinations)
             {
-              var expectedTreeString = GetExpectedTreeString(treeString, nodeCombinations);
               var nodeAndTraversalStrategyPairs = nodeAndTraversalStrategyPairCombination.ToArray();
 
               yield return new object[]

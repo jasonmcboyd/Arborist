@@ -42,18 +42,15 @@ namespace Arborist.Linq.Treenumerators
     // may produce a redundant parent visit. Cleared when an accepted child is scheduled.
     private bool _ConsumeNextInnerParentVisit = false;
 
-    // When a consumer-SkipNode'd node is removed from the queue, track its depth and
-    // child count for sibling index calculation of its remaining children.
-    private int _RemovedSkippedParentDepth = -1;
-    private int _RemovedSkippedParentChildCount = 0;
+    // When consumer-SkipNode'd nodes are removed from the queue, track child counts
+    // per depth for sibling index calculation. Index = effective depth of the removed
+    // parent; value = number of accepted children scheduled so far. -1 = no removed
+    // parent at that depth. Supports nested consumer-SkipNode'd parents (e.g., both
+    // a at depth 0 and b at depth 1 are SkipNode'd).
+    private readonly List<int> _RemovedSkippedChildCounts = new List<int>();
 
     // Deferred consumer strategy when a pending parent visit is emitted first.
     private NodeTraversalStrategies? _DeferredNodeTraversalStrategies = null;
-
-    // When SkipSiblings is stripped to protect the inner BFT's queue,
-    // the wrapper handles sibling skipping itself. Stores the queue front position
-    // at the time of stripping; null when not active.
-    private NodePosition? _SkipSiblingsQueueFrontPosition = null;
 
     // Effective depth of a consumer-SkipNode'd node whose removal requires the wrapper
     // to generate a parent visit when scheduling exits the subtree.
@@ -104,21 +101,10 @@ namespace Arborist.Linq.Treenumerators
       if (previouslySeenNodeWasScheduledAndSkipped)
         _NodePositionAndVisitCounts.GetLast().TraversalStrategy = nodeTraversalStrategies;
 
-      // Strip SkipSiblings when effective depth is 0 but inner depth > 0, to avoid
-      // damaging unrelated subtrees in the inner BFT's queue. At effective depth > 0,
-      // the inner BFT's SkipSiblings correctly disposes the right CE.
-      if (Position != new NodePosition(0, -1)
-        && InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode
-        && nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipSiblings))
-      {
-        var outerDepth = _NodePositionAndVisitCounts.GetLast().Position.Depth;
-        var innerDepth = InnerTreenumerator.Position.Depth;
-        if (outerDepth == 0 && innerDepth > 0)
-        {
-          nodeTraversalStrategies = nodeTraversalStrategies & ~NodeTraversalStrategies.SkipSiblings;
-          _SkipSiblingsQueueFrontPosition = _NodePositionAndVisitCounts.GetFirst().Position;
-        }
-      }
+      // SkipSiblings now passes straight through to the base engine, which handles it
+      // correctly under promotion (including effective-root SkipSiblings ending the root
+      // stream). The wrapper previously stripped and re-emulated it -- that was
+      // over-compensation for the then-broken base engine and produced wrong results.
 
       // Emit pending parent visit (unless consumer SkipNode'd or sentinel).
       if (_PendingParentVisit && !previouslySeenNodeWasScheduledAndSkipped)
@@ -166,22 +152,6 @@ namespace Arborist.Linq.Treenumerators
             _SkippedStack.RemoveLast();
           }
 
-          // Handle stripped SkipSiblings by skipping remaining effective siblings.
-          if (_SkipSiblingsQueueFrontPosition.HasValue)
-          {
-            var skippedAncestorCount = CountSkippedAncestors(out _);
-            var effectiveDepth = innerDepth - skippedAncestorCount;
-
-            if (effectiveDepth == 0
-              && _NodePositionAndVisitCounts.GetFirst().Position == _SkipSiblingsQueueFrontPosition.Value)
-            {
-              nodeTraversalStrategies = NodeTraversalStrategies.SkipNodeAndDescendants;
-              continue;
-            }
-
-            _SkipSiblingsQueueFrontPosition = null;
-          }
-
           var skipped = _Predicate(InnerTreenumerator.ToNodeContext());
 
           if (skipped)
@@ -204,13 +174,9 @@ namespace Arborist.Linq.Treenumerators
 
           if (lastScheduleNodeVisitWasSkipped)
           {
-            // Persist counter across consecutive siblings of the same removed parent.
-            if (!(_RemovedSkippedParentDepth >= 0
-              && _RemovedSkippedParentDepth + 1 == removedSkippedDepth))
-            {
-              _RemovedSkippedParentDepth = removedSkippedDepth;
-              _RemovedSkippedParentChildCount = 0;
-            }
+            // Record the removed parent at its effective depth so its children and
+            // subsequent siblings at the same depth get correct sibling indices.
+            SetRemovedSkippedChildCount(removedSkippedDepth, 0);
 
             _NodePositionAndVisitCounts.RemoveLast();
           }
@@ -219,14 +185,13 @@ namespace Arborist.Linq.Treenumerators
 
           if (effectivePosition.Depth > 0)
           {
-            if (_RemovedSkippedParentDepth >= 0
-              && _RemovedSkippedParentDepth + 1 == effectivePosition.Depth)
+            var parentDepth = effectivePosition.Depth - 1;
+            if (GetRemovedSkippedChildCount(parentDepth) >= 0)
             {
-              _RemovedSkippedParentChildCount++;
+              IncrementRemovedSkippedChildCount(parentDepth);
             }
             else
             {
-              _RemovedSkippedParentDepth = -1;
               _NodePositionAndVisitCounts.GetFirst().AcceptedChildCount++;
             }
           }
@@ -297,7 +262,7 @@ namespace Arborist.Linq.Treenumerators
           if (InnerTreenumerator.VisitCount == 1)
           {
             _NodePositionAndVisitCounts.RemoveFirst();
-            _RemovedSkippedParentDepth = -1;
+            ClearAllRemovedSkippedChildCounts();
 
             ref var visitedEntry = ref _NodePositionAndVisitCounts.GetFirst();
             if (visitedEntry.InnerDepth >= 0)
@@ -325,6 +290,31 @@ namespace Arborist.Linq.Treenumerators
       for (int i = 0; i <= innerDepth && i < _CurrentInnerPath.Count; i++)
         _QueuePathData.Add(_CurrentInnerPath[i]);
       return offset;
+    }
+
+    private int GetRemovedSkippedChildCount(int depth)
+    {
+      if (depth < 0 || depth >= _RemovedSkippedChildCounts.Count)
+        return -1;
+      return _RemovedSkippedChildCounts[depth];
+    }
+
+    private void SetRemovedSkippedChildCount(int depth, int count)
+    {
+      while (_RemovedSkippedChildCounts.Count <= depth)
+        _RemovedSkippedChildCounts.Add(-1);
+      _RemovedSkippedChildCounts[depth] = count;
+    }
+
+    private void IncrementRemovedSkippedChildCount(int depth)
+    {
+      _RemovedSkippedChildCounts[depth]++;
+    }
+
+    private void ClearAllRemovedSkippedChildCounts()
+    {
+      for (int i = 0; i < _RemovedSkippedChildCounts.Count; i++)
+        _RemovedSkippedChildCounts[i] = -1;
     }
 
     private int AppendSkippedPath(int innerDepth)
@@ -399,10 +389,11 @@ namespace Arborist.Linq.Treenumerators
       else
       {
         // Check if this is a child of a recently removed consumer-SkipNode'd parent
-        if (_RemovedSkippedParentDepth >= 0
-          && _RemovedSkippedParentDepth + 1 == effectiveDepth)
+        var parentDepth = effectiveDepth - 1;
+        var removedChildCount = GetRemovedSkippedChildCount(parentDepth);
+        if (removedChildCount >= 0)
         {
-          effectiveSiblingIndex = _RemovedSkippedParentChildCount;
+          effectiveSiblingIndex = removedChildCount;
         }
         else
         {
