@@ -1,0 +1,47 @@
+using Arborist.Core;
+using Arborist.Linq;
+using Arborist.SimpleSerializer;
+using BenchmarkDotNet.Attributes;
+using System.Linq;
+
+namespace Arborist.Benchmarks
+{
+  // Baseline for TreeSerializer.Serialize / Deserialize. Two shapes:
+  //   * Wide  -- a flat forest of 1M roots (stresses the symbol/comma path: 1M values + 1M commas).
+  //   * Deep  -- a degenerate 100K-deep path (stresses nesting: 100K '(' + 100K ')').
+  // Trees are materialized SimpleNode structures in [GlobalSetup] (via Deserialize), so the timed
+  // methods measure pure serializer work, not tree generation.
+  [MemoryDiagnoser]
+  [BenchmarkCategory("Serialization")]
+  public class Serialization
+  {
+    private const int Width = 1_000_000;
+    private const int Depth = 100_000;
+
+    private string _wideString;
+    private string _deepString;
+    private ITreenumerable<string> _wideTree;
+    private ITreenumerable<string> _deepTree;
+
+    [GlobalSetup]
+    public void Setup()
+    {
+      _wideString = Enumerable.Range(0, Width).ToTrivialForest().Serialize(value => value.ToString());
+      _deepString = Enumerable.Range(0, Depth).ToDegenerateTree().Serialize(value => value.ToString());
+      _wideTree = TreeSerializer.Deserialize(_wideString);
+      _deepTree = TreeSerializer.Deserialize(_deepString);
+    }
+
+    [Benchmark]
+    public string Serialize_Wide_1M() => _wideTree.Serialize();
+
+    [Benchmark]
+    public string Serialize_Deep_100K() => _deepTree.Serialize();
+
+    [Benchmark]
+    public ITreenumerable<string> Deserialize_Wide_1M() => TreeSerializer.Deserialize(_wideString);
+
+    [Benchmark]
+    public ITreenumerable<string> Deserialize_Deep_100K() => TreeSerializer.Deserialize(_deepString);
+  }
+}
