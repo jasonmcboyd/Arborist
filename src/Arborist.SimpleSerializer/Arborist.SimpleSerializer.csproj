@@ -4,6 +4,11 @@
     <TargetFrameworks>net48;net8.0</TargetFrameworks>
   </PropertyGroup>
 
+  <!-- net8.0 has Span/ReadOnlySpan built in; net48 needs the System.Memory polyfill. -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+    <PackageReference Include="System.Memory" Version="4.5.5" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Arborist.Core\Arborist.Core.csproj" />
     <ProjectReference Include="..\Arborist\Arborist.csproj" />

@@ -2,6 +2,7 @@ using Arborist.Core;
 using Arborist.Linq;
 using Arborist.SimpleSerializer;
 using BenchmarkDotNet.Attributes;
+using System;
 using System.Linq;
 
 namespace Arborist.Benchmarks
@@ -43,5 +44,15 @@ namespace Arborist.Benchmarks
 
     [Benchmark]
     public ITreenumerable<string> Deserialize_Deep_100K() => TreeSerializer.Deserialize(_deepString);
+
+    // Span demonstration: parse the same source into ints. The string map materializes 1M throwaway
+    // value strings; the span map parses straight off the source with int.Parse(ReadOnlySpan<char>).
+    [Benchmark]
+    public ITreenumerable<int> Deserialize_Wide_ToInt_StringMap()
+      => TreeSerializer.Deserialize(_wideString, (string s) => int.Parse(s));
+
+    [Benchmark]
+    public ITreenumerable<int> Deserialize_Wide_ToInt_SpanMap()
+      => TreeSerializer.Deserialize(_wideString, (ReadOnlySpan<char> s) => int.Parse(s));
   }
 }

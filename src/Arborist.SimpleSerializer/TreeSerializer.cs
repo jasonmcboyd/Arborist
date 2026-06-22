@@ -14,49 +14,70 @@ namespace Arborist.SimpleSerializer
     public static ITreenumerable<TValue> Deserialize<TValue>(
       string tree,
       Func<string, TValue> map)
+    {
+      // Adapt the string map to a span map: each value is materialized once (chars.ToString()),
+      // exactly as before. Callers that don't need a string should use the SpanMap overload below.
+      SpanMap<TValue> spanMap = chars => map(chars.ToString());
+      return new SimpleNodeTreenumerable<TValue>(DeserializeRoots(tree, spanMap));
+    }
+
+    // Span overload: the map receives each value as a slice of the source text (no intermediate
+    // string), so deserializing into non-string values (e.g. int.Parse(chars)) allocates no value
+    // strings at all.
+    public static ITreenumerable<TValue> Deserialize<TValue>(
+      string tree,
+      SpanMap<TValue> map)
       => new SimpleNodeTreenumerable<TValue>(DeserializeRoots(tree, map));
 
-    private static IEnumerable<SimpleNode<string>> DeserializeRoots(string tree)
-      => DeserializeRoots(tree, value => value);
-
+    // Fused parse: tokenize and build in one char pass, slicing each value straight off the source as
+    // a ReadOnlySpan<char> -- no StringBuilder, no intermediate Token stream. The standalone Tokenizer
+    // is kept for its own (tested) API; this is the hot deserialize path.
     private static IEnumerable<SimpleNode<TValue>> DeserializeRoots<TValue>(
       string tree,
-      Func<string, TValue> map)
+      SpanMap<TValue> map)
     {
-      var tokens = Tokenizer.Tokenize(tree);
-
       var stack = new Stack<List<SimpleNode<TValue>>>();
-
       stack.Push(new List<SimpleNode<TValue>>());
 
-      foreach (var token in tokens)
+      var valueStart = -1; // start index of the current value run; -1 = no value pending
+
+      for (int i = 0; i < tree.Length; i++)
       {
-        TValue value;
+        var character = tree[i];
 
-        switch (token.TokenType)
+        switch (character)
         {
-          case TokenType.Comma:
-            // Do nothing
-            break;
+          case '(':
+          case ')':
+          case ',':
+            if (valueStart >= 0)
+            {
+              stack.Peek().Add(new SimpleNode<TValue>(map(tree.AsSpan(valueStart, i - valueStart))));
+              valueStart = -1;
+            }
 
-          case TokenType.LeftParentheses:
-            stack.Push(new List<SimpleNode<TValue>>());
-            break;
-
-          case TokenType.RightParentheses:
-            var children = stack.Pop();
-            var nodes = stack.Peek();
-            var node = nodes[nodes.Count - 1];
-            nodes[nodes.Count - 1] = new SimpleNode<TValue>(node.Value, children);
+            if (character == '(')
+            {
+              stack.Push(new List<SimpleNode<TValue>>());
+            }
+            else if (character == ')')
+            {
+              var children = stack.Pop();
+              var nodes = stack.Peek();
+              nodes[nodes.Count - 1] = new SimpleNode<TValue>(nodes[nodes.Count - 1].Value, children);
+            }
+            // ',' just ends the pending value.
             break;
 
           default:
-            value = map(token.Symbol);
-            node = new SimpleNode<TValue>(value);
-            stack.Peek().Add(node);
+            if (valueStart < 0)
+              valueStart = i;
             break;
         }
       }
+
+      if (valueStart >= 0)
+        stack.Peek().Add(new SimpleNode<TValue>(map(tree.AsSpan(valueStart, tree.Length - valueStart))));
 
       return stack.Pop();
     }
