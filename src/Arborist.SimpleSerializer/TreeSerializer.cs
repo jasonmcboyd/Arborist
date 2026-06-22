@@ -30,8 +30,7 @@ namespace Arborist.SimpleSerializer
       => new SimpleNodeTreenumerable<TValue>(DeserializeRoots(tree, map));
 
     // Fused parse: tokenize and build in one char pass, slicing each value straight off the source as
-    // a ReadOnlySpan<char> -- no StringBuilder, no intermediate Token stream. The standalone Tokenizer
-    // is kept for its own (tested) API; this is the hot deserialize path.
+    // a ReadOnlySpan<char> -- no StringBuilder, no intermediate Token stream.
     private static IEnumerable<SimpleNode<TValue>> DeserializeRoots<TValue>(
       string tree,
       SpanMap<TValue> map)
