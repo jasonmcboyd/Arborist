@@ -2,8 +2,30 @@
 {
   public struct Token
   {
-    public Token(char character) : this(character.ToString())
+    public Token(char character)
     {
+      switch (character)
+      {
+        case ',':
+          Symbol = ",";                       // string literals are interned -> no allocation
+          TokenType = TokenType.Comma;
+          break;
+
+        case '(':
+          Symbol = "(";
+          TokenType = TokenType.LeftParentheses;
+          break;
+
+        case ')':
+          Symbol = ")";
+          TokenType = TokenType.RightParentheses;
+          break;
+
+        default:
+          Symbol = character.ToString();
+          TokenType = TokenType.String;
+          break;
+      }
     }
 
     public Token(string value)

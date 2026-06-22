@@ -2,7 +2,6 @@
 using Arborist.Treenumerables;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace Arborist.SimpleSerializer
@@ -47,7 +46,7 @@ namespace Arborist.SimpleSerializer
           case TokenType.RightParentheses:
             var children = stack.Pop();
             var nodes = stack.Peek();
-            var node = nodes.Last();
+            var node = nodes[nodes.Count - 1];
             nodes[nodes.Count - 1] = new SimpleNode<TValue>(node.Value, children);
             break;
 

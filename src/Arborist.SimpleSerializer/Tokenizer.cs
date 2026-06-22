@@ -38,13 +38,15 @@ namespace Arborist.SimpleSerializer
   
     private static bool IsSpecialSymbol(char character)
     {
-      var symbols = ",()";
-
-      for (int i = 0; i < symbols.Length; i++)
-        if (symbols[i] == character)
+      switch (character)
+      {
+        case ',':
+        case '(':
+        case ')':
           return true;
-
-      return false;
+        default:
+          return false;
+      }
     }
   }
 }
