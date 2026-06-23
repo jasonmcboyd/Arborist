@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782256078569,
+  "lastUpdate": 1782256078770,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -2032,6 +2032,54 @@ window.BENCHMARK_DATA = {
             "value": 35444264.284444444,
             "unit": "ns",
             "range": "± 101538.64510378653"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "7c795cd25f5b93fbac1993cf6a71485ef8c2de74",
+          "message": "Add MemoryDiagnoser benchmark for Invert\n\nCovers TriangleTree depth-1448 (~1M) and a 1M-deep DegenerateTree, tagged LINQ for the dashboard. Completes benchmark coverage of the now-flat transform/aggregation ops (Materialize, LeaffixScan, LeaffixAggregate, Invert).\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01Wg3xArL4FATQaXQMBvhXdg",
+          "timestamp": "2026-06-23T22:22:47Z",
+          "tree_id": "547984a2584ebd974bf3f4a1790b68fc9b328cfc",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/7c795cd25f5b93fbac1993cf6a71485ef8c2de74"
+        },
+        "date": 1782256078746,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToDegenerateTree",
+            "value": 16144160.46875,
+            "unit": "ns",
+            "range": "± 88571.46073335288"
+          },
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToDegenerateTreeUsingToTree",
+            "value": 50592255.21333333,
+            "unit": "ns",
+            "range": "± 777757.4681050602"
+          },
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToTrivialForest",
+            "value": 3827133.416015625,
+            "unit": "ns",
+            "range": "± 2333.1787772576863"
+          },
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToTrivialForestUsingToTree",
+            "value": 40174012.98224852,
+            "unit": "ns",
+            "range": "± 112867.59290637204"
           }
         ]
       }
