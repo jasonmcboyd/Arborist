@@ -15,10 +15,9 @@ namespace Arborist.SimpleSerializer
       string tree,
       Func<string, TValue> map)
     {
-      // Adapt the string map to a span map: each value is materialized once (chars.ToString()),
-      // exactly as before. Callers that don't need a string should use the SpanMap overload below.
+      // Adapt the string map to a span map: each value is materialized once (chars.ToString()).
       SpanMap<TValue> spanMap = chars => map(chars.ToString());
-      return new SimpleNodeTreenumerable<TValue>(DeserializeRoots(tree, spanMap));
+      return Parse(tree, spanMap);
     }
 
     // Span overload: the map receives each value as a slice of the source text (no intermediate
@@ -27,45 +26,48 @@ namespace Arborist.SimpleSerializer
     public static ITreenumerable<TValue> Deserialize<TValue>(
       string tree,
       SpanMap<TValue> map)
-      => new SimpleNodeTreenumerable<TValue>(DeserializeRoots(tree, map));
+      => Parse(tree, map);
 
-    // Fused parse: tokenize and build in one char pass, slicing each value straight off the source as
-    // a ReadOnlySpan<char> -- no StringBuilder, no intermediate Token stream.
-    private static IEnumerable<SimpleNode<TValue>> DeserializeRoots<TValue>(
-      string tree,
-      SpanMap<TValue> map)
+    // Single pass over the (pre-order) text, building the flat PreorderTree arrays directly -- no
+    // StringBuilder, no token stream, no intermediate SimpleNode tree. A value followed by '(' is a
+    // parent (its subtree size is backfilled at its matching ')'); a value followed by ',', ')' or
+    // end-of-string is a leaf (size 1). Subtrees are contiguous, so a parent's size is simply
+    // (node count - its index) at the moment it closes.
+    private static PreorderTree<TValue> Parse<TValue>(string tree, SpanMap<TValue> map)
     {
-      var stack = new Stack<List<SimpleNode<TValue>>>();
-      stack.Push(new List<SimpleNode<TValue>>());
+      var values = new List<TValue>();
+      var subtreeSizes = new List<int>();
+      var open = new Stack<int>();   // indices of parents whose ')' hasn't been seen yet
+      var valueStart = -1;           // start of the pending value run; -1 = none
 
-      var valueStart = -1; // start index of the current value run; -1 = no value pending
+      void Commit(int end, bool asParent)
+      {
+        if (valueStart < 0)
+          return;
+        var index = values.Count;
+        values.Add(map(tree.AsSpan(valueStart, end - valueStart)));
+        subtreeSizes.Add(asParent ? 0 : 1);   // a parent's size is backfilled when it closes
+        valueStart = -1;
+        if (asParent)
+          open.Push(index);
+      }
 
       for (int i = 0; i < tree.Length; i++)
       {
-        var character = tree[i];
-
-        switch (character)
+        switch (tree[i])
         {
           case '(':
-          case ')':
-          case ',':
-            if (valueStart >= 0)
-            {
-              stack.Peek().Add(new SimpleNode<TValue>(map(tree.AsSpan(valueStart, i - valueStart))));
-              valueStart = -1;
-            }
+            Commit(i, asParent: true);
+            break;
 
-            if (character == '(')
-            {
-              stack.Push(new List<SimpleNode<TValue>>());
-            }
-            else if (character == ')')
-            {
-              var children = stack.Pop();
-              var nodes = stack.Peek();
-              nodes[nodes.Count - 1] = new SimpleNode<TValue>(nodes[nodes.Count - 1].Value, children);
-            }
-            // ',' just ends the pending value.
+          case ')':
+            Commit(i, asParent: false);
+            var closed = open.Pop();
+            subtreeSizes[closed] = values.Count - closed;
+            break;
+
+          case ',':
+            Commit(i, asParent: false);
             break;
 
           default:
@@ -75,10 +77,9 @@ namespace Arborist.SimpleSerializer
         }
       }
 
-      if (valueStart >= 0)
-        stack.Peek().Add(new SimpleNode<TValue>(map(tree.AsSpan(valueStart, tree.Length - valueStart))));
+      Commit(tree.Length, asParent: false); // trailing top-level value, if any
 
-      return stack.Pop();
+      return new PreorderTree<TValue>(values.ToArray(), subtreeSizes.ToArray());
     }
 
     public static string Serialize(this ITreenumerable<string> treenumerable)
