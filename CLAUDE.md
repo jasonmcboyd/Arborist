@@ -138,7 +138,7 @@ Note that both produce: S a, S b, S c, V a (×3), V b (×1), V c (×1) — just 
 When implementing operators that filter or transform nodes (like `Where`), the wrapper must account for these different patterns. For example, when a node is filtered and its children are "promoted" to become children of the grandparent:
 
 - In DFT: The child is visited immediately after scheduling, so the wrapper naturally sees schedule→visit pairs
-- In BFT: All promoted children are scheduled (with inner parent visits between them) before any are visited. The wrapper must track which parent visits were already emitted to avoid duplicates (see `WhereBreadthFirstTreenumerator._PendingParentVisit` and `_ExtraParentVisitsEmitted`)
+- In BFT: All promoted children are scheduled (with inner parent visits between them) before any are visited. The wrapper must manufacture grandparent visits and suppress the inner's redundant ones (see `WhereBreadthFirstTreenumerator._PendingParentVisit` and `_ConsumeNextInnerParentVisit`)
 
 ### The Where Operation
 
@@ -255,92 +255,67 @@ When a node is scheduled by the inner treenumerator:
 
 ### WhereBreadthFirstTreenumerator
 
-BFT Where is significantly more complex due to the deferred visiting pattern. It uses a queue for accepted nodes and a stack for filtered ancestors:
+BFT Where is significantly more complex than DFT due to the deferred visiting pattern (all children at a level are scheduled before any are visited). It keeps a queue of accepted nodes plus an **incrementally-maintained skipped-ancestor prefix** — there is no per-node ancestor stack and no path buffers (an earlier design used both; they were removed when the operator was made linear-time — see "Skipped-ancestor counting" below):
 
 ```csharp
-private readonly RefSemiDeque<NodeTraversalStatus> _NodePositionAndVisitCounts;  // Queue
-private readonly RefSemiDeque<NodeVisit<TNode>> _SkippedStack;                   // Stack
+private readonly RefSemiDeque<NodeTraversalStatus> _NodePositionAndVisitCounts; // Queue of accepted nodes
+private readonly List<int> _PredSkipPrefix;                                     // Live skipped-ancestor prefix
+private readonly List<int> _RemovedSkippedChildCounts;                          // Consumer-SkipNode bookkeeping
 ```
+
+#### Two distinct kinds of "skip"
+
+The wrapper must keep these separate; conflating them is a classic bug source:
+
+- **Predicate skip** (a node filtered out by the `Where` predicate): the node is *swallowed* and its children *promoted*. This **compresses effective depth** and renumbers siblings. Counted by `_PredSkipPrefix`.
+- **Consumer SkipNode** (a `NodeTraversalStrategies.SkipNode` the *consumer* passes into `MoveNext`): the node is predicate-*accepted* but the consumer drops it. This is handled by `_RemovedSkippedChildCounts` and does **not** contribute to depth compression.
+
+#### Skipped-ancestor counting (the O(1) prefix carry)
+
+Effective depth is `innerDepth − (number of predicate-skipped proper ancestors)`. Counting those ancestors by scanning a stack of skipped nodes is **O(N) per accepted node → O(N²) overall** (during BFT scheduling, inner depth is monotonically non-decreasing, so a skipped stack never shrinks and grows to the full breadth). Instead the count is maintained incrementally:
+
+- `_PredSkipPrefix[d]` = number of predicate-skipped nodes among inner depths `0..d` on the **current path**.
+- On every scheduled node (skipped or accepted) set `_PredSkipPrefix[innerDepth] = _PredSkipPrefix[innerDepth-1] + (skipped ? 1 : 0)` — the live update.
+- `skippedAncestorCount = _PredSkipPrefix[D-1]`; `immediateParentIsSkipped = _PredSkipPrefix[D-1] > _PredSkipPrefix[D-2]` — both O(1).
+- When the queue **front advances** (a node is fully visited and dequeued), re-anchor the prefix at the new front in O(1): an accepted front contributes 0, so `prefix[frontDepth] == prefix[frontDepth-1] == frontInnerDepth − frontEffectiveDepth`. Deeper slots are rewritten live as the inner schedules the front's descendants contiguously downward, so no full-path restore is needed.
+
+This makes BFT Where **O(N)**, matching DFT. (The visit *stream* was always Θ(N); only the per-step cost was quadratic.)
 
 #### The Core Challenge: Deferred Parent Visits
 
-In BFT, all children at a level are scheduled before any are visited. When a child is promoted (parent filtered), the wrapper must emit an extra parent visit for the grandparent—but the inner BFT may later emit its own parent visit for the filtered parent. This creates potential duplicate visits.
+When a child is promoted (its inner parent was predicate-filtered), the wrapper must emit an extra parent visit for the grandparent — but the inner BFT may *also* later emit its own parent visit for the filtered parent, risking a duplicate.
 
-**Example showing the problem:**
+**Example:**
 
 ```
 Tree: a(b(c))    Filter: remove b
-
-Inner BFT sequence:
-  S a, V a, S b, V a, V b, S c, V b, V c
-
-What we need to output:
-  S a, V a, S c, V a, V c
-
-The tricky part: When we schedule c (promoted to child of a), we must emit
-"V a" BEFORE "V c". But the inner BFT will later emit "V b" which we skip,
-followed by more visits we need to handle correctly.
+Inner BFT sequence:   S a, V a, S b, V a, V b, S c, V b, V c
+What we must output:  S a, V a, S c, V a, V c
 ```
 
-#### The Pending Parent Visit Mechanism
+When we schedule `c` (promoted to a child of `a`) we must emit `V a` *before* `V c`, then suppress the inner's later `V b`.
 
-BFT tracks extra parent visits with two fields:
+#### Parent-visit machinery (current fields)
 
 ```csharp
-private bool _PendingParentVisit = false;        // Need to emit a parent visit next
-private int _ExtraParentVisitsEmitted = 0;       // Count of extra visits emitted
+private bool _PendingParentVisit;                  // emit a manufactured parent visit next
+private bool _ConsumeNextInnerParentVisit;         // swallow the inner's redundant parent visit
+private NodeTraversalStrategies? _DeferredNodeTraversalStrategies; // strategy held while a manufactured visit is emitted
+private int _ConsumerSkippedParentEffectiveDepth;  // tracks a consumer-SkipNode'd subtree (DeferredSchedulePending sentinel)
+private bool _ConsumerSkippedChildAfterLastAccepted;
 ```
 
-**When scheduling a promoted child** (detected when there are filtered ancestors and current depth = deepest filtered ancestor's depth + 1):
-- Set `_PendingParentVisit = true`
-
-**On next MoveNext**:
-- If `_PendingParentVisit` is true and conditions are met, emit parent visit first
-- Increment `_ExtraParentVisitsEmitted`
-
-**When visiting**:
-- If encountering a parent visit that corresponds to a filtered node, check if we already emitted equivalent visits
-- Use `_ExtraParentVisitsEmitted` to skip duplicates
+- **Scheduling a promoted child** (`immediateParentIsSkipped && effectiveDepth > 0`): set `_PendingParentVisit = true`.
+- **Next `MoveNext`**: if a pending parent visit is owed (and the node wasn't consumer-skipped), emit the grandparent `V` first and stash the consumer strategy in `_DeferredNodeTraversalStrategies`.
+- **Visiting**: `_ConsumeNextInnerParentVisit` suppresses the inner's now-redundant between-children parent visit for a filtered parent.
 
 #### Sibling Index Calculation
 
-BFT calculates sibling indices differently depending on context:
+`GetEffectivePosition` computes `effectiveDepth = innerDepth − PrefixSkippedAncestorCount(...)`, then the sibling index:
 
-```csharp
-private NodePosition GetEffectivePosition()
-{
-    var effectiveDepth = InnerTreenumerator.Position.Depth - _SkippedStack.Count;
-
-    int effectiveSiblingIndex;
-
-    if (effectiveDepth == 0)
-    {
-        // Root level: use counter
-        effectiveSiblingIndex = _SeenRootNodesCount;
-    }
-    else if (Mode == TreenumeratorMode.VisitingNode)
-    {
-        // Visiting: use parent's visit count - 1
-        effectiveSiblingIndex = _NodePositionAndVisitCounts.GetFirst().VisitCount - 1;
-    }
-    else
-    {
-        // Scheduling: check previous node at same depth, or use saved position
-        var previousNodePosition = _NodePositionAndVisitCounts.GetLast().Position;
-
-        if (previousNodePosition.Depth == effectiveDepth)
-            effectiveSiblingIndex = previousNodePosition.SiblingIndex + 1;
-        else if (_LastRemovedSkippedNodePosition?.Depth == effectiveDepth)
-            effectiveSiblingIndex = _LastRemovedSkippedNodePosition.Value.SiblingIndex + 1;
-        else
-            effectiveSiblingIndex = 0;
-    }
-
-    return new NodePosition(effectiveSiblingIndex, effectiveDepth);
-}
-```
-
-**Key insight**: `_LastRemovedSkippedNodePosition` saves the position of recently-removed filtered nodes. This handles the case where a filtered sibling's position is needed to calculate the next sibling's index.
+- effective root (`effectiveDepth == 0`) → `_SeenRootNodesCount`;
+- child of a consumer-SkipNode'd parent (`_RemovedSkippedChildCounts[parentDepth] >= 0`) → that running count;
+- otherwise → the queue front's `AcceptedChildCount` (the front is the node's nearest accepted ancestor / effective parent).
 
 #### Predicate Inversion
 
@@ -362,12 +337,12 @@ This is an implementation detail—the BFT implementation treats "true" as "skip
 
 | Aspect | DFT | BFT |
 |--------|-----|-----|
-| **Data structures** | Two stacks (accepted + skipped) | Queue (accepted) + stack (skipped) |
-| **Sibling index source** | Parent's `CurrentChildIndex` counter | Previous sibling position or saved position |
-| **Parent visit handling** | Natural—visits interleave with scheduling | Complex—must track pending/extra visits |
+| **Data structures** | Two stacks (accepted + skipped) | Queue (accepted) + incremental skipped-ancestor prefix |
+| **Sibling index source** | Parent's `CurrentChildIndex` counter | Queue front's `AcceptedChildCount` (or `_RemovedSkippedChildCounts`) |
+| **Parent visit handling** | Natural—visits interleave with scheduling | Complex—must manufacture/suppress parent visits |
 | **Predicate** | Used directly | Inverted |
-| **Depth calculation** | Sum of both stack counts - 1 | Inner depth - skipped stack count |
-| **Complexity** | Moderate | High |
+| **Depth calculation** | Sum of both stack counts - 1 | Inner depth − `_PredSkipPrefix[D-1]` |
+| **Time complexity** | O(N) | O(N) (was O(N²) before the prefix carry) |
 
 #### Why BFT Is Harder
 
@@ -379,7 +354,7 @@ In BFT, scheduling and visiting are decoupled. When a child is promoted:
 3. Much later, you visit the child
 4. The inner BFT emits parent visits for the filtered parent (which you must skip/suppress)
 
-This temporal separation requires explicit tracking of "how many extra parent visits did I emit" vs "how many is the inner treenumerator trying to emit that I should skip."
+This temporal separation requires explicitly manufacturing the grandparent visit at the right moment (`_PendingParentVisit`) and suppressing the inner treenumerator's now-redundant parent visit (`_ConsumeNextInnerParentVisit`).
 
 ---
 
