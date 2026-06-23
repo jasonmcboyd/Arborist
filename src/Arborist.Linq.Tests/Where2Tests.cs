@@ -29,44 +29,63 @@ namespace Arborist.Linq.Tests
       public NodeTraversalStrategies NodeTraversalStrategy { get; set; }
     }
 
-    public static IEnumerable<object[]> GetTestData()
+    // Full exhaustive tree set (groups c..i, 3..9 nodes). Consumed by the in-process
+    // Where2InProcessScan, which loops these directly -- no per-case MSTest discovery.
+    // Do NOT feed this to the [DynamicData] methods below: MSTest enumerates DynamicData
+    // during discovery even for [Ignore]d tests, and this many cases overwhelms the host.
+    public static readonly string[] AllTreeStrings =
     {
-      var treeStrings = new[]
-      {
-        // c
-        "a(b(c))",
-        //"a(b,c)",
-        //"a,b(c)",
-        //"a,b,c",
+      // c
+      "a(b(c))",
+      "a(b,c)",
+      "a,b(c)",
+      "a,b,c",
 
-        // d
-        //"a(b,c,d)",
-        //"a,b(c,d)",
-        //"a,b(d),c",
+      // d
+      "a(b,c,d)",
+      "a,b(c,d)",
+      "a,b(d),c",
 
-        // e
-        //"a(b(d(e)),c)",
-        //"a(b(c,d,e))",
-        //"a(d),b,c(e)",
+      // e
+      "a(b(d(e)),c)",
+      "a(b(c,d,e))",
+      "a(d),b,c(e)",
 
-        // f
-        //"a(c,d),b(e,f)",
-        //"a(d),b(e),c(f)",
-        //"a(b(d,e,f),c)",
-        //"a,b(d),c(e(f))",
+      // f
+      "a(c,d),b(e,f)",
+      "a(d),b(e),c(f)",
+      "a(b(d,e,f),c)",
+      "a,b(d),c(e(f))",
 
-        // g
-        //"a(b(e),c(f),d(g))",
-        //"a(b(d,e),c(f(g)))",
+      // g
+      "a(b(e),c(f),d(g))",
+      "a(b(d,e),c(f(g)))",
 
-        // h
-        //"a(d(f,g,h)),b,c(e)",
+      // h
+      "a(d(f,g,h)),b,c(e)",
 
-        // i
-        //"a(b(d,e,f),c(g,h,i))",
-        //"a(d(g)),b(e(h)),c(f(i))",
-      };
+      // i
+      "a(b(d,e,f),c(g,h,i))",
+      "a(d(g)),b(e(h)),c(f(i))",
+    };
 
+    // Small subset for the [DynamicData] methods only. Kept tiny so MSTest discovery stays
+    // cheap (those methods are [Ignore]d and superseded by Where2InProcessScan anyway).
+    private static readonly string[] DynamicDataTreeStrings =
+    {
+      "a(b(c))",
+      "a(b,c)",
+      "a,b(c)",
+      "a,b,c",
+    };
+
+    // DynamicData source for the (ignored) per-case methods -- intentionally the small set.
+    public static IEnumerable<object[]> GetTestData() => GenerateCases(DynamicDataTreeStrings);
+
+    // Exhaustive case generator over an arbitrary tree set. The in-process scan calls this
+    // with AllTreeStrings; GetTestData calls it with the small DynamicData set.
+    public static IEnumerable<object[]> GenerateCases(string[] treeStrings)
+    {
       var nodeTraversalStrategies =
         Enum.GetValues(typeof(NodeTraversalStrategies))
         .Cast<NodeTraversalStrategies>()

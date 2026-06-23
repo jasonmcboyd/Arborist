@@ -8,14 +8,17 @@ using System.Linq;
 
 namespace Arborist.Linq.Tests
 {
-  // Fast in-process equivalent of Where2Test_BreadthFirst for the currently-enabled tree(s):
-  // loops Where2Tests.GetTestData() and runs the identical Where-wrapper-vs-materialized-oracle
-  // BFT comparison per case, but in ONE test loop (no MSTest per-case overhead) and with
-  // deserialization caching (the serializer is the slow part). Big trees (9-node i-group are
-  // ~185k cases) run in seconds here vs minutes through DynamicData. Same coverage.
+  // Fast in-process equivalent of Where2Test_BreadthFirst over the FULL exhaustive tree set
+  // (Where2Tests.AllTreeStrings, groups c..i): runs the identical Where-wrapper-vs-materialized-
+  // oracle BFT comparison per case, but in ONE test loop (no MSTest per-case overhead) and with
+  // deserialization caching (the serializer is the slow part). This is why coverage lives here
+  // and NOT in the [DynamicData] Where2Test_* methods: enumerating the full set during MSTest
+  // discovery (even for [Ignore]d tests) overwhelms the host. Runs the whole set in seconds.
   [TestClass]
   public class Where2InProcessScan
   {
+    public TestContext TestContext { get; set; }
+
     [TestMethod]
     public void BreadthFirstMatchesOracle()
     {
@@ -34,7 +37,7 @@ namespace Arborist.Linq.Tests
       long failed = 0;
       var failures = new List<string>();
 
-      foreach (var data in Where2Tests.GetTestData())
+      foreach (var data in Where2Tests.GenerateCases(Where2Tests.AllTreeStrings))
       {
         total++;
 
@@ -78,6 +81,8 @@ namespace Arborist.Linq.Tests
             failures.Add(Where2Tests.GetTestDisplayName(null, data));
         }
       }
+
+      TestContext.WriteLine($"Where2InProcessScan: {total} cases across {Where2Tests.AllTreeStrings.Length} trees (groups c..i).");
 
       Assert.AreEqual(
         0L,
