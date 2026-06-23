@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782257438652,
+  "lastUpdate": 1782257438818,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -4922,6 +4922,50 @@ window.BENCHMARK_DATA = {
           {
             "name": "Arborist.Benchmarks.EnumerableToTree.ToTrivialForestUsingToTree",
             "value": 1929,
+            "unit": "bytes"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "cf2c06864e8fdc1e6c24df1f1437f0dae1da26b0",
+          "message": "Add 2-param Treenumerable base; drop redundant identity maps (map cleanup stage 1)\n\nThe sample trees whose node IS their surfaced value (TriangleTree, CollatzTree, CompleteBinaryTree, NDecrementTree, DeepTree) were each passing a redundant 'node => node' nodeToValueMap and carrying a duplicate type parameter. Add a 2-param Treenumerable<TNode, TChildEnumerator> convenience base (identity map) and migrate them to it. Public surfaces unchanged. The 3-param base + map remain for PreorderTree's genuine index->value dereference.\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01Wg3xArL4FATQaXQMBvhXdg",
+          "timestamp": "2026-06-23T22:35:56Z",
+          "tree_id": "005c51f9d7f00116b4e04d1cdb2a5fd0680fc86e",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/cf2c06864e8fdc1e6c24df1f1437f0dae1da26b0"
+        },
+        "date": 1782257438799,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToDegenerateTree",
+            "value": 564,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToDegenerateTreeUsingToTree",
+            "value": 46145913,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToTrivialForest",
+            "value": 275,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToTrivialForestUsingToTree",
+            "value": 1921,
             "unit": "bytes"
           }
         ]
