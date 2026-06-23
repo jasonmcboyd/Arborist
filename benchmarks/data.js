@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782253173738,
+  "lastUpdate": 1782253173934,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -1144,6 +1144,54 @@ window.BENCHMARK_DATA = {
             "value": 38423611.76923077,
             "unit": "ns",
             "range": "± 46097.79051302303"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "c3ab5ef05fc7c7304bb98cd14e97bed3a8f91e62",
+          "message": "Align LeaffixAggregate with LeaffixScan (flat, lazy, zero per-node alloc)\n\nLeaffixAggregate now uses the same flat forward DFS + no-copy ChildAccumulations view as LeaffixScan, yielding each root's accumulated value. Accumulator changes TAccumulate[] -> ChildAccumulations<TAccumulate>. Per-root lazy: a root is emitted the moment its subtree completes and the buffers are reused for the next root, so peak memory is the largest root subtree (not the whole forest) and early-terminating consumers traverse fewer roots -- matching the previous LeaffixAggregator behavior. Zero per-node heap allocation. Adds LeaffixAggregateTests (it previously had none and no callers).\n\nLeaffixAggregator is retained -- still used by Invert (TreeInverter); it'll be removed when Invert is redesigned onto a flat structure.\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01Wg3xArL4FATQaXQMBvhXdg",
+          "timestamp": "2026-06-23T21:57:19Z",
+          "tree_id": "7dacc032f0faefb81f1e004514e835a60b5bf81a",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/c3ab5ef05fc7c7304bb98cd14e97bed3a8f91e62"
+        },
+        "date": 1782253173911,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToDegenerateTree",
+            "value": 14573754.555288462,
+            "unit": "ns",
+            "range": "± 13293.132476950208"
+          },
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToDegenerateTreeUsingToTree",
+            "value": 50738299.58571428,
+            "unit": "ns",
+            "range": "± 95223.06699867996"
+          },
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToTrivialForest",
+            "value": 3584682.847916667,
+            "unit": "ns",
+            "range": "± 30921.729991443008"
+          },
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToTrivialForestUsingToTree",
+            "value": 38935770.702564105,
+            "unit": "ns",
+            "range": "± 173500.47334169337"
           }
         ]
       }
