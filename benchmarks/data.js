@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782254668503,
+  "lastUpdate": 1782254668670,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -3073,6 +3073,66 @@ window.BENCHMARK_DATA = {
             "value": 23882518.49107143,
             "unit": "ns",
             "range": "± 138584.07336015263"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "96f3cc44e2208f47258c2887c2a011530d708864",
+          "message": "Rewrite Invert flat; retire SimpleNode and LeaffixAggregator\n\nInvert now materializes the source into flat pre-order arrays and emits the mirror with a stack -- pushing roots/children in forward order so they pop in reverse (the mirror's pre-order). Subtree sizes are invariant under mirroring; result is a PreorderTree. O(N), zero per-node allocation (was a SimpleNode object per node via LeaffixAggregator).\n\nInvert was the last user of both SimpleNode and LeaffixAggregator, so this deletes five files: TreeInverter, LeaffixAggregator (+NodeContextAndResult), SimpleNode, SimpleNodeChildEnumerator, SimpleNodeTreenumerable. The SimpleNode retirement is complete, clearing the runway for the nodeToValueMap elimination. (A level-order/LOUDS mirror -- reverse each child-run in place -- remains a future refinement if a LevelOrderTree is ever built.)\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01Wg3xArL4FATQaXQMBvhXdg",
+          "timestamp": "2026-06-23T22:21:16Z",
+          "tree_id": "aafd024b9cc4740d5e6c4fe63bc7cf95158cbb5e",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/96f3cc44e2208f47258c2887c2a011530d708864"
+        },
+        "date": 1782254668648,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.Serialization.Serialize_Wide_1M",
+            "value": 52626835.557142854,
+            "unit": "ns",
+            "range": "± 311495.7808148656"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Serialize_Deep_100K",
+            "value": 7600805.435416667,
+            "unit": "ns",
+            "range": "± 35630.674812277044"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Deserialize_Wide_1M",
+            "value": 88476575.73611109,
+            "unit": "ns",
+            "range": "± 715454.1504625806"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Deserialize_Deep_100K",
+            "value": 8422532.638221154,
+            "unit": "ns",
+            "range": "± 72379.20809009434"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Deserialize_Wide_ToInt_StringMap",
+            "value": 41978506.02197802,
+            "unit": "ns",
+            "range": "± 327857.1147989337"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Deserialize_Wide_ToInt_SpanMap",
+            "value": 22505473.42410714,
+            "unit": "ns",
+            "range": "± 73539.0897777294"
           }
         ]
       }
