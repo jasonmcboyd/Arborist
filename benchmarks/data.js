@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782190986076,
+  "lastUpdate": 1782190986269,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -1597,6 +1597,45 @@ window.BENCHMARK_DATA = {
           "url": "https://github.com/jasonmcboyd/Arborist/commit/87495d479356376af86c640133c60ba9554a0463"
         },
         "date": 1769975446612,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.Add_8M",
+            "value": 33557386,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.RemoveFirst_8M",
+            "value": 33557386,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.RemoveLast_8M",
+            "value": 33557386,
+            "unit": "bytes"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "5993e5762d3c0ffa1bbacbb40b35307cff9a3f87",
+          "message": "Docs: document BFT Where O(N) prefix-carry design\n\nRewrite the WhereBreadthFirstTreenumerator section to match the implementation (queue + incremental _PredSkipPrefix, predicate-skip vs consumer-SkipNode, the real parent-visit fields, front-anchored sibling index). Update the DFT-vs-BFT table (BFT now O(N)) and fix stale _ExtraParentVisitsEmitted/_LastRemovedSkippedNodePosition/_SkippedStack references.\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01Wg3xArL4FATQaXQMBvhXdg",
+          "timestamp": "2026-06-23T04:33:54Z",
+          "tree_id": "a2615b3ce8e91df5baffd5f8f08e3c6ac9df2e3b",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/5993e5762d3c0ffa1bbacbb40b35307cff9a3f87"
+        },
+        "date": 1782190986244,
         "tool": "customSmallerIsBetter",
         "benches": [
           {
