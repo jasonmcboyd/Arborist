@@ -51,4 +51,26 @@ namespace Arborist.Treenumerables
           _NodeToValueMap);
     }
   }
+
+  // Convenience base for trees whose node IS its surfaced value (TValue == TNode): the value map is
+  // the identity, so callers don't supply one. Trees with a distinct internal handle (e.g.
+  // PreorderTree's int index) use the three-parameter base above with an explicit resolution map.
+  public class Treenumerable<TNode, TChildEnumerator>
+    : Treenumerable<TNode, TNode, TChildEnumerator>
+    where TChildEnumerator : IChildEnumerator<TNode>
+  {
+    public Treenumerable(
+      Func<NodeContext<TNode>, TChildEnumerator> childEnumeratorFactory,
+      params TNode[] roots)
+      : base(childEnumeratorFactory, node => node, roots)
+    {
+    }
+
+    public Treenumerable(
+      Func<NodeContext<TNode>, TChildEnumerator> childEnumeratorFactory,
+      IEnumerable<TNode> roots)
+      : base(childEnumeratorFactory, node => node, roots)
+    {
+    }
+  }
 }

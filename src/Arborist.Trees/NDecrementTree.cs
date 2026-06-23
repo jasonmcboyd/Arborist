@@ -15,12 +15,11 @@ namespace Arborist.Trees
   /// If the depth is 5, the width of the levels are 1, 4, 6, 4, 1, which corresponds to the
   /// fifth row of Pascal's triangle.
   /// </summary>
-  public class NDecrementTree : Treenumerable<int, int, NDecrementTreeNodeChildEnumerator>
+  public class NDecrementTree : Treenumerable<int, NDecrementTreeNodeChildEnumerator>
   {
     public NDecrementTree(int depth)
       : base(
           nodeContext => new NDecrementTreeNodeChildEnumerator(nodeContext.Node),
-          node => node,
           new[] { depth - 1 })
     {
     }
