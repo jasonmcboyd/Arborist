@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782256079157,
+  "lastUpdate": 1782256079351,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -2789,6 +2789,130 @@ window.BENCHMARK_DATA = {
           {
             "name": "Arborist.Benchmarks.PreorderTraversal.CompleteBinaryTree_PruneAfterDepth_19",
             "value": 1513,
+            "unit": "bytes"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "7c795cd25f5b93fbac1993cf6a71485ef8c2de74",
+          "message": "Add MemoryDiagnoser benchmark for Invert\n\nCovers TriangleTree depth-1448 (~1M) and a 1M-deep DegenerateTree, tagged LINQ for the dashboard. Completes benchmark coverage of the now-flat transform/aggregation ops (Materialize, LeaffixScan, LeaffixAggregate, Invert).\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01Wg3xArL4FATQaXQMBvhXdg",
+          "timestamp": "2026-06-23T22:22:47Z",
+          "tree_id": "547984a2584ebd974bf3f4a1790b68fc9b328cfc",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/7c795cd25f5b93fbac1993cf6a71485ef8c2de74"
+        },
+        "date": 1782256079327,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.BreadthFirstTreenumerator.TriangleTree_2896",
+            "value": 527480,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.BreadthFirstTreenumerator.CompleteBinaryTree_21",
+            "value": 117450220,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.BreadthFirstTreenumerator.TrivialForest_4M",
+            "value": 295,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.BreadthFirstTreenumerator.DegenerateTree_4M",
+            "value": 867,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.DepthFirstTreenumerator.TriangleTree_2896",
+            "value": 133245,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.DepthFirstTreenumerator.CompleteBinaryTree_21",
+            "value": 2184,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.DepthFirstTreenumerator.TrivialForest_4M",
+            "value": 295,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.DepthFirstTreenumerator.DegenerateTree_4M",
+            "value": 33557608,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.LevelOrderTraversal.DeepTree",
+            "value": 3234,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.LevelOrderTraversal.TriangleTree_PruneAfter_1447",
+            "value": 265219,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.LevelOrderTraversal.CompleteBinaryTree_PruneBefore_20",
+            "value": 58732544,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.LevelOrderTraversal.CompleteBinaryTree_PruneAfter_19",
+            "value": 29368803,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.PostOrderTraversal.DeepTree",
+            "value": 4198261,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.PostOrderTraversal.TriangleTree_PruneAfter_1447",
+            "value": 35217,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.PostOrderTraversal.CompleteBinaryTree_PruneBefore_20",
+            "value": 3800,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.PostOrderTraversal.CompleteBinaryTree_PruneAfter_19",
+            "value": 1979,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.PreorderTraversal.DeepTree",
+            "value": 2099442,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.PreorderTraversal.TriangleTree_PruneAfter_1447",
+            "value": 26269,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.PreorderTraversal.CompleteBinaryTree_PruneBefore_20",
+            "value": 3315,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.PreorderTraversal.CompleteBinaryTree_PruneAfterDepth_19",
+            "value": 1521,
             "unit": "bytes"
           }
         ]
