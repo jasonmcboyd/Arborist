@@ -43,8 +43,14 @@ namespace Arborist.Linq.Treenumerators
         return true;
       }
 
-      // If the node was skipped, move it to the skipped stack.
+      // If the consumer skipped the node we just scheduled, move it to the
+      // skipped stack so its descendants get promoted. The most recently
+      // scheduled node is the top of _NodeVisits. We must never move the
+      // sentinel (the only node present when _NodeVisits.Count == 1): it is a
+      // virtual parent, not a node we ever yielded, so an external skip cannot
+      // apply to it.
       if (InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode
+        && _NodeVisits.Count > 1
         && nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipNode))
       {
         _SkippedNodeVisits.AddLast(_NodeVisits.RemoveLast());
