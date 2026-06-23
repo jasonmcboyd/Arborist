@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782254669494,
+  "lastUpdate": 1782256078367,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -576,6 +576,150 @@ window.BENCHMARK_DATA = {
             "value": 33984610.51555555,
             "unit": "ns",
             "range": "± 65027.69047797112"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "7c795cd25f5b93fbac1993cf6a71485ef8c2de74",
+          "message": "Add MemoryDiagnoser benchmark for Invert\n\nCovers TriangleTree depth-1448 (~1M) and a 1M-deep DegenerateTree, tagged LINQ for the dashboard. Completes benchmark coverage of the now-flat transform/aggregation ops (Materialize, LeaffixScan, LeaffixAggregate, Invert).\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01Wg3xArL4FATQaXQMBvhXdg",
+          "timestamp": "2026-06-23T22:22:47Z",
+          "tree_id": "547984a2584ebd974bf3f4a1790b68fc9b328cfc",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/7c795cd25f5b93fbac1993cf6a71485ef8c2de74"
+        },
+        "date": 1782256078084,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.BreadthFirstTreenumerator.TriangleTree_2896",
+            "value": 291495011.35714287,
+            "unit": "ns",
+            "range": "± 1067125.8001722058"
+          },
+          {
+            "name": "Arborist.Benchmarks.BreadthFirstTreenumerator.CompleteBinaryTree_21",
+            "value": 330402836.1,
+            "unit": "ns",
+            "range": "± 4188847.9498712253"
+          },
+          {
+            "name": "Arborist.Benchmarks.BreadthFirstTreenumerator.TrivialForest_4M",
+            "value": 15867920.901785715,
+            "unit": "ns",
+            "range": "± 91308.18040693719"
+          },
+          {
+            "name": "Arborist.Benchmarks.BreadthFirstTreenumerator.DegenerateTree_4M",
+            "value": 108283896.73846152,
+            "unit": "ns",
+            "range": "± 201275.78452472237"
+          },
+          {
+            "name": "Arborist.Benchmarks.DepthFirstTreenumerator.TriangleTree_2896",
+            "value": 234825983.6666667,
+            "unit": "ns",
+            "range": "± 1074839.3170083312"
+          },
+          {
+            "name": "Arborist.Benchmarks.DepthFirstTreenumerator.CompleteBinaryTree_21",
+            "value": 248016743.05555555,
+            "unit": "ns",
+            "range": "± 4757453.750627021"
+          },
+          {
+            "name": "Arborist.Benchmarks.DepthFirstTreenumerator.TrivialForest_4M",
+            "value": 15790453.728365384,
+            "unit": "ns",
+            "range": "± 22888.203949514427"
+          },
+          {
+            "name": "Arborist.Benchmarks.DepthFirstTreenumerator.DegenerateTree_4M",
+            "value": 62434195.625,
+            "unit": "ns",
+            "range": "± 94006.48551420345"
+          },
+          {
+            "name": "Arborist.Benchmarks.LevelOrderTraversal.DeepTree",
+            "value": 57762220.37777778,
+            "unit": "ns",
+            "range": "± 196620.57011502679"
+          },
+          {
+            "name": "Arborist.Benchmarks.LevelOrderTraversal.TriangleTree_PruneAfter_1447",
+            "value": 84195067.5,
+            "unit": "ns",
+            "range": "± 57851.56323362437"
+          },
+          {
+            "name": "Arborist.Benchmarks.LevelOrderTraversal.CompleteBinaryTree_PruneBefore_20",
+            "value": 191455690.4358974,
+            "unit": "ns",
+            "range": "± 1015119.4878448008"
+          },
+          {
+            "name": "Arborist.Benchmarks.LevelOrderTraversal.CompleteBinaryTree_PruneAfter_19",
+            "value": 90263625.42857143,
+            "unit": "ns",
+            "range": "± 202193.14862767656"
+          },
+          {
+            "name": "Arborist.Benchmarks.PostOrderTraversal.DeepTree",
+            "value": 37591709.442857146,
+            "unit": "ns",
+            "range": "± 150916.96402513472"
+          },
+          {
+            "name": "Arborist.Benchmarks.PostOrderTraversal.TriangleTree_PruneAfter_1447",
+            "value": 40745255.88757397,
+            "unit": "ns",
+            "range": "± 63132.40039122792"
+          },
+          {
+            "name": "Arborist.Benchmarks.PostOrderTraversal.CompleteBinaryTree_PruneBefore_20",
+            "value": 127935661.89285715,
+            "unit": "ns",
+            "range": "± 1691160.1475769577"
+          },
+          {
+            "name": "Arborist.Benchmarks.PostOrderTraversal.CompleteBinaryTree_PruneAfter_19",
+            "value": 47893110.25874126,
+            "unit": "ns",
+            "range": "± 428160.25348819536"
+          },
+          {
+            "name": "Arborist.Benchmarks.PreorderTraversal.DeepTree",
+            "value": 24002339.08482143,
+            "unit": "ns",
+            "range": "± 145841.70756866015"
+          },
+          {
+            "name": "Arborist.Benchmarks.PreorderTraversal.TriangleTree_PruneAfter_1447",
+            "value": 35728918.329670325,
+            "unit": "ns",
+            "range": "± 47256.415737630814"
+          },
+          {
+            "name": "Arborist.Benchmarks.PreorderTraversal.CompleteBinaryTree_PruneBefore_20",
+            "value": 120457791.90666668,
+            "unit": "ns",
+            "range": "± 609989.3094869129"
+          },
+          {
+            "name": "Arborist.Benchmarks.PreorderTraversal.CompleteBinaryTree_PruneAfterDepth_19",
+            "value": 41706462.64285715,
+            "unit": "ns",
+            "range": "± 142143.84660282405"
           }
         ]
       }
