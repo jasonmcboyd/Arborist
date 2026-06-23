@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782190984846,
+  "lastUpdate": 1782190985053,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -1007,6 +1007,130 @@ window.BENCHMARK_DATA = {
           {
             "name": "Arborist.Benchmarks.PreorderTraversal.CompleteBinaryTree_PruneAfterDepth_19",
             "value": 1491,
+            "unit": "bytes"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "5993e5762d3c0ffa1bbacbb40b35307cff9a3f87",
+          "message": "Docs: document BFT Where O(N) prefix-carry design\n\nRewrite the WhereBreadthFirstTreenumerator section to match the implementation (queue + incremental _PredSkipPrefix, predicate-skip vs consumer-SkipNode, the real parent-visit fields, front-anchored sibling index). Update the DFT-vs-BFT table (BFT now O(N)) and fix stale _ExtraParentVisitsEmitted/_LastRemovedSkippedNodePosition/_SkippedStack references.\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01Wg3xArL4FATQaXQMBvhXdg",
+          "timestamp": "2026-06-23T04:33:54Z",
+          "tree_id": "a2615b3ce8e91df5baffd5f8f08e3c6ac9df2e3b",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/5993e5762d3c0ffa1bbacbb40b35307cff9a3f87"
+        },
+        "date": 1782190985028,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.BreadthFirstTreenumerator.TriangleTree_2896",
+            "value": 527480,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.BreadthFirstTreenumerator.CompleteBinaryTree_21",
+            "value": 117446144,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.BreadthFirstTreenumerator.TrivialForest_4M",
+            "value": 295,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.BreadthFirstTreenumerator.DegenerateTree_4M",
+            "value": 867,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.DepthFirstTreenumerator.TriangleTree_2896",
+            "value": 133245,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.DepthFirstTreenumerator.CompleteBinaryTree_21",
+            "value": 2061,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.DepthFirstTreenumerator.TrivialForest_4M",
+            "value": 295,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.DepthFirstTreenumerator.DegenerateTree_4M",
+            "value": 33557608,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.LevelOrderTraversal.DeepTree",
+            "value": 3226,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.LevelOrderTraversal.TriangleTree_PruneAfter_1447",
+            "value": 265201,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.LevelOrderTraversal.CompleteBinaryTree_PruneBefore_20",
+            "value": 58727157,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.LevelOrderTraversal.CompleteBinaryTree_PruneAfter_19",
+            "value": 29366085,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.PostOrderTraversal.DeepTree",
+            "value": 4198260,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.PostOrderTraversal.TriangleTree_PruneAfter_1447",
+            "value": 35217,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.PostOrderTraversal.CompleteBinaryTree_PruneBefore_20",
+            "value": 3763,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.PostOrderTraversal.CompleteBinaryTree_PruneAfter_19",
+            "value": 1979,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.PreorderTraversal.DeepTree",
+            "value": 2099442,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.PreorderTraversal.TriangleTree_PruneAfter_1447",
+            "value": 26265,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.PreorderTraversal.CompleteBinaryTree_PruneBefore_20",
+            "value": 3315,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.PreorderTraversal.CompleteBinaryTree_PruneAfterDepth_19",
+            "value": 1521,
             "unit": "bytes"
           }
         ]
