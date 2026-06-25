@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782413420296,
+  "lastUpdate": 1782413420499,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -2932,6 +2932,54 @@ window.BENCHMARK_DATA = {
             "value": 35244455.52,
             "unit": "ns",
             "range": "± 112646.40700093821"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "ca567e0f439d6d1f0f5c2143add771a6c13fd41c",
+          "message": "Fix BFT Where O(depth) memory regression: tail-carry skip prefix\n\nf7eae61's O(N)-time prefix carry stored _PredSkipPrefix as a List<int>\nindexed by absolute inner depth, grown to the current depth on every\nscheduled node -- so a 1M-deep degenerate Where(_=>true) chain allocated\n~8.39 MB even though nothing is predicate-skipped (every entry 0).\n\nReplace it with a tail-carry: the prefix is monotonic non-decreasing in\ndepth and constant (= total skips on the path) beyond the deepest skipped\nancestor, so store only up to the deepest skip and serve reads past the\nend from a scalar tail. New _PrefixStored + _PrefixStoredCount +\n_PrefixTail; PrefixRead/PrefixWriteScheduled (no-op when value == tail, so\nzero allocation in the accepted region); PrefixAnchor truncates the stored\ncount to frontDepth-1 on front-advance.\n\nWhereAll 8.39 MB -> ~1.9 KB (O(1) in depth); WhereNone byte-identical\n(inherent O(depth) preserved). Visit stream byte-identical: validated\nagainst Where2InProcessScan (full c..i, 891k cases) + WhereTests (218/0),\nnet48 + net8.0 clean. Add WhereBreadthFirstAllocationTests as a hard\nmemory-bound regression guard (the gh-pages benchmark only soft-alerts).\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01Wg3xArL4FATQaXQMBvhXdg",
+          "timestamp": "2026-06-25T18:13:44Z",
+          "tree_id": "6d5c2256d2c8574537a4127f73a8de04fe0b4011",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/ca567e0f439d6d1f0f5c2143add771a6c13fd41c"
+        },
+        "date": 1782413420474,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToDegenerateTree",
+            "value": 14582442.357291667,
+            "unit": "ns",
+            "range": "± 12913.785566132388"
+          },
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToDegenerateTreeUsingToTree",
+            "value": 51128588.88666668,
+            "unit": "ns",
+            "range": "± 609521.1896902452"
+          },
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToTrivialForest",
+            "value": 3609116.887276786,
+            "unit": "ns",
+            "range": "± 31532.59797173244"
+          },
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToTrivialForestUsingToTree",
+            "value": 38229985.19047619,
+            "unit": "ns",
+            "range": "± 35931.533575778725"
           }
         ]
       }
