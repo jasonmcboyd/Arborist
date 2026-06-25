@@ -26,16 +26,68 @@ namespace Arborist.Linq.Treenumerators
 
     private int _SeenRootNodesCount = 0;
 
-    // Incremental predicate-skipped-ancestor prefix: _PredSkipPrefix[d] = number of
+    // Incremental predicate-skipped-ancestor prefix: PrefixRead(d) = number of
     // PREDICATE-skipped nodes among inner depths 0..d on the current path. (Consumer-
     // SkipNode'd nodes are predicate-accepted, so they do NOT count here -- they are
     // handled by _RemovedSkippedChildCounts.) This gives an O(1) skipped-ancestor lookup
     // with no per-node stack scan. It is maintained incrementally: each scheduled node sets
     // its own depth (live), and when the queue front advances the prefix is re-anchored at
-    // the new front's depth in O(1) (RestoreSkipPrefixAtFront). Because the inner schedules
-    // depths contiguously from the front downward, deeper entries are always rewritten before
-    // they are read, so no full-path copy/restore is needed.
-    private readonly List<int> _PredSkipPrefix = new List<int>();
+    // the new front's depth in O(1) (PrefixAnchor). Because the inner schedules depths
+    // contiguously from the front downward, deeper entries are always rewritten before they
+    // are read, so no full-path copy/restore is needed.
+    //
+    // STORAGE (tail-carry): the prefix is monotonic non-decreasing in depth and CONSTANT
+    // beyond the deepest predicate-skipped ancestor on the current path (accepted nodes add 0).
+    // So we store explicit per-depth entries only up to the deepest depth that differs from the
+    // running tail value; reads past _PrefixStoredCount return _PrefixTail. With no predicate
+    // skips (WhereAll) the stored region stays empty -- memory is O(stored skip depth), not
+    // O(inner depth). This is the only thing that differs from a flat List<int> indexed by
+    // absolute depth; the logical values are identical (verified value-by-value against the old
+    // flat-list logic across the full Where2InProcessScan via a temporary validate-alongside shadow).
+    private readonly List<int> _PrefixStored = new List<int>();
+    private int _PrefixStoredCount = 0;
+    private int _PrefixTail = 0;
+
+    private int PrefixRead(int depth)
+    {
+      if (depth < 0)
+        return 0;
+      if (depth < _PrefixStoredCount)
+        return _PrefixStored[depth];
+      return _PrefixTail;
+    }
+
+    // Set the prefix at inner depth `depth` to `value` for the current scheduled node.
+    // Only materializes stored entries when `value` exceeds the constant tail (i.e. a
+    // predicate skip pushed the running count above the tail); equal-to-tail writes in the
+    // accepted region are no-ops and allocate nothing.
+    private void PrefixWriteScheduled(int depth, int value)
+    {
+      if (depth < _PrefixStoredCount)
+      {
+        _PrefixStored[depth] = value;
+        return;
+      }
+
+      if (value == _PrefixTail)
+        return; // still on the constant tail -- nothing to store.
+
+      // A skip raised the count above the tail. Materialize [_PrefixStoredCount .. depth]:
+      // the gap entries are still on the (old) tail, then this depth gets `value`.
+      while (_PrefixStoredCount < depth)
+      {
+        if (_PrefixStoredCount < _PrefixStored.Count)
+          _PrefixStored[_PrefixStoredCount] = _PrefixTail;
+        else
+          _PrefixStored.Add(_PrefixTail);
+        _PrefixStoredCount++;
+      }
+      if (_PrefixStoredCount < _PrefixStored.Count)
+        _PrefixStored[_PrefixStoredCount] = value;
+      else
+        _PrefixStored.Add(value);
+      _PrefixStoredCount++;
+    }
 
     private int PrefixSkippedAncestorCount(out bool immediateParentIsSkipped)
     {
@@ -45,8 +97,8 @@ namespace Arborist.Linq.Treenumerators
         immediateParentIsSkipped = false;
         return 0;
       }
-      var parentPrefix = _PredSkipPrefix[depth - 1];
-      var grandparentPrefix = depth > 1 ? _PredSkipPrefix[depth - 2] : 0;
+      var parentPrefix = PrefixRead(depth - 1);
+      var grandparentPrefix = depth > 1 ? PrefixRead(depth - 2) : 0;
       immediateParentIsSkipped = parentPrefix > grandparentPrefix;
       return parentPrefix;
     }
@@ -165,12 +217,10 @@ namespace Arborist.Linq.Treenumerators
         if (InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode)
         {
           var innerDepth = InnerTreenumerator.Position.Depth;
-          while (_PredSkipPrefix.Count <= innerDepth)
-            _PredSkipPrefix.Add(0);
 
           var skipped = _Predicate(InnerTreenumerator.ToNodeContext());
 
-          _PredSkipPrefix[innerDepth] = (innerDepth > 0 ? _PredSkipPrefix[innerDepth - 1] : 0) + (skipped ? 1 : 0);
+          PrefixWriteScheduled(innerDepth, (innerDepth > 0 ? PrefixRead(innerDepth - 1) : 0) + (skipped ? 1 : 0));
 
           if (skipped)
           {
@@ -279,7 +329,7 @@ namespace Arborist.Linq.Treenumerators
 
             ref var visitedEntry = ref _NodePositionAndVisitCounts.GetFirst();
             if (visitedEntry.InnerDepth >= 0)
-              RestoreSkipPrefixAtFront(visitedEntry.InnerDepth, visitedEntry.InnerDepth - visitedEntry.Position.Depth);
+              PrefixAnchor(visitedEntry.InnerDepth, visitedEntry.InnerDepth - visitedEntry.Position.Depth);
           }
           else if (Mode == TreenumeratorMode.VisitingNode)
             continue;
@@ -324,16 +374,19 @@ namespace Arborist.Linq.Treenumerators
 
     // Re-anchor the live skipped-ancestor prefix at the new queue front in O(1). The front
     // is an accepted (predicate-kept) node, so it contributes 0 to the prefix; hence
-    // prefix[frontDepth] == prefix[frontDepth-1] == frontSkipPrefix. Both are set so the
-    // front's first-scheduled child can read its grandparent slot; deeper slots are rewritten
-    // live as the inner schedules the front's descendants contiguously downward.
-    private void RestoreSkipPrefixAtFront(int frontInnerDepth, int frontSkipPrefix)
+    // prefix[frontDepth] == prefix[frontDepth-1] == frontSkipPrefix, and EVERYTHING below the
+    // front on the go-forward path is the constant frontSkipPrefix until the next skip. So we
+    // make frontSkipPrefix the tail and drop stored entries at/above frontDepth-1: deeper slots
+    // are re-materialized live (PrefixWriteScheduled) as the inner schedules the front's
+    // descendants contiguously downward. Ancestor entries above the front (depths <
+    // frontDepth-1, whose counts may be smaller) stay stored. This is what reclaims the memory
+    // the old absolute-depth List<int> never released.
+    private void PrefixAnchor(int frontInnerDepth, int frontSkipPrefix)
     {
-      while (_PredSkipPrefix.Count <= frontInnerDepth)
-        _PredSkipPrefix.Add(0);
-      _PredSkipPrefix[frontInnerDepth] = frontSkipPrefix;
-      if (frontInnerDepth > 0)
-        _PredSkipPrefix[frontInnerDepth - 1] = frontSkipPrefix;
+      var keep = frontInnerDepth > 0 ? frontInnerDepth - 1 : 0;
+      if (_PrefixStoredCount > keep)
+        _PrefixStoredCount = keep;
+      _PrefixTail = frontSkipPrefix;
     }
 
     private NodePosition GetEffectivePosition(out bool immediateParentIsSkipped)
