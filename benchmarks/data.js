@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782511429253,
+  "lastUpdate": 1782511429469,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -8852,6 +8852,50 @@ window.BENCHMARK_DATA = {
           {
             "name": "Arborist.Benchmarks.RefSemiDeque.Add_Block64_1M",
             "value": 64249958,
+            "unit": "bytes"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "81b46c42702e71ad313d08c636eb3e3c3c35b140",
+          "message": "Cohere BreadthFirstTreenumerator's four deques into one frame stack\n\nThe BFT kept each node's visit state and its child enumerator in FOUR parallel\nRefSemiDeques -- a state deque and an enumerator deque for each of the visit\nqueue and the schedule stack -- relying on keeping each pair in lockstep.\n\nFold each pair into one RefSemiDeque<Frame>, where Frame bundles\n{Node, Position, VisitCount, ChildEnumerator}, driven only by ref so the\nenumerator is never copied. Accepting a node becomes a single whole-frame move\nfrom the schedule stack to the visit queue, which structurally prevents a node\nand its enumerator from desynchronizing. The algorithm and visit cadence are\nunchanged. Mirrors the depth-first engine's frame stack, and removes the\nnow-unreferenced shared InternalNodeVisitState struct.\n\nNo behavior change: same (Mode, Node, VisitCount, Position) visit stream;\ndisposal (including the deliberate idempotent double-dispose on\nSkipDescendants/SkipSiblings) is at exact parity with the original.\n\nValidation:\n- Exact-order traversal + exhaustive DFT-vs-BFT multiset scan (438/0)\n- Full Arborist.Linq suite incl. Where (14,759/0)\n- Benchmarks (Release/Job.Default, clean tree): TriangleTree 289->255ms (-12%),\n  CompleteBinaryTree 337->281ms (-16%), TrivialForest/DegenerateTree 4M within\n  noise; allocation neutral, still zero per-node heap allocation. Timing\n  variance also dropped (StdDev roughly halved on the dense trees).\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01Wg3xArL4FATQaXQMBvhXdg",
+          "timestamp": "2026-06-26T21:37:21Z",
+          "tree_id": "05aa22f3461078c05e96518d52da4d56655c250f",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/81b46c42702e71ad313d08c636eb3e3c3c35b140"
+        },
+        "date": 1782511429441,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.Add_8M",
+            "value": 32160779,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.RemoveFirst_8M",
+            "value": 32160788,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.RemoveLast_8M",
+            "value": 32160854,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.Add_Block64_1M",
+            "value": 64249317,
             "unit": "bytes"
           }
         ]
