@@ -10,14 +10,12 @@ namespace Arborist
 
     public RefSemiDeque(int capacity)
     {
-      InitialCapacity = capacity;
       Capacity = capacity;
       _Partitions = new LinkedList<T[]>();
       _Partitions.AddLast(new T[capacity]);
       CurrentPartition = _Partitions.First;
     }
 
-    private int InitialCapacity { get; }
     public int Capacity { get; private set; }
     public int Count { get; private set; }
 
@@ -25,6 +23,19 @@ namespace Arborist
     private LinkedListNode<T[]> CurrentPartition { get; set; }
     private int _TailPointerOffset = 0;
     private int _HeadPointerOffset = 0;
+
+    // Upper bound on individual partition size, in elements. Pure geometric growth makes the
+    // largest partition ~half the deque's peak element count -- a multi-MB (potentially huge)
+    // Large Object Heap allocation on very wide/deep trees, plus up to ~2x peak over-allocation
+    // at the power-of-two boundary. Capping bounds both the largest partition and the overshoot.
+    //
+    // Deliberately a fixed element count rather than a byte budget that would force every
+    // partition sub-LOH: large element types belong on the LOH (a few big long-lived blocks are
+    // cheaper than many small ones churning through Gen0), so we bound the count and let the GC
+    // place each partition by its actual size. At 4096 a partition spans 4096 * sizeof(T) bytes,
+    // so small-element partitions (int, references) stay sub-LOH in Gen0 while only larger value
+    // types reach the LOH -- and then only as a bounded handful of blocks.
+    private const int MaxPartitionSize = 4096;
 
     public ref T GetFirst()
     {
@@ -143,7 +154,7 @@ namespace Arborist
     {
       if (CurrentPartition == _Partitions.Last)
       {
-        var newPartitionSize = Capacity;
+        var newPartitionSize = Math.Min(Capacity, MaxPartitionSize);
         var newPartition = new T[newPartitionSize];
         _Partitions.AddLast(newPartition);
         Capacity += newPartition.Length;

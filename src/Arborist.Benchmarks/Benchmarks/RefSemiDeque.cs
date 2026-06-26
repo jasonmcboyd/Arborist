@@ -38,5 +38,22 @@ namespace Arborist.Benchmarks
       while (deque.Count > 0)
         deque.RemoveLast();
     }
+
+    // Large node value (64 B): exercises the deque with LOH-sized partitions
+    // (64 B * MaxPartitionSize). Large, long-lived blocks belong on the LOH, so
+    // this is the case that argues against forcing partitions sub-LOH.
+    [Benchmark]
+    public void Add_Block64_1M()
+    {
+      var deque = new RefSemiDeque<Block64>();
+
+      for (int i = 0; i < 1_000_000; i++)
+        deque.AddLast(default);
+    }
+
+    public struct Block64
+    {
+      public long A, B, C, D, E, F, G, H;
+    }
   }
 }
