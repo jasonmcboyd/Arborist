@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782436871812,
+  "lastUpdate": 1782436872014,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -6975,6 +6975,66 @@ window.BENCHMARK_DATA = {
             "value": 23887439.239583332,
             "unit": "ns",
             "range": "± 152742.80977921298"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "6a5d01f5e6181c1c89a0993a6360bab3a4b0bac7",
+          "message": "Rewrite BreadthFirstTreenumerator with a structural visit cadence\n\nThe base BFT engine emitted parent visits reactively (when a child was\naccepted), which broke whenever a child was filtered and forced a tangle\nof deferred parent-visit bookkeeping to recover the swallowed visits.\n\nReplace it with a structural cadence: a single FIFO _VisitQueue whose\nfront is the active parent, plus a LIFO _ScheduleStack for the SkipNode\npromotion descent. A parent is visited once when it reaches the front,\nthen once after every child slot that enqueues at least one accepted\nnode -- a single bool, _CurrentSlotEnqueuedNode. Roots are scheduled\nfirst as the children of an implicit no-visit forest sentinel.\n\nThis deletes _OwesPromotedParentVisit, _HasDeferredScheduledChild,\n_DepthOfLastActedOnNode, PayOwedParentVisitAndDeferChild, and the\nOnScheduling/OnVisiting/PromoteChildren/SkipSubtree/Backtrack web in\nfavor of Advance/ApplyStrategy/SkipRemainingSiblings. The now-unused\nOwesPromotedParentVisit field comes off the shared InternalNodeVisitState\nstruct, shrinking every deque slot.\n\nNo behavior change: same (Mode, Node, VisitCount, Position) visit stream.\n\nValidation:\n- Exhaustive BFT-vs-DFT oracle, up to 6 concurrent skips x 27 trees\n- Where2InProcessScan: 891,056 Where-wrapper-vs-oracle cases (groups c..i)\n- Curated exact-order traversal + 14,759 Where/allocation tests\n- Benchmarks: allocations -12% to -14%, time within ShortRun noise\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01Wg3xArL4FATQaXQMBvhXdg",
+          "timestamp": "2026-06-26T00:47:42Z",
+          "tree_id": "39f01ca28e49bf3bbc704caca59e8d4bb815b334",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/6a5d01f5e6181c1c89a0993a6360bab3a4b0bac7"
+        },
+        "date": 1782436871988,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.Serialization.Serialize_Wide_1M",
+            "value": 53265714.20666668,
+            "unit": "ns",
+            "range": "± 321468.6699096187"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Serialize_Deep_100K",
+            "value": 8967331.246875,
+            "unit": "ns",
+            "range": "± 80105.7299710597"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Deserialize_Wide_1M",
+            "value": 88005538.31111112,
+            "unit": "ns",
+            "range": "± 555189.8299242326"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Deserialize_Deep_100K",
+            "value": 10673493.48515625,
+            "unit": "ns",
+            "range": "± 236074.3360800768"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Deserialize_Wide_ToInt_StringMap",
+            "value": 43172357.10555556,
+            "unit": "ns",
+            "range": "± 469190.71018271585"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Deserialize_Wide_ToInt_SpanMap",
+            "value": 24480667.28348214,
+            "unit": "ns",
+            "range": "± 377479.1412320001"
           }
         ]
       }
