@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782449420845,
+  "lastUpdate": 1782449421583,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -4218,6 +4218,54 @@ window.BENCHMARK_DATA = {
             "value": 26885584.147916667,
             "unit": "ns",
             "range": "± 216193.08825157626"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "ce22f8e1055cf2b7bf6486f1da78d2058d8c69aa",
+          "message": "Cap RefSemiDeque partition size to bound LOH allocation and overshoot\n\nGeometric partition growth sized each new partition to the running total\nCapacity, so the largest partition reached ~half the deque's peak element\ncount -- a multi-MB Large Object Heap allocation on wide/deep trees, plus\nup to ~2x peak over-allocation at power-of-two boundaries. Cap partition\nsize at 4096 elements (Math.Min(Capacity, MaxPartitionSize)) to bound both.\n\nBFT CompleteBinaryTree_21 (peak frontier ~2^21, the worst-case boundary):\n96 MB -> 48 MB allocated per traversal, throughput unchanged.\n\nFixed element count rather than a byte budget that would force partitions\nsub-LOH: forcing a 64 B node's partitions sub-LOH measured ~40% slower with\n~7x the Gen0 collections, because large long-lived blocks belong on the LOH.\n\nAdd RefSemiDeque regression tests crossing the cap (heterogeneous-partition\nordering, out-of-order recycling, GetFromBack/RemoveLast across boundaries)\nand an Add_Block64_1M benchmark. Remove unused InitialCapacity.\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>",
+          "timestamp": "2026-06-26T04:13:38Z",
+          "tree_id": "e35c9314063b1f6eda6dfccd1d7349907af73e32",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/ce22f8e1055cf2b7bf6486f1da78d2058d8c69aa"
+        },
+        "date": 1782449421546,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.Add_8M",
+            "value": 17020374.077083334,
+            "unit": "ns",
+            "range": "± 289489.4650102861"
+          },
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.RemoveFirst_8M",
+            "value": 29554952.960416667,
+            "unit": "ns",
+            "range": "± 278589.24062793807"
+          },
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.RemoveLast_8M",
+            "value": 25665255.42857143,
+            "unit": "ns",
+            "range": "± 325554.57352549967"
+          },
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.Add_Block64_1M",
+            "value": 16225628.664818548,
+            "unit": "ns",
+            "range": "± 732972.433468815"
           }
         ]
       }
