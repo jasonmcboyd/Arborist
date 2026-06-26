@@ -11,8 +11,10 @@ namespace Arborist.Treenumerators
   /// child (so an unskipped subtree gives the familiar raw-children + 1 visits, while a child that is
   /// SkipNodeAndDescendants'd, or SkipNode'd with nothing to promote, adds no visit).
   ///
-  /// <para>The engine has two structures, each a value deque kept in lockstep with its node's
-  /// (mutable-struct) child enumerator so neither is ever copied by value:</para>
+  /// <para>The engine has two structures, each a deque of <see cref="Frame"/>s. A frame bundles a
+  /// node's visit state with its (mutable-struct) child enumerator in one value slot, always driven by
+  /// <c>ref</c> so the enumerator is never copied -- and so a node and its enumerator can never become
+  /// desynchronized:</para>
   ///
   /// <list type="bullet">
   /// <item><b>_VisitQueue</b> (FIFO): accepted nodes that are scheduled but not yet fully visited.
@@ -25,6 +27,9 @@ namespace Arborist.Treenumerators
   /// ancestors kept resident so their children can be promoted into the skipped node's slot. The
   /// engine does not compress depth -- a promoted child keeps its raw reported depth.</item>
   /// </list>
+  ///
+  /// <para>Accepting a node is a single move of its whole frame from the schedule stack to the back of
+  /// the visit queue (<see cref="ApplyStrategy"/>) -- the node and its enumerator travel together.</para>
   ///
   /// <para><b>Cadence.</b> Each <see cref="OnMoveNext"/> applies the consumer's strategy to the
   /// node just scheduled (if any), then emits exactly one visit via <see cref="Advance"/>:</para>
@@ -44,6 +49,12 @@ namespace Arborist.Treenumerators
   /// promotes; a SkipNodeAndDescendants'd child (or a childless SkipNode'd one) enqueues nothing and
   /// so is skipped over without a parent visit. This is what previously required a tangle of deferred
   /// parent-visit bookkeeping.</para>
+  ///
+  /// <para><b>Design.</b> The visit state and child enumerator were once four parallel deques (a state
+  /// deque and an enumerator deque for each of the queue and the stack). Folding each pair into one
+  /// <see cref="Frame"/> ("struct cohesion") halves the deque count, makes accepting a node a single
+  /// frame move, and structurally prevents a node and its enumerator from desynchronizing; do not
+  /// split it back into parallel deques. This mirrors the depth-first engine's frame stack.</para>
   /// </summary>
   public sealed class BreadthFirstTreenumerator<TValue, TNode, TChildEnumerator>
     : TreenumeratorBase<TValue>
@@ -64,12 +75,10 @@ namespace Arborist.Treenumerators
     private readonly Func<TNode, TValue> _Map;
 
     // Accepted nodes, scheduled but not yet fully visited. The front is the active parent.
-    private readonly RefSemiDeque<InternalNodeVisitState<TNode>> _VisitQueue = new RefSemiDeque<InternalNodeVisitState<TNode>>();
-    private readonly RefSemiDeque<TChildEnumerator> _VisitQueueChildEnumerators = new RefSemiDeque<TChildEnumerator>();
+    private readonly RefSemiDeque<Frame> _VisitQueue = new RefSemiDeque<Frame>();
 
     // The node being classified, plus any SkipNode'd ancestors whose children are being promoted.
-    private readonly RefSemiDeque<InternalNodeVisitState<TNode>> _ScheduleStack = new RefSemiDeque<InternalNodeVisitState<TNode>>();
-    private readonly RefSemiDeque<TChildEnumerator> _ScheduleStackChildEnumerators = new RefSemiDeque<TChildEnumerator>();
+    private readonly RefSemiDeque<Frame> _ScheduleStack = new RefSemiDeque<Frame>();
 
     private int _RootNodesSeen = 0;
     private bool _RootsEnumeratorFinished = false;
@@ -79,6 +88,24 @@ namespace Arborist.Treenumerators
     // so the front is owed a return visit before its next child is scheduled. Accepting a root also
     // sets it (roots have no front to owe), so Advance clears it once at the root/visit phase boundary.
     private bool _CurrentSlotEnqueuedNode = false;
+
+    // A scheduled node: its visit state and its (mutable-struct) child enumerator in one slot, only
+    // ever touched by ref so the enumerator is never copied.
+    private struct Frame
+    {
+      public Frame(TNode node, NodePosition position, TChildEnumerator childEnumerator)
+      {
+        Node = node;
+        Position = position;
+        VisitCount = 0;
+        ChildEnumerator = childEnumerator;
+      }
+
+      public TNode Node;
+      public NodePosition Position;
+      public int VisitCount;
+      public TChildEnumerator ChildEnumerator;
+    }
 
     protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
     {
@@ -99,7 +126,7 @@ namespace Arborist.Treenumerators
         //    nodes stay here while their children are promoted; no parent visit is emitted.
         if (_ScheduleStack.Count > 0)
         {
-          if (TryScheduleNextChild(ref _ScheduleStack.GetLast(), ref _ScheduleStackChildEnumerators.GetLast()))
+          if (TryScheduleNextChild(ref _ScheduleStack.GetLast()))
             return true;
 
           PopScheduleStack();
@@ -141,12 +168,11 @@ namespace Arborist.Treenumerators
           return true;
         }
 
-        if (TryScheduleNextChild(ref parent, ref _VisitQueueChildEnumerators.GetFirst()))
+        if (TryScheduleNextChild(ref parent))
           return true;
 
         // The parent has no more children: retire it. The next turn visits the new front.
-        _VisitQueue.RemoveFirst();
-        _VisitQueueChildEnumerators.RemoveFirst().Dispose();
+        _VisitQueue.RemoveFirst().ChildEnumerator.Dispose();
       }
     }
 
@@ -172,12 +198,11 @@ namespace Arborist.Treenumerators
 
       if (nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipDescendants))
         // Accept the node but give it no children, then fall through to the accept block below.
-        _ScheduleStackChildEnumerators.GetLast().Dispose();
+        _ScheduleStack.GetLast().ChildEnumerator.Dispose();
 
-      // Accept (reached for TraverseAll and the SkipDescendants fall-through): move the node onto the
-      // visit queue, and record that this slot enqueued a node.
+      // Accept (reached for TraverseAll and the SkipDescendants fall-through): move the node's whole
+      // frame onto the visit queue, and record that this slot enqueued a node.
       _VisitQueue.AddLast(_ScheduleStack.RemoveLast());
-      _VisitQueueChildEnumerators.AddLast(_ScheduleStackChildEnumerators.RemoveLast());
       _CurrentSlotEnqueuedNode = true;
     }
 
@@ -186,10 +211,10 @@ namespace Arborist.Treenumerators
     // we silence that ancestor's enumerator along with every skipped ancestor in between.
     private void SkipRemainingSiblings()
     {
-      // Every schedule-stack enumerator except the node's own (the top) belongs to a skipped
-      // ancestor that would otherwise promote more of the node's siblings.
-      for (int i = 1; i < _ScheduleStackChildEnumerators.Count; i++)
-        _ScheduleStackChildEnumerators.GetFromBack(i).Dispose();
+      // Every schedule-stack frame except the node's own (the top) belongs to a skipped ancestor
+      // that would otherwise promote more of the node's siblings.
+      for (int i = 1; i < _ScheduleStack.Count; i++)
+        _ScheduleStack.GetFromBack(i).ChildEnumerator.Dispose();
 
       // The schedule stack holds only the node and its skipped ancestors (accepted ancestors live in
       // the queue), so _ScheduleStack.Count - 1 is the node's skipped-ancestor count. When that
@@ -199,14 +224,12 @@ namespace Arborist.Treenumerators
       if (_ScheduleStack.GetLast().Position.Depth == _ScheduleStack.Count - 1)
         _RootsEnumeratorFinished = true;
       else
-        _VisitQueueChildEnumerators.GetFirst().Dispose();
+        _VisitQueue.GetFirst().ChildEnumerator.Dispose();
     }
 
-    private bool TryScheduleNextChild(
-      ref InternalNodeVisitState<TNode> parent,
-      ref TChildEnumerator parentChildEnumerator)
+    private bool TryScheduleNextChild(ref Frame parent)
     {
-      if (!parentChildEnumerator.MoveNext(out var child))
+      if (!parent.ChildEnumerator.MoveNext(out var child))
         return false;
 
       PushScheduled(child.Node, new NodePosition(child.SiblingIndex, parent.Position.Depth + 1));
@@ -234,22 +257,21 @@ namespace Arborist.Treenumerators
       TNode node,
       NodePosition position)
     {
-      _ScheduleStack.AddLast(new InternalNodeVisitState<TNode>(node, position));
-      _ScheduleStackChildEnumerators.AddLast(_ChildEnumeratorFactory(new NodeContext<TNode>(node, position)));
+      _ScheduleStack.AddLast(
+        new Frame(node, position, _ChildEnumeratorFactory(new NodeContext<TNode>(node, position))));
     }
 
     private void PopScheduleStack()
     {
-      _ScheduleStack.RemoveLast();
-      _ScheduleStackChildEnumerators.RemoveLast().Dispose();
+      _ScheduleStack.RemoveLast().ChildEnumerator.Dispose();
     }
 
-    private void UpdateState(ref InternalNodeVisitState<TNode> nodeVisit)
+    private void UpdateState(ref Frame frame)
     {
-      Mode = nodeVisit.VisitCount == 0 ? TreenumeratorMode.SchedulingNode : TreenumeratorMode.VisitingNode;
-      Node = _Map(nodeVisit.Node);
-      VisitCount = nodeVisit.VisitCount;
-      Position = nodeVisit.Position;
+      Mode = frame.VisitCount == 0 ? TreenumeratorMode.SchedulingNode : TreenumeratorMode.VisitingNode;
+      Node = _Map(frame.Node);
+      VisitCount = frame.VisitCount;
+      Position = frame.Position;
     }
 
     #region Dispose
@@ -260,17 +282,17 @@ namespace Arborist.Treenumerators
 
       _RootsEnumerator?.Dispose();
 
-      DisposeChildEnumerators(_VisitQueueChildEnumerators);
-      DisposeChildEnumerators(_ScheduleStackChildEnumerators);
+      DisposeFrames(_VisitQueue);
+      DisposeFrames(_ScheduleStack);
     }
 
-    private void DisposeChildEnumerators(RefSemiDeque<TChildEnumerator> childEnumerators)
+    private void DisposeFrames(RefSemiDeque<Frame> frames)
     {
-      if (childEnumerators == null)
+      if (frames == null)
         return;
 
-      while (childEnumerators.Count > 0)
-        childEnumerators.RemoveLast().Dispose();
+      while (frames.Count > 0)
+        frames.RemoveLast().ChildEnumerator.Dispose();
     }
 
     #endregion Dispose
