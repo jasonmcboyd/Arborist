@@ -20,7 +20,16 @@ namespace Arborist.Linq.Tests
     public TestContext TestContext { get; set; }
 
     [TestMethod]
-    public void BreadthFirstMatchesOracle()
+    public void BreadthFirstMatchesOracle() => RunScan(TreeTraversalStrategy.BreadthFirst);
+
+    // DFT counterpart of BreadthFirstMatchesOracle. The DynamicData Where2Test_DepthFirst is
+    // [Ignore]d (its ~891k-case discovery overwhelms the host) -- so before this, DFT Where had no
+    // exhaustive oracle, only curated WhereTests. This closes that gap with the same in-process,
+    // discovery-free loop, giving the DFT wrapper the same exhaustive safety net as the BFT wrapper.
+    [TestMethod]
+    public void DepthFirstMatchesOracle() => RunScan(TreeTraversalStrategy.DepthFirst);
+
+    private void RunScan(TreeTraversalStrategy treeTraversalStrategy)
     {
       var deserializedByString = new Dictionary<string, ITreenumerable<string>>();
       ITreenumerable<string> Deserialize(string treeString)
@@ -70,9 +79,9 @@ namespace Arborist.Linq.Tests
           sut = Deserialize(treeString).Where(nodeContext => !skippedNodes.Contains(nodeContext.Node));
         }
 
-        var expected = Key(Deserialize(expectedTreeString).GetTraversal(TreeTraversalStrategy.BreadthFirst, Selector));
+        var expected = Key(Deserialize(expectedTreeString).GetTraversal(treeTraversalStrategy, Selector));
         // Take() bounds a hypothetical non-terminating wrapper regression into a length mismatch.
-        var actual = Key(sut.GetTraversal(TreeTraversalStrategy.BreadthFirst, Selector)).Take(100_000);
+        var actual = Key(sut.GetTraversal(treeTraversalStrategy, Selector)).Take(100_000);
 
         if (!expected.SequenceEqual(actual))
         {
@@ -82,12 +91,12 @@ namespace Arborist.Linq.Tests
         }
       }
 
-      TestContext.WriteLine($"Where2InProcessScan: {total} cases across {Where2Tests.AllTreeStrings.Length} trees (groups c..i).");
+      TestContext.WriteLine($"Where2InProcessScan ({treeTraversalStrategy}): {total} cases across {Where2Tests.AllTreeStrings.Length} trees (groups c..i).");
 
       Assert.AreEqual(
         0L,
         failed,
-        $"BFT Where wrapper diverged from the oracle on {failed} of {total} cases:{Environment.NewLine}"
+        $"{treeTraversalStrategy} Where wrapper diverged from the oracle on {failed} of {total} cases:{Environment.NewLine}"
         + string.Join(Environment.NewLine, failures));
     }
 
