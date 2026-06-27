@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782595509479,
+  "lastUpdate": 1782603515689,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -2160,6 +2160,150 @@ window.BENCHMARK_DATA = {
             "value": 31266468.129166666,
             "unit": "ns",
             "range": "± 57269.462306930436"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "956ee49770d051d50ff12df7c53b32de09bef9d6",
+          "message": "Merge branch 'feature/benchmark-dashboard-deploy'",
+          "timestamp": "2026-06-27T14:45:56-07:00",
+          "tree_id": "df364b45920c8ae045ade0c5dd0fb90f2faf8e70",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/956ee49770d051d50ff12df7c53b32de09bef9d6"
+        },
+        "date": 1782603515240,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.BreadthFirstTreenumerator.TriangleTree_2896",
+            "value": 239615496.6,
+            "unit": "ns",
+            "range": "± 1549827.1733979522"
+          },
+          {
+            "name": "Arborist.Benchmarks.BreadthFirstTreenumerator.CompleteBinaryTree_21",
+            "value": 279607908.65384614,
+            "unit": "ns",
+            "range": "± 827762.7152812621"
+          },
+          {
+            "name": "Arborist.Benchmarks.BreadthFirstTreenumerator.TrivialForest_4M",
+            "value": 16942974.299479168,
+            "unit": "ns",
+            "range": "± 25815.142762771953"
+          },
+          {
+            "name": "Arborist.Benchmarks.BreadthFirstTreenumerator.DegenerateTree_4M",
+            "value": 104070556.00000001,
+            "unit": "ns",
+            "range": "± 346366.2719428366"
+          },
+          {
+            "name": "Arborist.Benchmarks.DepthFirstTreenumerator.TriangleTree_2896",
+            "value": 220627823.9777778,
+            "unit": "ns",
+            "range": "± 2126666.3846411644"
+          },
+          {
+            "name": "Arborist.Benchmarks.DepthFirstTreenumerator.CompleteBinaryTree_21",
+            "value": 247767093,
+            "unit": "ns",
+            "range": "± 2352265.581105684"
+          },
+          {
+            "name": "Arborist.Benchmarks.DepthFirstTreenumerator.TrivialForest_4M",
+            "value": 17080399.921875,
+            "unit": "ns",
+            "range": "± 93975.95506164726"
+          },
+          {
+            "name": "Arborist.Benchmarks.DepthFirstTreenumerator.DegenerateTree_4M",
+            "value": 61840446.81632652,
+            "unit": "ns",
+            "range": "± 165277.79617040578"
+          },
+          {
+            "name": "Arborist.Benchmarks.LevelOrderTraversal.DeepTree",
+            "value": 46596595.96503497,
+            "unit": "ns",
+            "range": "± 191167.73900573316"
+          },
+          {
+            "name": "Arborist.Benchmarks.LevelOrderTraversal.TriangleTree_PruneAfter_1447",
+            "value": 64494792.36666667,
+            "unit": "ns",
+            "range": "± 206999.5484523169"
+          },
+          {
+            "name": "Arborist.Benchmarks.LevelOrderTraversal.CompleteBinaryTree_PruneBefore_20",
+            "value": 159394298.41666666,
+            "unit": "ns",
+            "range": "± 871549.2822033301"
+          },
+          {
+            "name": "Arborist.Benchmarks.LevelOrderTraversal.CompleteBinaryTree_PruneAfter_19",
+            "value": 81467195.4489796,
+            "unit": "ns",
+            "range": "± 392755.0713693606"
+          },
+          {
+            "name": "Arborist.Benchmarks.PostOrderTraversal.DeepTree",
+            "value": 36293670.9047619,
+            "unit": "ns",
+            "range": "± 324768.2426360821"
+          },
+          {
+            "name": "Arborist.Benchmarks.PostOrderTraversal.TriangleTree_PruneAfter_1447",
+            "value": 40452127.99358974,
+            "unit": "ns",
+            "range": "± 74253.72695164355"
+          },
+          {
+            "name": "Arborist.Benchmarks.PostOrderTraversal.CompleteBinaryTree_PruneBefore_20",
+            "value": 115932497,
+            "unit": "ns",
+            "range": "± 233832.10414363226"
+          },
+          {
+            "name": "Arborist.Benchmarks.PostOrderTraversal.CompleteBinaryTree_PruneAfter_19",
+            "value": 46883935.29870129,
+            "unit": "ns",
+            "range": "± 109580.38617552814"
+          },
+          {
+            "name": "Arborist.Benchmarks.PreorderTraversal.DeepTree",
+            "value": 25383087.423076924,
+            "unit": "ns",
+            "range": "± 48238.643267977845"
+          },
+          {
+            "name": "Arborist.Benchmarks.PreorderTraversal.TriangleTree_PruneAfter_1447",
+            "value": 36780235.884615384,
+            "unit": "ns",
+            "range": "± 34700.3888268456"
+          },
+          {
+            "name": "Arborist.Benchmarks.PreorderTraversal.CompleteBinaryTree_PruneBefore_20",
+            "value": 110500233.76,
+            "unit": "ns",
+            "range": "± 889024.6604795645"
+          },
+          {
+            "name": "Arborist.Benchmarks.PreorderTraversal.CompleteBinaryTree_PruneAfterDepth_19",
+            "value": 41890037.76923077,
+            "unit": "ns",
+            "range": "± 238588.15949971494"
           }
         ]
       }
