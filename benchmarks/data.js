@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782595508087,
+  "lastUpdate": 1782595508258,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -6532,6 +6532,54 @@ window.BENCHMARK_DATA = {
             "value": 25752905.19471154,
             "unit": "ns",
             "range": "± 42447.004249917394"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "05542f2bb58311ab93f64a711b38cf3b59cc2f17",
+          "message": "Encapsulate BFT Where state in WhereBreadthFirstPath\n\nComplete the Where-operator mirror of the base-engine Path split: extract the\nbreadth-first Where wrapper's structural state into a new sans-I/O\nWhereBreadthFirstPath struct, leaving the treenumerator a thin driver (507 -> 267\nlines). This matches the depth-first WhereDepthFirstPath (A1) and the base\nBreadthFirstPath/BreadthFirstTreenumerator split. NO algorithm change -- the\nemitted visit stream is byte-identical.\n\nLike the base BFT path, WhereBreadthFirstPath never touches the inner\ntreenumerator: the two I/O actions (InnerTreenumerator.MoveNext and the predicate\ncall) stay in the driver, which reads the inner Mode/Position once per step and\npasses them into the path operations. The path holds no reference to the inner, so\na future async BFT Where can share it and differ only at that seam.\n\nThis is a deliberate CLEAN PARTIAL extraction. The path owns all three structural\naxes -- the accepted queue + root counter, the off-limits predicate-skipped-\nancestor prefix carry (moved wholesale; PrefixAnchor is now private and called\nonly inside the atomic RetireFrontAndReanchor, which fixes the\nRemoveFirst -> ClearAll -> PrefixAnchor ordering as one op), and the off-limits\nconsumer-SkipNode axis -- plus the AcceptedFrame struct and GetEffectivePosition.\nThe driver keeps the output-sequencing cadence tokens (_FrontReturnVisit,\n_DeferredStrategy) and the consumer-skip coroutine's inline deferred-V emit, which\nread the wrapper's own Mode/Position and early-return mid-MoveNext: pushing them\ninto the path would force it to return control-flow verbs to the driver. This is\nthe same boundary A1 drew by keeping _HasCachedChild driver-side -- a partial,\nclean extraction beats a total, muddy one.\n\nDiscipline mirrors A1/base: _Path is a non-readonly field; every ref the path\nreturns points into the heap accepted queue, never into a struct scalar field\n(scalars are read via accessors and mutated by void ops). Publish takes an\nexplicit mode rather than deriving it from VisitCount, because the deferred-\nschedule emit publishes a SchedulingNode with a nonzero VisitCount.\n\nValidation: both Where2InProcessScan oracles (BFT 891,056 + DFT), the full Where\nsuite (228), and the full solution suite (14,760 Linq + 438 Arborist) all green;\nArborist.Linq warning-clean. Same-machine BFT Where benchmark A/B: time within\nShortRun noise (several cases faster), allocation byte-identical --\nDegenerateTree_WhereAll_1M stays ~1.95 KB (the ca567e0 O(1)-depth guard holds),\nWhereNone's inherent O(depth) unchanged.\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01Wg3xArL4FATQaXQMBvhXdg",
+          "timestamp": "2026-06-27T15:14:01Z",
+          "tree_id": "806958fb6b08fe48943ffda81fec2247388a925d",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/05542f2bb58311ab93f64a711b38cf3b59cc2f17"
+        },
+        "date": 1782595508235,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToDegenerateTree",
+            "value": 12365524.325721154,
+            "unit": "ns",
+            "range": "± 16273.704244331848"
+          },
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToDegenerateTreeUsingToTree",
+            "value": 39791853.72527472,
+            "unit": "ns",
+            "range": "± 1114142.8502253399"
+          },
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToTrivialForest",
+            "value": 3018199.318058894,
+            "unit": "ns",
+            "range": "± 5538.343685904358"
+          },
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToTrivialForestUsingToTree",
+            "value": 25708099.141666666,
+            "unit": "ns",
+            "range": "± 34260.77003862014"
           }
         ]
       }
