@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782534426037,
+  "lastUpdate": 1782534426250,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -11915,6 +11915,66 @@ window.BENCHMARK_DATA = {
             "value": 23588163.835416667,
             "unit": "ns",
             "range": "± 310607.37429593847"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "e8bbc30ca40332e6f77c535d2a6e5edf419feb67",
+          "message": "Revert DFT Backtrack consolidation (GetLeaves.DeepTree deep-unwind cost)\n\n6ebd5d0 fixed the wide-skip-traversal regression by making TryPushNextChild\nout-of-line, but it also folded Backtrack's pop + three predicate checks into one\nDepthFirstPath.PopFinishedLevelAndClassify call. That consolidation, fine on wide\ntrees, added one call per unwound level -- ~262K calls on the deep-unwind path --\nand regressed GetLeaves.DeepTree from ~10ms to ~24ms on the CI runner (a cost\nlocal benchmarks under-reported, due to cache differences).\n\nRevert the consolidation back to the original two-stack's inline-predicate\nBacktrack, keeping the out-of-line TryPushNextChild that fixed wide skip. The DFT\nis now structurally identical to the original two-stack (inline Backtrack +\nseparate promote method), just encapsulated in DepthFirstPath -- the form the CI\nshows is fast on every tree shape.\n\nNet (vs original two-stack, local same-session): SkipAllNodes.Dft 22.7 vs 22.0;\nGetLeaves.DeepTree 10.7 vs 8.8 (the residual +22% is the out-of-line promote's\nper-node call -- the irreducible cost of keeping wide skip fast; CI will confirm\nGetLeaves is well below 6ebd5d0's 24ms). Allocation unchanged.\n\nValidation: 438/0 oracle (exact-order + exhaustive DFT-vs-BFT scan), 14,759/0 Linq.\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01Wg3xArL4FATQaXQMBvhXdg",
+          "timestamp": "2026-06-27T03:58:38Z",
+          "tree_id": "a3f9dd64f7a624f48c68d521c40c1a096d4fa152",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/e8bbc30ca40332e6f77c535d2a6e5edf419feb67"
+        },
+        "date": 1782534426222,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.Serialization.Serialize_Wide_1M",
+            "value": 56409195.14814814,
+            "unit": "ns",
+            "range": "± 489190.6527341422"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Serialize_Deep_100K",
+            "value": 7513473.872767857,
+            "unit": "ns",
+            "range": "± 74642.60774948799"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Deserialize_Wide_1M",
+            "value": 85388289.03333333,
+            "unit": "ns",
+            "range": "± 254405.88350269283"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Deserialize_Deep_100K",
+            "value": 10179239.745833334,
+            "unit": "ns",
+            "range": "± 104855.89609132308"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Deserialize_Wide_ToInt_StringMap",
+            "value": 42266333.85416667,
+            "unit": "ns",
+            "range": "± 220031.66289552444"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Deserialize_Wide_ToInt_SpanMap",
+            "value": 23775936.66294643,
+            "unit": "ns",
+            "range": "± 191045.69787183683"
           }
         ]
       }
