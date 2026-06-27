@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782534425614,
+  "lastUpdate": 1782534425824,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -5632,6 +5632,54 @@ window.BENCHMARK_DATA = {
             "value": 30670457.375,
             "unit": "ns",
             "range": "± 41103.89136709783"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "e8bbc30ca40332e6f77c535d2a6e5edf419feb67",
+          "message": "Revert DFT Backtrack consolidation (GetLeaves.DeepTree deep-unwind cost)\n\n6ebd5d0 fixed the wide-skip-traversal regression by making TryPushNextChild\nout-of-line, but it also folded Backtrack's pop + three predicate checks into one\nDepthFirstPath.PopFinishedLevelAndClassify call. That consolidation, fine on wide\ntrees, added one call per unwound level -- ~262K calls on the deep-unwind path --\nand regressed GetLeaves.DeepTree from ~10ms to ~24ms on the CI runner (a cost\nlocal benchmarks under-reported, due to cache differences).\n\nRevert the consolidation back to the original two-stack's inline-predicate\nBacktrack, keeping the out-of-line TryPushNextChild that fixed wide skip. The DFT\nis now structurally identical to the original two-stack (inline Backtrack +\nseparate promote method), just encapsulated in DepthFirstPath -- the form the CI\nshows is fast on every tree shape.\n\nNet (vs original two-stack, local same-session): SkipAllNodes.Dft 22.7 vs 22.0;\nGetLeaves.DeepTree 10.7 vs 8.8 (the residual +22% is the out-of-line promote's\nper-node call -- the irreducible cost of keeping wide skip fast; CI will confirm\nGetLeaves is well below 6ebd5d0's 24ms). Allocation unchanged.\n\nValidation: 438/0 oracle (exact-order + exhaustive DFT-vs-BFT scan), 14,759/0 Linq.\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01Wg3xArL4FATQaXQMBvhXdg",
+          "timestamp": "2026-06-27T03:58:38Z",
+          "tree_id": "a3f9dd64f7a624f48c68d521c40c1a096d4fa152",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/e8bbc30ca40332e6f77c535d2a6e5edf419feb67"
+        },
+        "date": 1782534425795,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToDegenerateTree",
+            "value": 14530129.0078125,
+            "unit": "ns",
+            "range": "± 29615.799773007184"
+          },
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToDegenerateTreeUsingToTree",
+            "value": 50369611.559999995,
+            "unit": "ns",
+            "range": "± 905743.5679524665"
+          },
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToTrivialForest",
+            "value": 3602378.454520089,
+            "unit": "ns",
+            "range": "± 24100.06365928412"
+          },
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToTrivialForestUsingToTree",
+            "value": 30326025.3984375,
+            "unit": "ns",
+            "range": "± 52602.82104441895"
           }
         ]
       }
