@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782537493408,
+  "lastUpdate": 1782537493573,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -12904,6 +12904,66 @@ window.BENCHMARK_DATA = {
             "value": 23775936.66294643,
             "unit": "ns",
             "range": "± 191045.69787183683"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "745f772e964fd367b865bb595a347546911a25b4",
+          "message": "Re-apply DFT Backtrack consolidation (revert e8bbc30)\n\ne8bbc30 reverted 6ebd5d0's Backtrack consolidation on the theory it caused the\nGetLeaves.DeepTree regression. CI proved that wrong: the consolidation was HELPING\nthe deep visit-heavy unwind (PostOrderTraversal.DeepTree), so removing it broke\nPostOrder.DeepTree while GetLeaves.DeepTree stayed regressed -- its cost is the\nout-of-line promote, not the consolidation. e8bbc30 was strictly worse and is\nreverted here.\n\nRestore 6ebd5d0, the best encapsulated config: all three wide-skip ops fixed,\nPostOrder/Preorder/CountNodes DeepTree at parity with the original, with\nGetLeaves.DeepTree (deep pure-skip) the single accepted ~2.3x casualty of a\nfundamental deep-vs-wide promote-inlining tension -- the out-of-line promote that\nfixes wide skip costs the deep descent a per-node call; an inline promote would\nfix GetLeaves but rebreak wide skip; one shared promote method cannot satisfy\nboth. Every combination of the two inlining knobs has now been measured on CI;\n6ebd5d0 is the Pareto-best of the encapsulated forms.\n\nValidation: 438/0 oracle (exact-order + exhaustive DFT-vs-BFT scan), 14,759/0 Linq.\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01Wg3xArL4FATQaXQMBvhXdg",
+          "timestamp": "2026-06-27T04:39:21Z",
+          "tree_id": "5301780378953d2f586361d71d9e7e7b8dc1e6d3",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/745f772e964fd367b865bb595a347546911a25b4"
+        },
+        "date": 1782537493550,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.Serialization.Serialize_Wide_1M",
+            "value": 48478045.97402597,
+            "unit": "ns",
+            "range": "± 523394.77502044715"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Serialize_Deep_100K",
+            "value": 8403493.13641827,
+            "unit": "ns",
+            "range": "± 30260.1762855104"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Deserialize_Wide_1M",
+            "value": 69413382.90816328,
+            "unit": "ns",
+            "range": "± 264191.9446482481"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Deserialize_Deep_100K",
+            "value": 8327435.969791667,
+            "unit": "ns",
+            "range": "± 55799.48652285585"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Deserialize_Wide_ToInt_StringMap",
+            "value": 32458458.504166666,
+            "unit": "ns",
+            "range": "± 289068.7891137467"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Deserialize_Wide_ToInt_SpanMap",
+            "value": 19442930.050480768,
+            "unit": "ns",
+            "range": "± 192456.383817107"
           }
         ]
       }
