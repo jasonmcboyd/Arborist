@@ -4,15 +4,6 @@ using System.Runtime.CompilerServices;
 
 namespace Arborist.Treenumerators
 {
-  // What the level the engine just backtracked to needs next (returned by
-  // DepthFirstPath.PopFinishedLevelAndClassify).
-  internal enum DepthFirstBacktrackStep
-  {
-    GoToRoot,          // The whole forest path is unwound; schedule the next root.
-    PromoteNextChild,  // No visit owed here; advance this level's enumerator.
-    EmitReturnVisit,   // The accepted node here owes its next between/after-children visit.
-  }
-
   // The visit-state of one accepted node on the depth-first path.
   internal struct DepthFirstNodeState<TNode>
   {
@@ -48,7 +39,7 @@ namespace Arborist.Treenumerators
   /// </list>
   /// Under SkipNode the two diverge: the skipped node leaves <c>_AcceptedNodes</c> but its enumerator
   /// stays on <c>_Enumerators</c>, so a level whose accepted top is shallower than <see cref="Depth"/>
-  /// is a skipped level (see <see cref="PopFinishedLevelAndClassify"/>).
+  /// is a skipped level (<see cref="TopLevelWasSkipped"/>).
   ///
   /// <para><b>Layout.</b> A mutable struct, embedded as a single field of the treenumerator so there is
   /// no extra object indirection on the hot path. It is never copied -- only ever accessed as the
@@ -84,6 +75,8 @@ namespace Arborist.Treenumerators
     public int Depth => _Enumerators.Count - 1;
 
     public bool IsEmpty => _Enumerators.Count == 0;
+
+    public bool HasAcceptedNodes => _AcceptedNodes.Count > 0;
 
     // The active level's child enumerator, by ref so the driver advances it in place. THE I/O SEAM.
     public ref TChildEnumerator TopEnumerator
@@ -128,37 +121,24 @@ namespace Arborist.Treenumerators
       return ref node;
     }
 
-    // One step of backtracking, in a single call: pop the active (exhausted) level, then classify what
-    // the level we returned to needs next. Kept as ONE method (rather than a pop + three predicate
-    // calls from the driver) because the skip-heavy hot loop runs this repeatedly -- folding it lets the
-    // JIT keep the deque references in registers and compute the raw depth once, which a driver that
-    // ping-pongs into the struct per predicate cannot.
-    public DepthFirstBacktrackStep PopFinishedLevelAndClassify()
+    // Pop the active (exhausted) level: remove its accepted node if it has one (a skipped level has
+    // none) and dispose + remove its child enumerator.
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void PopFinishedLevel()
     {
-      // Pop the exhausted level: remove its accepted node if it owns this level (a skipped level has
-      // none), and dispose + remove its child enumerator.
-      if (_AcceptedNodes.Count > 0 && _AcceptedNodes.GetLast().Position.Depth == _Enumerators.Count - 1)
+      if (_AcceptedNodes.Count > 0 && _AcceptedNodes.GetLast().Position.Depth == Depth)
         _AcceptedNodes.RemoveLast();
 
       _Enumerators.RemoveLast().Dispose();
-
-      var depth = _Enumerators.Count - 1;
-
-      // Unwound the whole forest path.
-      if (depth < 0)
-        return DepthFirstBacktrackStep.GoToRoot;
-
-      // No visit is owed at the level we returned to -- it already took its return visit, it has no
-      // accepted node (a chain of skipped roots), or it is a SkipNode'd level -- so the driver should
-      // promote its next child without a parent visit.
-      if (depth == _DepthOfLastVisitedNode
-        || _AcceptedNodes.Count == 0
-        || _AcceptedNodes.GetLast().Position.Depth < depth)
-        return DepthFirstBacktrackStep.PromoteNextChild;
-
-      // The accepted node at this level owes its next between/after-children visit.
-      return DepthFirstBacktrackStep.EmitReturnVisit;
     }
+
+    // The level we returned to already took its return visit (its node was the last one visited), so it
+    // owes nothing now -- the driver should descend into its next child instead.
+    public bool TopLevelAlreadyVisited => Depth == _DepthOfLastVisitedNode;
+
+    // The active level's accepted top is shallower than the raw depth, so this level's node was removed
+    // by SkipNode -- only its enumerator remains, to promote children.
+    public bool TopLevelWasSkipped => _AcceptedNodes.GetLast().Position.Depth < Depth;
 
     // SkipSiblings: silence the remaining siblings of the just-scheduled node by disposing every
     // enumerator that would still yield them (its skipped ancestors up to its nearest accepted one).
