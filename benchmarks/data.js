@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782521635583,
+  "lastUpdate": 1782521635816,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -5214,6 +5214,54 @@ window.BENCHMARK_DATA = {
             "value": 16080276.091372283,
             "unit": "ns",
             "range": "± 609280.7396030414"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "ab94b3983058299be15f1b4d38b05b21509cb8ad",
+          "message": "Encapsulate BFT state in BreadthFirstPath; mirror the DFT driver/state split\n\nMove the breadth-first engine's state -- the visit queue, the schedule stack,\nthe owed-return-visit carry, and the root sibling counter -- into a new\nBreadthFirstPath, leaving BreadthFirstTreenumerator a thin driver, mirroring the\ndepth-first DepthFirstPath split. The cohesive Frame (visit state + child\nenumerator) is kept -- the BFT keeps full state for every resident node anyway,\nso it costs no memory -- so allocation is unchanged from the cohesion engine.\n\nLike DepthFirstPath, BreadthFirstPath is \"sans-I/O\": it never pulls a child; it\nexposes the two active enumerators (the schedule-stack top and the visit-queue\nfront) by ref for the driver to advance. That isolates the engine's asynchronous\noperations to those seams, so a future async BFT can share this class and differ\nonly there. It is a mutable struct embedded as the driver's single _Path field\n(never copied; refs it returns point into the heap deques), keeping dense\ntraversal at the cohesion engine's speed. The two child-pull sites collapse into\none TryScheduleNextChildOf(ref parent).\n\nNo behavior change: same (Mode, Node, VisitCount, Position) visit stream.\n\nValidation:\n- Exact-order traversal + exhaustive DFT-vs-BFT multiset scan (438/0)\n- Full Arborist.Linq suite incl. Where (14,759/0)\n- Benchmarks (Release/Job.Default, same session): TriangleTree 194.5 vs cohesion\n  193.9 ms; CompleteBinaryTree 208.1 vs 213.0 ms (parity). Allocation identical\n  to the cohesion engine (same Frame).\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01Wg3xArL4FATQaXQMBvhXdg",
+          "timestamp": "2026-06-27T00:09:54Z",
+          "tree_id": "8703f7198030df75b83a7026b75dc74f78b17190",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/ab94b3983058299be15f1b4d38b05b21509cb8ad"
+        },
+        "date": 1782521635788,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.Add_8M",
+            "value": 16367676.820833333,
+            "unit": "ns",
+            "range": "± 247510.91633211845"
+          },
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.RemoveFirst_8M",
+            "value": 29425023.44375,
+            "unit": "ns",
+            "range": "± 475678.2473304623"
+          },
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.RemoveLast_8M",
+            "value": 26929824.629166666,
+            "unit": "ns",
+            "range": "± 98450.3064934275"
+          },
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.Add_Block64_1M",
+            "value": 16207204.621299341,
+            "unit": "ns",
+            "range": "± 816259.4389167792"
           }
         ]
       }
