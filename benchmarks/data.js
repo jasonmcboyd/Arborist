@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782529879133,
+  "lastUpdate": 1782529879963,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -5182,6 +5182,54 @@ window.BENCHMARK_DATA = {
             "value": 30268300.510416668,
             "unit": "ns",
             "range": "± 81948.83489725483"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "6ebd5d0e1d60592672f966eaa4ab81a302c56999",
+          "message": "Fix DFT skip-heavy regression: keep TryPushNextChild out-of-line\n\nThe encapsulated DepthFirstPath DFT (14f8393) ran ~1.7-1.9x slower than the\noriginal two-stack on promotion-heavy skip traversal (SkipAllNodes / Preorder /\nPostorder on wide trees), despite identical allocation. JIT disassembly\n(DOTNET_JitDisasm) pinned the cause: [AggressiveInlining] on TryPushNextChild\ninlined the entire promote body (pull + push) into OnMoveNext/OnScheduling,\ninflating their frames to 6 callee-saved registers + sub rsp,72 + vzeroupper and\ndowngrading OnMoveNext's branch dispatch from a tail-jmp to a call+teardown paid\non EVERY node. The original two-stack stayed fast precisely because its promote\nwas a separate, out-of-line method.\n\nMark TryPushNextChild [NoInlining] so the drivers stay thin tail-dispatchers,\nwhile keeping the push chain (PushChild/PushLevel) force-inlined INTO it so the\npush itself is still call-free. Also fold Backtrack's pop + three predicate\nchecks into one DepthFirstPath.PopFinishedLevelAndClassify call: the original\ninline-predicate form is O(1) per level but its repeated struct round-trips cost\n~2x on the deep-unwind path (GetLeaves.DeepTree); folding restores it.\n\nNet (Release/Job.Default, local, vs original two-stack): SkipAllNodes.Dft\n41 -> 22.6 ms, Preorder 42.8 -> 25.7, Postorder 47 -> 32.9 -- all back at the\noriginal; dense traversal and GetLeaves.DeepTree within noise; allocation\nunchanged. The sans-I/O encapsulation (path never pulls; one ref seam) is intact.\n\nValidation: 438/0 oracle (exact-order + exhaustive DFT-vs-BFT scan), 14,759/0\nfull Linq suite.\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01Wg3xArL4FATQaXQMBvhXdg",
+          "timestamp": "2026-06-27T02:26:54Z",
+          "tree_id": "5301780378953d2f586361d71d9e7e7b8dc1e6d3",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/6ebd5d0e1d60592672f966eaa4ab81a302c56999"
+        },
+        "date": 1782529879935,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToDegenerateTree",
+            "value": 14547533.260044644,
+            "unit": "ns",
+            "range": "± 33458.85458036689"
+          },
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToDegenerateTreeUsingToTree",
+            "value": 50529453.60882353,
+            "unit": "ns",
+            "range": "± 1600387.5889517919"
+          },
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToTrivialForest",
+            "value": 3476125.2044270835,
+            "unit": "ns",
+            "range": "± 2229.9665038694957"
+          },
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToTrivialForestUsingToTree",
+            "value": 30670457.375,
+            "unit": "ns",
+            "range": "± 41103.89136709783"
           }
         ]
       }
