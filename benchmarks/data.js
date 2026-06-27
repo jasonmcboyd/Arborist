@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782595508776,
+  "lastUpdate": 1782595508951,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -12023,6 +12023,225 @@ window.BENCHMARK_DATA = {
           {
             "name": "Arborist.Benchmarks.AllNodes.Dft_TriangleTree_PruneBefore_19",
             "value": 84842,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.AnyNodes.Dft_TriangleTree_PruneBefore_19",
+            "value": 84754,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.SkipAllNodes.Bft_TriangleTree_1448",
+            "value": 58999,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.SkipAllNodes.Dft_TriangleTree_1448",
+            "value": 26135,
+            "unit": "bytes"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "05542f2bb58311ab93f64a711b38cf3b59cc2f17",
+          "message": "Encapsulate BFT Where state in WhereBreadthFirstPath\n\nComplete the Where-operator mirror of the base-engine Path split: extract the\nbreadth-first Where wrapper's structural state into a new sans-I/O\nWhereBreadthFirstPath struct, leaving the treenumerator a thin driver (507 -> 267\nlines). This matches the depth-first WhereDepthFirstPath (A1) and the base\nBreadthFirstPath/BreadthFirstTreenumerator split. NO algorithm change -- the\nemitted visit stream is byte-identical.\n\nLike the base BFT path, WhereBreadthFirstPath never touches the inner\ntreenumerator: the two I/O actions (InnerTreenumerator.MoveNext and the predicate\ncall) stay in the driver, which reads the inner Mode/Position once per step and\npasses them into the path operations. The path holds no reference to the inner, so\na future async BFT Where can share it and differ only at that seam.\n\nThis is a deliberate CLEAN PARTIAL extraction. The path owns all three structural\naxes -- the accepted queue + root counter, the off-limits predicate-skipped-\nancestor prefix carry (moved wholesale; PrefixAnchor is now private and called\nonly inside the atomic RetireFrontAndReanchor, which fixes the\nRemoveFirst -> ClearAll -> PrefixAnchor ordering as one op), and the off-limits\nconsumer-SkipNode axis -- plus the AcceptedFrame struct and GetEffectivePosition.\nThe driver keeps the output-sequencing cadence tokens (_FrontReturnVisit,\n_DeferredStrategy) and the consumer-skip coroutine's inline deferred-V emit, which\nread the wrapper's own Mode/Position and early-return mid-MoveNext: pushing them\ninto the path would force it to return control-flow verbs to the driver. This is\nthe same boundary A1 drew by keeping _HasCachedChild driver-side -- a partial,\nclean extraction beats a total, muddy one.\n\nDiscipline mirrors A1/base: _Path is a non-readonly field; every ref the path\nreturns points into the heap accepted queue, never into a struct scalar field\n(scalars are read via accessors and mutated by void ops). Publish takes an\nexplicit mode rather than deriving it from VisitCount, because the deferred-\nschedule emit publishes a SchedulingNode with a nonzero VisitCount.\n\nValidation: both Where2InProcessScan oracles (BFT 891,056 + DFT), the full Where\nsuite (228), and the full solution suite (14,760 Linq + 438 Arborist) all green;\nArborist.Linq warning-clean. Same-machine BFT Where benchmark A/B: time within\nShortRun noise (several cases faster), allocation byte-identical --\nDegenerateTree_WhereAll_1M stays ~1.95 KB (the ca567e0 O(1)-depth guard holds),\nWhereNone's inherent O(depth) unchanged.\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01Wg3xArL4FATQaXQMBvhXdg",
+          "timestamp": "2026-06-27T15:14:01Z",
+          "tree_id": "806958fb6b08fe48943ffda81fec2247388a925d",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/05542f2bb58311ab93f64a711b38cf3b59cc2f17"
+        },
+        "date": 1782595508927,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.BreadthFirstWhere.TriangleTree_1448",
+            "value": 478610,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.BreadthFirstWhere.TrivialForest_WhereAll_1M",
+            "value": 1517,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.BreadthFirstWhere.TrivialForest_WhereNone_1M",
+            "value": 1214,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.BreadthFirstWhere.DegenerateTree_WhereAll_1M",
+            "value": 2009,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.BreadthFirstWhere.DegenerateTree_WhereNone_1M",
+            "value": 8391811,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.DepthFirstWhere.TriangleTree_PruneAfter_1448",
+            "value": 73026,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.DepthFirstWhere.WhereAll_TrivialForest_1M",
+            "value": 1445,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.DepthFirstWhere.WhereNone_TrivialForest_1M",
+            "value": 1398,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.DepthFirstWhere.WhereAll_DegenerateTree_1M",
+            "value": 36174593,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.DepthFirstWhere.WhereNone_DegenerateTree_1M",
+            "value": 1644,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.Invert.TriangleTree_1448",
+            "value": 42054537,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.Invert.DegenerateTree_1M",
+            "value": 41215572,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.LeaffixAggregate.TriangleTree_1448",
+            "value": 33681622,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.LeaffixScan.TriangleTree_1448",
+            "value": 42087001,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.LeaffixAggregate.DegenerateTree_1M",
+            "value": 58384228,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.LeaffixScan.DegenerateTree_1M",
+            "value": 66384122,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.LeaffixAggregate.TrivialForest_1M",
+            "value": 687,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.Materialize.TriangleTree_1448",
+            "value": 42037896,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.Materialize.DegenerateTree_1M",
+            "value": 41215500,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.Select.SelectComposition",
+            "value": 871,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.PruneAfter.Bft_TrivialForest_1M",
+            "value": 596,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.PruneBefore.Bft_TrivialForest_1M",
+            "value": 1150,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.PruneAfter.Dft_TrivialForest_1M",
+            "value": 596,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.PruneBefore.Dft_TrivialForest_1M",
+            "value": 1462,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.AllNodes.Bft_CompleteBinaryTree_PruneBefore_19",
+            "value": 13860547,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.AnyNodes.Bft_CompleteBinaryTree_PruneBefore_19",
+            "value": 13860469,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.CountNodes.DeepTree",
+            "value": 10496292,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.GetLeaves.DeepTree",
+            "value": 1054524,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.AllNodes.Dft_CompleteBinaryTree_PruneBefore_19",
+            "value": 3197,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.AnyNodes.Dft_CompleteBinaryTree_PruneBefore_19",
+            "value": 3109,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.CountNodes.TriangleTree_PruneAfter_2048",
+            "value": 116445,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.GetLeaves.CompleteBinaryTree_PruneBefore_20",
+            "value": 3227,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.AllNodes.Bft_TriangleTree_PruneBefore_19",
+            "value": 478363,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.AnyNodes.Bft_TriangleTree_PruneBefore_19",
+            "value": 478275,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.CountNodes.CompleteBinaryTree_PruneAfter_20",
+            "value": 2010,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.AllNodes.Dft_TriangleTree_PruneBefore_19",
+            "value": 84850,
             "unit": "bytes"
           },
           {
