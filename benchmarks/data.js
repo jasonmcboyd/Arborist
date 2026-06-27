@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782603516776,
+  "lastUpdate": 1782603516994,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -14882,6 +14882,66 @@ window.BENCHMARK_DATA = {
             "value": 19383680.41517857,
             "unit": "ns",
             "range": "± 269898.2138907663"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "956ee49770d051d50ff12df7c53b32de09bef9d6",
+          "message": "Merge branch 'feature/benchmark-dashboard-deploy'",
+          "timestamp": "2026-06-27T14:45:56-07:00",
+          "tree_id": "df364b45920c8ae045ade0c5dd0fb90f2faf8e70",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/956ee49770d051d50ff12df7c53b32de09bef9d6"
+        },
+        "date": 1782603516957,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.Serialization.Serialize_Wide_1M",
+            "value": 59868111.57777778,
+            "unit": "ns",
+            "range": "± 774289.7448034518"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Serialize_Deep_100K",
+            "value": 7908949.637276785,
+            "unit": "ns",
+            "range": "± 73918.58630754225"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Deserialize_Wide_1M",
+            "value": 86846394.9404762,
+            "unit": "ns",
+            "range": "± 383355.06490699"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Deserialize_Deep_100K",
+            "value": 10317009.210336538,
+            "unit": "ns",
+            "range": "± 101643.9949287868"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Deserialize_Wide_ToInt_StringMap",
+            "value": 43353480.895833336,
+            "unit": "ns",
+            "range": "± 847941.0658495493"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Deserialize_Wide_ToInt_SpanMap",
+            "value": 23544614.83125,
+            "unit": "ns",
+            "range": "± 198536.79689144707"
           }
         ]
       }
