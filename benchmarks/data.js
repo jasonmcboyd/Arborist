@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782521635816,
+  "lastUpdate": 1782521636047,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -9937,6 +9937,66 @@ window.BENCHMARK_DATA = {
             "value": 24128328.614583332,
             "unit": "ns",
             "range": "± 135220.71780010196"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "ab94b3983058299be15f1b4d38b05b21509cb8ad",
+          "message": "Encapsulate BFT state in BreadthFirstPath; mirror the DFT driver/state split\n\nMove the breadth-first engine's state -- the visit queue, the schedule stack,\nthe owed-return-visit carry, and the root sibling counter -- into a new\nBreadthFirstPath, leaving BreadthFirstTreenumerator a thin driver, mirroring the\ndepth-first DepthFirstPath split. The cohesive Frame (visit state + child\nenumerator) is kept -- the BFT keeps full state for every resident node anyway,\nso it costs no memory -- so allocation is unchanged from the cohesion engine.\n\nLike DepthFirstPath, BreadthFirstPath is \"sans-I/O\": it never pulls a child; it\nexposes the two active enumerators (the schedule-stack top and the visit-queue\nfront) by ref for the driver to advance. That isolates the engine's asynchronous\noperations to those seams, so a future async BFT can share this class and differ\nonly there. It is a mutable struct embedded as the driver's single _Path field\n(never copied; refs it returns point into the heap deques), keeping dense\ntraversal at the cohesion engine's speed. The two child-pull sites collapse into\none TryScheduleNextChildOf(ref parent).\n\nNo behavior change: same (Mode, Node, VisitCount, Position) visit stream.\n\nValidation:\n- Exact-order traversal + exhaustive DFT-vs-BFT multiset scan (438/0)\n- Full Arborist.Linq suite incl. Where (14,759/0)\n- Benchmarks (Release/Job.Default, same session): TriangleTree 194.5 vs cohesion\n  193.9 ms; CompleteBinaryTree 208.1 vs 213.0 ms (parity). Allocation identical\n  to the cohesion engine (same Frame).\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01Wg3xArL4FATQaXQMBvhXdg",
+          "timestamp": "2026-06-27T00:09:54Z",
+          "tree_id": "8703f7198030df75b83a7026b75dc74f78b17190",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/ab94b3983058299be15f1b4d38b05b21509cb8ad"
+        },
+        "date": 1782521636020,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.Serialization.Serialize_Wide_1M",
+            "value": 57238278.903703704,
+            "unit": "ns",
+            "range": "± 262692.79970520164"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Serialize_Deep_100K",
+            "value": 7900494.033333333,
+            "unit": "ns",
+            "range": "± 87578.85570411733"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Deserialize_Wide_1M",
+            "value": 86632644.41666666,
+            "unit": "ns",
+            "range": "± 467877.55514507345"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Deserialize_Deep_100K",
+            "value": 10484904.008854168,
+            "unit": "ns",
+            "range": "± 174803.90735131313"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Deserialize_Wide_ToInt_StringMap",
+            "value": 43835992.63636363,
+            "unit": "ns",
+            "range": "± 1073717.140314893"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Deserialize_Wide_ToInt_SpanMap",
+            "value": 23943285.979166668,
+            "unit": "ns",
+            "range": "± 284331.5914295763"
           }
         ]
       }
