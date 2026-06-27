@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782603517866,
+  "lastUpdate": 1782603518082,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -16130,6 +16130,60 @@ window.BENCHMARK_DATA = {
           {
             "name": "Arborist.Benchmarks.Serialization.Deserialize_Wide_ToInt_SpanMap",
             "value": 24780187,
+            "unit": "bytes"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "956ee49770d051d50ff12df7c53b32de09bef9d6",
+          "message": "Merge branch 'feature/benchmark-dashboard-deploy'",
+          "timestamp": "2026-06-27T14:45:56-07:00",
+          "tree_id": "df364b45920c8ae045ade0c5dd0fb90f2faf8e70",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/956ee49770d051d50ff12df7c53b32de09bef9d6"
+        },
+        "date": 1782603518051,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.Serialization.Serialize_Wide_1M",
+            "value": 27634694,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Serialize_Deep_100K",
+            "value": 6878879,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Deserialize_Wide_1M",
+            "value": 76368560,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Deserialize_Deep_100K",
+            "value": 8595908,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Deserialize_Wide_ToInt_StringMap",
+            "value": 63978831,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.Serialization.Deserialize_Wide_ToInt_SpanMap",
+            "value": 24780884,
             "unit": "bytes"
           }
         ]
