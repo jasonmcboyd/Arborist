@@ -1,10 +1,20 @@
-﻿using Arborist.Core;
+using Arborist.Core;
 using Arborist.Linq.Extensions;
 using System;
-using System.Runtime.CompilerServices;
 
 namespace Arborist.Linq.Treenumerators
 {
+  /// <summary>
+  /// Depth-first <c>Where</c>: filters the inner visit stream, promoting a predicate-skipped node's
+  /// children into its parent's slot (compressing depth and renumbering siblings) without ever comparing
+  /// node values.
+  ///
+  /// <para>All structural state lives in <see cref="WhereDepthFirstPath{TNode}"/>; this class is a thin
+  /// driver over it. The only operations that touch the source are the two I/O seams pulling the next
+  /// inner visit (<see cref="InnerTreenumerator"/>.MoveNext) and evaluating <see cref="_Predicate"/>;
+  /// every other line is shared synchronous state on the path. The driver reads the inner
+  /// Mode/Node/Position once per step and passes them into the path operations.</para>
+  /// </summary>
   internal class WhereDepthFirstTreenumerator<TNode>
     : TreenumeratorWrapper<TNode>
   {
@@ -17,19 +27,17 @@ namespace Arborist.Linq.Treenumerators
       _Predicate = predicate;
       _NodeTraversalStrategy = nodeTraversalStrategy;
 
-      // Add a sentinel node to the stack.
-      _NodeVisits.AddLast(new InternalNodeVisit(InnerTreenumerator));
-      _NodeVisits.GetLast().VisitCount = 1;
+      // Seed the path with a sentinel root taken from the inner treenumerator's initial position.
+      _Path = new WhereDepthFirstPath<TNode>(InnerTreenumerator.Node, InnerTreenumerator.Position);
     }
 
     private readonly Func<NodeContext<TNode>, bool> _Predicate;
     private readonly NodeTraversalStrategies _NodeTraversalStrategy;
 
-    private readonly RefSemiDeque<InternalNodeVisit> _NodeVisits = new RefSemiDeque<InternalNodeVisit>();
-    private readonly RefSemiDeque<InternalNodeVisit> _SkippedNodeVisits = new RefSemiDeque<InternalNodeVisit>();
+    // Non-readonly so calls bind `ref this` and the struct's state mutations persist (a readonly field
+    // would force a defensive copy and silently lose them -- see DepthFirstTreenumerator.cs:37-39).
+    private WhereDepthFirstPath<TNode> _Path;
 
-    private int _DepthOfLastSeenNode = -1;
-    private int _DepthOfLastVisitedNode = -1;
     private bool _HasCachedChild = false;
 
     protected override bool OnMoveNext(NodeTraversalStrategies nodeTraversalStrategies)
@@ -38,22 +46,19 @@ namespace Arborist.Linq.Treenumerators
       {
         _HasCachedChild = false;
 
-        UpdateStateFromNodeVisit(ref _NodeVisits.GetLast());
+        Publish(ref _Path.AcceptedTop());
 
         return true;
       }
 
-      // If the consumer skipped the node we just scheduled, move it to the
-      // skipped stack so its descendants get promoted. The most recently
-      // scheduled node is the top of _NodeVisits. We must never move the
-      // sentinel (the only node present when _NodeVisits.Count == 1): it is a
-      // virtual parent, not a node we ever yielded, so an external skip cannot
-      // apply to it.
+      // If the consumer skipped the node we just scheduled, move it to the skipped stack so its
+      // descendants get promoted. We must never move the sentinel (the only node present when
+      // AcceptedCount == 1): it is a virtual parent, not a node we ever yielded.
       if (InnerTreenumerator.Mode == TreenumeratorMode.SchedulingNode
-        && _NodeVisits.Count > 1
+        && _Path.AcceptedCount > 1
         && nodeTraversalStrategies.HasNodeTraversalStrategies(NodeTraversalStrategies.SkipNode))
       {
-        _SkippedNodeVisits.AddLast(_NodeVisits.RemoveLast());
+        _Path.MoveLastAcceptedToSkipped();
       }
 
       if (Mode == TreenumeratorMode.VisitingNode)
@@ -89,74 +94,26 @@ namespace Arborist.Linq.Treenumerators
 
     private bool OnScheduling()
     {
-      var stackWithDeepestNodeVisit = GetStackWithDeepestNodeVisit();
-
-      var traversingAwayFromRootNode = InnerTreenumerator.Position.Depth > stackWithDeepestNodeVisit.GetLast().OriginalPosition.Depth;
-
-      if (!traversingAwayFromRootNode)
-      {
-        while (_SkippedNodeVisits.Count > 0
-          && _SkippedNodeVisits.GetLast().OriginalPosition.Depth >= InnerTreenumerator.Position.Depth)
-        {
-          _SkippedNodeVisits.RemoveLast();
-        }
-
-        while (_NodeVisits.GetLast().OriginalPosition.Depth >= InnerTreenumerator.Position.Depth)
-         _NodeVisits.RemoveLast();
-
-        stackWithDeepestNodeVisit = GetStackWithDeepestNodeVisit();
-
-        if (stackWithDeepestNodeVisit == _SkippedNodeVisits)
-        {
-          // Increment the skipped node's visit count to ensure
-          // the sibling index calculation is correct.
-          _SkippedNodeVisits.GetLast().VisitCount++;
-        }
-        else if (_NodeVisits.Count == 1)
-        {
-          // Increment the sentinel node's visit count to ensure
-          // the sibling index calculation is correct.
-          _NodeVisits.GetLast().VisitCount++;
-        }
-      }
+      // Unwind finished levels and top up the level we returned to so the sibling index is correct.
+      _Path.PopDeeperThanForScheduling(InnerTreenumerator.Position.Depth);
 
       // Check if the current node visit should be skipped.
       if (!_Predicate(InnerTreenumerator.ToNodeContext()))
         return false;
 
-      ref var previousVisit = ref stackWithDeepestNodeVisit.GetLast();
+      // ShouldCacheChild reads the accepted top as the PARENT, so it must run BEFORE the push.
+      var cacheChild = _Path.ShouldCacheChild();
 
-      var depth = _NodeVisits.Count + _SkippedNodeVisits.Count - 1;
-      var siblingIndex = previousVisit.CurrentChildIndex;
-
-      previousVisit.CurrentChildIndex++;
-
-      // TODO: When should I cache?
-      var cacheChild =
-        stackWithDeepestNodeVisit != _SkippedNodeVisits
-        && _NodeVisits.Count > 1
-        && _DepthOfLastVisitedNode > _NodeVisits.GetLast().OriginalPosition.Depth;
-
-      var nodeVisit =
-        new InternalNodeVisit(
-          InnerTreenumerator.Node,
-          InnerTreenumerator.Position,
-          new NodePosition(siblingIndex, depth),
-          0,
-          0);
-
-      _NodeVisits.AddLast(nodeVisit);
+      _Path.PushAcceptedChild(InnerTreenumerator.Node, InnerTreenumerator.Position);
 
       if (cacheChild)
       {
-        ref var parentNodeVisit = ref _NodeVisits.GetFromBack(1);
         _HasCachedChild = true;
-        parentNodeVisit.VisitCount++;
-        UpdateStateFromNodeVisit(ref parentNodeVisit);
+        Publish(ref _Path.TakeParentReturnVisit());
       }
       else
       {
-        UpdateStateFromNodeVisit(ref _NodeVisits.GetLast());
+        Publish(ref _Path.AcceptedTop());
       }
 
       return true;
@@ -164,99 +121,28 @@ namespace Arborist.Linq.Treenumerators
 
     private bool OnVisiting()
     {
-      var removedVisitedNodes = false;
-      var removedSkippedNodes = false;
+      _Path.PopDeeperThanForVisiting(
+        InnerTreenumerator.Position.Depth,
+        out var removedVisitedNodes,
+        out var removedSkippedNodes);
 
-      while (_NodeVisits.GetLast().OriginalPosition.Depth > InnerTreenumerator.Position.Depth)
-      {
-        ref var removedNode = ref _NodeVisits.RemoveLast();
-        removedVisitedNodes |= removedNode.VisitCount > 0;
-      }
+      if (_Path.ShouldSuppressVisit(InnerTreenumerator.Position, removedVisitedNodes, removedSkippedNodes))
+        return false;
 
-      while (_SkippedNodeVisits.Count > 0 && _SkippedNodeVisits.GetLast().OriginalPosition.Depth > InnerTreenumerator.Position.Depth)
-      {
-        _SkippedNodeVisits.RemoveLast();
-        removedSkippedNodes = true;
-      }
-
-      ref var nodeVisit = ref _NodeVisits.GetLast();
-
-      if (nodeVisit.OriginalPosition == InnerTreenumerator.Position
-        && nodeVisit.OriginalPosition.Depth >= _DepthOfLastVisitedNode
-        && !removedVisitedNodes)
-      {
-        if (removedSkippedNodes)
-          return false;
-
-        if (_DepthOfLastSeenNode > nodeVisit.OriginalPosition.Depth)
-          return false;
-      }
-
-      nodeVisit.VisitCount++;
-
-      UpdateStateFromNodeVisit(ref _NodeVisits.GetLast());
+      Publish(ref _Path.TakeCurrentVisit());
 
       return true;
     }
-    
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private RefSemiDeque<InternalNodeVisit> GetStackWithDeepestNodeVisit()
+
+    private void Publish(ref WhereDepthFirstPath<TNode>.InternalNodeVisit frame)
     {
-      return
-        _SkippedNodeVisits.Count == 0 || _NodeVisits.GetLast().OriginalPosition.Depth > _SkippedNodeVisits.GetLast().OriginalPosition.Depth
-        ? _NodeVisits
-        : _SkippedNodeVisits;
-    }
+      Mode = frame.VisitCount == 0 ? TreenumeratorMode.SchedulingNode : TreenumeratorMode.VisitingNode;
 
-    private void UpdateStateFromNodeVisit(ref InternalNodeVisit nodeVisit)
-    {
-      Mode = nodeVisit.VisitCount == 0 ? TreenumeratorMode.SchedulingNode : TreenumeratorMode.VisitingNode;
+      _Path.RecordPublished(frame.OriginalPosition.Depth, Mode == TreenumeratorMode.VisitingNode);
 
-      _DepthOfLastSeenNode = nodeVisit.OriginalPosition.Depth;
-
-      if (Mode == TreenumeratorMode.VisitingNode)
-        _DepthOfLastVisitedNode = nodeVisit.OriginalPosition.Depth;
-
-      Node = nodeVisit.Node;
-      VisitCount = nodeVisit.VisitCount;
-      Position = nodeVisit.Position;
-    }
-
-    private struct InternalNodeVisit
-    {
-      public InternalNodeVisit(
-        TNode node,
-        NodePosition originalPosition,
-        NodePosition position,
-        int visitCount,
-        int currentChildIndex)
-      {
-        Node = node;
-        OriginalPosition = originalPosition;
-        Position = position;
-        VisitCount = visitCount;
-        CurrentChildIndex = currentChildIndex;
-      }
-
-      public InternalNodeVisit(ITreenumerator<TNode> treenumerator)
-        : this(
-        treenumerator.Node,
-        treenumerator.Position,
-        treenumerator.Position,
-        treenumerator.VisitCount,
-        0)
-      { }
-
-      public TNode Node;
-      public NodePosition OriginalPosition;
-      public NodePosition Position;
-      public int VisitCount;
-      public int CurrentChildIndex;
-
-      public override string ToString()
-      {
-        return $"N:{Node},  OP:{OriginalPosition},  P:{Position}  VC:{VisitCount},  CI:{CurrentChildIndex}";
-      }
+      Node = frame.Node;
+      VisitCount = frame.VisitCount;
+      Position = frame.Position;
     }
   }
 }
