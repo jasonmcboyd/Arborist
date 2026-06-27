@@ -114,27 +114,22 @@ namespace Arborist.Treenumerators
     {
       while (true)
       {
-        _Path.PopFinishedLevel();
-
-        // Unwound the whole forest path: advance to the next root (or finish).
-        if (_Path.IsEmpty)
-          return MoveToNextRootNode();
-
-        // No visit is owed at the level we returned to -- it already took its return visit, or it has
-        // no accepted node (a chain of skipped roots), or it is a SkipNode'd level -- so promote its
-        // next child without a parent visit.
-        if (_Path.TopLevelAlreadyVisited || !_Path.HasAcceptedNodes || _Path.TopLevelWasSkipped)
+        // Pop the exhausted level and classify what the level we returned to needs -- one call into the
+        // path per iteration (this is the skip-heavy hot loop, so driver<->path round-trips matter).
+        switch (_Path.PopFinishedLevelAndClassify())
         {
-          if (TryPushNextChild())
+          case DepthFirstBacktrackStep.GoToRoot:
+            return MoveToNextRootNode();
+
+          case DepthFirstBacktrackStep.PromoteNextChild:
+            if (TryPushNextChild())
+              return true;
+            continue;
+
+          default: // EmitReturnVisit
+            Publish(ref _Path.TakeNextVisit());
             return true;
-
-          continue;
         }
-
-        // The accepted node at this level owes its next between/after-children visit.
-        Publish(ref _Path.TakeNextVisit());
-
-        return true;
       }
     }
 
@@ -142,11 +137,12 @@ namespace Arborist.Treenumerators
     // async treenumerator replaces the synchronous MoveNext here with an awaited MoveNextAsync; nothing
     // else changes.
     //
-    // Deliberately NOT inlined -- mirrors the original two-stack engine where the promote was its own
+    // Deliberately NOT inlined: this mirrors the original two-stack engine where the promote was its own
     // method. Inlining the whole promote body into OnMoveNext/OnScheduling inflated their frames
-    // (6 callee-saved + sub rsp,72 + vzeroupper) and downgraded OnMoveNext's branch dispatch from a
-    // tail-jmp to a call+teardown paid on EVERY node -- ~1.7-2.3x on promotion-heavy skip traversal.
-    // The push chain (PushChild/PushLevel) still inlines INTO this method, so the push is call-free.
+    // (6 callee-saved regs + sub rsp,72 + vzeroupper) and downgraded OnMoveNext's branch dispatch from a
+    // tail-jmp to a call+teardown paid on EVERY node -- ~1.7x on promotion-heavy traversal. Keeping it
+    // out-of-line lets the drivers stay thin dispatchers; the push chain (PushChild/PushLevel) still
+    // inlines INTO this method, so the push itself is call-free.
     [MethodImpl(MethodImplOptions.NoInlining)]
     private bool TryPushNextChild()
     {
