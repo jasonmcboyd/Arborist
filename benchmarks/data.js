@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782511429683,
+  "lastUpdate": 1782521634289,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -1440,6 +1440,150 @@ window.BENCHMARK_DATA = {
             "value": 37436644.43877552,
             "unit": "ns",
             "range": "± 51753.536123196616"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "ab94b3983058299be15f1b4d38b05b21509cb8ad",
+          "message": "Encapsulate BFT state in BreadthFirstPath; mirror the DFT driver/state split\n\nMove the breadth-first engine's state -- the visit queue, the schedule stack,\nthe owed-return-visit carry, and the root sibling counter -- into a new\nBreadthFirstPath, leaving BreadthFirstTreenumerator a thin driver, mirroring the\ndepth-first DepthFirstPath split. The cohesive Frame (visit state + child\nenumerator) is kept -- the BFT keeps full state for every resident node anyway,\nso it costs no memory -- so allocation is unchanged from the cohesion engine.\n\nLike DepthFirstPath, BreadthFirstPath is \"sans-I/O\": it never pulls a child; it\nexposes the two active enumerators (the schedule-stack top and the visit-queue\nfront) by ref for the driver to advance. That isolates the engine's asynchronous\noperations to those seams, so a future async BFT can share this class and differ\nonly there. It is a mutable struct embedded as the driver's single _Path field\n(never copied; refs it returns point into the heap deques), keeping dense\ntraversal at the cohesion engine's speed. The two child-pull sites collapse into\none TryScheduleNextChildOf(ref parent).\n\nNo behavior change: same (Mode, Node, VisitCount, Position) visit stream.\n\nValidation:\n- Exact-order traversal + exhaustive DFT-vs-BFT multiset scan (438/0)\n- Full Arborist.Linq suite incl. Where (14,759/0)\n- Benchmarks (Release/Job.Default, same session): TriangleTree 194.5 vs cohesion\n  193.9 ms; CompleteBinaryTree 208.1 vs 213.0 ms (parity). Allocation identical\n  to the cohesion engine (same Frame).\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01Wg3xArL4FATQaXQMBvhXdg",
+          "timestamp": "2026-06-27T00:09:54Z",
+          "tree_id": "8703f7198030df75b83a7026b75dc74f78b17190",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/ab94b3983058299be15f1b4d38b05b21509cb8ad"
+        },
+        "date": 1782521633932,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.BreadthFirstTreenumerator.TriangleTree_2896",
+            "value": 241693677.7142857,
+            "unit": "ns",
+            "range": "± 799152.9614224165"
+          },
+          {
+            "name": "Arborist.Benchmarks.BreadthFirstTreenumerator.CompleteBinaryTree_21",
+            "value": 277165730.8333333,
+            "unit": "ns",
+            "range": "± 811370.9752618021"
+          },
+          {
+            "name": "Arborist.Benchmarks.BreadthFirstTreenumerator.TrivialForest_4M",
+            "value": 14027810.334134616,
+            "unit": "ns",
+            "range": "± 25310.360737917064"
+          },
+          {
+            "name": "Arborist.Benchmarks.BreadthFirstTreenumerator.DegenerateTree_4M",
+            "value": 99655476.9076923,
+            "unit": "ns",
+            "range": "± 69641.38074203911"
+          },
+          {
+            "name": "Arborist.Benchmarks.DepthFirstTreenumerator.TriangleTree_2896",
+            "value": 217758471.5333333,
+            "unit": "ns",
+            "range": "± 2283178.922581809"
+          },
+          {
+            "name": "Arborist.Benchmarks.DepthFirstTreenumerator.CompleteBinaryTree_21",
+            "value": 235309379.0444444,
+            "unit": "ns",
+            "range": "± 4330093.607033592"
+          },
+          {
+            "name": "Arborist.Benchmarks.DepthFirstTreenumerator.TrivialForest_4M",
+            "value": 14005912.260416666,
+            "unit": "ns",
+            "range": "± 25221.33095757315"
+          },
+          {
+            "name": "Arborist.Benchmarks.DepthFirstTreenumerator.DegenerateTree_4M",
+            "value": 61448815.30612244,
+            "unit": "ns",
+            "range": "± 214498.93192710195"
+          },
+          {
+            "name": "Arborist.Benchmarks.LevelOrderTraversal.DeepTree",
+            "value": 46666440.779220775,
+            "unit": "ns",
+            "range": "± 246098.29546213336"
+          },
+          {
+            "name": "Arborist.Benchmarks.LevelOrderTraversal.TriangleTree_PruneAfter_1447",
+            "value": 63987492.928571425,
+            "unit": "ns",
+            "range": "± 375466.2194790001"
+          },
+          {
+            "name": "Arborist.Benchmarks.LevelOrderTraversal.CompleteBinaryTree_PruneBefore_20",
+            "value": 162756564.88333333,
+            "unit": "ns",
+            "range": "± 1117206.9744340838"
+          },
+          {
+            "name": "Arborist.Benchmarks.LevelOrderTraversal.CompleteBinaryTree_PruneAfter_19",
+            "value": 82021045.16666666,
+            "unit": "ns",
+            "range": "± 280625.6186827892"
+          },
+          {
+            "name": "Arborist.Benchmarks.PostOrderTraversal.DeepTree",
+            "value": 37305640.1952381,
+            "unit": "ns",
+            "range": "± 218797.1754314641"
+          },
+          {
+            "name": "Arborist.Benchmarks.PostOrderTraversal.TriangleTree_PruneAfter_1447",
+            "value": 67197136.51666667,
+            "unit": "ns",
+            "range": "± 237351.04852010077"
+          },
+          {
+            "name": "Arborist.Benchmarks.PostOrderTraversal.CompleteBinaryTree_PruneBefore_20",
+            "value": 124515252.05714285,
+            "unit": "ns",
+            "range": "± 473117.0045216465"
+          },
+          {
+            "name": "Arborist.Benchmarks.PostOrderTraversal.CompleteBinaryTree_PruneAfter_19",
+            "value": 47361694.72077923,
+            "unit": "ns",
+            "range": "± 92512.17320882069"
+          },
+          {
+            "name": "Arborist.Benchmarks.PreorderTraversal.DeepTree",
+            "value": 21105357.485576924,
+            "unit": "ns",
+            "range": "± 32214.11462973749"
+          },
+          {
+            "name": "Arborist.Benchmarks.PreorderTraversal.TriangleTree_PruneAfter_1447",
+            "value": 75741554.26495726,
+            "unit": "ns",
+            "range": "± 897074.4881240202"
+          },
+          {
+            "name": "Arborist.Benchmarks.PreorderTraversal.CompleteBinaryTree_PruneBefore_20",
+            "value": 114571556.41333334,
+            "unit": "ns",
+            "range": "± 129371.37947814059"
+          },
+          {
+            "name": "Arborist.Benchmarks.PreorderTraversal.CompleteBinaryTree_PruneAfterDepth_19",
+            "value": 38859173.71005917,
+            "unit": "ns",
+            "range": "± 78171.76447355872"
           }
         ]
       }
