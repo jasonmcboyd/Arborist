@@ -1,0 +1,56 @@
+name: Deploy Benchmark Dashboard
+
+# The benchmark dashboard's HTML lives on main (benchmark-dashboard/index.html) as the source of
+# truth. benchmark-action/github-action-benchmark (in benchmarks.yml) owns benchmarks/data.js and
+# only writes its DEFAULT index.html when none exists -- it never overwrites -- so this workflow is
+# what keeps the custom dashboard in sync: whenever the source changes on main, it copies the HTML
+# into the gh-pages branch. Decoupled from the measurement workflow so benchmark runs stay quiet,
+# and self-healing (workflow_dispatch re-deploys if gh-pages is ever reset).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'benchmark-dashboard/**'
+      - '.github/workflows/deploy-dashboard.yml'
+  workflow_dispatch:
+
+# Share the benchmark workflow's concurrency group so two jobs never push gh-pages at once.
+concurrency:
+  group: benchmarks
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    name: Sync dashboard to gh-pages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history so the gh-pages push is never a shallow update
+
+      - name: Copy dashboard into gh-pages
+        run: |
+          set -euo pipefail
+          git config --global user.name  "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          WT="${RUNNER_TEMP}/ghp"
+          git fetch origin gh-pages
+          git worktree add "$WT" origin/gh-pages
+
+          mkdir -p "$WT/benchmarks"
+          cp benchmark-dashboard/index.html "$WT/benchmarks/index.html"
+
+          git -C "$WT" add benchmarks/index.html
+          if git -C "$WT" diff --cached --quiet; then
+            echo "Dashboard already up to date on gh-pages; nothing to deploy."
+          else
+            git -C "$WT" commit -m "Deploy benchmark dashboard from main@${GITHUB_SHA}"
+            git -C "$WT" push origin HEAD:gh-pages
+            echo "Deployed updated dashboard to gh-pages."
+          fi

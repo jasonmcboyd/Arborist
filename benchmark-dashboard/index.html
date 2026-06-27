@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Arborist Benchmarks — preview</title>
+<!-- Self-contained preview dashboard over the SAME data.js the gh-pages site publishes.
+     No external libraries; charts are inline SVG (so all text is real, selectable DOM — searchable,
+     unlike the canvas-based stock dashboard). Open directly from disk (file://). -->
+<style>
+  :root {
+    --bg:#fff; --fg:#1c2024; --muted:#6b7280; --line:#e5e7eb; --row:#f9fafb;
+    --accent:#3273dc; --bad:#c0392b; --good:#1e8e54; --chip:#eef2f7; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#15181c; --fg:#e6e8eb; --muted:#9aa3ad; --line:#2a2f36; --row:#1b1f24;
+            --accent:#5b9bff; --bad:#ff6b5e; --good:#46c585; --chip:#222831; }
+  }
+  * { box-sizing:border-box; }
+  html { font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--fg); }
+  body { margin:0; padding:0 16px 64px; }
+  header { position:sticky; top:0; background:var(--bg); border-bottom:1px solid var(--line); padding:12px 0; z-index:5; }
+  h1 { font-size:18px; margin:0 0 8px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  h1 .sub { font-weight:400; color:var(--muted); font-size:13px; }
+  .controls { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  input[type=search], select { font:inherit; padding:6px 10px; border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--fg); }
+  input[type=search] { flex:1; min-width:220px; }
+  .seg { display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+  .seg button { font:inherit; padding:6px 10px; border:0; background:var(--bg); color:var(--fg); cursor:pointer; }
+  .seg button[aria-pressed=true] { background:var(--accent); color:#fff; }
+  label.lbl { color:var(--muted); font-size:12px; }
+  .count { color:var(--muted); font-size:12px; margin-left:auto; }
+
+  section.group { margin:18px 0 0; }
+  .group > h2 { font-size:14px; margin:0; padding:8px 6px; cursor:pointer; border-bottom:1px solid var(--line);
+                display:flex; align-items:center; gap:8px; user-select:none; }
+  .group > h2 .n { color:var(--muted); font-weight:400; }
+  .caret { display:inline-block; width:12px; transition:transform .12s; color:var(--muted); }
+  .collapsed .caret { transform:rotate(-90deg); }
+  .collapsed table { display:none; }
+
+  table { width:100%; border-collapse:collapse; }
+  th, td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:middle; }
+  th { font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); font-weight:600; cursor:pointer; }
+  tbody tr:nth-child(4n+1) { background:var(--row); }       /* zebra over (row + expand) pairs */
+  tr.brow { cursor:pointer; }
+  td.num { text-align:right; font-family:var(--mono); white-space:nowrap; }
+  td.name { font-family:var(--mono); font-size:13px; }
+  .cls { color:var(--muted); }
+  .badge { display:inline-block; font-size:10px; padding:1px 6px; border-radius:999px; background:var(--chip); color:var(--muted); margin-left:6px; }
+  .delta.bad { color:var(--bad); } .delta.good { color:var(--good); } .delta.flat { color:var(--muted); }
+  .spark { display:block; }
+  tr.detail td { background:transparent; }
+  tr.detail .panel { padding:10px 14px; color:var(--muted); font-size:12px; }
+  .commits { font-family:var(--mono); font-size:11px; margin-top:6px; }
+  .movers { margin:12px 0 0; padding:10px 12px; border:1px solid var(--line); border-radius:10px; }
+  .movers h2 { font-size:13px; margin:0 0 8px; }
+  .movers ul { list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:8px; }
+  .movers li { font-size:12px; padding:4px 8px; border-radius:8px; background:var(--chip); font-family:var(--mono); }
+  .note { color:var(--muted); font-size:12px; padding:8px 6px; }
+  svg text { fill:var(--muted); font-size:10px; }
+  a { color:var(--accent); text-decoration:none; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Arborist Benchmarks <span class="sub" id="sub"></span></h1>
+  <div class="controls">
+    <input id="q" type="search" placeholder="filter by name… (e.g. Where, DegenerateTree, BreadthFirst)" autofocus />
+    <label class="lbl">group</label>
+    <select id="group">
+      <option value="suite">Suite</option>
+      <option value="cls">Operation</option>
+      <option value="metric">Metric (time/memory)</option>
+      <option value="engine">Engine (DFT/BFT)</option>
+    </select>
+    <label class="lbl">sort</label>
+    <select id="sort">
+      <option value="delta">Δ since prev</option>
+      <option value="latest">Latest value</option>
+      <option value="name">Name</option>
+    </select>
+    <span class="count" id="count"></span>
+  </div>
+</header>
+
+<div id="movers"></div>
+<main id="main"></main>
+
+<script src="data.js"></script>
+<script>
+"use strict";
+const SMALLER_IS_BETTER = true; // every metric here (time, memory) is smaller-better
+const state = { q:"", group:"suite", sort:"delta", collapsed:new Set(), open:new Set() };
+
+function dataset() { return window.BENCHMARK_DATA; }
+
+// ---- model: flatten entries{suite:[commit{benches[]}]} into one row per benchmark with a series ----
+function buildRows() {
+  const data = dataset();
+  const rows = [];
+  if (!data || !data.entries) return rows;
+  for (const suite of Object.keys(data.entries)) {
+    const commits = data.entries[suite].slice().sort((a,b)=>a.date-b.date);
+    const series = new Map();
+    for (const c of commits) {
+      for (const b of (c.benches||[])) {
+        if (!series.has(b.name)) series.set(b.name, []);
+        series.get(b.name).push({ value:b.value, unit:b.unit, date:c.date,
+          id:(c.commit&&c.commit.id)||"", msg:(c.commit&&c.commit.message)||"", url:(c.commit&&c.commit.url)||"" });
+      }
+    }
+    for (const [full, pts] of series) {
+      const unit = pts[pts.length-1].unit;
+      const short = full.replace(/^Arborist\.Benchmarks\./, "");
+      const dot = short.indexOf(".");
+      const cls = dot>=0 ? short.slice(0,dot) : short;
+      const method = dot>=0 ? short.slice(dot+1) : "";
+      const latest = pts[pts.length-1].value;
+      const prev = pts.length>=2 ? pts[pts.length-2].value : null;
+      const deltaPct = (prev!=null && prev!==0) ? (latest-prev)/prev*100 : null;
+      const metric = unit==="bytes" ? "Memory" : "Time";
+      const engine = /BreadthFirst|Bft|LevelOrder/i.test(short) ? "BFT"
+                   : /DepthFirst|Dft|Preorder|PostOrder/i.test(short) ? "DFT" : "—";
+      rows.push({ suite, full, cls, method, short, unit, metric, engine, series:pts, latest, prev, deltaPct });
+    }
+  }
+  return rows;
+}
+
+// ---- formatting ----
+function fmtVal(v, unit) {
+  if (unit==="bytes") {
+    if (v>=1048576) return (v/1048576).toFixed(2)+" MB";
+    if (v>=1024) return (v/1024).toFixed(2)+" KB";
+    return Math.round(v)+" B";
+  }
+  // ns
+  if (v>=1e6) return (v/1e6).toFixed(2)+" ms";
+  if (v>=1e3) return (v/1e3).toFixed(2)+" µs";
+  return v.toFixed(1)+" ns";
+}
+function fmtDelta(d) {
+  if (d==null) return ["—","flat"];
+  const cls = Math.abs(d)<0.5 ? "flat" : (d>0 ? "bad" : "good"); // smaller-is-better
+  const s = (d>0?"+":"")+d.toFixed(1)+"%";
+  return [s, cls];
+}
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+// ---- inline SVG ----
+function sparkline(pts) {
+  if (pts.length<2) return '<svg class="spark" width="120" height="22"><text x="0" y="15">single point</text></svg>';
+  const vs = pts.map(p=>p.value), mn=Math.min(...vs), mx=Math.max(...vs), W=120,H=22,P=2;
+  const x=i=>P+i*(W-2*P)/(pts.length-1);
+  const y=v=>mx===mn ? H/2 : H-P-(v-mn)/(mx-mn)*(H-2*P);
+  const d=pts.map((p,i)=>(i?"L":"M")+x(i).toFixed(1)+" "+y(p.value).toFixed(1)).join(" ");
+  const last=pts[pts.length-1];
+  return `<svg class="spark" width="${W}" height="${H}"><path d="${d}" fill="none" stroke="var(--accent)" stroke-width="1.5"/>`
+       + `<circle cx="${x(pts.length-1).toFixed(1)}" cy="${y(last.value).toFixed(1)}" r="2" fill="var(--accent)"/></svg>`;
+}
+function bigChart(pts, unit) {
+  if (pts.length<2) return '<div class="note">No history yet — only one commit recorded. (Toggle “Demo history” to see the trend UI populated.)</div>';
+  const vs=pts.map(p=>p.value), mn=Math.min(...vs), mx=Math.max(...vs);
+  const W=640,H=190,L=70,R=14,T=14,B=28, iw=W-L-R, ih=H-T-B;
+  const x=i=>L+i*iw/(pts.length-1);
+  const y=v=>mx===mn ? T+ih/2 : T+ih-(v-mn)/(mx-mn)*ih;
+  const d=pts.map((p,i)=>(i?"L":"M")+x(i).toFixed(1)+" "+y(p.value).toFixed(1)).join(" ");
+  let g="";
+  for (let k=0;k<=2;k++){ const v=mn+(mx-mn)*k/2, yy=y(v).toFixed(1);
+    g+=`<line x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}" stroke="var(--line)"/><text x="6" y="${(+yy+3).toFixed(1)}">${esc(fmtVal(v,unit))}</text>`; }
+  let dots="";
+  pts.forEach((p,i)=>{ dots+=`<circle cx="${x(i).toFixed(1)}" cy="${y(p.value).toFixed(1)}" r="2.5" fill="var(--accent)">`
+    +`<title>${esc((p.id||"").slice(0,10))} — ${esc(fmtVal(p.value,unit))}\n${esc(p.msg).slice(0,80)}</title></circle>`; });
+  const d0=new Date(pts[0].date).toISOString().slice(0,10), d1=new Date(pts[pts.length-1].date).toISOString().slice(0,10);
+  return `<svg width="${W}" height="${H}" role="img">${g}<path d="${d}" fill="none" stroke="var(--accent)" stroke-width="1.75"/>${dots}`
+       + `<text x="${L}" y="${H-8}">${d0}</text><text x="${W-R}" y="${H-8}" text-anchor="end">${d1}</text></svg>`;
+}
+
+// ---- render ----
+function render() {
+  const sub = document.getElementById("sub");
+  const d = dataset();
+  sub.textContent = d ? ("· updated "+new Date(d.lastUpdate).toISOString().slice(0,10)) : "· no data";
+  let rows = buildRows();
+  const q = state.q.trim().toLowerCase();
+  if (q) rows = rows.filter(r => (r.short+" "+r.suite+" "+r.engine+" "+r.metric).toLowerCase().includes(q));
+  document.getElementById("count").textContent = rows.length+" benchmarks";
+
+  renderMovers(rows);
+
+  // group
+  const groups = new Map();
+  for (const r of rows) {
+    const key = r[state.group] || "—";
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(r);
+  }
+  const sortRows = arr => arr.sort((a,b)=>{
+    if (state.sort==="name") return a.short.localeCompare(b.short);
+    if (state.sort==="latest") return b.latest-a.latest;
+    const ad=a.deltaPct==null?-1:Math.abs(a.deltaPct), bd=b.deltaPct==null?-1:Math.abs(b.deltaPct);
+    return bd-ad;
+  });
+
+  const main = document.getElementById("main");
+  main.innerHTML = "";
+  if (!rows.length) { main.innerHTML = '<p class="note">No benchmarks match the filter.</p>'; return; }
+  for (const key of [...groups.keys()].sort()) {
+    const list = sortRows(groups.get(key));
+    const sec = document.createElement("section");
+    sec.className = "group"+(state.collapsed.has(key)?" collapsed":"");
+    const rowsHtml = list.map(r => rowHtml(r)).join("");
+    sec.innerHTML = `<h2 data-key="${esc(key)}"><span class="caret">▾</span>${esc(key)} <span class="n">(${list.length})</span></h2>`
+      + `<table><thead><tr><th></th><th data-s="name">Benchmark</th><th data-s="latest" style="text-align:right">Latest</th>`
+      + `<th data-s="delta" style="text-align:right">Δ prev</th><th>Trend</th></tr></thead><tbody>${rowsHtml}</tbody></table>`;
+    main.appendChild(sec);
+  }
+}
+
+function rowHtml(r) {
+  const [ds,dc] = fmtDelta(r.deltaPct);
+  const open = state.open.has(r.full);
+  const badge = r.engine!=="—" ? `<span class="badge">${r.engine}</span>` : "";
+  let html = `<tr class="brow" data-full="${esc(r.full)}"><td>${open?"▾":"▸"}</td>`
+    + `<td class="name"><span class="cls">${esc(r.cls)}.</span>${esc(r.method)}${badge}</td>`
+    + `<td class="num">${esc(fmtVal(r.latest,r.unit))}</td>`
+    + `<td class="num delta ${dc}">${esc(ds)}</td>`
+    + `<td>${sparkline(r.series)}</td></tr>`;
+  if (open) html += `<tr class="detail"><td></td><td colspan="4"><div class="panel">${bigChart(r.series,r.unit)}`
+    + `<div class="commits">${r.series.slice(-6).reverse().map(p=>`${esc((p.id||"").slice(0,8))}  ${esc(fmtVal(p.value,r.unit))}  ${esc(p.msg).slice(0,60)}`).join("<br>")}</div>`
+    + `</div></td></tr>`;
+  return html;
+}
+
+function renderMovers(rows) {
+  const box = document.getElementById("movers");
+  const moved = rows.filter(r=>r.deltaPct!=null).sort((a,b)=>Math.abs(b.deltaPct)-Math.abs(a.deltaPct)).slice(0,10);
+  if (!moved.length) {
+    box.innerHTML = `<div class="movers"><h2>Biggest movers since previous commit</h2><div class="note">Needs ≥2 commits of history — the live data has one. Toggle “Demo history”.</div></div>`;
+    return;
+  }
+  box.innerHTML = `<div class="movers"><h2>Biggest movers since previous commit</h2><ul>`
+    + moved.map(r=>{const [ds,dc]=fmtDelta(r.deltaPct);
+        return `<li><span class="delta ${dc}">${esc(ds)}</span> ${esc(r.cls)}.${esc(r.method)} <span class="cls">${esc(fmtVal(r.latest,r.unit))}</span></li>`;}).join("")
+    + `</ul></div>`;
+}
+
+// ---- events ----
+document.getElementById("q").addEventListener("input", e=>{ state.q=e.target.value; render(); });
+document.getElementById("group").addEventListener("change", e=>{ state.group=e.target.value; state.collapsed.clear(); render(); });
+document.getElementById("sort").addEventListener("change", e=>{ state.sort=e.target.value; render(); });
+document.getElementById("main").addEventListener("click", e=>{
+  const h2=e.target.closest("h2[data-key]");
+  if (h2){ const k=h2.dataset.key; state.collapsed.has(k)?state.collapsed.delete(k):state.collapsed.add(k); render(); return; }
+  const th=e.target.closest("th[data-s]");
+  if (th){ state.sort=th.dataset.s==="name"?"name":th.dataset.s; document.getElementById("sort").value=state.sort; render(); return; }
+  const tr=e.target.closest("tr.brow");
+  if (tr){ const f=tr.dataset.full; state.open.has(f)?state.open.delete(f):state.open.add(f); render(); }
+});
+
+render();
+</script>
+</body>
+</html>
