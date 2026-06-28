@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782677966665,
+  "lastUpdate": 1782677966894,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -16350,6 +16350,50 @@ window.BENCHMARK_DATA = {
           {
             "name": "Arborist.Benchmarks.RefSemiDeque.Add_Block64_1M",
             "value": 64248582,
+            "unit": "bytes"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "b2789b315ab00e8aa3058a2d33a365848dee4bb5",
+          "message": "Added merge benchmarks",
+          "timestamp": "2026-06-28T12:52:27-07:00",
+          "tree_id": "2934f229e52805b3560635e17a7ab003dbbc7894",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/b2789b315ab00e8aa3058a2d33a365848dee4bb5"
+        },
+        "date": 1782677966861,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.Add_8M",
+            "value": 32160808,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.RemoveFirst_8M",
+            "value": 32160743,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.RemoveLast_8M",
+            "value": 32160766,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.Add_Block64_1M",
+            "value": 64249866,
             "unit": "bytes"
           }
         ]
