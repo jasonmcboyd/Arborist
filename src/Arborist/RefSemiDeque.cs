@@ -1,10 +1,12 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Arborist
 {
-  public class RefSemiDeque<T> : IEnumerable<T>
+  [DebuggerDisplay("Count = {Count}")]
+  [DebuggerTypeProxy(typeof(RefSemiDeque<>.DebugView))]
+  public class RefSemiDeque<T>
   {
     public RefSemiDeque() : this(8) { }
 
@@ -164,40 +166,55 @@ namespace Arborist
       _HeadPointerOffset = 0;
     }
 
-    #region IEnumerable
-
-    public IEnumerator<T> GetEnumerator()
+    // Point-in-time copy of the deque's contents in front-to-back order. This type's accessors all
+    // return `ref T` for in-place mutation; a snapshot is deliberately by-value and is NOT a live
+    // view -- it exists for tests/debugging, not the traversal hot path. Intentionally not an
+    // IEnumerable/LINQ surface: enumerating a ref-cell arena by value silently copies large structs
+    // and offers no concurrent-mutation guard, both of which contradict the type's contract.
+    internal T[] Snapshot()
     {
+      var result = new T[Count];
+
       if (Count == 0)
-        yield break;
+        return result;
+
+      var index = 0;
 
       if (CurrentPartition == _Partitions.First)
       {
         for (var offset = _TailPointerOffset; offset < _HeadPointerOffset; offset++)
-          yield return CurrentPartition.Value[offset];
+          result[index++] = CurrentPartition.Value[offset];
 
-        yield break;
+        return result;
       }
 
       for (var offset = _TailPointerOffset; offset < _Partitions.First.Value.Length; offset++)
-        yield return _Partitions.First.Value[offset];
+        result[index++] = _Partitions.First.Value[offset];
 
       var node = _Partitions.First.Next;
 
       while (node != CurrentPartition)
       {
         for (var offset = 0; offset < node.Value.Length; offset++)
-          yield return node.Value[offset];
+          result[index++] = node.Value[offset];
 
         node = node.Next;
       }
 
       for (var offset = 0; offset < _HeadPointerOffset; offset++)
-        yield return CurrentPartition.Value[offset];
+        result[index++] = CurrentPartition.Value[offset];
+
+      return result;
     }
 
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    private sealed class DebugView
+    {
+      private readonly RefSemiDeque<T> _Deque;
 
-    #endregion IEnumerable
+      public DebugView(RefSemiDeque<T> deque) => _Deque = deque;
+
+      [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+      public T[] Items => _Deque.Snapshot();
+    }
   }
 }

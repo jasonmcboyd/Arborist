@@ -21,7 +21,7 @@ namespace Arborist.Tests
       sut.AddLast(1);
 
       // Assert
-      Assert.IsTrue(Enumerable.SequenceEqual(sut, new [] { 1 }));
+      Assert.IsTrue(Enumerable.SequenceEqual(sut.Snapshot(), new [] { 1 }));
     }
 
 
@@ -36,7 +36,7 @@ namespace Arborist.Tests
       sut.AddLast(2);
 
       // Assert
-      Assert.IsTrue(Enumerable.SequenceEqual(sut, new [] { 1, 2 }));
+      Assert.IsTrue(Enumerable.SequenceEqual(sut.Snapshot(), new [] { 1, 2 }));
     }
 
     [TestMethod]
@@ -51,7 +51,7 @@ namespace Arborist.Tests
       sut.RemoveFirst();
 
       // Assert
-      Assert.IsTrue(Enumerable.SequenceEqual(sut, new [] { 2 }));
+      Assert.IsTrue(Enumerable.SequenceEqual(sut.Snapshot(), new [] { 2 }));
     }
 
     [TestMethod]
@@ -66,7 +66,7 @@ namespace Arborist.Tests
       sut.RemoveLast();
 
       // Assert
-      Assert.IsTrue(Enumerable.SequenceEqual(sut, new [] { 1 }));
+      Assert.IsTrue(Enumerable.SequenceEqual(sut.Snapshot(), new [] { 1 }));
     }
 
     [TestMethod]
@@ -81,7 +81,7 @@ namespace Arborist.Tests
       sut.RemoveFirst();
 
       // Assert
-      Assert.IsTrue(Enumerable.SequenceEqual(sut, new [] { 2 }));
+      Assert.IsTrue(Enumerable.SequenceEqual(sut.Snapshot(), new [] { 2 }));
     }
 
     // --- Regression coverage for partition-size capping (MaxPartitionSize = 4096) ---
@@ -108,7 +108,7 @@ namespace Arborist.Tests
 
       // Assert
       Assert.AreEqual(PastCapElementCount, sut.Count);
-      Assert.IsTrue(Enumerable.SequenceEqual(sut, Enumerable.Range(0, PastCapElementCount)));
+      Assert.IsTrue(Enumerable.SequenceEqual(sut.Snapshot(), Enumerable.Range(0, PastCapElementCount)));
     }
 
     [TestMethod]
@@ -168,7 +168,7 @@ namespace Arborist.Tests
 
       // Remaining content is still 0 .. (PastCapElementCount - removeCount - 1) in order.
       Assert.IsTrue(
-        Enumerable.SequenceEqual(sut, Enumerable.Range(0, PastCapElementCount - removeCount)));
+        Enumerable.SequenceEqual(sut.Snapshot(), Enumerable.Range(0, PastCapElementCount - removeCount)));
     }
 
     [TestMethod]
@@ -220,7 +220,7 @@ namespace Arborist.Tests
 
       // Assert
       Assert.AreEqual(model.Count, sut.Count);
-      Assert.IsTrue(Enumerable.SequenceEqual(sut, model));
+      Assert.IsTrue(Enumerable.SequenceEqual(sut.Snapshot(), model));
 
       // GetFromBack must agree with enumeration across the recycled, out-of-order partitions.
       var expectedSequence = model.ToArray();
@@ -253,7 +253,7 @@ namespace Arborist.Tests
         sut.RemoveFirst();
 
       Assert.AreEqual(0, sut.Count);
-      Assert.IsFalse(sut.Any());
+      Assert.IsFalse(sut.Snapshot().Any());
 
       // Refill past the cap again, reusing the existing (now out-of-size-order) partitions.
       const int refillCount = 12_000;
@@ -262,7 +262,7 @@ namespace Arborist.Tests
 
       // Assert
       Assert.AreEqual(refillCount, sut.Count);
-      Assert.IsTrue(Enumerable.SequenceEqual(sut, Enumerable.Range(0, refillCount)));
+      Assert.IsTrue(Enumerable.SequenceEqual(sut.Snapshot(), Enumerable.Range(0, refillCount)));
       Assert.AreEqual(refillCount - 1, sut.GetFromBack(0));
       Assert.AreEqual(0, sut.GetFromBack(refillCount - 1));
       Assert.AreEqual(0, sut.GetFirst());
