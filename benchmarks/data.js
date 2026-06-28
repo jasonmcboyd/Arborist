@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782608059854,
+  "lastUpdate": 1782608060076,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -15333,6 +15333,50 @@ window.BENCHMARK_DATA = {
           {
             "name": "Arborist.Benchmarks.RefSemiDeque.Add_Block64_1M",
             "value": 64249433,
+            "unit": "bytes"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "92bb0ac3ac960ab8cf51e794f9d7bcc4fa5750f4",
+          "message": "Replace RefSemiDeque IEnumerable<T> with internal Snapshot()\n\nRefSemiDeque<T> is a zero-copy, ref-semantics state arena: every accessor\nreturns `ref T` for in-place mutation. Implementing IEnumerable<T> contradicted\nthat contract -- the yield iterator handed out elements by value, lit up an\nallocating LINQ surface on a hot type, and offered no concurrent-mutation guard.\nIts only consumer was the test suite's SequenceEqual assertions.\n\nDrop the interface and replace it with `internal T[] Snapshot()` (a point-in-time\ncopy in the same front-to-back order, exposed to Arborist.Tests via\nInternalsVisibleTo). Add a DebuggerTypeProxy/DebuggerDisplay so debugger\ninspection is preserved without a runtime enumeration surface. Tests now assert\nvia sut.Snapshot().\n\nNo production code enumerated the deque; build is green on net48 + net8.0 and all\ntests pass.\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01Wg3xArL4FATQaXQMBvhXdg",
+          "timestamp": "2026-06-28T00:29:31Z",
+          "tree_id": "f34d815e3f68ab07d1a2dfc0724360021030adcf",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/92bb0ac3ac960ab8cf51e794f9d7bcc4fa5750f4"
+        },
+        "date": 1782608060046,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.Add_8M",
+            "value": 32160821,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.RemoveFirst_8M",
+            "value": 32160823,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.RemoveLast_8M",
+            "value": 32160857,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.Add_Block64_1M",
+            "value": 64248582,
             "unit": "bytes"
           }
         ]
