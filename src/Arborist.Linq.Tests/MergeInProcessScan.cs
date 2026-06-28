@@ -79,7 +79,6 @@ namespace Arborist.Linq.Tests
     public void DepthFirstMatchesOracle() => RunScan(TreeTraversalStrategy.DepthFirst, BuildFullPairs(), maxArity: 2);
 
     [TestMethod]
-    [Ignore("BFT StructuralMerge correctness not yet implemented (DFT is done); this is the BFT baseline/gate, enabled when BFT is fixed.")]
     public void BreadthFirstMatchesOracle() => RunScan(TreeTraversalStrategy.BreadthFirst, BuildFullPairs(), maxArity: 2);
 
     // Deep gate: a curated set of multi-level-promotion-prone shapes at up to 3 simultaneous strategies.
@@ -90,7 +89,6 @@ namespace Arborist.Linq.Tests
     public void DepthFirstMatchesOracle_Arity3Deep() => RunScan(TreeTraversalStrategy.DepthFirst, BuildDeepPairs(), maxArity: 3);
 
     [TestMethod]
-    [Ignore("BFT StructuralMerge correctness not yet implemented (DFT is done); this is the BFT baseline/gate, enabled when BFT is fixed.")]
     public void BreadthFirstMatchesOracle_Arity3Deep() => RunScan(TreeTraversalStrategy.BreadthFirst, BuildDeepPairs(), maxArity: 3);
 
     private static List<(string Left, string Right)> BuildFullPairs()
