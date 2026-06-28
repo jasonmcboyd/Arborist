@@ -15,21 +15,9 @@ namespace Arborist.Benchmarks
       .CountNodes();
 
     [Benchmark]
-    public int ToDegenerateTreeUsingToTree() =>
-      Enumerable.Range(0, 1 << 20)
-      .ToTree(_ => true)
-      .CountNodes();
-
-    [Benchmark]
     public int ToTrivialForest() =>
       Enumerable.Range(0, 1 << 20)
       .ToTrivialForest()
-      .CountNodes();
-
-    [Benchmark]
-    public int ToTrivialForestUsingToTree() =>
-      Enumerable.Range(0, 1 << 20)
-      .ToTree(_ => false)
       .CountNodes();
   }
 }
