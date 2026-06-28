@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782608059181,
+  "lastUpdate": 1782608059407,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -10223,6 +10223,130 @@ window.BENCHMARK_DATA = {
           {
             "name": "Arborist.Benchmarks.PreorderTraversal.CompleteBinaryTree_PruneAfterDepth_19",
             "value": 1473,
+            "unit": "bytes"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "92bb0ac3ac960ab8cf51e794f9d7bcc4fa5750f4",
+          "message": "Replace RefSemiDeque IEnumerable<T> with internal Snapshot()\n\nRefSemiDeque<T> is a zero-copy, ref-semantics state arena: every accessor\nreturns `ref T` for in-place mutation. Implementing IEnumerable<T> contradicted\nthat contract -- the yield iterator handed out elements by value, lit up an\nallocating LINQ surface on a hot type, and offered no concurrent-mutation guard.\nIts only consumer was the test suite's SequenceEqual assertions.\n\nDrop the interface and replace it with `internal T[] Snapshot()` (a point-in-time\ncopy in the same front-to-back order, exposed to Arborist.Tests via\nInternalsVisibleTo). Add a DebuggerTypeProxy/DebuggerDisplay so debugger\ninspection is preserved without a runtime enumeration surface. Tests now assert\nvia sut.Snapshot().\n\nNo production code enumerated the deque; build is green on net48 + net8.0 and all\ntests pass.\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01Wg3xArL4FATQaXQMBvhXdg",
+          "timestamp": "2026-06-28T00:29:31Z",
+          "tree_id": "f34d815e3f68ab07d1a2dfc0724360021030adcf",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/92bb0ac3ac960ab8cf51e794f9d7bcc4fa5750f4"
+        },
+        "date": 1782608059377,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.BreadthFirstTreenumerator.TriangleTree_2896",
+            "value": 345941,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.BreadthFirstTreenumerator.CompleteBinaryTree_21",
+            "value": 50478112,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.BreadthFirstTreenumerator.TrivialForest_4M",
+            "value": 295,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.BreadthFirstTreenumerator.DegenerateTree_4M",
+            "value": 859,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.DepthFirstTreenumerator.TriangleTree_2896",
+            "value": 116845,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.DepthFirstTreenumerator.CompleteBinaryTree_21",
+            "value": 1917,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.DepthFirstTreenumerator.TrivialForest_4M",
+            "value": 295,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.DepthFirstTreenumerator.DegenerateTree_4M",
+            "value": 32089728,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.LevelOrderTraversal.DeepTree",
+            "value": 2347,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.LevelOrderTraversal.TriangleTree_PruneAfter_1447",
+            "value": 231300,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.LevelOrderTraversal.CompleteBinaryTree_PruneBefore_20",
+            "value": 27502292,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.LevelOrderTraversal.CompleteBinaryTree_PruneAfter_19",
+            "value": 12698928,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.PostOrderTraversal.DeepTree",
+            "value": 4214857,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.PostOrderTraversal.TriangleTree_PruneAfter_1447",
+            "value": 35165,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.PostOrderTraversal.CompleteBinaryTree_PruneBefore_20",
+            "value": 3691,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.PostOrderTraversal.CompleteBinaryTree_PruneAfter_19",
+            "value": 1923,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.PreorderTraversal.DeepTree",
+            "value": 2107719,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.PreorderTraversal.TriangleTree_PruneAfter_1447",
+            "value": 26217,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.PreorderTraversal.CompleteBinaryTree_PruneBefore_20",
+            "value": 3251,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.PreorderTraversal.CompleteBinaryTree_PruneAfterDepth_19",
+            "value": 1477,
             "unit": "bytes"
           }
         ]
