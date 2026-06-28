@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782677965241,
+  "lastUpdate": 1782677965504,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -7930,6 +7930,42 @@ window.BENCHMARK_DATA = {
             "value": 3623068.228515625,
             "unit": "ns",
             "range": "± 3159.654053316187"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "b2789b315ab00e8aa3058a2d33a365848dee4bb5",
+          "message": "Added merge benchmarks",
+          "timestamp": "2026-06-28T12:52:27-07:00",
+          "tree_id": "2934f229e52805b3560635e17a7ab003dbbc7894",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/b2789b315ab00e8aa3058a2d33a365848dee4bb5"
+        },
+        "date": 1782677965468,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToDegenerateTree",
+            "value": 15738106.778846154,
+            "unit": "ns",
+            "range": "± 14250.370043226603"
+          },
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToTrivialForest",
+            "value": 3884229.0946514425,
+            "unit": "ns",
+            "range": "± 12000.39691268222"
           }
         ]
       }
