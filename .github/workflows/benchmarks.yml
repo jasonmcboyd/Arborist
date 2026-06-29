@@ -109,9 +109,8 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: false
           alert-threshold: '150%'
-          comment-on-alert: true
+          comment-on-alert: false
           fail-on-alert: false
-          alert-comment-cc-users: '@ktrz'
           gh-pages-branch: gh-pages
           benchmark-data-dir-path: benchmarks
 
@@ -125,9 +124,8 @@ jobs:
           auto-push: false
           skip-fetch-gh-pages: true
           alert-threshold: '150%'
-          comment-on-alert: true
+          comment-on-alert: false
           fail-on-alert: false
-          alert-comment-cc-users: '@ktrz'
           gh-pages-branch: gh-pages
           benchmark-data-dir-path: benchmarks
 
@@ -141,9 +139,8 @@ jobs:
           auto-push: false
           skip-fetch-gh-pages: true
           alert-threshold: '150%'
-          comment-on-alert: true
+          comment-on-alert: false
           fail-on-alert: false
-          alert-comment-cc-users: '@ktrz'
           gh-pages-branch: gh-pages
           benchmark-data-dir-path: benchmarks
 
@@ -157,9 +154,8 @@ jobs:
           auto-push: false
           skip-fetch-gh-pages: true
           alert-threshold: '150%'
-          comment-on-alert: true
+          comment-on-alert: false
           fail-on-alert: false
-          alert-comment-cc-users: '@ktrz'
           gh-pages-branch: gh-pages
           benchmark-data-dir-path: benchmarks
 
@@ -173,9 +169,8 @@ jobs:
           auto-push: false
           skip-fetch-gh-pages: true
           alert-threshold: '150%'
-          comment-on-alert: true
+          comment-on-alert: false
           fail-on-alert: false
-          alert-comment-cc-users: '@ktrz'
           gh-pages-branch: gh-pages
           benchmark-data-dir-path: benchmarks
 
@@ -190,9 +185,8 @@ jobs:
           auto-push: false
           skip-fetch-gh-pages: true
           alert-threshold: '150%'
-          comment-on-alert: true
+          comment-on-alert: false
           fail-on-alert: false
-          alert-comment-cc-users: '@ktrz'
           gh-pages-branch: gh-pages
           benchmark-data-dir-path: benchmarks
 
@@ -206,9 +200,8 @@ jobs:
           auto-push: false
           skip-fetch-gh-pages: true
           alert-threshold: '150%'
-          comment-on-alert: true
+          comment-on-alert: false
           fail-on-alert: false
-          alert-comment-cc-users: '@ktrz'
           gh-pages-branch: gh-pages
           benchmark-data-dir-path: benchmarks
 
@@ -222,9 +215,8 @@ jobs:
           auto-push: false
           skip-fetch-gh-pages: true
           alert-threshold: '150%'
-          comment-on-alert: true
+          comment-on-alert: false
           fail-on-alert: false
-          alert-comment-cc-users: '@ktrz'
           gh-pages-branch: gh-pages
           benchmark-data-dir-path: benchmarks
 
@@ -238,9 +230,8 @@ jobs:
           auto-push: false
           skip-fetch-gh-pages: true
           alert-threshold: '150%'
-          comment-on-alert: true
+          comment-on-alert: false
           fail-on-alert: false
-          alert-comment-cc-users: '@ktrz'
           gh-pages-branch: gh-pages
           benchmark-data-dir-path: benchmarks
 
@@ -255,9 +246,8 @@ jobs:
           auto-push: true
           skip-fetch-gh-pages: true
           alert-threshold: '150%'
-          comment-on-alert: true
+          comment-on-alert: false
           fail-on-alert: false
-          alert-comment-cc-users: '@ktrz'
           gh-pages-branch: gh-pages
           benchmark-data-dir-path: benchmarks
 

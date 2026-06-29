@@ -13,7 +13,7 @@ The project uses [BenchmarkDotNet](https://benchmarkdotnet.org/) for performance
 - Stores results in the `gh-pages` branch
 - Compares against historical data
 - Alerts if performance regresses by >150%
-- Comments on commits with regression alerts (cc: @ktrz)
+- Tracks regressions (>150% threshold) in the stored data — no commit comments or notifications are posted; regressions are visible on the GitHub Pages dashboard
 - Publishes results to GitHub Pages
 
 ### On Pull Requests
