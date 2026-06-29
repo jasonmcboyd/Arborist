@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782677967118,
+  "lastUpdate": 1782712306574,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -2592,6 +2592,150 @@ window.BENCHMARK_DATA = {
             "value": 41350977.148809515,
             "unit": "ns",
             "range": "± 88909.18294673885"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "0d4a08f9abaabd2b46efa7e47c48eab41cb147e0",
+          "message": "Disable benchmark regression alert comments\n\nThe continuous-benchmarking workflow used github-action-benchmark's\ndefault config, which CC'd the action's author (@ktrz) on every >150%\nregression alert comment across all 10 benchmark steps — pinging him\non each run (reported in #14).\n\nSet comment-on-alert: false and removed the alert-comment-cc-users\nline in every step so no commit comments or notifications are posted\nto anyone. Regression detection (150% threshold) and the gh-pages\ndashboard are unchanged — regressions remain visible on the chart.\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01Wg3xArL4FATQaXQMBvhXdg",
+          "timestamp": "2026-06-29T00:38:31Z",
+          "tree_id": "d67d257036a0ae1915526a53298575cabd0d79d1",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/0d4a08f9abaabd2b46efa7e47c48eab41cb147e0"
+        },
+        "date": 1782712305405,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.BreadthFirstTreenumerator.TriangleTree_2896",
+            "value": 241091837.21428576,
+            "unit": "ns",
+            "range": "± 3396227.577602623"
+          },
+          {
+            "name": "Arborist.Benchmarks.BreadthFirstTreenumerator.CompleteBinaryTree_21",
+            "value": 277335049.21428573,
+            "unit": "ns",
+            "range": "± 742306.2538459684"
+          },
+          {
+            "name": "Arborist.Benchmarks.BreadthFirstTreenumerator.TrivialForest_4M",
+            "value": 14977773.917410715,
+            "unit": "ns",
+            "range": "± 37122.83949001576"
+          },
+          {
+            "name": "Arborist.Benchmarks.BreadthFirstTreenumerator.DegenerateTree_4M",
+            "value": 100220117.24285714,
+            "unit": "ns",
+            "range": "± 128903.2821159323"
+          },
+          {
+            "name": "Arborist.Benchmarks.DepthFirstTreenumerator.TriangleTree_2896",
+            "value": 220138249.8333333,
+            "unit": "ns",
+            "range": "± 2319581.3454970354"
+          },
+          {
+            "name": "Arborist.Benchmarks.DepthFirstTreenumerator.CompleteBinaryTree_21",
+            "value": 247292466.1904762,
+            "unit": "ns",
+            "range": "± 390988.1983323679"
+          },
+          {
+            "name": "Arborist.Benchmarks.DepthFirstTreenumerator.TrivialForest_4M",
+            "value": 14002840.241586538,
+            "unit": "ns",
+            "range": "± 25344.64137672891"
+          },
+          {
+            "name": "Arborist.Benchmarks.DepthFirstTreenumerator.DegenerateTree_4M",
+            "value": 65972026.785714276,
+            "unit": "ns",
+            "range": "± 203441.04732295504"
+          },
+          {
+            "name": "Arborist.Benchmarks.LevelOrderTraversal.DeepTree",
+            "value": 46725628.49350649,
+            "unit": "ns",
+            "range": "± 182511.88006385177"
+          },
+          {
+            "name": "Arborist.Benchmarks.LevelOrderTraversal.TriangleTree_PruneAfter_1447",
+            "value": 68402680.53846154,
+            "unit": "ns",
+            "range": "± 59924.67716790876"
+          },
+          {
+            "name": "Arborist.Benchmarks.LevelOrderTraversal.CompleteBinaryTree_PruneBefore_20",
+            "value": 159247650.19642857,
+            "unit": "ns",
+            "range": "± 806443.6326641316"
+          },
+          {
+            "name": "Arborist.Benchmarks.LevelOrderTraversal.CompleteBinaryTree_PruneAfter_19",
+            "value": 80824586,
+            "unit": "ns",
+            "range": "± 542705.8184900582"
+          },
+          {
+            "name": "Arborist.Benchmarks.PostOrderTraversal.DeepTree",
+            "value": 36353470.104761906,
+            "unit": "ns",
+            "range": "± 124589.37737751544"
+          },
+          {
+            "name": "Arborist.Benchmarks.PostOrderTraversal.TriangleTree_PruneAfter_1447",
+            "value": 40830246.97435897,
+            "unit": "ns",
+            "range": "± 268736.07230818557"
+          },
+          {
+            "name": "Arborist.Benchmarks.PostOrderTraversal.CompleteBinaryTree_PruneBefore_20",
+            "value": 119282689.61538461,
+            "unit": "ns",
+            "range": "± 745062.5805656079"
+          },
+          {
+            "name": "Arborist.Benchmarks.PostOrderTraversal.CompleteBinaryTree_PruneAfter_19",
+            "value": 47140241.118881114,
+            "unit": "ns",
+            "range": "± 185481.88768226316"
+          },
+          {
+            "name": "Arborist.Benchmarks.PreorderTraversal.DeepTree",
+            "value": 25536496.01785714,
+            "unit": "ns",
+            "range": "± 44135.65340000621"
+          },
+          {
+            "name": "Arborist.Benchmarks.PreorderTraversal.TriangleTree_PruneAfter_1447",
+            "value": 36806142.89880952,
+            "unit": "ns",
+            "range": "± 14058.720875075507"
+          },
+          {
+            "name": "Arborist.Benchmarks.PreorderTraversal.CompleteBinaryTree_PruneBefore_20",
+            "value": 109289248.43076922,
+            "unit": "ns",
+            "range": "± 110184.04093696583"
+          },
+          {
+            "name": "Arborist.Benchmarks.PreorderTraversal.CompleteBinaryTree_PruneAfterDepth_19",
+            "value": 42486984.41666667,
+            "unit": "ns",
+            "range": "± 150266.4161776944"
           }
         ]
       }
