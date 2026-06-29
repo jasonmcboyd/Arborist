@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782712306802,
+  "lastUpdate": 1782712307024,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -8428,6 +8428,42 @@ window.BENCHMARK_DATA = {
             "value": 3884229.0946514425,
             "unit": "ns",
             "range": "± 12000.39691268222"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "0d4a08f9abaabd2b46efa7e47c48eab41cb147e0",
+          "message": "Disable benchmark regression alert comments\n\nThe continuous-benchmarking workflow used github-action-benchmark's\ndefault config, which CC'd the action's author (@ktrz) on every >150%\nregression alert comment across all 10 benchmark steps — pinging him\non each run (reported in #14).\n\nSet comment-on-alert: false and removed the alert-comment-cc-users\nline in every step so no commit comments or notifications are posted\nto anyone. Regression detection (150% threshold) and the gh-pages\ndashboard are unchanged — regressions remain visible on the chart.\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01Wg3xArL4FATQaXQMBvhXdg",
+          "timestamp": "2026-06-29T00:38:31Z",
+          "tree_id": "d67d257036a0ae1915526a53298575cabd0d79d1",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/0d4a08f9abaabd2b46efa7e47c48eab41cb147e0"
+        },
+        "date": 1782712306993,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToDegenerateTree",
+            "value": 14640911.340401785,
+            "unit": "ns",
+            "range": "± 30723.265329587182"
+          },
+          {
+            "name": "Arborist.Benchmarks.EnumerableToTree.ToTrivialForest",
+            "value": 3601516.8990384615,
+            "unit": "ns",
+            "range": "± 17457.52794912235"
           }
         ]
       }
