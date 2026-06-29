@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782712308139,
+  "lastUpdate": 1782712308360,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -17367,6 +17367,50 @@ window.BENCHMARK_DATA = {
           {
             "name": "Arborist.Benchmarks.RefSemiDeque.Add_Block64_1M",
             "value": 64249866,
+            "unit": "bytes"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "0d4a08f9abaabd2b46efa7e47c48eab41cb147e0",
+          "message": "Disable benchmark regression alert comments\n\nThe continuous-benchmarking workflow used github-action-benchmark's\ndefault config, which CC'd the action's author (@ktrz) on every >150%\nregression alert comment across all 10 benchmark steps — pinging him\non each run (reported in #14).\n\nSet comment-on-alert: false and removed the alert-comment-cc-users\nline in every step so no commit comments or notifications are posted\nto anyone. Regression detection (150% threshold) and the gh-pages\ndashboard are unchanged — regressions remain visible on the chart.\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01Wg3xArL4FATQaXQMBvhXdg",
+          "timestamp": "2026-06-29T00:38:31Z",
+          "tree_id": "d67d257036a0ae1915526a53298575cabd0d79d1",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/0d4a08f9abaabd2b46efa7e47c48eab41cb147e0"
+        },
+        "date": 1782712308329,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.Add_8M",
+            "value": 32160881,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.RemoveFirst_8M",
+            "value": 32160863,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.RemoveLast_8M",
+            "value": 32160928,
+            "unit": "bytes"
+          },
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.Add_Block64_1M",
+            "value": 64249901,
             "unit": "bytes"
           }
         ]
