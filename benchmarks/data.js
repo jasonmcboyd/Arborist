@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782712307024,
+  "lastUpdate": 1782712307250,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -9282,6 +9282,54 @@ window.BENCHMARK_DATA = {
             "value": 14442783.81529018,
             "unit": "ns",
             "range": "± 620571.7588331453"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "0d4a08f9abaabd2b46efa7e47c48eab41cb147e0",
+          "message": "Disable benchmark regression alert comments\n\nThe continuous-benchmarking workflow used github-action-benchmark's\ndefault config, which CC'd the action's author (@ktrz) on every >150%\nregression alert comment across all 10 benchmark steps — pinging him\non each run (reported in #14).\n\nSet comment-on-alert: false and removed the alert-comment-cc-users\nline in every step so no commit comments or notifications are posted\nto anyone. Regression detection (150% threshold) and the gh-pages\ndashboard are unchanged — regressions remain visible on the chart.\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01Wg3xArL4FATQaXQMBvhXdg",
+          "timestamp": "2026-06-29T00:38:31Z",
+          "tree_id": "d67d257036a0ae1915526a53298575cabd0d79d1",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/0d4a08f9abaabd2b46efa7e47c48eab41cb147e0"
+        },
+        "date": 1782712307220,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.Add_8M",
+            "value": 16287749.828125,
+            "unit": "ns",
+            "range": "± 179569.2168546685"
+          },
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.RemoveFirst_8M",
+            "value": 28900484.918269232,
+            "unit": "ns",
+            "range": "± 123478.37359284105"
+          },
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.RemoveLast_8M",
+            "value": 25046337.90848214,
+            "unit": "ns",
+            "range": "± 192245.15883987653"
+          },
+          {
+            "name": "Arborist.Benchmarks.RefSemiDeque.Add_Block64_1M",
+            "value": 15657367.177220395,
+            "unit": "ns",
+            "range": "± 794968.2594196176"
           }
         ]
       }
