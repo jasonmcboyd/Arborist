@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFrameworks>net48;net8.0</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <Description>Depth-first and breadth-first tree traversal engine for Copse.</Description>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)'=='net7.0'">

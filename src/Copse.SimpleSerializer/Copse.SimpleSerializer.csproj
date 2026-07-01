@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFrameworks>net48;net8.0</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <Description>Text-based tree serialization for Copse.</Description>
   </PropertyGroup>
 
   <!-- net8.0 has Span/ReadOnlySpan built in; net48 needs the System.Memory polyfill. -->

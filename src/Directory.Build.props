@@ -1,0 +1,48 @@
+<Project>
+
+  <!--
+    Shared build & packaging settings for every project under src/.
+    Individual shippable projects opt in with <IsPackable>true</IsPackable> and a <Description>.
+    Version is derived from git tags by MinVer (tag "v0.1.0-alpha.1" => package "0.1.0-alpha.1");
+    do NOT add <Version>/<VersionPrefix> anywhere.
+  -->
+
+  <PropertyGroup>
+    <!-- Nothing ships unless a project explicitly opts in. -->
+    <IsPackable>false</IsPackable>
+
+    <!-- Shared package metadata. -->
+    <Authors>Jason Boyd</Authors>
+    <Copyright>Copyright (c) 2023-2026 Jason Boyd</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/copselib/copse-dotnet</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/copselib/copse-dotnet</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>tree traversal linq treenumerable depth-first breadth-first monad tree-data-structure</PackageTags>
+
+    <!-- TODO: add PackageReadmeFile once README.md has meaningful content (currently empty). -->
+    <!-- TODO: add PackageIcon once an icon asset is committed (intentionally uncommitted for now). -->
+
+    <!-- MinVer: git tag is the single source of truth for the version. -->
+    <MinVerTagPrefix>v</MinVerTagPrefix>
+
+    <!-- SourceLink + deterministic/symbol settings for good packages. -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MinVer" Version="6.0.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!-- Allow net48 to build on any platform (Linux/macOS CI included). -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>

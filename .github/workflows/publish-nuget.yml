@@ -1,0 +1,80 @@
+# Publishes the Copse NuGet package family (Copse.Core, Copse, Copse.Linq, Copse.SimpleSerializer)
+# to nuget.org using Trusted Publishing (OIDC) — no long-lived API key is stored.
+#
+# Prerequisites:
+#   - A Trusted Publishing policy on nuget.org, owned by the copselib organization, matching:
+#       Repository Owner = copselib, Repository = copse-dotnet, Workflow File = publish-nuget.yml,
+#       Environment = (leave blank — this workflow does not use a GitHub environment).
+#   - A NUGET_USER secret = the policy's "Package Owner". For these org-owned packages that is the
+#     nuget.org organization name -> `copselib` (NOT a personal username or email).
+#   - The NuGet IDs (Copse, Copse.Core, Copse.Linq, Copse.SimpleSerializer) must be free / owned by
+#     the org, or the push fails with HTTP 409 (id/version conflict).
+#
+# The package version is derived from the git tag by MinVer (tag "v0.1.0-alpha.1" => "0.1.0-alpha.1").
+name: Publish NuGet
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Pack only; skip pushing to NuGet'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read   # checkout
+  id-token: write  # request the GitHub OIDC token for NuGet Trusted Publishing
+
+concurrency:
+  group: publish-nuget
+  cancel-in-progress: false # Never interrupt an in-flight publish.
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # MinVer needs full history + tags to derive the version.
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore src/Copse.sln
+
+      - name: Build
+        run: dotnet build src/Copse.sln -c Release --no-restore
+
+      - name: Pack
+        run: dotnet pack src/Copse.sln -c Release --no-build -o ${{ github.workspace }}/artifacts
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-packages
+          path: |
+            ${{ github.workspace }}/artifacts/*.nupkg
+            ${{ github.workspace }}/artifacts/*.snupkg
+
+      # Mint a short-lived (1-hour) NuGet API key via OIDC. Kept immediately before the push so it
+      # can't expire mid-run, and gated identically to the push so dry-runs never mint a key.
+      - name: NuGet login (OIDC -> temporary API key)
+        # A tag push always publishes; a manual dispatch publishes only when dry_run is unchecked.
+        # NOTE: use the typed `inputs.dry_run` (a real boolean), NOT `github.event.inputs.dry_run`
+        # (a string) — the latter breaks the boolean comparison and would never publish.
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run)
+        uses: NuGet/login@v1
+        id: nuget-login
+        with:
+          user: ${{ secrets.NUGET_USER }} # nuget.org username (profile name), NOT email
+
+      - name: Push to NuGet
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run)
+        run: dotnet nuget push "${{ github.workspace }}/artifacts/*.nupkg" --source https://api.nuget.org/v3/index.json --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }} --skip-duplicate
