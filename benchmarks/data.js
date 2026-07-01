@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782945766552,
+  "lastUpdate": 1782945766786,
   "repoUrl": "https://github.com/copselib/copse-dotnet",
   "entries": {
     "Traversal Benchmarks": [
@@ -9424,6 +9424,42 @@ window.BENCHMARK_DATA = {
             "value": 3608013.984074519,
             "unit": "ns",
             "range": "± 4090.189542411504"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "41e9ec865d562dce6aad765b48557971139ca356",
+          "message": "Add NuGet packaging and alpha publish workflow\n\nSet up the Copse package family (Copse.Core, Copse, Copse.Linq,\nCopse.SimpleSerializer) for publishing to nuget.org:\n\n- src/Directory.Build.props: shared package metadata (MIT, copselib\n  URLs), MinVer for git-tag-driven versioning (no version stored in the\n  repo), SourceLink + snupkg symbols, IsPackable=false by default, and\n  Microsoft.NETFramework.ReferenceAssemblies so net48 builds anywhere.\n- The four shippable projects opt in with IsPackable=true + a Description.\n- .github/workflows/publish-nuget.yml: builds/packs on a v* tag (or a\n  manual dispatch that defaults to dry-run), publishing via NuGet Trusted\n  Publishing (OIDC, NuGet/login@v1) with no long-lived API key stored.\n\nFirst net48 build of the libraries succeeds. Packing produces exactly the\nfour intended package IDs with correct cross-package dependencies.\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>",
+          "timestamp": "2026-07-01T22:14:01Z",
+          "tree_id": "484fdbcd535662f7bcef77e6b750c8ae5700f81e",
+          "url": "https://github.com/copselib/copse-dotnet/commit/41e9ec865d562dce6aad765b48557971139ca356"
+        },
+        "date": 1782945766754,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Copse.Benchmarks.EnumerableToTree.ToDegenerateTree",
+            "value": 14645305.80048077,
+            "unit": "ns",
+            "range": "± 29867.263471032857"
+          },
+          {
+            "name": "Copse.Benchmarks.EnumerableToTree.ToTrivialForest",
+            "value": 3608069.2080729166,
+            "unit": "ns",
+            "range": "± 2242.1808361460803"
           }
         ]
       }
