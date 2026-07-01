@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782712308581,
+  "lastUpdate": 1782941710519,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -2736,6 +2736,150 @@ window.BENCHMARK_DATA = {
             "value": 42486984.41666667,
             "unit": "ns",
             "range": "± 150266.4161776944"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "84084d256f546730f4047e949748a4dff0cfca1c",
+          "message": "Rename project Manzanita -> Copse\n\nRename the library from Manzanita to Copse across the entire codebase:\nnamespaces, project/directory names, the solution file, docs, README,\nbenchmark dashboard, and scripts. Solution builds green (net8.0).\n\nRegistered identifiers: GitHub org copselib, npm scope @copselib,\ndomains copselib.{org,dev,com,net}. NuGet package ID still to be verified.\n\nIcons excluded from this commit.\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>",
+          "timestamp": "2026-07-01T20:57:44Z",
+          "tree_id": "985dc49dbb835b381a2224069a4b1908c309099e",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/84084d256f546730f4047e949748a4dff0cfca1c"
+        },
+        "date": 1782941709764,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Copse.Benchmarks.BreadthFirstTreenumerator.TriangleTree_2896",
+            "value": 237219550.71428576,
+            "unit": "ns",
+            "range": "± 2071165.8715894895"
+          },
+          {
+            "name": "Copse.Benchmarks.BreadthFirstTreenumerator.CompleteBinaryTree_21",
+            "value": 288658532,
+            "unit": "ns",
+            "range": "± 4293740.278015881"
+          },
+          {
+            "name": "Copse.Benchmarks.BreadthFirstTreenumerator.TrivialForest_4M",
+            "value": 17154059.135416668,
+            "unit": "ns",
+            "range": "± 58017.83624688344"
+          },
+          {
+            "name": "Copse.Benchmarks.BreadthFirstTreenumerator.DegenerateTree_4M",
+            "value": 103532294.34285715,
+            "unit": "ns",
+            "range": "± 1517633.6122730726"
+          },
+          {
+            "name": "Copse.Benchmarks.DepthFirstTreenumerator.TriangleTree_2896",
+            "value": 222427007.1794872,
+            "unit": "ns",
+            "range": "± 1658297.4097730822"
+          },
+          {
+            "name": "Copse.Benchmarks.DepthFirstTreenumerator.CompleteBinaryTree_21",
+            "value": 246192892.4871795,
+            "unit": "ns",
+            "range": "± 388104.9676961834"
+          },
+          {
+            "name": "Copse.Benchmarks.DepthFirstTreenumerator.TrivialForest_4M",
+            "value": 14987412.74330357,
+            "unit": "ns",
+            "range": "± 31073.989655616555"
+          },
+          {
+            "name": "Copse.Benchmarks.DepthFirstTreenumerator.DegenerateTree_4M",
+            "value": 61149905.666666664,
+            "unit": "ns",
+            "range": "± 183942.35844209738"
+          },
+          {
+            "name": "Copse.Benchmarks.LevelOrderTraversal.DeepTree",
+            "value": 47057609.564935066,
+            "unit": "ns",
+            "range": "± 138101.58507288393"
+          },
+          {
+            "name": "Copse.Benchmarks.LevelOrderTraversal.TriangleTree_PruneAfter_1447",
+            "value": 64350037.83035714,
+            "unit": "ns",
+            "range": "± 168243.43874982715"
+          },
+          {
+            "name": "Copse.Benchmarks.LevelOrderTraversal.CompleteBinaryTree_PruneBefore_20",
+            "value": 161316267.11666667,
+            "unit": "ns",
+            "range": "± 615651.5091688356"
+          },
+          {
+            "name": "Copse.Benchmarks.LevelOrderTraversal.CompleteBinaryTree_PruneAfter_19",
+            "value": 81971677,
+            "unit": "ns",
+            "range": "± 647100.0199090253"
+          },
+          {
+            "name": "Copse.Benchmarks.PostOrderTraversal.DeepTree",
+            "value": 36093766.10204082,
+            "unit": "ns",
+            "range": "± 179229.08130061388"
+          },
+          {
+            "name": "Copse.Benchmarks.PostOrderTraversal.TriangleTree_PruneAfter_1447",
+            "value": 40716185.266666666,
+            "unit": "ns",
+            "range": "± 110851.47480526385"
+          },
+          {
+            "name": "Copse.Benchmarks.PostOrderTraversal.CompleteBinaryTree_PruneBefore_20",
+            "value": 119139240.77142857,
+            "unit": "ns",
+            "range": "± 490122.33861203125"
+          },
+          {
+            "name": "Copse.Benchmarks.PostOrderTraversal.CompleteBinaryTree_PruneAfter_19",
+            "value": 49666899.24675325,
+            "unit": "ns",
+            "range": "± 83765.31794504223"
+          },
+          {
+            "name": "Copse.Benchmarks.PreorderTraversal.DeepTree",
+            "value": 25290222.548076924,
+            "unit": "ns",
+            "range": "± 20161.541194588353"
+          },
+          {
+            "name": "Copse.Benchmarks.PreorderTraversal.TriangleTree_PruneAfter_1447",
+            "value": 35865101.68571428,
+            "unit": "ns",
+            "range": "± 66118.3665550062"
+          },
+          {
+            "name": "Copse.Benchmarks.PreorderTraversal.CompleteBinaryTree_PruneBefore_20",
+            "value": 111220149.00000001,
+            "unit": "ns",
+            "range": "± 1287425.8435720312"
+          },
+          {
+            "name": "Copse.Benchmarks.PreorderTraversal.CompleteBinaryTree_PruneAfterDepth_19",
+            "value": 39445304.873626366,
+            "unit": "ns",
+            "range": "± 192940.29389469762"
           }
         ]
       }
