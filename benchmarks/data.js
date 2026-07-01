@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782941710990,
+  "lastUpdate": 1782941711222,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -9828,6 +9828,54 @@ window.BENCHMARK_DATA = {
             "value": 15657367.177220395,
             "unit": "ns",
             "range": "± 794968.2594196176"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "84084d256f546730f4047e949748a4dff0cfca1c",
+          "message": "Rename project Manzanita -> Copse\n\nRename the library from Manzanita to Copse across the entire codebase:\nnamespaces, project/directory names, the solution file, docs, README,\nbenchmark dashboard, and scripts. Solution builds green (net8.0).\n\nRegistered identifiers: GitHub org copselib, npm scope @copselib,\ndomains copselib.{org,dev,com,net}. NuGet package ID still to be verified.\n\nIcons excluded from this commit.\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>",
+          "timestamp": "2026-07-01T20:57:44Z",
+          "tree_id": "985dc49dbb835b381a2224069a4b1908c309099e",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/84084d256f546730f4047e949748a4dff0cfca1c"
+        },
+        "date": 1782941711190,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Copse.Benchmarks.RefSemiDeque.Add_8M",
+            "value": 16420952.216796875,
+            "unit": "ns",
+            "range": "± 319711.17307726754"
+          },
+          {
+            "name": "Copse.Benchmarks.RefSemiDeque.RemoveFirst_8M",
+            "value": 29086973.759615384,
+            "unit": "ns",
+            "range": "± 180162.2736060402"
+          },
+          {
+            "name": "Copse.Benchmarks.RefSemiDeque.RemoveLast_8M",
+            "value": 26441337.7625,
+            "unit": "ns",
+            "range": "± 72862.67148472444"
+          },
+          {
+            "name": "Copse.Benchmarks.RefSemiDeque.Add_Block64_1M",
+            "value": 15991242.611505682,
+            "unit": "ns",
+            "range": "± 574524.3308164757"
           }
         ]
       }
