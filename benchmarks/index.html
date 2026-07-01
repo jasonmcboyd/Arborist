@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Arborist Benchmarks — preview</title>
+<title>Copse Benchmarks — preview</title>
 <!-- Self-contained preview dashboard over the SAME data.js the gh-pages site publishes.
      No external libraries; charts are inline SVG (so all text is real, selectable DOM — searchable,
      unlike the canvas-based stock dashboard). Open directly from disk (file://). -->
@@ -64,7 +64,7 @@
 </head>
 <body>
 <header>
-  <h1>Arborist Benchmarks <span class="sub" id="sub"></span></h1>
+  <h1>Copse Benchmarks <span class="sub" id="sub"></span></h1>
   <div class="controls">
     <input id="q" type="search" placeholder="filter by name… (e.g. Where, DegenerateTree, BreadthFirst)" autofocus />
     <label class="lbl">group</label>
@@ -112,7 +112,7 @@ function buildRows() {
     }
     for (const [full, pts] of series) {
       const unit = pts[pts.length-1].unit;
-      const short = full.replace(/^Arborist\.Benchmarks\./, "");
+      const short = full.replace(/^Copse\.Benchmarks\./, "");
       const dot = short.indexOf(".");
       const cls = dot>=0 ? short.slice(0,dot) : short;
       const method = dot>=0 ? short.slice(dot+1) : "";
