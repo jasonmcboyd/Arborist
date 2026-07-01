@@ -1,7 +1,7 @@
 # Benchmark dashboard
 
-Source of truth for the Arborist benchmark dashboard published at
-<https://jasonmcboyd.github.io/Arborist/> (the root redirects to `/benchmarks/`).
+Source of truth for the Copse benchmark dashboard published at
+<https://copselib.github.io/copse-dotnet/> (the root redirects to `/benchmarks/`).
 
 `index.html` is the whole dashboard: **no build step, no external libraries** (charts are inline
 SVG, so chart text is real selectable/searchable DOM). It reads `window.BENCHMARK_DATA` from a

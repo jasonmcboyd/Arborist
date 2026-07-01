@@ -1,0 +1,23 @@
+﻿using Copse.Core;
+using Copse.Linq;
+using Copse.Trees;
+using BenchmarkDotNet.Attributes;
+using System.Linq;
+
+namespace Copse.Benchmarks
+{
+  [MemoryDiagnoser]
+  [BenchmarkCategory("LINQ", "Invert")]
+  public class Invert
+  {
+    [Benchmark]
+    public ITreenumerable<int> TriangleTree_1448()
+      => new TriangleTree()
+        .PruneAfter(nodeContext => nodeContext.Position.Depth == 1448)
+        .Invert();
+
+    [Benchmark]
+    public ITreenumerable<int> DegenerateTree_1M()
+      => Enumerable.Range(0, 1_000_000).ToDegenerateTree().Invert();
+  }
+}

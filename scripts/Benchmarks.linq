@@ -1,11 +1,11 @@
 <Query Kind="Program">
-  <Reference Relative="..\src\Arborist.Trees\bin\Release\net7.0\Arborist.Core.dll">C:\Users\jason\source\repos\Arborist\src\Arborist.Trees\bin\Release\net7.0\Arborist.Core.dll</Reference>
-  <Reference Relative="..\src\Arborist.Trees\bin\Release\net7.0\Arborist.dll">C:\Users\jason\source\repos\Arborist\src\Arborist.Trees\bin\Release\net7.0\Arborist.dll</Reference>
-  <Reference Relative="..\src\Arborist.Trees\bin\Release\net7.0\Arborist.Linq.dll">C:\Users\jason\source\repos\Arborist\src\Arborist.Trees\bin\Release\net7.0\Arborist.Linq.dll</Reference>
-  <Reference Relative="..\src\Arborist.Trees\bin\Release\net7.0\Arborist.Trees.dll">C:\Users\jason\source\repos\Arborist\src\Arborist.Trees\bin\Release\net7.0\Arborist.Trees.dll</Reference>
-  <Namespace>Arborist.Core</Namespace>
-  <Namespace>Arborist.Linq</Namespace>
-  <Namespace>Arborist.Trees</Namespace>
+  <Reference Relative="..\src\Copse.Trees\bin\Release\net7.0\Copse.Core.dll">C:\Users\jason\source\repos\Copse\src\Copse.Trees\bin\Release\net7.0\Copse.Core.dll</Reference>
+  <Reference Relative="..\src\Copse.Trees\bin\Release\net7.0\Copse.dll">C:\Users\jason\source\repos\Copse\src\Copse.Trees\bin\Release\net7.0\Copse.dll</Reference>
+  <Reference Relative="..\src\Copse.Trees\bin\Release\net7.0\Copse.Linq.dll">C:\Users\jason\source\repos\Copse\src\Copse.Trees\bin\Release\net7.0\Copse.Linq.dll</Reference>
+  <Reference Relative="..\src\Copse.Trees\bin\Release\net7.0\Copse.Trees.dll">C:\Users\jason\source\repos\Copse\src\Copse.Trees\bin\Release\net7.0\Copse.Trees.dll</Reference>
+  <Namespace>Copse.Core</Namespace>
+  <Namespace>Copse.Linq</Namespace>
+  <Namespace>Copse.Trees</Namespace>
 </Query>
 
 void Main()

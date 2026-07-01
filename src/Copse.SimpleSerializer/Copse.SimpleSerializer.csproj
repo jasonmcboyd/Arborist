@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net48;net8.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <!-- net8.0 has Span/ReadOnlySpan built in; net48 needs the System.Memory polyfill. -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+    <PackageReference Include="System.Memory" Version="4.5.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Copse.Core\Copse.Core.csproj" />
+    <ProjectReference Include="..\Copse\Copse.csproj" />
+  </ItemGroup>
+
+</Project>

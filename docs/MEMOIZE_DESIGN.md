@@ -1,7 +1,7 @@
 # Memoize — design spec (preorder, incremental, eager-skip)
 
 > **Status: DECIDED, not yet implemented.** Decision recorded 2026-06-27. This supersedes the
-> dead experimental `MemoizeTreenumerator` stub (`Arborist.Linq.Experimental`), which is
+> dead experimental `MemoizeTreenumerator` stub (`Copse.Linq.Experimental`), which is
 > abandoned — do **not** resurrect it. The broad capability-interface lattice
 > ([TREE_CAPABILITY_INTERFACES.md](TREE_CAPABILITY_INTERFACES.md)) is *out of scope* here:
 > this design deliberately needs **no** child-realization capability.
@@ -40,7 +40,7 @@ foreach over memo (BFS)                    // forces full build, then rides BFS 
    node-count guard that throws instead of hanging on an unbounded source.)*
 
 4. **Representation = preorder, one structure.** The memo is a `PreorderTree<TValue>`
-   (`values[]` + `subtreeSizes[]`, `src/Arborist/Treenumerables/PreorderTree.cs`), built
+   (`values[]` + `subtreeSizes[]`, `src/Copse/Treenumerables/PreorderTree.cs`), built
    incrementally. Both DFS and BFS replay ride the existing engine over it. BFS over a preorder
    layout is correct and O(N) but not cache-sequential — that locality tax is **accepted**;
    a level-order/LOUDS variant is deferred to the *serialization* track, where sequential disk
@@ -63,7 +63,7 @@ fully-traversed finite tree the two converge on the same content.
 ## Why preorder is enough for both modes
 
 `PreorderTree` already rides the generic DFS **and** BFS engine via `PreorderChildEnumerator`
-(`src/Arborist/PreorderChildEnumerator.cs`): given any node it locates that node's children by
+(`src/Copse/PreorderChildEnumerator.cs`): given any node it locates that node's children by
 subtree-size hops, and `Dispose()` on the enumerator is how the engine signals
 `SkipDescendants`/`SkipSiblings`. So:
 
@@ -84,7 +84,7 @@ A `MemoizedTree<TValue>` (final name TBD) holds:
 - a lazily-created **shared inner DFT treenumerator**, driven `TraverseAll`;
 - the **growing pre-order builder**: `List<TValue> _values`, `List<int> _subtreeSizes`, plus
   parse state — a `Stack<int>` of open-parent indices and the previous scheduling depth. This is
-  exactly the construction `TreeSerializer.Parse` uses (`src/Arborist.SimpleSerializer/
+  exactly the construction `TreeSerializer.Parse` uses (`src/Copse.SimpleSerializer/
   TreeSerializer.cs`), but fed from the **live DFT scheduling stream** instead of a char span;
 - an `_exhausted` flag.
 
@@ -139,8 +139,8 @@ an on-demand `PreorderTree` builder.
 - **Disposal** — disposing the memo disposes the inner; define behavior for outstanding replay
   enumerators.
 - **Surface** — possibly expose `ToPreorderTree()` once fully built.
-- **Home** — `Memoize` extension in `Arborist.Linq`; backing type backed by `PreorderTree` (in
-  `Arborist`). This is *not* the broad project-boundary question — just this operator's placement.
+- **Home** — `Memoize` extension in `Copse.Linq`; backing type backed by `PreorderTree` (in
+  `Copse`). This is *not* the broad project-boundary question — just this operator's placement.
 
 ## Connection to serialization (recorded, not actioned here)
 

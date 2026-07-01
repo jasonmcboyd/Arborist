@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DiffPlex" Version="1.7.2" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.1" />
+    <PackageReference Include="MSTest.TestFramework" Version="3.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Copse.Core\Copse.Core.csproj" />
+    <ProjectReference Include="..\Copse.Linq\Copse.Linq.csproj" />
+    <ProjectReference Include="..\Copse.SimpleSerializer\Copse.SimpleSerializer.csproj" />
+    <ProjectReference Include="..\Copse\Copse.csproj" />
+  </ItemGroup>
+
+</Project>

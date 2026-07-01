@@ -1,9 +1,9 @@
 $pattern = '\(\d+,\s+\d+\),\s+\(\d+,\s+\d+\)'
 
-$file = "$PSScriptRoot/../src/Arborist.Tests/TreeTraversalTestData.cs"
-#$file = "$PSSCRiptRoot/../src/Arborist.Linq.Tests/PruneAfterTests.cs"
-#$file = "$PSSCRiptRoot/../src/Arborist.Linq.Tests/PruneBeforeTests.cs"
-#$file = "$PSSCRiptRoot/../src/Arborist.Linq.Tests/WhereTests.cs"
+$file = "$PSScriptRoot/../src/Copse.Tests/TreeTraversalTestData.cs"
+#$file = "$PSSCRiptRoot/../src/Copse.Linq.Tests/PruneAfterTests.cs"
+#$file = "$PSSCRiptRoot/../src/Copse.Linq.Tests/PruneBeforeTests.cs"
+#$file = "$PSSCRiptRoot/../src/Copse.Linq.Tests/WhereTests.cs"
 
 $lines = Get-Content $file
 

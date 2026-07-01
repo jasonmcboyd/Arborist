@@ -134,14 +134,14 @@ The user asked to **analyze DFT first** — Steps 0–2 are the DFT spine and la
 
 ### Relevant files (absolute)
 
-- `/c/Users/jason/source/repos/Arborist/src/Arborist.Linq/Treenumerators/StructuralMerge/StructuralMergeDepthFirstTreenumerator.cs`
-- `/c/Users/jason/source/repos/Arborist/src/Arborist.Linq/Treenumerators/StructuralMerge/StructuralMergeBreadthFirstTreenumerator.cs`
-- `/c/Users/jason/source/repos/Arborist/src/Arborist.Linq/Treenumerators/StructuralMerge/MergeNode.cs`
-- `/c/Users/jason/source/repos/Arborist/src/Arborist.Core/NodePosition.cs`
-- `/c/Users/jason/source/repos/Arborist/src/Arborist/RefSemiDeque.cs` (partition cap `MaxPartitionSize = 4096`, line 40 — LOH analysis)
-- `/c/Users/jason/source/repos/Arborist/src/Arborist/Treenumerators/DepthFirstPath.cs` (pattern to mirror; `Count==1` effective-root idiom at line 168)
-- `/c/Users/jason/source/repos/Arborist/src/Arborist.Linq/Treenumerators/Filter/WhereBreadthFirstTreenumerator.cs` (`_PendingParentVisit`/`_ConsumeNextInnerParentVisit` to mirror for BFT merge)
-- `/c/Users/jason/source/repos/Arborist/src/Arborist.Linq.Tests/UnionTests.cs` (14 commented oracle rows; BFT `[Ignore]`d line 161)
-- `/c/Users/jason/source/repos/Arborist/src/Arborist.Linq.Tests/Where2InProcessScan.cs` (scan to model)
-- `/c/Users/jason/source/repos/Arborist/src/Arborist.Linq/Materialize.cs` (proves the ALT-3 round-trip for the oracle)
-- New: `/c/Users/jason/source/repos/Arborist/src/Arborist.Linq.Tests/MergeInProcessScan.cs`
+- `/c/Users/jason/source/repos/Copse/src/Copse.Linq/Treenumerators/StructuralMerge/StructuralMergeDepthFirstTreenumerator.cs`
+- `/c/Users/jason/source/repos/Copse/src/Copse.Linq/Treenumerators/StructuralMerge/StructuralMergeBreadthFirstTreenumerator.cs`
+- `/c/Users/jason/source/repos/Copse/src/Copse.Linq/Treenumerators/StructuralMerge/MergeNode.cs`
+- `/c/Users/jason/source/repos/Copse/src/Copse.Core/NodePosition.cs`
+- `/c/Users/jason/source/repos/Copse/src/Copse/RefSemiDeque.cs` (partition cap `MaxPartitionSize = 4096`, line 40 — LOH analysis)
+- `/c/Users/jason/source/repos/Copse/src/Copse/Treenumerators/DepthFirstPath.cs` (pattern to mirror; `Count==1` effective-root idiom at line 168)
+- `/c/Users/jason/source/repos/Copse/src/Copse.Linq/Treenumerators/Filter/WhereBreadthFirstTreenumerator.cs` (`_PendingParentVisit`/`_ConsumeNextInnerParentVisit` to mirror for BFT merge)
+- `/c/Users/jason/source/repos/Copse/src/Copse.Linq.Tests/UnionTests.cs` (14 commented oracle rows; BFT `[Ignore]`d line 161)
+- `/c/Users/jason/source/repos/Copse/src/Copse.Linq.Tests/Where2InProcessScan.cs` (scan to model)
+- `/c/Users/jason/source/repos/Copse/src/Copse.Linq/Materialize.cs` (proves the ALT-3 round-trip for the oracle)
+- New: `/c/Users/jason/source/repos/Copse/src/Copse.Linq.Tests/MergeInProcessScan.cs`

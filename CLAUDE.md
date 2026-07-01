@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 
 ### Summary
 
-**Arborist** is a high-performance .NET tree traversal and manipulation library providing efficient, memory-conscious algorithms for:
+**Copse** is a high-performance .NET tree traversal and manipulation library providing efficient, memory-conscious algorithms for:
 - Tree traversal (Depth-First and Breadth-First)
 - LINQ-style operations on trees (Select, Where, SelectMany, Union, etc.)
 - Tree construction, filtering, pruning, and aggregation
@@ -37,17 +37,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 
 ```bash
 # Build the solution
-dotnet build src/Arborist.sln
+dotnet build src/Copse.sln
 
 # Run all tests
-dotnet test src/Arborist.sln
+dotnet test src/Copse.sln
 
 # Run specific test project
-dotnet test src/Arborist.Tests
-dotnet test src/Arborist.Linq.Tests
+dotnet test src/Copse.Tests
+dotnet test src/Copse.Linq.Tests
 
 # Run benchmarks
-dotnet run --project src/Arborist.Benchmarks
+dotnet run --project src/Copse.Benchmarks
 ```
 
 ## Architecture
@@ -60,13 +60,13 @@ The library **never performs node equality comparisons**. This is a deliberate d
 
 ### Project Structure
 
-- **Arborist.Core** - Core interfaces (`ITreenumerable<T>`, `ITreenumerator<T>`) and enums
-- **Arborist** - Base traversal implementations (DFS/BFS treenumerators)
-- **Arborist.Linq** - LINQ-style tree operations and extensions
-- **Arborist.Linq.Experimental** - Experimental features (in progress)
-- **Arborist.Trees** - Sample tree implementations (Collatz, Triangle, etc.)
-- **Arborist.SimpleSerializer** - Tree serialization for testing/debugging
-- **Arborist.TestUtils** - Test utilities and helpers
+- **Copse.Core** - Core interfaces (`ITreenumerable<T>`, `ITreenumerator<T>`) and enums
+- **Copse** - Base traversal implementations (DFS/BFS treenumerators)
+- **Copse.Linq** - LINQ-style tree operations and extensions
+- **Copse.Linq.Experimental** - Experimental features (in progress)
+- **Copse.Trees** - Sample tree implementations (Collatz, Triangle, etc.)
+- **Copse.SimpleSerializer** - Tree serialization for testing/debugging
+- **Copse.TestUtils** - Test utilities and helpers
 
 ### Key Abstractions
 
@@ -172,9 +172,9 @@ Original:  a(b[0], c[1], d[2])     After filtering c:  a(b[0], d[1])
 
 #### Implementation Files
 
-- **Extension method**: `Arborist.Linq/Treenumerable/Treenumerable.Where.cs`
-- **DFT implementation**: `Arborist.Linq/Treenumerators/Filter/WhereDepthFirstTreenumerator.cs`
-- **BFT implementation**: `Arborist.Linq/Treenumerators/Filter/WhereBreadthFirstTreenumerator.cs`
+- **Extension method**: `Copse.Linq/Treenumerable/Treenumerable.Where.cs`
+- **DFT implementation**: `Copse.Linq/Treenumerators/Filter/WhereDepthFirstTreenumerator.cs`
+- **BFT implementation**: `Copse.Linq/Treenumerators/Filter/WhereBreadthFirstTreenumerator.cs`
 
 > **Design history:** An alternative *stream-rewrite ("extraction")* DFT `Where` was spiked as a
 > potential simpler replacement and **rejected** (correct full drop-in, but ~par on size and a

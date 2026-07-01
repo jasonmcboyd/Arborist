@@ -1,6 +1,6 @@
 $pattern = '\([a-zA-Z]+\.[a-zA-Z]+,\s+"[a-zA-Z]+",\s+\d+,\s+\(\d+,\s+\d+\),\s+\(\d+,\s+\d+\)\),'
 
-$file = "$PSScriptRoot/../src/Arborist.Tests/TreeTraversalTestData.cs"
+$file = "$PSScriptRoot/../src/Copse.Tests/TreeTraversalTestData.cs"
 
 $lines = Get-Content $file
 

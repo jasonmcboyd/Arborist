@@ -44,35 +44,35 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore src/Arborist.sln
+        run: dotnet restore src/Copse.sln
 
       - name: Build benchmarks
-        run: dotnet build src/Arborist.Benchmarks/Arborist.Benchmarks.csproj -c Release --no-restore
+        run: dotnet build src/Copse.Benchmarks/Copse.Benchmarks.csproj -c Release --no-restore
 
       # Run benchmarks by category for better organization
       - name: Run Traversal benchmarks
         run: |
-          cd src/Arborist.Benchmarks
+          cd src/Copse.Benchmarks
           dotnet run -c Release --no-build -- --exporters json --allCategories Traversal --artifacts ./artifacts/Traversal --join
 
       - name: Run LINQ benchmarks
         run: |
-          cd src/Arborist.Benchmarks
+          cd src/Copse.Benchmarks
           dotnet run -c Release --no-build -- --exporters json --allCategories LINQ --artifacts ./artifacts/LINQ --join
 
       - name: Run Conversion benchmarks
         run: |
-          cd src/Arborist.Benchmarks
+          cd src/Copse.Benchmarks
           dotnet run -c Release --no-build -- --exporters json --allCategories Conversion --artifacts ./artifacts/Conversion --join
 
       - name: Run DataStructures benchmarks
         run: |
-          cd src/Arborist.Benchmarks
+          cd src/Copse.Benchmarks
           dotnet run -c Release --no-build -- --exporters json --allCategories DataStructures --artifacts ./artifacts/DataStructures --join
 
       - name: Run Serialization benchmarks
         run: |
-          cd src/Arborist.Benchmarks
+          cd src/Copse.Benchmarks
           dotnet run -c Release --no-build -- --exporters json --allCategories Serialization --artifacts ./artifacts/Serialization --join
 
       # Find benchmark result files and create memory benchmark JSON files
@@ -81,13 +81,13 @@ jobs:
         run: |
           for category in Traversal LINQ Conversion DataStructures Serialization; do
             # Find the runtime benchmark JSON file
-            RESULTS_FILE=$(find src/Arborist.Benchmarks/artifacts/$category/results -name "*-report-full-compressed.json" -type f | head -n 1)
+            RESULTS_FILE=$(find src/Copse.Benchmarks/artifacts/$category/results -name "*-report-full-compressed.json" -type f | head -n 1)
             echo "${category,,}_file=$RESULTS_FILE" >> $GITHUB_OUTPUT
             echo "Found $category results: $RESULTS_FILE"
 
             # Create memory benchmark JSON from the results
             if [ -f "$RESULTS_FILE" ]; then
-              MEMORY_FILE="src/Arborist.Benchmarks/artifacts/$category/results/memory-benchmarks.json"
+              MEMORY_FILE="src/Copse.Benchmarks/artifacts/$category/results/memory-benchmarks.json"
               jq '[.Benchmarks[] | {name: .FullName, unit: "bytes", value: (.Memory.BytesAllocatedPerOperation // 0)}]' "$RESULTS_FILE" > "$MEMORY_FILE"
               echo "Created memory benchmark file: $MEMORY_FILE"
             fi
@@ -180,7 +180,7 @@ jobs:
         with:
           name: Traversal Memory
           tool: 'customSmallerIsBetter'
-          output-file-path: src/Arborist.Benchmarks/artifacts/Traversal/results/memory-benchmarks.json
+          output-file-path: src/Copse.Benchmarks/artifacts/Traversal/results/memory-benchmarks.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: false
           skip-fetch-gh-pages: true
@@ -195,7 +195,7 @@ jobs:
         with:
           name: LINQ Memory
           tool: 'customSmallerIsBetter'
-          output-file-path: src/Arborist.Benchmarks/artifacts/LINQ/results/memory-benchmarks.json
+          output-file-path: src/Copse.Benchmarks/artifacts/LINQ/results/memory-benchmarks.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: false
           skip-fetch-gh-pages: true
@@ -210,7 +210,7 @@ jobs:
         with:
           name: Conversion Memory
           tool: 'customSmallerIsBetter'
-          output-file-path: src/Arborist.Benchmarks/artifacts/Conversion/results/memory-benchmarks.json
+          output-file-path: src/Copse.Benchmarks/artifacts/Conversion/results/memory-benchmarks.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: false
           skip-fetch-gh-pages: true
@@ -225,7 +225,7 @@ jobs:
         with:
           name: DataStructures Memory
           tool: 'customSmallerIsBetter'
-          output-file-path: src/Arborist.Benchmarks/artifacts/DataStructures/results/memory-benchmarks.json
+          output-file-path: src/Copse.Benchmarks/artifacts/DataStructures/results/memory-benchmarks.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: false
           skip-fetch-gh-pages: true
@@ -241,7 +241,7 @@ jobs:
         with:
           name: Serialization Memory
           tool: 'customSmallerIsBetter'
-          output-file-path: src/Arborist.Benchmarks/artifacts/Serialization/results/memory-benchmarks.json
+          output-file-path: src/Copse.Benchmarks/artifacts/Serialization/results/memory-benchmarks.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: true
           skip-fetch-gh-pages: true
@@ -256,5 +256,5 @@ jobs:
         if: always()
         with:
           name: benchmark-results
-          path: src/Arborist.Benchmarks/artifacts/
+          path: src/Copse.Benchmarks/artifacts/
           retention-days: 30

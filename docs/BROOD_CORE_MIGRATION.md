@@ -141,7 +141,7 @@ Two genuinely positive changes fall out of the analysis:
 1. Add `OpenChildCount`; maintain it **alongside** `_DepthOfLastActedOnNode` (do not remove yet).
    `Debug.Assert` that the new brood-close check `==` the old depth-watermark check at every decision
    point.
-2. Run `Arborist.Tests/DepthFirstVsBreadthFirstTests` at the **deep** budget (raise `PerTreeBudget`
+2. Run `Copse.Tests/DepthFirstVsBreadthFirstTests` at the **deep** budget (raise `PerTreeBudget`
    toward ~1.5M; covers the 3-concurrent-skip case), plus `Where2InProcessScan` + `UnionInProcessScan`
    (the wrappers ride this engine).
 3. Once the asserts hold across the deep scan, delete `_DepthOfLastActedOnNode` and the two

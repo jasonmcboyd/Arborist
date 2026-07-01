@@ -40,7 +40,7 @@ second stack, and a one-step `_HasCachedChild` defer.
 
 ## What was built
 
-- **`WhereDepthFirstTreenumerator2`** (`src/Arborist.Linq/Treenumerators/Filter/`) — consumes the
+- **`WhereDepthFirstTreenumerator2`** (`src/Copse.Linq/Treenumerators/Filter/`) — consumes the
   **full** inner DFT stream (`TraverseAll`), suppresses extracted nodes, reassigns their interleave
   visits to the nearest accepted ancestor, and relabels accepted nodes with compressed depth +
   renumbered sibling indices. One `List<Frame>` path stack; **no defer/cache, no sentinel**.
@@ -61,8 +61,8 @@ Commits: `808e33f` (core, defer-free) -> `64df666` (consumer strategies, 76->6 f
 ## Results
 
 ### Correctness — full drop-in
-Wired in as the production DFT `Where`, the spike passes the **entire** suite (Arborist.Tests 438 +
-Arborist.Linq.Tests 14,739, 0 failures), plus the 1,840-case exhaustive predicate scan matches
+Wired in as the production DFT `Where`, the spike passes the **entire** suite (Copse.Tests 438 +
+Copse.Linq.Tests 14,739, 0 failures), plus the 1,840-case exhaustive predicate scan matches
 production exactly (a *different* algorithm, so agreement is strong evidence).
 
 ### Simplicity — roughly par
@@ -125,11 +125,11 @@ one genuinely inherent penalty. But there was no compelling reason to invest fur
 
 ## Pointers
 
-- Code: `src/Arborist.Linq/Treenumerators/Filter/WhereDepthFirstTreenumerator2.cs`,
-  `src/Arborist.Linq/Treenumerable/Treenumerable.WhereSpike.cs`,
-  `src/Arborist.Linq.Tests/DepthFirstExtractionScan.cs`.
+- Code: `src/Copse.Linq/Treenumerators/Filter/WhereDepthFirstTreenumerator2.cs`,
+  `src/Copse.Linq/Treenumerable/Treenumerable.WhereSpike.cs`,
+  `src/Copse.Linq.Tests/DepthFirstExtractionScan.cs`.
 - Production for comparison: `WhereDepthFirstTreenumerator.cs` (same folder).
 - Reproduce benchmarks (Release): on each of `main` and `spike-dft-extraction`,
-  `dotnet run -c Release --project src/Arborist.Benchmarks -- --filter "*DepthFirstWhere.WhereAll_TrivialForest_1M" "*DepthFirstWhere.WhereNone_TrivialForest_1M" "*DepthFirstWhere.TriangleTree_PruneAfter_1448"`.
+  `dotnet run -c Release --project src/Copse.Benchmarks -- --filter "*DepthFirstWhere.WhereAll_TrivialForest_1M" "*DepthFirstWhere.WhereNone_TrivialForest_1M" "*DepthFirstWhere.TriangleTree_PruneAfter_1448"`.
 
 [the BFT fundamental-limit note]: ../CLAUDE.md

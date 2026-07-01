@@ -148,10 +148,10 @@ choice matters more if the capability gets shared into hot paths.
 
 - **Push vs pull** for the child-realization capability (above).
 - **Cache keying** for incremental memoize (path-keyed trie; engine-aware path tracking).
-- **Where these interfaces live** — ties into the unresolved `Arborist.Core` /
-  `Arborist` / `Arborist.Linq` boundary (the project-split discussion). Capability interfaces
+- **Where these interfaces live** — ties into the unresolved `Copse.Core` /
+  `Copse` / `Copse.Linq` boundary (the project-split discussion). Capability interfaces
   are contracts → probably `Core`-adjacent; the snapshot structures that implement them are
-  concrete → `Arborist`.
+  concrete → `Copse`.
 
 ---
 

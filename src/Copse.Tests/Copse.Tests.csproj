@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.1" />
+    <PackageReference Include="MSTest.TestAdapter" Version="2.2.10" />
+    <PackageReference Include="MSTest.TestFramework" Version="3.1.1" />
+    <PackageReference Include="coverlet.collector" Version="3.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Copse.Core\Copse.Core.csproj" />
+    <ProjectReference Include="..\Copse.Linq\Copse.Linq.csproj" />
+    <ProjectReference Include="..\Copse.TestUtils\Copse.TestUtils.csproj" />
+    <ProjectReference Include="..\Copse.SimpleSerializer\Copse.SimpleSerializer.csproj" />
+    <ProjectReference Include="..\Copse\Copse.csproj" />
+  </ItemGroup>
+
+</Project>

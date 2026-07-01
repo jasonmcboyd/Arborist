@@ -1,6 +1,6 @@
 # Continuous Benchmarking Setup
 
-This document explains the continuous benchmarking setup for the Arborist project.
+This document explains the continuous benchmarking setup for the Copse project.
 
 ## Overview
 
@@ -9,7 +9,7 @@ The project uses [BenchmarkDotNet](https://benchmarkdotnet.org/) for performance
 ## What's Automated
 
 ### On Push to Main
-- Runs all benchmarks in the `Arborist.Benchmarks` project
+- Runs all benchmarks in the `Copse.Benchmarks` project
 - Stores results in the `gh-pages` branch
 - Compares against historical data
 - Alerts if performance regresses by >150%
@@ -60,7 +60,7 @@ The benchmark project automatically uses **fast ShortRun mode** for local develo
 
 ### Run Specific Benchmark Class
 ```bash
-cd src/Arborist.Benchmarks
+cd src/Copse.Benchmarks
 dotnet run -c Release -- --filter '*DepthFirstTreenumerator*'
 ```
 
@@ -89,21 +89,21 @@ dotnet run -c Release
 
 ### Run All Benchmarks (Like CI)
 ```bash
-cd src/Arborist.Benchmarks
+cd src/Copse.Benchmarks
 dotnet run -c Release -- --filter '*'
 ```
 
 ### Export Results
 ```bash
-cd src/Arborist.Benchmarks
+cd src/Copse.Benchmarks
 dotnet run -c Release -- --filter '*DepthFirst*' --exporters json html
 ```
 
-See [BENCHMARK_CATEGORIES.md](../src/Arborist.Benchmarks/BENCHMARK_CATEGORIES.md) for the full list of categories and usage examples.
+See [BENCHMARK_CATEGORIES.md](../src/Copse.Benchmarks/BENCHMARK_CATEGORIES.md) for the full list of categories and usage examples.
 
 ## Adding New Benchmarks
 
-1. Create a new class in `src/Arborist.Benchmarks/Benchmarks/`
+1. Create a new class in `src/Copse.Benchmarks/Benchmarks/`
 2. Add `[MemoryDiagnoser]` and `[BenchmarkCategory]` attributes
 3. Mark benchmark methods with `[Benchmark]`
 4. **No Program.cs changes needed** - auto-discovered!
@@ -112,7 +112,7 @@ Example:
 ```csharp
 using BenchmarkDotNet.Attributes;
 
-namespace Arborist.Benchmarks;
+namespace Copse.Benchmarks;
 
 [MemoryDiagnoser]
 [BenchmarkCategory("YourCategory")]

@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net48;net8.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)'=='net7.0'">
+    <NoWarn>$(NoWarn);IDE0090</NoWarn> <!--'new' expression can be simplified-->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Copse.Core\Copse.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Copse.Tests" />
+  </ItemGroup>
+</Project>
