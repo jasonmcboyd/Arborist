@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782941711673,
+  "lastUpdate": 1782941711900,
   "repoUrl": "https://github.com/jasonmcboyd/Arborist",
   "entries": {
     "Traversal Benchmarks": [
@@ -16455,6 +16455,275 @@ window.BENCHMARK_DATA = {
           {
             "name": "Copse.Benchmarks.CountNodes.CompleteBinaryTree_PruneAfter_20",
             "value": 2041,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.AllNodes.Dft_TriangleTree_PruneBefore_19",
+            "value": 84860,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.AnyNodes.Dft_TriangleTree_PruneBefore_19",
+            "value": 84772,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.SkipAllNodes.Bft_TriangleTree_1448",
+            "value": 58999,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.SkipAllNodes.Dft_TriangleTree_1448",
+            "value": 26158,
+            "unit": "bytes"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "84084d256f546730f4047e949748a4dff0cfca1c",
+          "message": "Rename project Manzanita -> Copse\n\nRename the library from Manzanita to Copse across the entire codebase:\nnamespaces, project/directory names, the solution file, docs, README,\nbenchmark dashboard, and scripts. Solution builds green (net8.0).\n\nRegistered identifiers: GitHub org copselib, npm scope @copselib,\ndomains copselib.{org,dev,com,net}. NuGet package ID still to be verified.\n\nIcons excluded from this commit.\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>",
+          "timestamp": "2026-07-01T20:57:44Z",
+          "tree_id": "985dc49dbb835b381a2224069a4b1908c309099e",
+          "url": "https://github.com/jasonmcboyd/Arborist/commit/84084d256f546730f4047e949748a4dff0cfca1c"
+        },
+        "date": 1782941711867,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Copse.Benchmarks.BreadthFirstWhere.TriangleTree_1448",
+            "value": 478633,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.BreadthFirstWhere.TrivialForest_WhereAll_1M",
+            "value": 1525,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.BreadthFirstWhere.TrivialForest_WhereNone_1M",
+            "value": 1220,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.BreadthFirstWhere.DegenerateTree_WhereAll_1M",
+            "value": 2027,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.BreadthFirstWhere.DegenerateTree_WhereNone_1M",
+            "value": 8391811,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.DepthFirstWhere.TriangleTree_PruneAfter_1448",
+            "value": 73049,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.DepthFirstWhere.WhereAll_TrivialForest_1M",
+            "value": 1453,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.DepthFirstWhere.WhereNone_TrivialForest_1M",
+            "value": 1404,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.DepthFirstWhere.WhereAll_DegenerateTree_1M",
+            "value": 36173535,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.DepthFirstWhere.WhereNone_DegenerateTree_1M",
+            "value": 1655,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.Invert.TriangleTree_1448",
+            "value": 42054539,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.Invert.DegenerateTree_1M",
+            "value": 41215220,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.LeaffixAggregate.TriangleTree_1448",
+            "value": 33681669,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.LeaffixScan.TriangleTree_1448",
+            "value": 42087003,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.LeaffixAggregate.DegenerateTree_1M",
+            "value": 58384508,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.LeaffixScan.DegenerateTree_1M",
+            "value": 66383817,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.LeaffixAggregate.TrivialForest_1M",
+            "value": 687,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.Materialize.TriangleTree_1448",
+            "value": 42037899,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.Materialize.DegenerateTree_1M",
+            "value": 41215338,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.BreadthFirstUnion.Union_IdenticalTriangleTrees_1448",
+            "value": 888920,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.BreadthFirstUnion.Union_TrivialForests_1M",
+            "value": 1529,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.BreadthFirstUnion.Union_DegenerateTrees_1M",
+            "value": 2549,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.BreadthFirstUnion.Union_WideVsDeep_1M",
+            "value": 136578104,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.BreadthFirstUnion.Union_ForestVsHalfForest_1M",
+            "value": 1529,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.DepthFirstUnion.Union_IdenticalTriangleTrees_1448",
+            "value": 234272,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.DepthFirstUnion.Union_TrivialForests_1M",
+            "value": 1259,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.DepthFirstUnion.Union_DegenerateTrees_1M",
+            "value": 74816693,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.DepthFirstUnion.Union_WideVsDeep_1M",
+            "value": 66773576,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.DepthFirstUnion.Union_ForestVsHalfForest_1M",
+            "value": 1259,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.Select.SelectComposition",
+            "value": 871,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.PruneAfter.Bft_TrivialForest_1M",
+            "value": 596,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.PruneBefore.Bft_TrivialForest_1M",
+            "value": 1150,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.PruneAfter.Dft_TrivialForest_1M",
+            "value": 596,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.PruneBefore.Dft_TrivialForest_1M",
+            "value": 1468,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.AllNodes.Bft_CompleteBinaryTree_PruneBefore_19",
+            "value": 13860985,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.AnyNodes.Bft_CompleteBinaryTree_PruneBefore_19",
+            "value": 13860919,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.CountNodes.DeepTree",
+            "value": 10496303,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.GetLeaves.DeepTree",
+            "value": 1054535,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.AllNodes.Dft_CompleteBinaryTree_PruneBefore_19",
+            "value": 3210,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.AnyNodes.Dft_CompleteBinaryTree_PruneBefore_19",
+            "value": 3122,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.CountNodes.TriangleTree_PruneAfter_2048",
+            "value": 116459,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.GetLeaves.CompleteBinaryTree_PruneBefore_20",
+            "value": 3251,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.AllNodes.Bft_TriangleTree_PruneBefore_19",
+            "value": 478387,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.AnyNodes.Bft_TriangleTree_PruneBefore_19",
+            "value": 478299,
+            "unit": "bytes"
+          },
+          {
+            "name": "Copse.Benchmarks.CountNodes.CompleteBinaryTree_PruneAfter_20",
+            "value": 2028,
             "unit": "bytes"
           },
           {
