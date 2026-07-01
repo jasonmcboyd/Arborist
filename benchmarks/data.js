@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782945766786,
+  "lastUpdate": 1782945767014,
   "repoUrl": "https://github.com/copselib/copse-dotnet",
   "entries": {
     "Traversal Benchmarks": [
@@ -10374,6 +10374,54 @@ window.BENCHMARK_DATA = {
             "value": 15991242.611505682,
             "unit": "ns",
             "range": "± 574524.3308164757"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "committer": {
+            "email": "jason.boyd.ce@gmail.com",
+            "name": "Jason Boyd",
+            "username": "jasonmcboyd"
+          },
+          "distinct": true,
+          "id": "41e9ec865d562dce6aad765b48557971139ca356",
+          "message": "Add NuGet packaging and alpha publish workflow\n\nSet up the Copse package family (Copse.Core, Copse, Copse.Linq,\nCopse.SimpleSerializer) for publishing to nuget.org:\n\n- src/Directory.Build.props: shared package metadata (MIT, copselib\n  URLs), MinVer for git-tag-driven versioning (no version stored in the\n  repo), SourceLink + snupkg symbols, IsPackable=false by default, and\n  Microsoft.NETFramework.ReferenceAssemblies so net48 builds anywhere.\n- The four shippable projects opt in with IsPackable=true + a Description.\n- .github/workflows/publish-nuget.yml: builds/packs on a v* tag (or a\n  manual dispatch that defaults to dry-run), publishing via NuGet Trusted\n  Publishing (OIDC, NuGet/login@v1) with no long-lived API key stored.\n\nFirst net48 build of the libraries succeeds. Packing produces exactly the\nfour intended package IDs with correct cross-package dependencies.\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>",
+          "timestamp": "2026-07-01T22:14:01Z",
+          "tree_id": "484fdbcd535662f7bcef77e6b750c8ae5700f81e",
+          "url": "https://github.com/copselib/copse-dotnet/commit/41e9ec865d562dce6aad765b48557971139ca356"
+        },
+        "date": 1782945766981,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Copse.Benchmarks.RefSemiDeque.Add_8M",
+            "value": 17058693.058333334,
+            "unit": "ns",
+            "range": "± 311922.4789726072"
+          },
+          {
+            "name": "Copse.Benchmarks.RefSemiDeque.RemoveFirst_8M",
+            "value": 29298904.3,
+            "unit": "ns",
+            "range": "± 147701.68605982375"
+          },
+          {
+            "name": "Copse.Benchmarks.RefSemiDeque.RemoveLast_8M",
+            "value": 26837593.276442308,
+            "unit": "ns",
+            "range": "± 92532.27461393135"
+          },
+          {
+            "name": "Copse.Benchmarks.RefSemiDeque.Add_Block64_1M",
+            "value": 28450294.220880684,
+            "unit": "ns",
+            "range": "± 624085.2127662405"
           }
         ]
       }
